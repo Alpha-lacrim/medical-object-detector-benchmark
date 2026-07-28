@@ -1,0 +1,21 @@
+schema_version: 1
+seed: 2026
+levels:
+  - {name: darker-0.8, kind: brightness, value: 0.8}
+  - {name: darker-0.6, kind: brightness, value: 0.6}
+  - {name: brighter-1.2, kind: brightness, value: 1.2}
+  - {name: brighter-1.4, kind: brightness, value: 1.4}
+  - {name: gaussian-noise-0.02, kind: gaussian_noise, value: 0.02}
+  - {name: gaussian-noise-0.05, kind: gaussian_noise, value: 0.05}
+  - {name: gaussian-noise-0.10, kind: gaussian_noise, value: 0.10}
+  - {name: salt-pepper-0.01, kind: salt_pepper, value: 0.01}
+  - {name: salt-pepper-0.03, kind: salt_pepper, value: 0.03}
+  - {name: salt-pepper-0.05, kind: salt_pepper, value: 0.05}
+  - {name: gaussian-blur-1, kind: gaussian_blur, value: 1}
+  - {name: gaussian-blur-2, kind: gaussian_blur, value: 2}
+  - {name: gaussian-blur-3, kind: gaussian_blur, value: 3}
+  - {name: motion-blur-5, kind: motion_blur, value: 5}
+  - {name: motion-blur-9, kind: motion_blur, value: 9}
+  - {name: motion-blur-15, kind: motion_blur, value: 15}
+  - {name: jpeg-50, kind: jpeg, value: 50}
+  - {name: jpeg-20, kind: jpeg, value: 20}

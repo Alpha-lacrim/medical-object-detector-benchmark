@@ -2,6 +2,7 @@
 
 from meddet_benchmark.coco_evaluation import evaluate_coco
 from meddet_benchmark.config import ExperimentConfig, config_fingerprint, load_experiment
+from meddet_benchmark.corruptions import apply_corruption, load_corruptions
 from meddet_benchmark.data_audit import audit_yolo_dataset
 from meddet_benchmark.evaluation import (
     ImagePrediction,
@@ -14,11 +15,13 @@ __all__ = [
     "ExperimentConfig",
     "ImagePrediction",
     "ImageTarget",
+    "apply_corruption",
     "audit_yolo_dataset",
     "config_fingerprint",
     "configure_reproducibility",
     "evaluate_coco",
     "evaluate_operating_point",
+    "load_corruptions",
     "load_experiment",
 ]
 __version__ = "0.1.0"
