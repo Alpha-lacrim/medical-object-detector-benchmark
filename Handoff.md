@@ -49,6 +49,8 @@ publish it to the user's GitHub account.
   `Alpha-lacrim`; `MitsuPishi` must never be used.
 - Added `README.md`, `AGENTS.md`, `Codex.md`, `Handoff.md`,
   `docs/PROJECT_PLAN.md`, `.gitignore`, and `.gitattributes`.
+- Created the private GitHub repository
+  `Alpha-lacrim/medical-object-detector-benchmark` and pushed `main`.
 
 **Validation performed**
 
@@ -66,26 +68,35 @@ publish it to the user's GitHub account.
   IoU/Dice aggregation, corruption weighting, and the statistical endpoint.
 - Official portable GitHub CLI v2.94.0 was downloaded and its SHA-256 matched
   GitHub's published checksum.
-- Local commit, final Git status, and remote verification: pending.
-- Remote repository creation and push: pending.
+- GitHub CLI/API authentication was verified as exactly `Alpha-lacrim` before
+  the remote write.
+- The remote was verified as private with `main` as its default branch.
+- Local `main` was verified to track and match `origin/main` after the initial
+  push.
+
+**Commits**
+
+- `f9ff63c2a9227178e5b752a9819d43798ef80423` — initialized the benchmark,
+  assignment brief, plan, and memory files; validation: relative-link check and
+  `git diff --check`.
+- `904acf42706f7076e7ae0bcf4d9664cc4f444610` — recorded the corrected GitHub
+  authorization boundary; validation: staged diff check and authenticated-owner
+  verification.
+- Session-ending `HEAD` — records the verified remote and final handoff. Its
+  resolved SHA must be reported to the user because a commit cannot contain its
+  own hash.
 
 **Incomplete or blocked**
 
 - Confirm the source paper, dataset, class semantics, allowed YOLO generation,
   fairness interpretation, deadline, and hardware budget with the instructor.
-- Create and push the private GitHub repository
-  `Alpha-lacrim/medical-object-detector-benchmark`.
-- GitHub CLI browser authentication is awaiting user approval. The previously
-  stored `Alpha-lacrim` CLI token was invalid; create the repository only after
-  confirming the authenticated owner is exactly `Alpha-lacrim`.
 - No data download, implementation, environment lock, training, or result
   generation has begun.
 
 **Next action**
 
-1. Complete GitHub CLI authentication and verify the account is `Alpha-lacrim`.
-2. Commit the validated initialization, create the repository as private, and
-   push the initial `main` branch.
-3. Update this entry with the remote URL, commit SHA, and validation results.
-4. Obtain instructor answers to the blocking questions in `Codex.md` before
-   final experiment implementation.
+1. Obtain instructor answers to the blocking questions in `Codex.md`.
+2. Record the approved dataset, classes, model/head, source-paper
+   interpretation, and fairness rules before implementation.
+3. Create the environment/config foundation in coherent commits containing no
+   more than 500 changed lines of source, test, and configuration code.

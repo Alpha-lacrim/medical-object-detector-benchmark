@@ -12,8 +12,9 @@ metric.
 
 Working title: **Medical Object Detector Benchmark: Faster R-CNN vs YOLO**
 
-Planned GitHub repository:
-`Alpha-lacrim/medical-object-detector-benchmark`.
+GitHub repository:
+[`Alpha-lacrim/medical-object-detector-benchmark`](https://github.com/Alpha-lacrim/medical-object-detector-benchmark).
+It is private and uses `main` as its default branch.
 
 GitHub authorization boundary: `Alpha-lacrim` is the user's account and the only
 permitted remote owner. Never use `MitsuPishi`; it is unrelated to the user.
@@ -188,6 +189,7 @@ are frozen.
 | `Codex.md` | Durable context, decisions, invariants, and file map | Present |
 | `Handoff.md` | Chronological changes, validation, incomplete work, and next action | Present |
 | `docs/PROJECT_PLAN.md` | Detailed requirements traceability and execution protocol | Present |
+| `.gitattributes` | Enforces LF text files and treats the assignment PDF as binary | Present |
 | `.gitignore` | Prevents data, weights, credentials, and generated artifacts from entering Git | Present |
 | `configs/experiment.yaml` | Frozen final experiment contract | Planned |
 | `configs/corruptions.yaml` | Frozen corruption types, severities, and seeds | Planned |
