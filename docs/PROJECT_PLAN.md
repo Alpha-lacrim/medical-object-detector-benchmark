@@ -1,10 +1,16 @@
 # Project plan: medical object detector benchmark
 
-Document status: **protocol draft v0.2**
+Document status: **protocol draft v0.3**
 
 Prepared: **2026-07-28**
 
 Requirements baseline: `Final project 1405.v1.pdf`
+
+Implementation checkpoint (2026-07-28): the locked lightweight environment,
+strict configuration/run gates, deterministic seeding, canonical records,
+operating-point metrics, official COCO AP, exact dataset audit, and corruption
+engine are implemented with tests. Real data, model adapters, training,
+profiling, Grad-CAM, and statistical resampling remain incomplete.
 
 ## 1. Aim and research questions
 

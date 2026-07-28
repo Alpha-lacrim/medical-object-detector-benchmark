@@ -26,6 +26,33 @@ staged numstat before committing and record each commit SHA in `Handoff.md`.
 Documentation and generated lockfiles do not count as code, but should remain
 focused and separate when practical.
 
+## Reproducible software stack
+
+The project uses `uv` 0.11.27 and a committed hash-bearing `uv.lock`.
+
+- Runtime: standard-GIL CPython 3.13.14, selected for current support and
+  Windows wheel compatibility.
+- Lightweight core: NumPy 2.5.1, Pydantic 2.13.4, PyYAML 6.0.3, Pillow 12.3.0,
+  and pycocotools 2.0.11.
+- Development: pytest 9.1.1 and Ruff 0.16.0.
+- Pinned detector extras: PyTorch 2.13.0 and Torchvision 0.28.0 from either the
+  official CPU index or the official CUDA 13.0 index, plus Ultralytics 8.4.108.
+  The `cpu` and `cu130` extras are mutually exclusive.
+
+Commands:
+
+```powershell
+uv sync --locked --group dev
+uv run --locked pytest -q
+uv run --locked python -m meddet_benchmark smoke configs/smoke.yaml
+uv sync --locked --group dev --extra cu130
+```
+
+The lightweight environment is installed and validated. The multi-gigabyte
+CUDA extra is locked but not yet installed or GPU-preflighted. Hash every
+downloaded pretrained weight separately; a package pin does not freeze a
+mutable model asset.
+
 ## Outcome-first decision policy
 
 On 2026-07-28, the user authorized overriding instructor directions when needed
@@ -89,7 +116,8 @@ Why this is likely:
 This is an inference, not a confirmed fact. The paper used different learning
 rates, batch sizes, epoch budgets, and optimizers for its models. The assignment
 appears to replace that design with a controlled two-detector comparison, but
-the instructor should confirm before final experiments.
+the interpretation must be confirmed or its documented fallback activated
+before final experiments.
 
 The paper is internally inconsistent and therefore cannot yet define an exact
 reproduction target:
@@ -107,6 +135,12 @@ augmentation stage, and split manifests rather than choosing one silently.
 
 Provisional recommendation:
 [`pkdarabi/medical-image-dataset-brain-tumor-detection`](https://www.kaggle.com/datasets/pkdarabi/medical-image-dataset-brain-tumor-detection).
+
+Public Kaggle API metadata retrieved on 2026-07-28 identifies current version
+`5`, last updated `2025-02-10T21:20:45.74Z`, with `313,038,935` bytes and a
+CC BY 4.0 license. An unauthenticated archive request returned HTTP 403, so the
+dataset remains absent and requires the user's Kaggle authentication or a
+manual version-5 download.
 
 Reasons:
 
@@ -128,8 +162,8 @@ Known class ambiguity:
   the brief intended five semantic classes.
 
 Do not freeze the class map until the dataset YAML and every annotation are
-audited and the instructor confirms the interpretation. Do not manufacture a
-box around a no-tumor image.
+audited and the interpretation is resolved through instructor clarification or
+the documented fallback. Do not manufacture a box around a no-tumor image.
 
 ## Provisional model decision
 
@@ -230,14 +264,23 @@ are frozen.
 | `Handoff.md` | Chronological changes, validation, incomplete work, and next action | Present |
 | `docs/PROJECT_PLAN.md` | Detailed requirements traceability and execution protocol | Present |
 | `docs/DECISION_LOG.md` | Preregistered interpretations, deviations, evidence, risks, and controls | Present |
+| `.python-version` | Pins standard-GIL CPython 3.13.14 | Present |
+| `pyproject.toml` | Package metadata, bounded dependencies, tool settings, and CPU/CUDA extras | Present |
+| `uv.lock` | Exact dependency versions, sources, hashes, and accelerator forks | Present |
+| `.github/workflows/ci.yml` | Locked Windows/Linux lint, test, and offline smoke checks | Present |
+| `configs/smoke.yaml` | Synthetic config for offline run-gate validation; never a final experiment | Present |
+| `configs/corruptions.yaml` | Frozen required corruption kinds, severities, and seed | Present |
+| `data/README.md` | Exact source-version metadata, safe download, and audit instructions | Present |
+| `src/meddet_benchmark/config.py` | Immutable experiment schema, fingerprinting, and test-access gate | Present |
+| `src/meddet_benchmark/evaluation.py` | Canonical records, IoU, matching, and operating-point metrics | Present |
+| `src/meddet_benchmark/coco_evaluation.py` | Shared official COCO AP50 and AP50:95 evaluation | Present |
+| `src/meddet_benchmark/data_audit.py` | YOLO annotation, image, hash, count, and exact-leakage audit | Present |
+| `src/meddet_benchmark/corruptions.py` | Deterministic lighting, noise, blur, and JPEG corruptions | Present |
+| `tests/` | Hand-calculated config, reproducibility, evaluator, audit, and corruption tests | Present |
 | `.gitattributes` | Enforces LF text files and treats the assignment PDF as binary | Present |
 | `.gitignore` | Prevents data, weights, credentials, and generated artifacts from entering Git | Present |
 | `configs/experiment.yaml` | Frozen final experiment contract | Planned |
-| `configs/corruptions.yaml` | Frozen corruption types, severities, and seeds | Planned |
-| `data/README.md` | Download, license, expected hashes, and local layout | Planned |
 | `data/manifests/` | Versioned split and annotation-audit manifests | Planned |
-| `src/meddet_benchmark/` | Shared implementation package | Planned |
-| `tests/` | Unit, integration, determinism, and evaluator parity tests | Planned |
 | `reports/` | Report source plus generated table/figure manifests | Planned |
 
 Update this table as important paths appear, move, or become obsolete.

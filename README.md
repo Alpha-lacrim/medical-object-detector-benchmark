@@ -21,10 +21,32 @@ has the highest mAP?” It will compare:
 
 ## Current status
 
-Repository and protocol design are in progress. No dataset has been downloaded
-and no model result has been produced yet. Any result directory, table, or
-figure must remain clearly marked as generated evidence rather than an expected
-outcome.
+The reproducible Python foundation, strict two-track configuration schema,
+deterministic seeding, shared operating-point/COCO evaluators, dataset audit,
+and corruption engine are implemented and tested. No dataset has been
+downloaded and no model result has been produced yet. Any result directory,
+table, or figure must remain clearly marked as generated evidence rather than
+an expected outcome.
+
+## Quick start
+
+Install the locked lightweight environment and run the offline checks:
+
+```powershell
+uv sync --locked --group dev
+uv run --locked ruff check src tests
+uv run --locked pytest -q
+uv run --locked python -m meddet_benchmark smoke configs/smoke.yaml
+```
+
+The pinned CUDA 13.0 detector environment is installed separately:
+
+```powershell
+uv sync --locked --group dev --extra cu130
+```
+
+Do not enable the mutually exclusive `cpu` and `cu130` extras together. Dataset
+provenance and audit instructions are in [`data/README.md`](data/README.md).
 
 ## Study strategy
 
