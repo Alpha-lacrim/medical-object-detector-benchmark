@@ -1,5 +1,6 @@
 """Shared infrastructure for the medical object-detector benchmark."""
 
+from meddet_benchmark.coco_evaluation import evaluate_coco
 from meddet_benchmark.config import ExperimentConfig, config_fingerprint, load_experiment
 from meddet_benchmark.evaluation import (
     ImagePrediction,
@@ -14,6 +15,7 @@ __all__ = [
     "ImageTarget",
     "config_fingerprint",
     "configure_reproducibility",
+    "evaluate_coco",
     "evaluate_operating_point",
     "load_experiment",
 ]
