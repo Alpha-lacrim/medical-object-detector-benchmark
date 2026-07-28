@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+kaggle.json
+*.pem
+
+# IDE and operating system
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Raw/intermediate data: commit only documentation and manifests
+data/*
+!data/README.md
+!data/manifests/
+!data/manifests/**
+
+# Model artifacts and experiment trackers
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+checkpoints/
+runs/
+wandb/
+mlruns/
+artifacts/
+
+# Generated reports and profiling output
+reports/figures/generated/
+reports/tables/generated/
+profiling/
+
+# Local tools and temporary files
+.tools/
+tmp/
+temp/
+*.tmp
+*.log
