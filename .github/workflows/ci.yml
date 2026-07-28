@@ -1,0 +1,33 @@
+name: foundation-ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: "0.11.27"
+          enable-cache: true
+      - run: uv python install
+      - run: uv lock --check
+      - run: uv sync --locked --group dev
+      - run: uv run --locked ruff format --check src tests
+      - run: uv run --locked ruff check src tests
+      - run: uv run --locked pytest -q
+      - run: uv run --locked python -m meddet_benchmark smoke configs/smoke.yaml
