@@ -3,6 +3,13 @@
 These instructions apply to every human or automated contributor working in
 this repository.
 
+## GitHub authorization boundary
+
+The only authorized GitHub owner is `Alpha-lacrim`. Never create, push, open a
+pull request, or make any other change under `MitsuPishi`, even if a connector
+lists repositories from that account. Verify the authenticated login immediately
+before every remote write.
+
 ## The three memory files
 
 - `AGENTS.md` (this file) contains stable working rules. Change it only when the

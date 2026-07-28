@@ -17,7 +17,9 @@ publish it to the user's GitHub account.
 
 - The workspace contained only `Final project 1405.v1.pdf`.
 - No local Git repository or remote was configured.
-- GitHub access was connected to the user account `MitsuPishi`.
+- The connected GitHub app exposed a repository owned by `MitsuPishi`, but the
+  user later clarified that this is not their account and must never be used.
+- The user's only authorized GitHub account is `Alpha-lacrim`.
 - GitHub CLI (`gh`) and Windows Package Manager (`winget`) were not installed.
 
 **Changes**
@@ -43,6 +45,8 @@ publish it to the user's GitHub account.
 - Added the permanent rule that implementation commits contain no more than 500
   changed lines of source, test, and configuration code; future handoffs must
   record each commit SHA and its validation.
+- Added a permanent authorization boundary: remote writes may target only
+  `Alpha-lacrim`; `MitsuPishi` must never be used.
 - Added `README.md`, `AGENTS.md`, `Codex.md`, `Handoff.md`,
   `docs/PROJECT_PLAN.md`, `.gitignore`, and `.gitattributes`.
 
@@ -70,16 +74,16 @@ publish it to the user's GitHub account.
 - Confirm the source paper, dataset, class semantics, allowed YOLO generation,
   fairness interpretation, deadline, and hardware budget with the instructor.
 - Create and push the private GitHub repository
-  `MitsuPishi/medical-object-detector-benchmark`.
+  `Alpha-lacrim/medical-object-detector-benchmark`.
 - GitHub CLI browser authentication is awaiting user approval. The previously
   stored `Alpha-lacrim` CLI token was invalid; create the repository only after
-  confirming the authenticated owner is `MitsuPishi`.
+  confirming the authenticated owner is exactly `Alpha-lacrim`.
 - No data download, implementation, environment lock, training, or result
   generation has begun.
 
 **Next action**
 
-1. Complete GitHub CLI authentication and verify the account is `MitsuPishi`.
+1. Complete GitHub CLI authentication and verify the account is `Alpha-lacrim`.
 2. Commit the validated initialization, create the repository as private, and
    push the initial `main` branch.
 3. Update this entry with the remote URL, commit SHA, and validation results.

@@ -12,7 +12,12 @@ metric.
 
 Working title: **Medical Object Detector Benchmark: Faster R-CNN vs YOLO**
 
-Planned GitHub repository name: `medical-object-detector-benchmark`
+Planned GitHub repository:
+`Alpha-lacrim/medical-object-detector-benchmark`.
+
+GitHub authorization boundary: `Alpha-lacrim` is the user's account and the only
+permitted remote owner. Never use `MitsuPishi`; it is unrelated to the user.
+Verify the active login immediately before every remote write.
 
 Commit policy: implementation work must be committed in coherent increments of
 at most 500 changed lines of source, test, and configuration code. Inspect the
