@@ -231,6 +231,10 @@ integration.
   unauthenticated archive probe returned HTTP 403, so no data was claimed.
 - All relative links in the seven project Markdown files resolved locally, and
   `git diff --check` passed.
+- Draft PR
+  [`#1`](https://github.com/Alpha-lacrim/medical-object-detector-benchmark/pull/1)
+  was opened from `agent/implementation-foundation` into `main`. Both Ubuntu
+  jobs and both Windows jobs passed for `f547f89`.
 
 **Incomplete or blocked**
 
@@ -269,6 +273,8 @@ integration.
   source/test/config lines excluding generated lock changes.
 - `c222632` — frozen deterministic robustness corruptions; 276
   source/test/config lines.
-- Session-ending `HEAD` — records documentation, final validation, and this
-  handoff. Its resolved SHA must be reported because a commit cannot contain its
-  own hash.
+- `f547f89` — dataset instructions, implementation status, durable context, and
+  the completed local-validation handoff.
+- Session-ending `HEAD` — records the verified draft PR and remote CI result.
+  Its resolved SHA must be reported because a commit cannot contain its own
+  hash.
