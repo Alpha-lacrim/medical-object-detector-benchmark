@@ -100,3 +100,65 @@ publish it to the user's GitHub account.
    interpretation, and fairness rules before implementation.
 3. Create the environment/config foundation in coherent commits containing no
    more than 500 changed lines of source, test, and configuration code.
+
+## 2026-07-28 — Outcome-first research policy
+
+**Objective**
+
+Record the user's authorization to override instructor directions when necessary
+for the best scientific outcome, while preserving grading value where possible.
+
+**Starting state**
+
+- `main` was clean and matched `origin/main` at `9f22641`.
+- The plan treated unresolved instructor questions as blockers and defined only
+  one strict assignment-aligned comparison track.
+
+**Changes**
+
+- Added a durable outcome-priority policy to `AGENTS.md` and `Codex.md`, with
+  safety/research-integrity limits and a requirement to preregister every
+  instructor deviation before test access.
+- Replaced indefinite instructor blockers with evidence-based fallback
+  decisions for the source paper, dataset, class semantics, image counts, YOLO
+  version, fairness interpretation, and unknown compute/deadline.
+- Upgraded the protocol to v0.2 with an assignment-aligned Track A and a
+  separately reported, equal-tuning-opportunity architecture-optimized Track B.
+- Added `docs/DECISION_LOG.md` and accepted D-001, recording the policy,
+  rationale, compliant alternative, risks, controls, affected artifacts, and
+  pre-test state.
+- Updated `README.md` so the public roadmap matches the two-track protocol.
+
+**Validation performed**
+
+- Re-read the assignment PDF, all three memory files, and the detailed project
+  plan before changing the research policy.
+- `git diff --check` passed.
+- All relative links in the six project Markdown files resolved locally.
+- The diff is documentation-only; it adds no source, test, or configuration
+  code, so the 500-code-line commit ceiling is satisfied.
+
+**Incomplete or blocked**
+
+- No dataset download, environment lock, implementation, training, or result
+  generation has begun.
+- Instructor answers are still welcome, but every known ambiguity now has a
+  non-blocking fallback that must be frozen in config before final test access.
+- The exact Track B search spaces and equal compute/trial budget remain to be
+  defined after the dataset and dependency preflights.
+
+**Next action**
+
+1. Implement Milestone 1: pin the environment, add the configuration schema,
+   and create deterministic seed and tiny CPU smoke-test foundations.
+2. Encode Track A and Track B as separate validated configs and add a generated
+   difference check before any detector training.
+3. Continue in coherent commits containing no more than 500 changed lines of
+   source, test, and configuration code.
+
+**Commits**
+
+- Session-ending `HEAD` — records the outcome-first policy, two-track protocol,
+  D-001, and this handoff; validation: relative-link check and
+  `git diff --check`. Its resolved SHA must be reported to the user because a
+  commit cannot contain its own hash.

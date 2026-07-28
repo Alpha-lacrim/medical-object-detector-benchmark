@@ -26,10 +26,28 @@ staged numstat before committing and record each commit SHA in `Handoff.md`.
 Documentation and generated lockfiles do not count as code, but should remain
 focused and separate when practical.
 
-## Source of truth
+## Outcome-first decision policy
 
-The authoritative brief is `Final project 1405.v1.pdf` (8 pages, PDF metadata
-creation date 2026-07-18; that date is not a stated deadline).
+On 2026-07-28, the user authorized overriding instructor directions when needed
+for the best defensible outcome. The priority order is:
+
+1. safety, ethics, law, privacy, and research integrity;
+2. scientific validity, reproducibility, and honest reporting;
+3. assignment coverage and grading value; and
+4. convenience.
+
+An override must identify the conflict and supporting evidence, be declared
+before test inspection, preserve a compliant result when feasible, and appear
+in the decision log, configs, report, and `Handoff.md`. Never select or conceal
+a deviation after seeing which result looks better. This policy does not
+override higher-level operating instructions.
+
+## Requirements baseline
+
+The requirements baseline is `Final project 1405.v1.pdf` (8 pages, PDF metadata
+creation date 2026-07-18; that date is not a stated deadline). It remains the
+grading traceability source, but scientifically necessary deviations must stay
+visible and justified under the outcome-first policy.
 
 Recorded SHA-256:
 `4E880C9E4F0F580E66CEF6C13F05543AC01CDF744D1A29969EF96C776FF66ABA`.
@@ -139,6 +157,28 @@ Authoritative implementation references:
 Pin exact package versions and model artifact hashes before training. Include
 Ultralytics AGPL/enterprise licensing in the deployment discussion.
 
+## Two-track experiment strategy
+
+Both tracks share the audited raw data, immutable splits and test set, evaluator,
+metric definitions, reporting schema, seeds where applicable, and final
+profiling hardware.
+
+- **Track A — assignment-aligned controlled comparison:** hold the dataset,
+  preprocessing, shared augmentation corpus, exact optimizer and settings,
+  schedule, update budget, effective batch size, checkpoint-selection rule, and
+  seeds constant whenever both architectures permit. Record every unavoidable
+  model-internal difference.
+- **Track B — architecture-optimized comparison:** allow predeclared,
+  model-specific optimizer settings, schedules, augmentations, input resolution,
+  and training duration under the same tuning-trial or compute budget. Select
+  configurations using training and validation data only.
+
+Track A is the assignment-facing primary comparison while it remains valid.
+Track B answers which detector performs best when each is used competently. If
+Track A is impossible or materially invalid, document that conclusion before
+test access and make Track B primary. Never pool, relabel, or selectively omit
+the two tracks.
+
 ## Available local hardware
 
 Detected on 2026-07-28:
@@ -189,6 +229,7 @@ are frozen.
 | `Codex.md` | Durable context, decisions, invariants, and file map | Present |
 | `Handoff.md` | Chronological changes, validation, incomplete work, and next action | Present |
 | `docs/PROJECT_PLAN.md` | Detailed requirements traceability and execution protocol | Present |
+| `docs/DECISION_LOG.md` | Preregistered interpretations, deviations, evidence, risks, and controls | Present |
 | `.gitattributes` | Enforces LF text files and treats the assignment PDF as binary | Present |
 | `.gitignore` | Prevents data, weights, credentials, and generated artifacts from entering Git | Present |
 | `configs/experiment.yaml` | Frozen final experiment contract | Planned |
@@ -201,21 +242,27 @@ are frozen.
 
 Update this table as important paths appear, move, or become obsolete.
 
-## Blocking questions
+## Open questions and fallback decisions
 
-Ask the instructor before final training:
+Seek instructor clarification when it is available, but do not let silence
+stall the project. Freeze these fallbacks before final test access:
 
-1. Is the AIMS 2025 paper above the intended original paper?
-2. Is the 3,903-image Kaggle dataset the intended dataset?
-3. What are the five required classes, and is background being counted?
-4. Should `no tumor` be a negative image or a detector class?
-5. Which source-paper counts are authoritative: 3,903/four groups or
-   9,900/three groups, and does 9,900 include online/offline augmentation?
-6. Is YOLO26 in standard NMS-free mode acceptable, or should the comparator be
-   YOLOv8/YOLOv9/YOLO11?
-7. Does “identical training conditions” require the same numeric learning rate
-   and effective batch size as well as the exact same optimizer settings?
-8. What are the deadline, compute constraints, and required submission format?
+1. Treat the AIMS 2025 paper as contextual evidence, not exact authority, unless
+   the instructor confirms it.
+2. Use the audited 3,903-image linked Kaggle dataset unless its annotations or
+   licensing fail the acceptance audit.
+3. Derive detector classes only from valid annotated boxes. Keep background
+   model-internal and treat `no tumor` as a negative image unless the labels
+   prove it is a localized object.
+4. Describe 3,903 as the apparent raw count. Treat 9,900 as unverified,
+   potentially derived or augmented, and never call it raw without provenance.
+5. Use YOLO26s in standard NMS-free mode; activate YOLO11s only after the
+   predeclared compatibility preflight fails and the evidence is logged.
+6. Resolve “identical training conditions” with the two-track strategy: Track A
+   provides the strict controlled result and Track B the architecture-optimized
+   result.
+7. Until a deadline and compute budget are known, use checkpointed staged runs
+   sized for the detected 8 GB GPU and preserve resumability.
 
 ## Memory maintenance
 

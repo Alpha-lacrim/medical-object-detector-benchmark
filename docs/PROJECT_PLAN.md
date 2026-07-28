@@ -1,10 +1,10 @@
 # Project plan: medical object detector benchmark
 
-Document status: **protocol draft v0.1**
+Document status: **protocol draft v0.2**
 
 Prepared: **2026-07-28**
 
-Authority: `Final project 1405.v1.pdf`
+Requirements baseline: `Final project 1405.v1.pdf`
 
 ## 1. Aim and research questions
 
@@ -36,8 +36,10 @@ The result is complete only when:
 
 - a clean environment can reproduce data manifests, training, evaluation,
   figures, and tables from documented commands;
-- both detectors use the same frozen comparison contract except for unavoidable
-  architecture-specific components;
+- Track A compares both detectors under the same frozen assignment-aligned
+  contract except for unavoidable architecture-specific components;
+- Track B compares competently optimized detector configurations under the same
+  predeclared tuning budget without test-set feedback;
 - every metric requested by the PDF is reported with an explicit definition;
 - robustness includes every required corruption and JPEG quality 20 and 50;
 - Grad-CAM covers paired successes and failures for both models;
@@ -48,6 +50,20 @@ The result is complete only when:
 - limitations explicitly cover public-dataset quality, leakage risk, missing
   external validation, lack of clinical validation, and the inability of two
   selected variants to establish a universal one-stage-versus-two-stage claim.
+
+### Outcome-first decision framework
+
+The assignment is the grading and traceability baseline, not an infallible
+scientific protocol. Use this priority order: safety/ethics/law/privacy/research
+integrity; scientific validity and reproducibility; assignment coverage; then
+convenience.
+
+Every deviation must be entered in a versioned decision log before test access.
+The entry must quote or locate the affected requirement, state the conflict,
+cite the evidence, record the compliant alternative considered, identify the
+expected benefit and grading risk, and list affected configs and results. Keep
+the compliant Track A result whenever feasible. Never choose, hide, or relabel a
+deviation after seeing test performance.
 
 ## 3. Requirements traceability
 
@@ -65,11 +81,14 @@ The result is complete only when:
 | Statistics | Paired intervals/tests, effect sizes, adjusted p-values, and a declared statistical unit |
 | Scientific discussion | Evidence-weighted comparison, deployment scenarios, limitations, and future work |
 | Final report | Twelve sections in the exact order given by the brief |
+| Instruction deviations | Preregistered decision log plus a report matrix linking each deviation to evidence, configs, Track A, and Track B |
 
 ### Named acceptance artifacts
 
 The repository must produce these explicit deliverables before submission:
 
+- `docs/DECISION_LOG.md`: preregistered interpretations and deviations,
+  including evidence, alternatives, risks, controls, and test-access state;
 - `reports/literature_review/`: reviewed sources on YOLOv8 or newer, XAI, and
   Grad-CAM, with a traceable bibliography;
 - `reports/dataset_report/`: dataset-version report, class-distribution
@@ -92,8 +111,9 @@ artifacts must link back to result JSON, configs, seeds, and Git commits.
 
 ## 4. Interpretation gate
 
-The PDF has no numeric rubric and contains several inconsistencies. Resolve
-these before expensive final runs:
+The PDF has no numeric rubric and contains several inconsistencies. Seek answers
+before expensive final runs, then activate and freeze the documented fallbacks
+in `Codex.md` for any unanswered item:
 
 1. Confirm that the intended source is
    [Alsufyani 2025](https://doi.org/10.3934/bioeng.2025001).
@@ -111,9 +131,10 @@ these before expensive final runs:
    size, and epoch budget.
 7. Obtain the deadline, submission format, and available GPU/time budget.
 
-If answers cannot be obtained, preserve the assumptions in a signed-off
-decision record and run the scientifically safest interpretation without
-claiming that ambiguity was resolved.
+Lack of an instructor response is not an indefinite blocker. Preserve every
+assumption and fallback in the versioned decision record, run the scientifically
+safest predeclared interpretation, and never claim that the ambiguity was
+resolved.
 
 ## 5. Dataset selection
 
@@ -174,12 +195,12 @@ and small license-compatible examples.
   or training-control preflight fails and the reason is recorded before final
   runs.
 
-### Provisional controlled fields
+### Track A — assignment-aligned controlled fields
 
 The PDF unambiguously requires the same dataset, augmentation, and optimizer.
-Whether every numeric training setting must also match is a blocking instructor
-question. The strict, scientifically conservative default below becomes binding
-if no answer is available. Once approved, both models must share:
+If the instructor does not clarify whether every numeric training setting must
+also match, use the strict, scientifically conservative default below. Once
+frozen, both models must share:
 
 - exact train/validation/test manifests;
 - decoded pixels and grayscale-to-three-channel conversion;
@@ -201,9 +222,25 @@ Unavoidable differences—loss functions, proposal generation, heads,
 architecture-internal normalization, and postprocessing—are detector
 components, not experimental controls. List them explicitly in the report.
 
+### Track B — architecture-optimized fields
+
+Track B keeps the audited data, immutable splits and test set, canonical
+prediction schema, evaluator, metric definitions, reporting schema, and final
+profiling hardware identical. It permits model-specific optimizer settings,
+schedules, effective batch sizes, input resolutions, native augmentations, and
+training duration when they are part of a predeclared search space.
+
+Give each detector the same tuning opportunity, defined before tuning as the
+same number of trials and a comparable wall-clock or accelerator-hour ceiling.
+Use training and validation data only; freeze the chosen configuration before
+test access. Report Track B separately from Track A and publish the search
+space, trial ledger, rejected configurations, selection criterion, and compute
+consumed. Track B cannot retroactively replace an unfavorable Track A result.
+
 ### Input-size rule
 
-Freeze one shared size after the dataset audit and before model training:
+For Track A, freeze one shared size after the dataset audit and before model
+training:
 
 1. Determine the confirmed paper's exact resize/crop behavior. It reports
    approximately 139x132 native images resized to 128x128, but this must be
@@ -223,9 +260,9 @@ resolution that erases small lesions.
 
 ### Augmentation
 
-Split first. Generate a deterministic, versioned training-only augmentation
-manifest or corpus that both frameworks consume identically. Start with
-conservative transforms whose box geometry is unambiguous:
+Split first. For Track A, generate a deterministic, versioned training-only
+augmentation manifest or corpus that both frameworks consume identically.
+Start with conservative transforms whose box geometry is unambiguous:
 
 - horizontal flip only if medically justified;
 - small rotation/translation/scale with clipped, validated boxes;
@@ -237,21 +274,24 @@ unless the protocol explicitly defines a separate robustness-training study.
 
 ### Initial training budget
 
-Use two stages:
+Use two stages for each frozen track:
 
 1. **Preflight:** a tiny subset and 1–2 epochs to verify data parity, finite
    losses, checkpointing, evaluation, profiling, and Grad-CAM end to end.
-2. **Final:** at least three fixed seeds, a fixed 100-epoch budget, validation
-   each epoch, and the best validation AP50:95 checkpoint per seed.
+2. **Final:** at least three fixed seeds, the track-specific frozen budget,
+   validation each epoch, and the best validation AP50:95 checkpoint per seed.
 
-If compute cannot support three runs, report a single-run comparison as
-exploratory and use image-level paired uncertainty without implying
-training-seed stability.
+Track A starts with a fixed 100-epoch budget. Track B uses the configuration and
+duration selected within its equal tuning budget. If compute cannot support
+three final seeds for both tracks, prioritize a multi-seed Track A, label any
+single-seed Track B result exploratory, and use image-level paired uncertainty
+without implying training-seed stability.
 
 The proposed starting optimizer is AdamW with cosine decay and a shared
-effective batch size. Freeze exact values only after a training-only/validation
-pilot; do not use test results. Any hyperparameter search must use the same
-budget and search space for both models.
+effective batch size for Track A. Freeze exact values only after a
+training-only/validation pilot; do not use test results. Track B may use
+model-specific search spaces, but both detectors must receive the same
+predeclared trial and compute opportunity.
 
 ## 7. Shared evaluation protocol
 
@@ -382,7 +422,7 @@ unit. Preserve per-image predictions and metrics.
 
 Primary estimand:
 
-- the difference in clean-test COCO AP50:95 between the two selected
+- the Track A difference in clean-test COCO AP50:95 between the two selected
   implementations, averaged across final training seeds.
 
 Primary inference:
@@ -398,6 +438,9 @@ Primary inference:
 
 Secondary analysis:
 
+- the separately labeled Track B clean-test AP50:95 difference, with the same
+  paired uncertainty machinery but no substitution for an unfavorable Track A
+  outcome;
 - paired intervals/tests for AP50, frozen-threshold F1, robustness retention,
   attention-inside-box score, and other declared outcomes;
 - McNemar's test only for a clearly defined paired binary outcome, such as
@@ -418,12 +461,14 @@ machine-readable test results before writing the conclusion.
 
 ### Milestone 0 — Clarify and freeze
 
-- Get instructor answers.
+- Seek instructor answers and record responses or non-response.
+- Activate a documented fallback for every unresolved interpretation.
+- Freeze the initial deviation and decision log before test access.
 - Record hardware/storage budget.
 - Pin the repository scope and acceptance criteria.
 
-Exit criterion: no unresolved interpretation can change dataset, classes, or
-models.
+Exit criterion: every interpretation that could change data, classes, models,
+or evaluation has either an answer or a preregistered fallback.
 
 ### Milestone 1 — Reproducible foundation
 
@@ -451,25 +496,32 @@ documented and approved.
 Exit criterion: both adapter formats yield identical metrics for identical toy
 predictions.
 
-### Milestone 4 — Faster R-CNN baseline
+### Milestone 4 — Detector adapters and preflight
 
-- Implement adapter, training, checkpoint selection, and profiling.
-- Complete preflight, then final seeds.
+- Implement Faster R-CNN and YOLO adapters, training, checkpoint selection, and
+  profiling.
+- Disable YOLO native augmentation for Track A and expose Track B choices in
+  explicit config.
+- Complete tiny end-to-end preflights for both models and both tracks.
 
-Exit criterion: reproducible logs, curves, checkpoints, predictions, and
-baseline tables.
+Exit criterion: both adapters produce the canonical prediction schema; data,
+evaluation, profiling, checkpointing, and Grad-CAM paths pass preflight.
 
-### Milestone 5 — YOLO comparator
+### Milestone 5 — Controlled and optimized training
 
-- Implement adapter with native augmentation disabled.
-- Generate a config-difference report against the baseline contract.
-- Complete preflight, then final seeds.
+- Freeze the Track A contract and generate its model-config difference report.
+- Complete Track A final seeds for both detectors.
+- Run the equal-budget Track B validation search, freeze winners, and complete
+  final seeds for both detectors.
+- Preserve all trial ledgers, rejected configurations, and resource accounting.
 
-Exit criterion: only detector-specific fields differ.
+Exit criterion: Track A differs only in declared detector components, Track B
+used equal tuning opportunity, and both tracks have separately traceable logs,
+curves, checkpoints, and predictions.
 
 ### Milestone 6 — Full benchmark
 
-- Clean evaluation and compute profiling.
+- Separate Track A and Track B clean evaluation and compute profiling.
 - Corruption matrix.
 - Grad-CAM panels and quantitative attention checks.
 - Paired statistical analysis.
@@ -480,6 +532,8 @@ Exit criterion: every PDF-required metric and artifact exists with provenance.
 
 - Generate tables/figures from results.
 - Write the 12 required sections.
+- Add a compliance/deviation matrix and keep Track A and Track B conclusions
+  separate.
 - Re-run from a clean checkout or container.
 - Check citations, limitations, artifact hashes, and result consistency.
 
@@ -501,6 +555,7 @@ Exit criterion: one documented command chain reproduces the submitted evidence.
 |   |-- README.md
 |   `-- manifests/
 |-- docs/
+|   |-- DECISION_LOG.md
 |   `-- PROJECT_PLAN.md
 |-- reports/
 |   |-- figures/
@@ -539,13 +594,16 @@ Use the exact order required by the brief:
 12. Conclusions and Future Work
 
 Each results section must point to the config, result file, seed(s), and commit
-that generated its claims.
+that generated its claims. Experimental Methodology must include the
+compliance/deviation matrix, and every quantitative section must label Track A
+and Track B rather than blending them.
 
 ## 15. Major risks and mitigations
 
 | Risk | Mitigation |
 |---|---|
 | Class-count ambiguity | Instructor confirmation plus annotation-derived class map |
+| A silent instructor override harms grading or validity | Preregistered decision log, preserved Track A, separate Track B, and explicit report matrix |
 | Patient or duplicate leakage | Patient grouping when possible; exact/near-duplicate audit; sensitivity analysis |
 | “Identical” conditions hide framework defaults | Shared/offline augmentations, disabled native augmentation, generated config diff |
 | Test-set tuning | Validation-only thresholds and model selection; freeze before test |

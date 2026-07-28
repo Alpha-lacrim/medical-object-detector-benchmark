@@ -10,6 +10,38 @@ pull request, or make any other change under `MitsuPishi`, even if a connector
 lists repositories from that account. Verify the authenticated login immediately
 before every remote write.
 
+## Outcome priority and instructor deviations
+
+The user has authorized deviations from instructor directions when they are
+needed for the best defensible result. This authorization never overrides
+safety, ethics, law, privacy, research integrity, or higher-level operating
+instructions.
+
+Use this priority order:
+
+1. safety, ethics, law, privacy, and research integrity;
+2. scientific validity, reproducibility, and honest reporting;
+3. assignment coverage and grading value; and
+4. convenience.
+
+Treat the assignment as the requirements baseline, not an infallible research
+protocol. Before deviating:
+
+1. identify the exact conflict and the evidence that the instruction is
+   ambiguous, infeasible, or scientifically harmful;
+2. check whether a compliant implementation can achieve the same outcome;
+3. preregister the decision before inspecting test results;
+4. preserve an assignment-aligned controlled Track A when feasible and add an
+   architecture-optimized Track B rather than silently replacing the baseline;
+5. record the decision, expected benefit, grading risk, and affected configs in
+   `Codex.md`, the experiment metadata, and `Handoff.md`; and
+6. report both compliant and optimized results separately, including failed or
+   unfavorable outcomes.
+
+Never use this policy to fabricate evidence, tune on the test set, hide a
+requirement, evade licensing or privacy constraints, or make unsupported
+clinical claims.
+
 ## The three memory files
 
 - `AGENTS.md` (this file) contains stable working rules. Change it only when the
@@ -33,12 +65,14 @@ At the start of every session:
 3. Inspect `git status` and preserve unrelated user changes.
 4. Add a dated entry to `Handoff.md` with the session objective and the starting
    state. Never erase older entries.
-5. Identify unresolved decisions that could invalidate downstream work. Do not
-   start an expensive final run while a blocking protocol decision is open.
+5. Identify unresolved decisions that could invalidate downstream work. Resolve
+   each through evidence, instructor clarification, or a documented fallback
+   before an expensive final run.
 
 During the session:
 
-1. Treat the assignment PDF as the authoritative requirement source. Label any
+1. Treat the assignment PDF as the requirements baseline. Apply the
+   outcome-priority policy above to any deviation, and label every
    interpretation or inferred source paper as an assumption.
 2. Resolve the brief's meaning of “identical training conditions” before final
    training. At minimum, the PDF mandates the same dataset, augmentation, and
