@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling>=1.28,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meddet-benchmark"
+version = "0.1.0"
+description = "Reproducible Faster R-CNN and YOLO benchmark for medical images"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "numpy>=2.3,<3",
+  "pydantic>=2.13,<3",
+  "PyYAML>=6.0.3,<7",
+]
+
+[project.optional-dependencies]
+cpu = [
+  "pycocotools==2.0.11",
+  "torch==2.13.0",
+  "torchvision==0.28.0",
+  "ultralytics==8.4.108",
+]
+cu130 = [
+  "pycocotools==2.0.11",
+  "torch==2.13.0",
+  "torchvision==0.28.0",
+  "ultralytics==8.4.108",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.1,<10",
+  "ruff==0.16.0",
+]
+
+[tool.uv]
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "cu130" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu130", extra = "cu130" },
+]
+torchvision = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu130", extra = "cu130" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/meddet_benchmark"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]

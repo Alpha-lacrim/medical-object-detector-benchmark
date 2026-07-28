@@ -1,0 +1,83 @@
+schema_version: 1
+experiment_id: synthetic-smoke-v1
+status: smoke
+test_access_allowed: false
+decision_ids:
+  - D-001
+seeds:
+  - 17
+  - 42
+  - 2026
+data:
+  kind: synthetic
+  source_id: generated-boxes-v1
+  root: data/synthetic
+  manifests:
+    train: data/manifests/smoke-train.json
+    validation: data/manifests/smoke-validation.json
+    test: data/manifests/smoke-test.json
+  class_names:
+    - lesion
+models:
+  faster_rcnn:
+    implementation: torchvision/fasterrcnn_resnet50_fpn_v2
+    weights: synthetic-none
+    head_mode: roi-heads
+  yolo:
+    implementation: ultralytics/yolo26s
+    weights: synthetic-none
+    head_mode: one-to-one-nms-free
+runtime:
+  device: cpu
+  precision: fp32
+  deterministic: true
+  allow_tf32: false
+evaluation:
+  fixed_score_threshold: 0.25
+  match_iou_threshold: 0.5
+  max_detections: 100
+track_a:
+  training:
+    epochs: 2
+    batch_size: 2
+    accumulation_steps: 1
+    input_size: 64
+    augmentation_profile: none
+    optimizer:
+      name: adamw
+      learning_rate: 0.0001
+      weight_decay: 0.0001
+    scheduler:
+      name: cosine
+      warmup_epochs: 0
+track_b:
+  trials_per_model: 1
+  accelerator_hours_per_model: 0.01
+  selection_metric: val_ap50_95
+  training:
+    faster_rcnn:
+      epochs: 2
+      batch_size: 1
+      accumulation_steps: 2
+      input_size: 64
+      augmentation_profile: none
+      optimizer:
+        name: adamw
+        learning_rate: 0.0001
+        weight_decay: 0.0001
+      scheduler:
+        name: cosine
+        warmup_epochs: 0
+    yolo:
+      epochs: 2
+      batch_size: 2
+      accumulation_steps: 1
+      input_size: 64
+      augmentation_profile: none
+      optimizer:
+        name: adamw
+        learning_rate: 0.0001
+        weight_decay: 0.0001
+      scheduler:
+        name: cosine
+        warmup_epochs: 0
