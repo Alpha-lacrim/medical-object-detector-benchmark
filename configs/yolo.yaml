@@ -1,3 +1,8 @@
-# Populated only after Batch 1 selects and justifies the YOLO generation.
-model: null
-ultralytics_version: null
+model:
+  family: YOLO11
+  scale: small
+  weights: yolo11s.pt
+  implementation: ultralytics
+  rationale: established anchor-free baseline with more independent literature than YOLO26
+
+ultralytics_version: 8.4.110

@@ -1,3 +1,97 @@
 # Literature Review
 
-Deferred to Batch 1.
+## Scope and position of this study
+
+This project is a controlled comparison of two object-detection paradigms on one medical-imaging dataset. It asks how a two-stage, anchor-based Faster R-CNN and a modern one-stage, anchor-free YOLO trade off localization accuracy, computational cost, resistance to common image corruptions, and post-hoc visual explainability. The literature below motivates those comparison axes; it does not establish that either detector is clinically effective. All later results will be retrospective benchmark results on the selected public dataset, not evidence of diagnostic safety, clinical utility, or generalization to another institution, scanner, or patient population.
+
+## Detector selection: Ultralytics YOLO11s
+
+The YOLO arm is **Ultralytics YOLO11s**, loaded from the `yolo11s.pt` model family and run with the exact package pin **`ultralytics==8.4.110`**, a stable release published on July 29, 2026 and selected on this study's August 2, 2026 decision date [@ultralytics2026release]. The package version and model scale are separate parts of the specification: the former fixes the training/inference implementation, while the `s` suffix selects the small compound-scaled model. The eventual experiment must also record the downloaded checkpoint hash because a Python-package pin alone does not identify a weight file.
+
+YOLO11 was selected instead of YOLO26 for three reasons. First, it retains the established dense, anchor-free YOLO detection interface and conventional non-maximum suppression (NMS), making the contrast with an anchor-based, proposal-driven Faster R-CNN easier to isolate and explain. Second, that anchor-free, NMS-based design has greater continuity with existing YOLO medical-detection literature than YOLO26's newer end-to-end head. Third, the small scale is compatible with the study's 8 GB GPU constraint without moving to a nano model whose capacity could become an avoidable confound. YOLO26's NMS-free end-to-end head is an interesting newer design, but choosing it would simultaneously change the detector stage, matching strategy, and post-processing regime; its recency also leaves less directly comparable literature. This choice is about experimental interpretability and maturity, not an a priori claim that YOLO11 is more accurate.
+
+Ultralytics has not published a formal peer-reviewed architecture paper for YOLO11. Therefore, architecture-specific statements here are deliberately limited to what is exposed by the official documentation and model configuration [@ultralytics2024yolo11; @ultralytics2026yoloarchitecture; @ultralytics2026yolo11config]. The pinned source and the instantiated model summary, rather than third-party architecture diagrams, will be the implementation authority.
+
+## YOLO11 architecture
+
+The original YOLO formulation recast detection as a single-network prediction problem instead of a pipeline that first generates regions and then classifies them [@redmon2016yolo]. YOLO11 follows that one-stage principle but differs substantially from the original anchor-based YOLO. Its detection model can be described in three parts:
+
+1. **Backbone.** Successive strided convolutions and CSP-style `C3k2` blocks extract a hierarchy of features. An `SPPF` block expands the effective spatial context near the deepest feature level, followed by a `C2PSA` attention block in the official detection configuration. These names identify release-defined modules; this review does not infer undocumented internal motivations or reproduce unofficial diagrams.
+2. **Multi-scale feature fusion.** A top-down and bottom-up neck upsamples, concatenates, and downsamples features so that the detector receives three feature maps. The standard model configuration exposes outputs at strides 8, 16, and 32 (`P3`, `P4`, and `P5`), allowing smaller and larger findings to be represented at different resolutions [@ultralytics2026yoloarchitecture; @ultralytics2026yolo11config]. This plays a role analogous to, but is not architecturally identical with, the feature pyramid used by the Faster R-CNN baseline. Feature Pyramid Networks were introduced to give semantically strong representations at several spatial scales without independently processing a full image pyramid [@lin2017fpn].
+3. **Dense detection head.** At every pyramid level, an anchor-free, decoupled head uses separate branches for box regression and classification. "Anchor-free" means the model predicts relative to feature-grid locations rather than selecting among hand-specified anchor shapes; it does not mean that predictions have no spatial reference. YOLO11 represents each box side as a discrete distribution (`reg_max=16`) and decodes its expectation, following the distributed box-regression idea associated with Distribution Focal Loss [@li2020gfl]. Candidate boxes are then filtered with confidence criteria and NMS. Thus YOLO11 is one-stage and anchor-free, but it is not NMS-free.
+
+The small variant applies the release-defined depth and width scaling to this common graph. Parameter count, FLOPs, latency, and memory use will be measured from the instantiated `yolo11s` model in the study environment rather than copied from vendor benchmarks. Likewise, COCO results in the official documentation describe a different dataset and cannot predict performance on medical images.
+
+## One-stage anchor-free YOLO versus two-stage Faster R-CNN
+
+Faster R-CNN introduced a Region Proposal Network (RPN) that shares convolutional features with the second-stage detector [@ren2015fasterrcnn]. In this study, `fasterrcnn_resnet50_fpn_v2` uses a ResNet-50/FPN representation. The RPN scores and regresses multiple anchors at each location, proposal filtering reduces them to candidate regions, and an RoI-based second stage assigns classes and refines boxes. YOLO11 instead makes dense class and box predictions directly from the three fused feature levels and has no learned proposal-to-RoI classification stage.
+
+| Dimension | Faster R-CNN baseline | YOLO11s |
+|---|---|---|
+| Detection organization | RPN followed by an RoI classification/regression stage | One dense detection stage |
+| Localization prior | Multiple predefined anchor shapes per feature location | Anchor-free grid-point reference |
+| Multi-scale representation | ResNet-50 Feature Pyramid Network | YOLO neck with `P3`/`P4`/`P5` outputs |
+| Per-candidate computation | Second-stage processing of selected proposals | Shared dense head over all three feature maps |
+| Duplicate suppression | Proposal/detection filtering, including NMS | NMS after dense prediction |
+| Main experimental hypothesis | Proposal refinement may behave differently for subtle or variably sized findings | A single dense pass may offer lower latency, but its medical-image accuracy and robustness must be measured |
+
+The architecture suggests a speed hypothesis, not an accuracy ranking. Published results cannot settle this project's question because data splits, image resolution, augmentation, pretraining, confidence thresholds, NMS, and metric implementations often differ. Both models will therefore consume the same canonical annotations and split, and their predictions will be scored by the same COCO-style evaluator.
+
+## Explainability for object detection
+
+### Grad-CAM
+
+Grad-CAM forms a coarse spatial explanation by differentiating a target score with respect to a convolutional feature tensor, globally pooling those gradients into channel weights, combining the activation maps, and retaining positive contributions [@selvaraju2017gradcam]. It requires no model retraining and can be applied to convolutional backbones in both detectors. However, its original presentation primarily treats a single differentiable target such as a class score. A detector returns a variable set of boxes, class scores, and locations, so applying Grad-CAM requires extra choices that can materially change the map.
+
+For this study, every explanation must identify (a) the exact predicted detection being explained, (b) the differentiable scalar used as its target, (c) whether that score is taken before or after candidate filtering, and (d) the hooked feature layer. Inference wrappers that detach tensors cannot be used for gradient explanations. Matching layers by their names would also be misleading because the networks organize features differently; comparisons should match approximate spatial stride and semantic depth, with at least one common-resolution backbone or pyramid level reported for each model.
+
+Object-detection-specific caveats include:
+
+- NMS and proposal selection contain discrete index operations. Gradients explain the score of a selected candidate, not the entire decision process that caused it to survive suppression.
+- A class score alone may not explain why the box has a particular extent. Classification and localization targets should not be conflated, and the target definition must remain fixed across models.
+- Later feature maps offer stronger semantics but lower spatial resolution, so an apparently diffuse map can be a resolution artifact. Layer choice is part of the method, not a cosmetic plotting option.
+- In images with multiple findings, a map can mix evidence for nearby detections or shared context. Each matched detection should be explained separately.
+- A true false negative has no retained detection score to target. It cannot receive an ordinary per-detection Grad-CAM map unless an explicit proxy is defined, such as the best pre-threshold candidate associated with the missed ground-truth box; proxy-target maps must be labeled and analyzed separately from explanations of emitted detections.
+- A visually plausible heatmap is neither a causal account nor proof that a model used clinically appropriate evidence. Some saliency methods can remain visually similar after model or label randomization [@adebayo2018sanity]. In radiology datasets, evaluated saliency methods have also failed at least one of localization utility, sensitivity, repeatability, or reproducibility criteria [@arun2021saliency].
+
+### Alternatives and planned fallback order
+
+**Grad-CAM++** changes the channel weighting to use pixel-wise positive gradient information and was proposed to improve localization when several instances of a class are present [@chattopadhay2018gradcampp]. It is the first fallback if ordinary Grad-CAM is consistently diffuse or unstable while gradients remain usable.
+
+**Eigen-CAM** takes a principal component of the selected activation tensor and does not require a class score or back-propagated gradient [@muhammad2020eigencam]. This can be useful when a detector's output path makes gradients fragile, but its gradient-free nature also removes detection/class specificity. It should be described as an activation visualization, not silently substituted as an equivalent class-specific explanation.
+
+**D-RISE** is a detector-specific, black-box alternative. It repeatedly masks input regions and weights those masks using a similarity that includes both the category and localization of a target detection. The method was demonstrated on both YOLO and Faster R-CNN and avoids dependence on internal layer choices [@petsiuk2021drise]. Its disadvantage is computational cost, so it is best suited to a small diagnostic subset or to validate whether conclusions drawn from faster CAM methods are method-dependent.
+
+The primary qualitative analysis will show the same representative correct detections, localization errors, and false positives for both models. False negatives will use a separately reported, predeclared proxy target or activation view rather than pretending that an absent detection has a score to explain. Quantitatively, the **pointing game** counts a hit when the maximum-saliency location falls inside the matched ground-truth region [@zhang2016excitation]. An energy-in-box score can complement it by measuring the fraction of nonnegative saliency mass inside the ground-truth box. Both are localization proxies: a large box makes a hit easier, and a bounding box does not delineate lesion tissue. Scores should therefore be paired with box-area-aware/random baselines, model-parameter randomization checks, and the qualitative failure analysis; they must not be interpreted as clinical reasoning scores.
+
+## Related medical-imaging detection work
+
+The table includes both detector studies and the RSNA resource paper that defines a widely used medical bounding-box benchmark. Reported metrics are protocol-specific and are not directly comparable across rows or with this project.
+
+| Work | Modality and data | Detector focus | Relevance and limitation for this study |
+|---|---|---|---|
+| Shih et al. [@shih2019rsna] | Chest radiographs; RSNA Pneumonia Detection Challenge annotations derived from the NIH collection | Expert bounding boxes for possible pneumonia-like pulmonary opacity | Establishes the challenge resource and documents an adjudicated annotation process. The target is a radiographic opacity that may represent pneumonia in context, not a pathologically confirmed diagnosis. |
+| Yao et al. [@yao2021pneumonia] | Chest radiographs; RSNA and ChestX-ray14 | Modified Faster R-CNN with a dilated backbone, FPN, learned anchor sizes, and Soft-NMS | Shows that a two-stage detector can be adapted to low-contrast, variable-scale findings. Its custom backbone, preprocessing, anchors, and metric averaging prevent attribution of results to the two-stage paradigm alone. |
+| Wu et al. [@wu2024pneumonia] | Chest radiographs; RSNA | Anchor-free detector with a feature pyramid and two-branch head | Supports studying anchor-free localization on RSNA data. It also illustrates why results from a custom architecture and augmentation/loss recipe cannot be treated as a vanilla YOLO-versus-Faster-R-CNN comparison. |
+| Kang et al. (RCS-YOLO) [@kang2023rcsyolo] | 2-D brain MRI slices; Br35H | Efficiency-oriented modified YOLO compared with several YOLO generations | Demonstrates that brain-tumor bounding-box detection has been studied as a speed/accuracy problem. Its YOLO-to-YOLO comparisons and point estimates do not answer the controlled cross-paradigm or statistical questions posed here. |
+| Kang et al. (PK-YOLO) [@kang2025pkyolo] | Multiplanar structural brain MRI slices | Domain-pretrained YOLO with a loss intended to improve small-tumor detection; comparisons include YOLO-like and DETR-like models | Highlights domain pretraining, small findings, and relationships among MRI planes. Its multiplanar inputs and custom pretraining differ from the single-image controlled transfer-learning setup here. |
+
+Together these studies show that both proposal-based and dense anchor-free detectors are plausible research baselines for medical localization. They also expose recurring comparability problems: custom backbones and losses are changed together, evaluation protocols differ, and speed is reported on different hardware. The present study deliberately changes only the detector family as far as the two frameworks allow, uses a unified evaluator, reports compute on one machine, and treats any remaining augmentation asymmetry as a validity threat rather than a hidden advantage.
+
+## Common-corruption robustness
+
+Clean test accuracy does not characterize behavior after ordinary image degradation. ImageNet-C established a reproducible approach in which fixed corruption families are applied at ordered severity levels and evaluated alongside clean performance [@hendrycks2019corruptions]. That benchmark concerns natural-image classification, so its exact corruption set and normalization cannot simply be claimed as a medical-detection standard. Nevertheless, its key design principles transfer: preserve the underlying labels, evaluate several severities, avoid cherry-picking one transformation level, and report both absolute performance and relative degradation. Work extending this idea to object detection likewise found substantial performance loss under common corruptions, reinforcing the need to evaluate detectors rather than infer robustness from clean mAP [@michaelis2019detectionrobustness].
+
+This project's robustness grid will cover controlled lighting changes, Gaussian and impulse noise, Gaussian and motion blur, and JPEG compression at config-defined severities. Each detector will receive the same corrupted image instances, and the same unified detection evaluator will measure clean and corrupted mAP/precision/recall. Curves and a clean-normalized retention or degradation measure are more informative than a single before/after number because two models can have different clean baselines.
+
+These transformations are stress tests, not faithful simulations of every acquisition failure. For example, display-level brightness changes and JPEG artifacts do not reproduce scanner physics, reconstruction pipelines, DICOM windowing, or site-specific preprocessing; an MRI and a chest radiograph also have different plausible failure modes. Conclusions will therefore be restricted to the tested digital corruptions and severity ranges. Robustness on this grid cannot establish robustness to population shift, new devices, adversarial manipulation, or clinical deployment.
+
+## Implications for the experimental design
+
+The literature yields three testable expectations without predetermining the outcome:
+
+1. YOLO11s should have a computational advantage hypothesis because it avoids per-proposal second-stage processing, but FPS, memory, and training time must be measured under matched resolution and hardware.
+2. Anchor-free dense prediction and anchor-based proposal refinement may respond differently to lesion scale, class imbalance, and corruption; clean mAP alone cannot identify the more robust detector.
+3. Explanation results are conditional on target and layer choices. Comparable layers, fixed detection targets, quantitative localization proxies, and sanity checks are required before discussing where either network appears to focus.
+
+These are benchmark hypotheses only. Any preference between detectors will be argued from the measured accuracy, robustness, explanation, and compute trade-offs for the selected dataset and deployment scenario, with no claim of clinical validity.

@@ -1,0 +1,119 @@
+{
+  "audit": {
+    "by_code": {},
+    "by_severity": {},
+    "issue_count": 0,
+    "issues": []
+  },
+  "dataset_id": "rsna-pneumonia-detection-2018-stage2",
+  "image_processing": {
+    "conversion_errors": [],
+    "invert_monochrome1": true,
+    "mode": "partial",
+    "normalization": "per_image_minmax",
+    "output_bit_depth": 8,
+    "pngs_converted": 0,
+    "pngs_existing": 12,
+    "selected_images": 5000,
+    "source_dicoms_available": 0,
+    "source_dicoms_missing": 4988
+  },
+  "input_counts": {
+    "annotation_exam_ids": 26684,
+    "class_info_exam_ids": 26684,
+    "class_info_rows": 30227,
+    "invalid_exam_ids": 0,
+    "label_rows": 30227,
+    "mapped_exam_ids": 30000,
+    "mapping_entries": 30000,
+    "maximum_exams_per_nih_patient": 65,
+    "multi_exam_nih_patients": 4355,
+    "unique_nih_patients": 11452,
+    "valid_boxes": 9555,
+    "valid_exam_ids": 26684
+  },
+  "input_files": {
+    "class_info_csv": {
+      "bytes": 1647396,
+      "path": "data/raw/rsna-pneumonia/stage_2_detailed_class_info.csv",
+      "sha256": "c004c12dea2042cc23e3b848f65e8cb2e725799afaa90f13ee81f854bcc9614d"
+    },
+    "labels_csv": {
+      "bytes": 1490034,
+      "path": "data/raw/rsna-pneumonia/stage_2_train_labels.csv",
+      "sha256": "bb40b7e956e9922a6b275ed4a158197568cf9ab618017d53db6159b1b624bb65"
+    },
+    "mapping_json": {
+      "bytes": 17587143,
+      "expected_sha256": "803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27",
+      "path": "data/raw/rsna-pneumonia/mappings.json",
+      "sha256": "803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27",
+      "sha256_verified": true
+    }
+  },
+  "outputs": {
+    "audit_summary": "data\\manifests\\rsna-pneumonia-5000-audit.json",
+    "coco_test": "data\\processed\\rsna-pneumonia-5000\\annotations\\instances_test.json",
+    "coco_train": "data\\processed\\rsna-pneumonia-5000\\annotations\\instances_train.json",
+    "coco_val": "data\\processed\\rsna-pneumonia-5000\\annotations\\instances_val.json",
+    "manifest_test": "data\\splits\\rsna-pneumonia-5000\\test.csv",
+    "manifest_train": "data\\splits\\rsna-pneumonia-5000\\train.csv",
+    "manifest_val": "data\\splits\\rsna-pneumonia-5000\\val.csv"
+  },
+  "schema_version": 1,
+  "split_group_overlap": {
+    "train__test": 0,
+    "train__val": 0,
+    "val__test": 0
+  },
+  "splits": {
+    "test": {
+      "boxes": 268,
+      "groups": 323,
+      "images": 750,
+      "negative_images": 581,
+      "positive_images": 169,
+      "strata": {
+        "Lung Opacity": 169,
+        "No Lung Opacity / Not Normal": 331,
+        "Normal": 250
+      }
+    },
+    "train": {
+      "boxes": 1267,
+      "groups": 1492,
+      "images": 3500,
+      "negative_images": 2702,
+      "positive_images": 798,
+      "strata": {
+        "Lung Opacity": 798,
+        "No Lung Opacity / Not Normal": 1554,
+        "Normal": 1148
+      }
+    },
+    "val": {
+      "boxes": 277,
+      "groups": 321,
+      "images": 750,
+      "negative_images": 581,
+      "positive_images": 169,
+      "strata": {
+        "Lung Opacity": 169,
+        "No Lung Opacity / Not Normal": 331,
+        "Normal": 250
+      }
+    }
+  },
+  "subsample": {
+    "configured_max_images": 5000,
+    "enabled": true,
+    "seed": 17,
+    "selected_groups": 2136,
+    "selected_images": 5000,
+    "strata": {
+      "Lung Opacity": 1136,
+      "No Lung Opacity / Not Normal": 2216,
+      "Normal": 1648
+    }
+  }
+}

@@ -1,2 +1,93 @@
-# Populated after the Batch 1 dataset review and selection checkpoint.
-dataset: null
+schema_version: 1
+
+dataset:
+  id: rsna-pneumonia-detection-2018-stage2
+  display_name: RSNA Pneumonia Detection Challenge 2018
+  source_url: https://www.rsna.org/artificial-intelligence/ai-image-challenge/rsna-pneumonia-detection-challenge-2018
+  license_url: https://www.rsna.org/-/media/files/rsna/education/ai-resources-and-training/ai-image-challenge/pneumonia-detection-challenge-terms-of-use-and-attribution.pdf
+
+  kaggle:
+    competition: rsna-pneumonia-detection-challenge
+    files:
+      - stage_2_train_images.zip
+      - stage_2_train_labels.csv
+      - stage_2_detailed_class_info.csv
+    require_rules_acceptance: true
+
+  paths:
+    raw_dir: data/raw/rsna-pneumonia
+    source_images_dir: data/raw/rsna-pneumonia/stage_2_train_images
+    labels_csv: data/raw/rsna-pneumonia/stage_2_train_labels.csv
+    class_info_csv: data/raw/rsna-pneumonia/stage_2_detailed_class_info.csv
+    mapping_json: data/raw/rsna-pneumonia/mappings.json
+    processed_dir: data/processed/rsna-pneumonia-5000
+    processed_images_dir: data/processed/rsna-pneumonia-5000/images
+    annotations_dir: data/processed/rsna-pneumonia-5000/annotations
+    audit_json: data/manifests/rsna-pneumonia-5000-audit.json
+    splits_dir: data/splits/rsna-pneumonia-5000
+    figures_dir: results/figures
+
+  official_supplements:
+    mapping_url: https://s3.amazonaws.com/east1.public.rsna.org/AI/2018/pneumonia-challenge-dataset-mappings_2018.json
+    mapping_sha256: 803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27
+
+  image:
+    source_extension: .dcm
+    processed_extension: .png
+    width: 1024
+    height: 1024
+    conversion:
+      normalization: per_image_minmax
+      output_bit_depth: 8
+      invert_monochrome1: true
+
+  mapping:
+    exam_id_field: subset_img_id
+    original_image_field: img_id
+    patient_id_pattern: '^(?P<patient_id>[0-9]+)_[0-9]+\.png$'
+
+  annotation:
+    format: rsna_stage2_csv
+    exam_id_field: patientId
+    x_field: x
+    y_field: y
+    width_field: width
+    height_field: height
+    target_field: Target
+    positive_target: '1'
+    negative_target: '0'
+    class_info_exam_id_field: patientId
+    class_info_class_field: class
+
+  classes:
+    foreground:
+      - Lung Opacity
+    study_strata:
+      - Lung Opacity
+      - No Lung Opacity / Not Normal
+      - Normal
+    positive_study_stratum: Lung Opacity
+
+  subsample:
+    enabled: true
+    max_images: 5000
+    seed: 17
+    stratify_by: study_stratum
+    group_by: nih_patient_id
+
+  split:
+    seed: 17
+    group_by: nih_patient_id
+    stratify_by: study_stratum
+    ratios:
+      train: 0.70
+      val: 0.15
+      test: 0.15
+
+  eda:
+    sample_seed: 17
+    sample_images: 12
+    grid_columns: 4
+    thumbnail_size: 320
+    distribution_width: 1100
+    distribution_height: 650

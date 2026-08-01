@@ -1,0 +1,22 @@
+{
+  "distribution_figure": "results/figures/rsna_class_distribution.png",
+  "sample_count": 12,
+  "sample_figure": "results/figures/rsna_annotation_samples.png",
+  "study_counts": {
+    "test": {
+      "Lung Opacity": 169,
+      "No Lung Opacity / Not Normal": 331,
+      "Normal": 250
+    },
+    "train": {
+      "Lung Opacity": 798,
+      "No Lung Opacity / Not Normal": 1554,
+      "Normal": 1148
+    },
+    "val": {
+      "Lung Opacity": 169,
+      "No Lung Opacity / Not Normal": 331,
+      "Normal": 250
+    }
+  }
+}

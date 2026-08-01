@@ -1,59 +1,74 @@
 # Dataset workspace
 
-Raw data is deliberately excluded from Git. This directory keeps only download
-instructions and future versioned manifests.
+Raw images, credentials, and processed pixels are excluded from Git. Only this
+guide and deterministic split manifests are versioned.
 
 ## Selected source
 
-Provisional source:
-[Medical Image DataSet: Brain Tumor Detection](https://www.kaggle.com/datasets/pkdarabi/medical-image-dataset-brain-tumor-detection).
+The selected source is the
+[RSNA Pneumonia Detection Challenge 2018](https://www.rsna.org/artificial-intelligence/ai-image-challenge/rsna-pneumonia-detection-challenge-2018),
+Stage 2 training data, hosted as the Kaggle competition
+`rsna-pneumonia-detection-challenge`. Its one foreground detection class is
+`Lung Opacity`; background images include both normal studies and abnormal
+studies without opacity.
 
-Public Kaggle API metadata retrieved on 2026-07-28 reported:
+The experiment uses a deterministic, patient-grouped 5,000-study subset. See
+`docs/DATASET_CHOICE.md` and `docs/DATASHEET.md` for the selection rationale,
+composition, terms, and leakage controls.
 
-- dataset version `5`;
-- last update `2025-02-10T21:20:45.74Z`;
-- archive size `313,038,935` bytes;
-- license `CC BY 4.0`; and
-- public visibility.
+## Credentials and competition access
 
-These are source metadata, not verified image or annotation counts. The archive
-and extracted files must still be hashed and audited locally.
+Join the Kaggle competition and accept its rules first. Supply credentials by
+either:
 
-## Download
+- setting both `KAGGLE_USERNAME` and `KAGGLE_KEY`; or
+- placing `kaggle.json` in `~/.kaggle/` (or under `KAGGLE_CONFIG_DIR`).
 
-Authenticate with Kaggle outside this repository. Never place a token or
-`kaggle.json` under the project directory. With the official `kagglehub`
-package, download the exact version into the ignored raw-data directory:
-
-```powershell
-uv run --with kagglehub python -c "import kagglehub; print(kagglehub.dataset_download('pkdarabi/medical-image-dataset-brain-tumor-detection/versions/5', output_dir='data/raw/brain-tumor-v5'))"
-```
-
-Alternatively, download version 5 in a browser and extract it under
-`data/raw/brain-tumor-v5/`. Preserve the original archive until its SHA-256 is
-recorded.
-
-The unauthenticated direct API probe returned HTTP 403 on 2026-07-28, so no
-dataset is currently present.
-
-## Audit
-
-Read the extracted `data.yaml` first and pass its actual ordered class names;
-do not infer a fifth class or manufacture a `no tumor` box:
+Never put `kaggle.json` inside this repository. Check discovery without making
+a network request:
 
 ```powershell
-uv run --locked python -m meddet_benchmark audit-data data/raw/brain-tumor-v5/EXTRACTED_ROOT --class-name ACTUAL_CLASS_0 --class-name ACTUAL_CLASS_1
+python -m src.data.download --check-credentials
 ```
 
-The command emits deterministic JSON containing:
+If credentials are absent, partial, or malformed, the command exits with an
+actionable message and never prints a secret.
 
-- image and box counts by split and class;
-- missing, empty, invalid, duplicate, and orphan annotations;
-- image readability and dimensions;
-- image and label SHA-256 values;
-- exact within-split and cross-split duplicate groups; and
-- a canonical manifest fingerprint.
+## Acquire and prepare
 
-The default expected layout is `train/`, `valid/`, and `test/`, each containing
-`images/` and `labels/`. Near-duplicate and patient-level leakage checks remain
-required after the exact-hash audit.
+From the repository root:
+
+```powershell
+python -m src.data.download --config configs/dataset.yaml
+Expand-Archive -LiteralPath data/raw/rsna-pneumonia/stage_2_train_images.zip -DestinationPath data/raw/rsna-pneumonia -Force
+Invoke-WebRequest -Uri "https://s3.amazonaws.com/east1.public.rsna.org/AI/2018/pneumonia-challenge-dataset-mappings_2018.json" -OutFile data/raw/rsna-pneumonia/mappings.json
+python -m src.data.prepare --config configs/dataset.yaml
+python -m src.data.visualize --config configs/dataset.yaml
+```
+
+The expected SHA-256 of the official mapping is configured in
+`configs/dataset.yaml`; preparation refuses a mismatched mapping. Kaggle may
+report either unaccepted competition rules or a storage-region restriction.
+The downloader explains those cases separately rather than treating them as
+missing credentials.
+
+Preparation writes canonical COCO JSON, a machine-readable annotation audit,
+and CSV split manifests. DICOM-to-PNG conversion is streaming and does not load
+the full dataset into RAM. The committed manifests and figures can be reviewed
+without committing the raw/processed image files.
+
+## Locally inspected source files
+
+The 2026-08-02 audit used the canonical Stage 2 CSV filenames and the official
+RSNA mapping. Re-running preparation records the exact input hashes in its
+audit output. The locally inspected mapping hash was:
+
+```text
+803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27  mappings.json
+```
+
+The local environment had no Kaggle credentials and its signed Google Storage
+route was region-blocked. For the review-only EDA, a public mirror supplied the
+canonical-named label CSVs and a small set of DICOMs; their hashes and this
+provenance are disclosed in `docs/DATASHEET.md`. A full authorized Kaggle
+download remains the required source before detector training.

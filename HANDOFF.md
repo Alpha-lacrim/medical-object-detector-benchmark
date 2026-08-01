@@ -25,6 +25,38 @@
 
 ---
 
+## Session 2 — 2026-08-02 — Batch 1
+
+**What I did:**
+- Inspected all three linked dataset candidates for advertised/verified image inventory, class semantics, annotation format/integrity, balance, license terms, and recoverable patient/study identity. Selected RSNA Stage 2 and documented why the two MRI exports cannot establish patient-disjoint splits.
+- Selected YOLO11s with `ultralytics==8.4.110`; wrote the detector/Grad-CAM/medical-detection/corruption literature review and a 22-entry BibTeX file.
+- Added a secret-safe Kaggle downloader that reads a complete environment-variable pair or `~/.kaggle/kaggle.json`/`KAGGLE_CONFIG_DIR`, redacts secrets, and distinguishes missing credentials, unaccepted rules, and geographic storage failures.
+- Audited all 30,227 RSNA annotation rows: 26,684 valid studies, 9,555 valid boxes, zero malformed/non-positive/off-image/duplicate boxes, and zero target/class/mapping inconsistencies. Verified and recorded input SHA-256 values.
+- Recovered true NIH patient keys from the official RSNA mapping. Deterministically selected 5,000 studies from 2,136 patient groups and created exact 3,500/750/750 splits with zero patient overlap. Wrote committed CSV manifests and generated per-split canonical COCO JSON.
+- Converted 12 authentic review DICOMs, generated the split-distribution and labeled bounding-box sample figures, visually checked box placement, and wrote the dataset-choice report, datasheet, and limitations.
+- Verified 80 repository tests pass, Ruff passes over `src`/`tests`, `git diff --check` is clean, and a repeated real-data preparation produces identical hashes for all three manifests and all three COCO files. No model training or Batch 2 implementation was started.
+
+**What's still incomplete / next step:**
+- Stop here until the user approves the RSNA choice, one-class task definition, patient-safe 5,000-study split, and EDA.
+- Before Batch 2 can train, use authorized Kaggle credentials to acquire the other 4,988 selected DICOMs, rerun conversion, and compare the official-download CSV hashes with the committed audit.
+- Batch 2 is Faster R-CNN only after this review gate. YOLO augmentation-parity handling remains deferred to Batch 3.
+
+**Needs the user's review before proceeding:**
+- Approve or reject the RSNA selection and fixed 5,000-study hardware scope.
+- Review `results/figures/rsna_class_distribution.png` and `results/figures/rsna_annotation_samples.png`, plus the disclosed interim mirror provenance/full-image-download requirement in `docs/DATASHEET.md`.
+- Confirm acceptance of the actual class map (`Lung Opacity` only) and the NIH-patient-group split strategy.
+
+**Files touched:**
+- `README.md`, `requirements.txt`, `configs/{dataset,yolo}.yaml`, `data/README.md`
+- `src/data/{__init__,download,prepare,visualize}.py`
+- `tests/test_{download,prepare,visualize}.py`
+- `docs/{DATASET_CHOICE,DATASHEET,LITERATURE_REVIEW,LIMITATIONS}.md`, `report/references.bib`
+- `data/manifests/rsna-pneumonia-5000-audit.json`, `data/splits/rsna-pneumonia-5000/*.csv`
+- `results/figures/rsna_{class_distribution,annotation_samples}.png`, `results/figures/rsna_eda_summary.json`
+- `CODEX.md`, `HANDOFF.md`
+
+---
+
 ## Session 1 — 2026-08-02 — Batch 0
 
 **What I did:**
