@@ -1,0 +1,11 @@
+# Core numerical and detector dependencies. Keep every active requirement exact.
+numpy==2.5.1
+torch==2.13.0
+torchvision==0.28.0
+pycocotools==2.0.11
+albumentations==2.0.8
+scipy==1.18.0
+pytest==9.1.1
+
+# Deferred decision: Batch 1 must select and justify the YOLO generation first.
+# ultralytics==<VERSION_TO_SELECT_IN_BATCH_1>

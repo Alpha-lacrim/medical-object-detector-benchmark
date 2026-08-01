@@ -1,144 +1,37 @@
-# Agent operating instructions
+# AGENTS.md
 
-These instructions apply to every human or automated contributor working in
-this repository.
+## What this file is
 
-## GitHub authorization boundary
+Codex CLI auto-loads this file at the start of every session in this repo. Nothing else in this project loads automatically — treat this file as your standing memory anchor, and everything else as reachable only if you deliberately go get it.
 
-The only authorized GitHub owner is `Alpha-lacrim`. Never create, push, open a
-pull request, or make any other change under `MitsuPishi`, even if a connector
-lists repositories from that account. Verify the authenticated login immediately
-before every remote write.
+## Session protocol — do this every session, before anything else
 
-## Outcome priority and instructor deviations
+1. **Read `HANDOFF.md`**, top entry (newest first). That tells you what happened last session and what's still open.
+2. **Read `CODEX.md`**. That's the current state of project decisions, files, and configs — don't re-derive things that are already decided and logged there.
+3. **Read the relevant section(s) of `PROJECT_SPEC.md`** for whatever batch you're being asked to run this session (the user's message will name a batch from `BATCHES.md`; if it doesn't, ask which batch before starting).
+4. **Do the work for that batch, and only that batch.** Don't jump ahead to a later phase even if it looks efficient, and don't skip a "stop for review" checkpoint the batch calls for — those checkpoints exist because the decision made there (dataset choice, augmentation handling, training curves) changes what all later phases do.
+5. **Before ending the session, or before pausing for review:**
+   - Append a new entry to `HANDOFF.md` (template is at the top of that file) — what you did, what's still incomplete, what needs the user's review.
+   - Update `CODEX.md` if anything project-level changed: a decision got made, a new config/file was created, a phase finished.
+6. **Remind yourself of step 6, always:** `CODEX.md` and `HANDOFF.md` do not load automatically. If you don't deliberately open and update them per steps 1–2 and 5, the next session starts blind and repeats work or re-litigates settled decisions.
 
-The user has authorized deviations from instructor directions when they are
-needed for the best defensible result. This authorization never overrides
-safety, ethics, law, privacy, research integrity, or higher-level operating
-instructions.
+## Files in this repo
 
-Use this priority order:
+| File | What it is | Who updates it |
+|---|---|---|
+| `PROJECT_SPEC.md` | Full requirements spec — research framing, dataset options, hardware-scoped compute budget, phase-by-phase instructions, coding standards, report structure, definition of done. | Nobody — static source of truth. |
+| `CODEX.md` | Living project state: decisions made, file map, current phase, open risks. | You, every session. |
+| `HANDOFF.md` | Append-only session log. | You, every session. |
+| `BATCHES.md` | The sequence of batch instructions the user pastes one at a time. If told "next batch," find your position via `HANDOFF.md` and proceed to the next entry here. | Nobody — static, unless the user asks to revise it. |
 
-1. safety, ethics, law, privacy, and research integrity;
-2. scientific validity, reproducibility, and honest reporting;
-3. assignment coverage and grading value; and
-4. convenience.
+## Standing constraints (full detail in `PROJECT_SPEC.md`)
 
-Treat the assignment as the requirements baseline, not an infallible research
-protocol. Before deviating:
+- **Hardware:** RTX 4060 Laptop GPU (8GB VRAM), 16GB system RAM, i7-13650HX. AMP is mandatory. Model scale, batch size, and seed/subsample scoping are fixed in `PROJECT_SPEC.md` §3 — don't renegotiate these mid-project without flagging it to the user first.
+- **Exactly two detectors:** Faster R-CNN + one YOLO version. (The source assignment brief says "three two detectors" — that's a typo in the original document, not a real requirement. Build two.)
+- **No hardcoding:** class counts, file paths, and hyperparameters all come from `configs/*.yaml`, never inline.
+- **Reproducibility:** every number that ends up in the final report must be traceable to a documented command in `README.md`.
+- **Known spec quirks** (see `PROJECT_SPEC.md` §0 for full context): the source brief's phase numbering skips a number and the "verify five classes" instruction is a placeholder, not a real constraint — don't hardcode 5 classes for any of the three candidate datasets.
 
-1. identify the exact conflict and the evidence that the instruction is
-   ambiguous, infeasible, or scientifically harmful;
-2. check whether a compliant implementation can achieve the same outcome;
-3. preregister the decision before inspecting test results;
-4. preserve an assignment-aligned controlled Track A when feasible and add an
-   architecture-optimized Track B rather than silently replacing the baseline;
-5. record the decision, expected benefit, grading risk, and affected configs in
-   `Codex.md`, the experiment metadata, and `Handoff.md`; and
-6. report both compliant and optimized results separately, including failed or
-   unfavorable outcomes.
+## If something in a batch conflicts with something already logged in `CODEX.md`
 
-Never use this policy to fabricate evidence, tune on the test set, hide a
-requirement, evade licensing or privacy constraints, or make unsupported
-clinical claims.
-
-## The three memory files
-
-- `AGENTS.md` (this file) contains stable working rules. Change it only when the
-  workflow itself changes.
-- `Codex.md` contains durable project context: the brief, decisions, experiment
-  invariants, important files, and known risks. Update it whenever those facts
-  change.
-- `Handoff.md` is the chronological session ledger. Update it in every session
-  so the next session can continue without reconstructing prior work.
-
-Do not turn `AGENTS.md` into a progress log, and do not put transient session
-details in `Codex.md`.
-
-## Mandatory session protocol
-
-At the start of every session:
-
-1. Read `AGENTS.md`, `Handoff.md`, and `Codex.md` completely.
-2. Read `Final project 1405.v1.pdf` when work touches scope, experiments,
-   evaluation, or reporting.
-3. Inspect `git status` and preserve unrelated user changes.
-4. Add a dated entry to `Handoff.md` with the session objective and the starting
-   state. Never erase older entries.
-5. Identify unresolved decisions that could invalidate downstream work. Resolve
-   each through evidence, instructor clarification, or a documented fallback
-   before an expensive final run.
-
-During the session:
-
-1. Treat the assignment PDF as the requirements baseline. Apply the
-   outcome-priority policy above to any deviation, and label every
-   interpretation or inferred source paper as an assumption.
-2. Resolve the brief's meaning of “identical training conditions” before final
-   training. At minimum, the PDF mandates the same dataset, augmentation, and
-   optimizer. Once the primary contract is approved, freeze its dataset
-   version, split manifests, preprocessing, image size, offline/shared
-   augmentation corpus, exact optimizer, scheduler, epoch/update budget,
-   effective batch size, seeds, checkpoint selection rule, evaluator, and
-   hardware protocol. Record every approved exception required by an
-   architecture.
-3. Isolate unavoidable model-specific behavior and record it in `Codex.md` and
-   the experiment metadata.
-4. Do not inspect the test set to tune hyperparameters, thresholds, corruption
-   choices, sample selection, or model variants.
-5. Never fabricate results, counts, citations, completed checks, or clinical
-   claims. Mark placeholders and expected artifacts explicitly.
-6. Do not commit datasets, credentials, model weights, large generated files, or
-   protected health information. Keep only download instructions, manifests,
-   hashes, schemas, and small approved examples.
-7. Make generated tables and figures traceable to immutable result files and a
-   Git commit.
-8. Use deterministic seeds where possible and record software, CUDA, GPU,
-   precision, and hardware information for every benchmark.
-9. Prefer small, reviewable changes. Run the most relevant validation before
-   declaring a task complete.
-10. Commit implementation work in increments of no more than 500 changed lines
-    of source, test, and configuration code. Check the staged `git diff
-    --numstat` before every commit. Split larger features into coherent,
-    independently validated commits before continuing; do not split a file in
-    a state that cannot run or be reviewed. Documentation-only changes and
-    generated lockfiles are not “code” for this limit, but keep them focused and
-    commit them separately when practical.
-
-Before ending every session:
-
-1. Update `Codex.md` if durable context, decisions, invariants, file paths, or
-   commands changed.
-2. Complete the current `Handoff.md` entry with:
-   - files and behavior changed;
-   - decisions made and their evidence;
-   - validation actually run and its outcome;
-   - work still incomplete or blocked;
-   - the exact recommended next action and command, when known.
-3. Re-read both files for contradictions and remove stale status from
-   `Codex.md`.
-4. Inspect `git status` and summarize only verified outcomes.
-5. Record every commit SHA created during the session in `Handoff.md`, together
-   with its scope and validation. The commit that contains the final handoff
-   update cannot contain its own SHA; identify that one as the session-ending
-   `HEAD` commit and report its resolved SHA to the user.
-
-## Scientific guardrails
-
-- Split before augmentation. Detect exact and near duplicates before trusting
-  the supplied split. Use patient-level grouping if identifiers exist.
-- A “no tumor” image normally has no tumor bounding box. Do not invent a
-  `no_tumor` box class to satisfy an ambiguous class count.
-- Use one shared COCO-style evaluator for both models. Do not compare
-  framework-native metrics produced under different defaults.
-- Select confidence thresholds on validation data only and lock them before
-  test evaluation.
-- Report per-class and macro results in addition to aggregate metrics.
-- Report uncertainty and effect sizes, not p-values alone. Correct for multiple
-  comparisons where applicable.
-- Grad-CAM for object detectors must target a defined detection score and layer.
-  Pair qualitative panels with localization/attention sanity checks.
-- Benchmark both model-only and end-to-end inference with warm-up, device
-  synchronization, fixed precision, batch size, and identical hardware.
-- State that public-dataset results do not establish external or clinical
-  generalization.
+Stop and flag it to the user rather than silently picking one. This usually means either the user changed their mind since the last session, or a decision is about to get made twice in two different ways — both are worth a one-line check-in before proceeding.

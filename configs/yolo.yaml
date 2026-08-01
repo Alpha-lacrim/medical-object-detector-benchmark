@@ -1,0 +1,3 @@
+# Populated only after Batch 1 selects and justifies the YOLO generation.
+model: null
+ultralytics_version: null

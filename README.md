@@ -1,123 +1,63 @@
 # Medical Object Detector Benchmark
 
-**Comparative analysis of Faster R-CNN and YOLO for medical-image object
-detection**
-
-This repository is the reproducible workspace for the final project described in
-[`Final project 1405.v1.pdf`](./Final%20project%201405.v1.pdf). The study will
-compare a two-stage detector (Faster R-CNN) with a one-stage detector (YOLOv8 or
-newer) on one fixed medical-image dataset under controlled training conditions.
-
-The benchmark is designed to answer more than “which selected implementation
-has the highest mAP?” It will compare:
-
-- clean-set detection quality;
-- latency, throughput, memory, parameter count, FLOPs, training time, and model
-  size;
-- degradation under brightness, noise, blur, and JPEG corruptions;
-- detection-aware Grad-CAM explanations for successes and failures;
-- paired confidence intervals, significance tests, and effect sizes; and
-- suitability for research or deployment under different constraints.
+Controlled comparison of Faster R-CNN and one modern Ultralytics YOLO detector on a medical
+imaging detection dataset. The study will compare predictive performance, computational cost,
+robustness to corruption, Grad-CAM explainability, and statistical uncertainty. The authoritative
+requirements and batch checkpoints are in [`PROJECT_SPEC.md`](PROJECT_SPEC.md) and
+[`BATCHES.md`](BATCHES.md).
 
 ## Current status
 
-The reproducible Python foundation, strict two-track configuration schema,
-deterministic seeding, shared operating-point/COCO evaluators, dataset audit,
-and corruption engine are implemented and tested. No dataset has been
-downloaded and no model result has been produced yet. Any result directory,
-table, or figure must remain clearly marked as generated evidence rather than
-an expected outcome.
+Batch 0 infrastructure is complete and awaiting review. The repository tree, exact dependency
+baseline, reproducibility utility, run-environment capture, and unit tests are in place. No dataset
+has been selected or downloaded, no detector has been implemented or trained in this workflow,
+and no experimental result has been produced.
 
-## Quick start
+The dataset, class map, patient-level split policy, and YOLO generation are deliberately `TBD`.
+Ultralytics therefore remains a commented placeholder in `requirements.txt` until the Batch 1
+literature review records and justifies an exact version.
 
-Install the locked lightweight environment and run the offline checks:
+## Setup and verification
 
-```powershell
-uv sync --locked --group dev
-uv run --locked ruff check src tests
-uv run --locked pytest -q
-uv run --locked python -m meddet_benchmark smoke configs/smoke.yaml
-```
-
-The pinned CUDA 13.0 detector environment is installed separately:
+The project targets Python 3.13 on Windows. From PowerShell:
 
 ```powershell
-uv sync --locked --group dev --extra cu130
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pytest -q
 ```
 
-Do not enable the mutually exclusive `cpu` and `cu130` extras together. Dataset
-provenance and audit instructions are in [`data/README.md`](data/README.md).
+The existing `pyproject.toml`, `uv.lock`, and `src/meddet_benchmark/` predate this phased workflow
+and contain deferred decisions. Do not use them as the Batch 0 dependency or implementation
+baseline until they are reconciled in a later reviewed batch.
 
-## Study strategy
+## Reproducibility contract
 
-The project separates two questions that should not be conflated:
+Every experiment entry point must initialize RNGs and write its environment snapshot before CUDA
+initialization:
 
-- **Track A — assignment-aligned control:** both detectors share the strict
-  training contract requested by the brief.
-- **Track B — architecture-optimized:** each detector may use predeclared
-  model-appropriate settings under the same tuning opportunity.
+```python
+from pathlib import Path
 
-Both tracks use the same audited data, immutable test set, evaluator, metrics,
-and final hardware, and their results are reported separately. Scientifically
-necessary deviations from the brief are preregistered with evidence while the
-compliant Track A is preserved whenever feasible.
+from src.utils.seed import initialize_reproducibility
 
-## Recommended study
+initialize_reproducibility(seed=17, output_dir=Path("results/logs/example_run"))
+```
 
-The current recommendation is:
+The run directory receives `pip_freeze.txt` and `run_environment.json`, which record the seed,
+determinism settings, package versions, Python/platform details, and detected CUDA/GPU/driver
+information. See [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) for DataLoader worker setup
+and determinism limitations.
 
-- **Dataset:** [Medical Image DataSet: Brain Tumor Detection](https://www.kaggle.com/datasets/pkdarabi/medical-image-dataset-brain-tumor-detection),
-  subject to an annotation and leakage audit.
-- **Baseline:** torchvision Faster R-CNN with a ResNet-50-FPN-v2 backbone and
-  pretrained weights.
-- **Comparator:** Ultralytics YOLO26-small with pretrained weights, subject to
-  an explainability and reproducibility preflight. YOLO11-small is the
-  predeclared compatibility fallback if that preflight fails.
-- **Runs:** one smoke-test seed, followed by at least three final seeds if the
-  available compute budget permits.
-- **Evaluation:** one shared, model-independent evaluator and one frozen test
-  set for both detectors.
+## Session workflow
 
-These choices remain provisional until the dataset audit and decision log are
-frozen. Instructor clarification is preferred, but documented fallbacks prevent
-silence from stalling the project. In particular, the PDF mentions five classes
-while the likely source dataset describes four image categories.
+Before each batch, read:
 
-Any conclusion will apply to the exact Faster R-CNN and YOLO variants tested,
-not to every possible two-stage or one-stage detector.
+- [`AGENTS.md`](AGENTS.md) for the standing protocol;
+- [`CODEX.md`](CODEX.md) for current decisions and the file map; and
+- [`HANDOFF.md`](HANDOFF.md) for the newest session state.
 
-## Work plan
-
-1. Seek clarification on the source paper, class semantics, deadline, and
-   accepted YOLO version; freeze documented fallbacks for unanswered items.
-2. Download and audit the dataset; preserve source metadata, split manifests,
-   checksums, class mappings, duplicate clusters, and sample visualizations.
-3. Freeze the experiment contract before any final training.
-4. Implement shared data, augmentation, evaluation, profiling, corruption,
-   explainability, and statistics modules.
-5. Train and validate both detectors under Track A, then run equal-opportunity
-   tuning and final training under Track B.
-6. Run clean, efficiency, robustness, Grad-CAM, and paired statistical analyses.
-7. Generate all report tables and figures from machine-readable result files.
-8. Reproduce the final results from a clean environment and complete the
-   12-section report required by the brief.
-
-The complete protocol and acceptance criteria are in
-[`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md). Preregistered interpretations
-and deviations are in [`docs/DECISION_LOG.md`](docs/DECISION_LOG.md).
-
-## Repository memory
-
-Future sessions must read these files before making changes:
-
-- [`AGENTS.md`](AGENTS.md): stable operating rules and the mandatory
-  start/end-of-session procedure.
-- [`Codex.md`](Codex.md): durable project context, decisions, constraints, and
-  the important-file map.
-- [`Handoff.md`](Handoff.md): chronological changes, validation performed,
-  incomplete work, and the exact next actions.
-
-Large datasets, checkpoints, credentials, and generated experiment artifacts are
-not committed to Git. This repository is for research and education only; it
-does not establish clinical validity and must not be presented as a medical
-device.
+Raw/processed datasets, credentials, model weights, and checkpoints must not be committed. This
+repository is a research benchmark and does not establish clinical validity.

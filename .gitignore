@@ -25,9 +25,17 @@ kaggle.json
 .DS_Store
 Thumbs.db
 
-# Raw/intermediate data: commit only documentation and manifests
+# Raw/intermediate data: commit only documentation, placeholders, and manifests
 data/*
 !data/README.md
+!data/raw/
+data/raw/*
+!data/raw/.gitkeep
+!data/processed/
+data/processed/*
+!data/processed/.gitkeep
+!data/splits/
+!data/splits/**
 !data/manifests/
 !data/manifests/**
 
@@ -37,7 +45,9 @@ data/*
 *.ckpt
 *.onnx
 *.engine
-checkpoints/
+/checkpoints/
+/results/checkpoints/*
+!/results/checkpoints/.gitkeep
 runs/
 wandb/
 mlruns/
