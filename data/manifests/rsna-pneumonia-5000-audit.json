@@ -9,14 +9,14 @@
   "image_processing": {
     "conversion_errors": [],
     "invert_monochrome1": true,
-    "mode": "partial",
+    "mode": "converted",
     "normalization": "per_image_minmax",
     "output_bit_depth": 8,
-    "pngs_converted": 0,
-    "pngs_existing": 12,
+    "pngs_converted": 5000,
+    "pngs_existing": 0,
     "selected_images": 5000,
-    "source_dicoms_available": 0,
-    "source_dicoms_missing": 4988
+    "source_dicoms_available": 5000,
+    "source_dicoms_missing": 0
   },
   "input_counts": {
     "annotation_exam_ids": 26684,

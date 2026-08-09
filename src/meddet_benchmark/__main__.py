@@ -8,9 +8,9 @@ from collections.abc import Sequence
 from dataclasses import asdict
 from pathlib import Path
 
-from meddet_benchmark.config import assert_run_allowed, config_fingerprint, load_experiment
-from meddet_benchmark.data_audit import audit_yolo_dataset
-from meddet_benchmark.reproducibility import configure_reproducibility
+from .config import assert_run_allowed, config_fingerprint, load_experiment
+from .data_audit import audit_yolo_dataset
+from .reproducibility import configure_reproducibility
 
 
 def build_parser() -> argparse.ArgumentParser:

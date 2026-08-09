@@ -107,10 +107,12 @@ not establish that every box is clinically correct.
 
 For the review EDA, 12 authentic selected DICOMs—four from each study
 stratum—were decoded successfully at 1024×1024, with no conversion errors.
-Their opacity boxes visually fall on plausible pulmonary findings. The local
-checkout does not yet cache the other 4,988 selected DICOMs, so full pixel-file
-integrity must be rerun after the authorized Kaggle download and before model
-training. The metadata audit covers the entire labeled population.
+Their opacity boxes visually fall on plausible pulmonary findings. On
+2026-08-04, the complete official Kaggle aggregate archive passed a full CRC
+test and supplied all 26,684 training DICOMs. All 5,000 selected studies were
+present; fresh conversion produced exactly 5,000 manifest-matching PNGs with
+zero missing sources or conversion errors. The 12 regenerated review PNGs were
+byte-identical to their earlier outputs.
 
 The committed machine-readable audit is
 `data/manifests/rsna-pneumonia-5000-audit.json`. Its locally inspected source
@@ -121,6 +123,7 @@ digests are:
 | `stage_2_train_labels.csv` | 1,490,034 | `bb40b7e956e9922a6b275ed4a158197568cf9ab618017d53db6159b1b624bb65` |
 | `stage_2_detailed_class_info.csv` | 1,647,396 | `c004c12dea2042cc23e3b848f65e8cb2e725799afaa90f13ee81f854bcc9614d` |
 | official `mappings.json` | 17,587,143 | `803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27` |
+| `rsna-pneumonia-detection-challenge.zip` | 3,932,287,530 | `133acacf95aa68c4d219124b17937f31cec073052096b9f9b122180df9d9af18` |
 
 The mapping digest is pinned in config and must match before preparation writes
 outputs.
@@ -129,13 +132,15 @@ outputs.
 
 The authoritative acquisition route is the Kaggle competition downloader in
 `src/data/download.py`, after the user accepts the competition rules. This local
-environment had no Kaggle credentials, and the signed Google Storage route was
-unavailable from its region. To complete the requested metadata review, the two
-canonical-named Stage 2 CSVs and 12 review DICOMs were obtained from the public
-Hugging Face mirror `Baldezo313/rsna-pneumonia-dataset`; the patient mapping came
-directly from official RSNA storage. The exact local file hashes above make that
-interim input state auditable. A full authorized Kaggle acquisition is required
-before training.
+environment initially had no Kaggle credentials, and both the legacy API and a
+completed browser OAuth token exchange were denied with HTTP 403. To complete
+the earlier review, the two canonical-named Stage 2 CSVs and 12 review DICOMs
+were obtained from the public Hugging Face mirror
+`Baldezo313/rsna-pneumonia-dataset`; the patient mapping came directly from
+official RSNA storage. That interim state is now resolved: the user manually
+downloaded Kaggle's official aggregate archive, its CSV hashes reproduce the
+recorded values, its full DICOM inventory passed CRC/path/count checks, and all
+selected pixels were regenerated from that official source before training.
 
 Raw DICOMs, extracted PNGs, credentials, and generated COCO files are excluded
 from Git. They can be regenerated with the commands in `README.md`.

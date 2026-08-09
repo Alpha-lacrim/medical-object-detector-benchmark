@@ -1,0 +1,121 @@
+{
+  "benchmark": {
+    "epochs": 3,
+    "require_complete_dataset": true
+  },
+  "data": {
+    "dataset_config": "configs\\dataset.yaml",
+    "grayscale_to_rgb": "replicate",
+    "images_dir": "data\\processed\\rsna-pneumonia-5000\\images",
+    "test_annotations": "data\\processed\\rsna-pneumonia-5000\\annotations\\instances_test.json",
+    "train_annotations": "data\\processed\\rsna-pneumonia-5000\\annotations\\instances_train.json",
+    "train_augmentation": "none",
+    "val_annotations": "data\\processed\\rsna-pneumonia-5000\\annotations\\instances_val.json"
+  },
+  "evaluation": {
+    "coco_minimum_score": 0.0,
+    "match_iou_threshold": 0.5,
+    "max_detections": 100,
+    "score_threshold": 0.25
+  },
+  "experiment_id": "faster-rcnn-rsna-baseline-seed17",
+  "model": {
+    "architecture": "fasterrcnn_resnet50_fpn_v2",
+    "batch_norm_policy": "freeze_statistics",
+    "box_detections_per_image": 100,
+    "box_nms_threshold": 0.5,
+    "box_score_threshold": 0.0,
+    "image_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "image_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "max_size": 640,
+    "min_size": 640,
+    "trainable_backbone_layers": 3,
+    "weights": "DEFAULT"
+  },
+  "outputs": {
+    "benchmark_estimate_path": "benchmark_estimate.json",
+    "benchmark_run_name": "faster_rcnn_rsna_seed17_benchmark",
+    "benchmark_timing_checkpoints_dir": "results\\checkpoints\\faster_rcnn_rsna_seed17_benchmark_timing",
+    "best_checkpoint_path": "results\\checkpoints\\faster_rcnn_rsna_seed17_full\\best_model.pt",
+    "checkpoints_dir": "results\\checkpoints",
+    "compute_table_path": "results\\tables\\faster_rcnn_compute.csv",
+    "epoch_csv_path": "epochs.csv",
+    "epoch_jsonl_path": "epochs.jsonl",
+    "figures_dir": "results\\figures",
+    "last_checkpoint_path": "results\\checkpoints\\faster_rcnn_rsna_seed17_full\\last_state.pt",
+    "logs_dir": "results\\logs",
+    "resolved_config_path": "resolved_config.json",
+    "smoke_run_name": "faster_rcnn_rsna_seed17_smoke",
+    "summary_path": "summary.json",
+    "tables_dir": "results\\tables",
+    "train_run_name": "faster_rcnn_rsna_seed17_full",
+    "training_curves_path": "results\\figures\\faster_rcnn_training_curves.png",
+    "validation_table_path": "results\\tables\\faster_rcnn_baseline_validation.csv"
+  },
+  "profiling": {
+    "batch_size": 1,
+    "num_workers": 0,
+    "persistent_workers": false,
+    "profile_flops": true,
+    "timed_batches": 100,
+    "warmup_batches": 10
+  },
+  "project_root": "C:\\Users\\Pouyan\\PycharmProjects\\Uni\\Deep Learning\\DP_Final_Project",
+  "runtime": {
+    "allow_tf32": false,
+    "amp": true,
+    "amp_dtype": "float16",
+    "batch_size": 2,
+    "deterministic": true,
+    "deterministic_warn_only": true,
+    "device": "cuda",
+    "gradient_accumulation_steps": 2,
+    "num_workers": 6,
+    "persistent_workers": false,
+    "pin_memory": true,
+    "validation_persistent_workers": false
+  },
+  "schema_version": 1,
+  "seed": 17,
+  "smoke": {
+    "max_train_batches": 2,
+    "max_val_batches": 2,
+    "use_pretrained_weights": false
+  },
+  "source_path": "C:\\Users\\Pouyan\\PycharmProjects\\Uni\\Deep Learning\\DP_Final_Project\\configs\\faster_rcnn.yaml",
+  "training": {
+    "early_stopping": {
+      "metric": "val_map_50_95",
+      "min_delta": 0.001,
+      "min_epochs": 8,
+      "mode": "max",
+      "patience": 5
+    },
+    "log_every_batches": 100,
+    "max_epochs": 30,
+    "optimizer": {
+      "gradient_clip_norm": 10.0,
+      "learning_rate": 0.005,
+      "momentum": 0.9,
+      "name": "sgd",
+      "nesterov": false,
+      "weight_decay": 0.0005
+    },
+    "scheduler": {
+      "factor": 0.1,
+      "min_learning_rate": 1e-06,
+      "mode": "max",
+      "name": "reduce_on_plateau",
+      "patience": 2,
+      "threshold": 0.001
+    }
+  }
+}

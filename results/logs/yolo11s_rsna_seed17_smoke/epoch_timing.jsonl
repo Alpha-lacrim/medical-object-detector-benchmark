@@ -1,0 +1,1 @@
+{"amp_scale": 65536.0, "best_fitness": 0.0, "epoch": 1, "epoch_seconds": 3.077473999997892, "epochs_without_improvement": 0, "fitness": 0.0, "learning_rates": {"lr/pg0": 0.001, "lr/pg1": 0.001, "lr/pg2": 0.001}, "peak_gpu_memory_mib": 1109.6328125}

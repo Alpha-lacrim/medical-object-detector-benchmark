@@ -146,6 +146,20 @@ def test_seed_worker_and_generator_use_pytorch_seed_contract(
     assert generator_seeds == [2026]
 
 
+def test_initialization_can_defer_environment_writes_until_after_a_gate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(seed_utils, "_optional_torch", lambda: None)
+
+    report = seed_utils.initialize_reproducibility(
+        17, tmp_path, log_environment=False
+    )
+
+    assert report.seed == 17
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_nvidia_smi_parser_tolerates_quoted_and_unavailable_values(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

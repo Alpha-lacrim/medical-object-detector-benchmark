@@ -11,7 +11,7 @@ import numpy as np
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 
-from meddet_benchmark.evaluation import ImagePrediction, ImageTarget
+from .evaluation import ImagePrediction, ImageTarget
 
 
 def _safe_average(values: np.ndarray) -> float | None:

@@ -1,15 +1,15 @@
 """Shared infrastructure for the medical object-detector benchmark."""
 
-from meddet_benchmark.coco_evaluation import evaluate_coco
-from meddet_benchmark.config import ExperimentConfig, config_fingerprint, load_experiment
-from meddet_benchmark.corruptions import apply_corruption, load_corruptions
-from meddet_benchmark.data_audit import audit_yolo_dataset
-from meddet_benchmark.evaluation import (
+from .coco_evaluation import evaluate_coco
+from .config import ExperimentConfig, config_fingerprint, load_experiment
+from .corruptions import apply_corruption, load_corruptions
+from .data_audit import audit_yolo_dataset
+from .evaluation import (
     ImagePrediction,
     ImageTarget,
     evaluate_operating_point,
 )
-from meddet_benchmark.reproducibility import configure_reproducibility
+from .reproducibility import configure_reproducibility
 
 __all__ = [
     "ExperimentConfig",

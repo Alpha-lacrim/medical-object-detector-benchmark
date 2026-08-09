@@ -1,14 +1,16 @@
 # Core numerical and detector dependencies. Keep every active requirement exact.
-numpy==2.5.1
-torch==2.13.0
-torchvision==0.28.0
+numpy==2.4.4
+torch==2.6.0
+torchvision==0.21.0
 pycocotools==2.0.11
 albumentations==2.0.8
-scipy==1.18.0
+scipy==1.17.1
 pytest==9.1.1
 ruff==0.16.0
 Pillow==12.3.0
+matplotlib==3.11.1
 PyYAML==6.0.3
+pydantic==2.13.4
 pydicom==3.0.2
 kaggle==2.2.3
 ultralytics==8.4.110

@@ -50,6 +50,35 @@ patient care.
 - Images are standardized to a configured 640-pixel training size later in the
   pipeline. Small findings may lose detail, and resizing can affect detector
   families differently.
+- The Faster R-CNN baseline uses physical batch size 2 with gradient
+  accumulation to an effective optimizer batch of 4. Accumulation does not
+  enlarge per-forward BatchNorm samples, so pretrained BatchNorm running
+  statistics are frozen while affine parameters remain trainable.
+- Both primary detector arms use no stochastic training augmentation. For
+  YOLO11s, all Ultralytics extras are explicitly disabled: mosaic, mixup,
+  cutmix, copy-paste, HSV jitter, flips, geometric transforms, erasing,
+  auto-augmentation, and multi-scale training. This removes augmentation as a
+  known comparison confound, but it may understate YOLO's performance under its
+  conventional default recipe and does not make the architectures' losses or
+  optimization dynamics identical.
+- YOLO11s uses a one-epoch linear learning-rate warmup from zero to 0.001,
+  whereas Faster R-CNN starts at 0.005. No-warmup YOLO diagnostics reached a
+  non-finite classification loss at epoch 1, batch 29 under AMP; warming up to
+  0.005 avoided `NaN` but collapsed to all-zero losses and near-zero scores
+  after epoch 1. The lower target is a disclosed numerical-stability exception
+  and a remaining optimization asymmetry.
+- YOLO uses mandatory bfloat16 AMP for its model forward/backward and runs
+  task-aligned target assignment and detector losses in float32. With the
+  pinned library's default float16 path, one-class head scores underflowed to
+  zero before the loss and training collapsed; a positive-spread diagnostic
+  showed batching was not the root cause and was discarded. Faster R-CNN uses
+  float16 AMP, so exact autocast/loss-precision symmetry is not possible.
+  Ultralytics' float16-specific AMP equivalence probe is replaced by a CUDA
+  bfloat16 support/dtype gate plus smoke and per-batch numerical guards.
+- Faster R-CNN retains pretrained BatchNorm statistics, while YOLO11s updates
+  its native BatchNorm statistics. Forcing YOLO's statistics to remain frozen
+  still collapsed the one-class head under otherwise stable bfloat16 AMP, so
+  normalization behavior must remain an architecture-specific asymmetry.
 
 These constraints are fixed before model training. Any later adjustment will
 be added to the decision log and reported with the affected results.

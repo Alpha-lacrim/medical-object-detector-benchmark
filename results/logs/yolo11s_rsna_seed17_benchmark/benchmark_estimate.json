@@ -1,0 +1,205 @@
+{
+  "completed_epochs": 3,
+  "config_sha256": "5a9bd54c730a42db166d8e5c7075f863f914b5be7c66567f5bc91a70b50ef8d2",
+  "dataset_identity": {
+    "categories": {
+      "1": "Lung Opacity"
+    },
+    "category_id_to_yolo_label": {
+      "1": 0
+    },
+    "dataset_yaml": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/data/processed/rsna-pneumonia-5000/yolo/dataset.yaml",
+    "link_mode": "hardlink",
+    "smoke_dataset_yaml": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/data/processed/rsna-pneumonia-5000/yolo/dataset_smoke.yaml",
+    "test_split_accessed": false,
+    "train": {
+      "annotation_sha256": "f9263e36b44082a23de68c2d54d1867ffd34e691c9322fa07eb821e1df7ea335",
+      "annotations": 1267,
+      "image_manifest_sha256": "c94d43d1da9c029e4feabc6b96770892dee45869f45ed0b84e089d76a295ff80",
+      "images": 3500,
+      "label_manifest_sha256": "0bcdc79625f55d330581d5fe9d4e976717716b9fddd54527a7979e9fa5a8bd0f",
+      "negative_images": 2702
+    },
+    "validation": {
+      "annotation_sha256": "cf0592a36f96d2f7989695156ce3b9ef4701a36a4d70641bfe4292c91ae07f94",
+      "annotations": 277,
+      "image_manifest_sha256": "3f7c48d57d0632362202b731c2bf26a682393b8981bb706dcc999ed4e31a24e4",
+      "images": 750,
+      "label_manifest_sha256": "060e0737964269172841cdaae53a5b93d46a0eda998f617306ef954e93320833",
+      "negative_images": 581
+    }
+  },
+  "early_stopping_caveat": "The stopping epoch is unknown after the timing benchmark; the maximum-epoch estimate is the sign-off upper bound.",
+  "estimated_maximum_range_seconds": [
+    4056.464553199985,
+    4091.557366200068
+  ],
+  "estimated_maximum_seconds": 4074.0109597000264,
+  "estimated_minimum_seconds": 1090.9449991000074,
+  "execution_identity": {
+    "amp": true,
+    "amp_dtype": "bfloat16",
+    "augmentation_policy": "match_faster_rcnn_none",
+    "batch_norm_policy": "train_statistics",
+    "bfloat16_supported": true,
+    "cache": false,
+    "cuda_runtime_version": "12.4",
+    "cudnn_version": 90100,
+    "effective_batch_size": 4,
+    "gpu_compute_capability": [
+      8,
+      9
+    ],
+    "gpu_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "gpu_total_memory_bytes": 8585216000,
+    "input_size": 640,
+    "loss_dtype": "float32",
+    "nvidia_driver_version": "610.47",
+    "physical_batch_size": 4,
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python_version": "3.11.15",
+    "torch_version": "2.6.0+cu124",
+    "torchvision_version": "0.21.0+cu124",
+    "ultralytics_version": "8.4.110",
+    "workers": 2
+  },
+  "implementation_identity": {
+    "git_commit": "8dad0232ae9b60193e8f2da1003915140e30abd2",
+    "source_files": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "8290756a972522e83b0d2474fe9bc640084a3afef092083e3fc51b49d2709348"
+      },
+      {
+        "path": "requirements.txt",
+        "sha256": "9e68b75fb10eef8840d9e32821714779b0d0721cbf06abd17b33a24b1caade6e"
+      },
+      {
+        "path": "src/data/prepare.py",
+        "sha256": "6072580623cfa149156167021bd12644749e55f802e3adde86c486df099f65af"
+      },
+      {
+        "path": "src/meddet_benchmark/__init__.py",
+        "sha256": "c07a1b92f6945d6f2c00040ce2db551f1d98c005218bbcb2f4f675e30fa15594"
+      },
+      {
+        "path": "src/meddet_benchmark/__main__.py",
+        "sha256": "2b234e3e475c42c8b460d3171a55e6606a1a14d58ae98f62852b49c53bf1f522"
+      },
+      {
+        "path": "src/meddet_benchmark/coco_evaluation.py",
+        "sha256": "b131f923d5e452db2a7d98751ec0e0909b7f43aaded0a4f9287d1565f8162fb3"
+      },
+      {
+        "path": "src/meddet_benchmark/config.py",
+        "sha256": "fa6c20a7b006f373f181ee42b0cdd0a4b1e17f22bafbe2720f15c0f514268d15"
+      },
+      {
+        "path": "src/meddet_benchmark/corruptions.py",
+        "sha256": "eaa238f07029c32daf14cac529e7d37371feca34402c575b11a6ee5d3ca1bcf2"
+      },
+      {
+        "path": "src/meddet_benchmark/data_audit.py",
+        "sha256": "66e49f342f58eba5684d97659d08911fb6805b4fa7a48ed094c8b758d4b35908"
+      },
+      {
+        "path": "src/meddet_benchmark/evaluation.py",
+        "sha256": "be7bca53c50d9e1de45a686709fb303c9e389491196406978988dc2033eb933f"
+      },
+      {
+        "path": "src/meddet_benchmark/reproducibility.py",
+        "sha256": "65288824c9e5f8da6039f63def2a458d083b0bbc77c27ba8904a9f4cb0cbddd2"
+      },
+      {
+        "path": "src/models/__init__.py",
+        "sha256": "658ee3335ae4f2b791040467ef7f9190964707441b7ee7882e1474b65d17d9a3"
+      },
+      {
+        "path": "src/models/faster_rcnn_config.py",
+        "sha256": "7dc5f06d6250ca6f7fc139c36e219e1e4ff487f6af625200502509f1276f58ed"
+      },
+      {
+        "path": "src/models/faster_rcnn_data.py",
+        "sha256": "83594dcce67703f5bb768f02deb8cb91487595e4aec92254e47184213fc3517a"
+      },
+      {
+        "path": "src/models/faster_rcnn_evaluation.py",
+        "sha256": "702343d528e1a2a5160b48314a1ff3f42f4d6732be4de26f5b9a21d76d1358f4"
+      },
+      {
+        "path": "src/models/faster_rcnn_model.py",
+        "sha256": "9924fad69ca98cb019b6ba5ecab1e861cc9f23de2e1273516b55afd9352e0177"
+      },
+      {
+        "path": "src/models/faster_rcnn_reporting.py",
+        "sha256": "fb20f4c08f3335c89bba24b0c6f579224ee269537da41aea004e3b7e3d33db11"
+      },
+      {
+        "path": "src/models/faster_rcnn_training.py",
+        "sha256": "acd28860877448b8d2acdc8c03237a1b8442ce3f8c85e2acc0be982f7f497a5c"
+      },
+      {
+        "path": "src/models/train_faster_rcnn.py",
+        "sha256": "d19d8e0222b7494ee49f793a576cb24f0ce884a7e63e89b819b2f946598eb925"
+      },
+      {
+        "path": "src/models/train_yolo.py",
+        "sha256": "bd592935d05aabc1e67de8d19095f53703b92df8f58411579bf43549aab31109"
+      },
+      {
+        "path": "src/models/yolo_config.py",
+        "sha256": "e3dd32b0905421d24465a4b2f2bdf44fffab603d830adb40732feef2fc752b81"
+      },
+      {
+        "path": "src/models/yolo_data.py",
+        "sha256": "463c3054eeff2c2edc1511371168a584bd7559a58e7b797790a0ba7e94e1024e"
+      },
+      {
+        "path": "src/models/yolo_reporting.py",
+        "sha256": "170c48799a94174f5344aa025e45a2f3bd37b688f488a3c926d4dd1a1f0d82a3"
+      },
+      {
+        "path": "src/models/yolo_training.py",
+        "sha256": "02c70132ae479096f5e647dcabe1d682358f3e4045b9451d93be187edc120990"
+      },
+      {
+        "path": "src/utils/__init__.py",
+        "sha256": "79b434d3401de2fc39330b8e7395bc0be074e3c44cc4a126eeb3bcba16d9346d"
+      },
+      {
+        "path": "src/utils/seed.py",
+        "sha256": "f77faf601a861570b55993717485b2c8db93b985d65ae5695753f50b2b27dfea"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "2b4214d0e64a90546f8a0fac4a6c54964c341f16c81f8bd87469831ee07f5535"
+      }
+    ],
+    "source_manifest_sha256": "5f95216bc418fbf11f602cb737d131774ba607fb73fc29487976bb0ce08f2d42"
+  },
+  "maximum_epochs": 30,
+  "method": "first_epoch_plus_median_remaining_epochs",
+  "minimum_epochs": 8,
+  "observed_epoch_seconds": [
+    141.78764800000135,
+    134.98885879999943,
+    136.1989558000023
+  ],
+  "pretrained_weights": {
+    "path": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/checkpoints/pretrained/yolo11s.pt",
+    "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "size_bytes": 19313732,
+    "size_mib": 18.419010162353516
+  },
+  "restart_full_run_from_pretrained_weights": true,
+  "run_id": "yolo11s_rsna_seed17_benchmark",
+  "scenario_estimated_seconds": {
+    "30": 4074.0109597000264
+  },
+  "steady_state_range_seconds_per_epoch": [
+    134.98885879999943,
+    136.1989558000023
+  ],
+  "steady_state_seconds_per_epoch": 135.59390730000086,
+  "test_split_accessed": false
+}

@@ -355,9 +355,14 @@ def initialize_reproducibility(
     *,
     deterministic: bool = True,
     warn_only: bool = True,
+    log_environment: bool = True,
 ) -> SeedReport:
-    """Seed all supported RNGs and capture the run environment in ``output_dir``."""
+    """Seed RNGs and optionally capture the run environment in ``output_dir``."""
+
+    if not isinstance(log_environment, bool):
+        raise TypeError("log_environment must be boolean")
 
     report = seed_everything(seed, deterministic=deterministic, warn_only=warn_only)
-    log_run_environment(output_dir, report)
+    if log_environment:
+        log_run_environment(output_dir, report)
     return report

@@ -7,30 +7,35 @@ name = "meddet-benchmark"
 version = "0.1.0"
 description = "Reproducible Faster R-CNN and YOLO benchmark for medical images"
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.11,<3.12"
 dependencies = [
-  "numpy>=2.3,<3",
-  "Pillow>=12.3,<13",
+  "numpy==2.4.4",
+  "albumentations==2.0.8",
+  "scipy==1.17.1",
+  "Pillow==12.3.0",
+  "matplotlib==3.11.1",
   "pycocotools==2.0.11",
-  "pydantic>=2.13,<3",
-  "PyYAML>=6.0.3,<7",
+  "pydantic==2.13.4",
+  "PyYAML==6.0.3",
+  "pydicom==3.0.2",
+  "kaggle==2.2.3",
 ]
 
 [project.optional-dependencies]
 cpu = [
-  "torch==2.13.0",
-  "torchvision==0.28.0",
-  "ultralytics==8.4.108",
+  "torch==2.6.0",
+  "torchvision==0.21.0",
+  "ultralytics==8.4.110",
 ]
-cu130 = [
-  "torch==2.13.0",
-  "torchvision==0.28.0",
-  "ultralytics==8.4.108",
+cu124 = [
+  "torch==2.6.0",
+  "torchvision==0.21.0",
+  "ultralytics==8.4.110",
 ]
 
 [dependency-groups]
 dev = [
-  "pytest>=9.1,<10",
+  "pytest==9.1.1",
   "ruff==0.16.0",
 ]
 
@@ -38,18 +43,18 @@ dev = [
 conflicts = [
   [
     { extra = "cpu" },
-    { extra = "cu130" },
+    { extra = "cu124" },
   ],
 ]
 
 [tool.uv.sources]
 torch = [
   { index = "pytorch-cpu", extra = "cpu" },
-  { index = "pytorch-cu130", extra = "cu130" },
+  { index = "pytorch-cu124", extra = "cu124" },
 ]
 torchvision = [
   { index = "pytorch-cpu", extra = "cpu" },
-  { index = "pytorch-cu130", extra = "cu130" },
+  { index = "pytorch-cu124", extra = "cu124" },
 ]
 
 [[tool.uv.index]]
@@ -58,8 +63,8 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [[tool.uv.index]]
-name = "pytorch-cu130"
-url = "https://download.pytorch.org/whl/cu130"
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
 explicit = true
 
 [tool.hatch.build.targets.wheel]
@@ -71,7 +76,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]

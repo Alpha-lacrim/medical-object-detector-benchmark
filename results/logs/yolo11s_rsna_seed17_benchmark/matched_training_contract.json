@@ -1,0 +1,17 @@
+{
+  "amp": true,
+  "amp_dtype": "bfloat16",
+  "amp_validation": "cuda_bfloat16_support_plus_per_batch_numerical_guards",
+  "augmentation_policy": "match_faster_rcnn_none",
+  "batch_norm_policy": "train_statistics",
+  "dataset_augment": false,
+  "effective_batch_size": 4,
+  "loss_dtype": "float32",
+  "min_delta": 0.001,
+  "minimum_epochs": 8,
+  "nesterov": false,
+  "optimizer": "SGD",
+  "patience": 5,
+  "physical_batch_size": 4,
+  "test_split_accessed": false
+}

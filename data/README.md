@@ -67,8 +67,10 @@ audit output. The locally inspected mapping hash was:
 803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27  mappings.json
 ```
 
-The local environment had no Kaggle credentials and its signed Google Storage
-route was region-blocked. For the review-only EDA, a public mirror supplied the
-canonical-named label CSVs and a small set of DICOMs; their hashes and this
-provenance are disclosed in `docs/DATASHEET.md`. A full authorized Kaggle
-download remains the required source before detector training.
+The local API route and OAuth token exchange were region/account-policy blocked.
+For the review-only EDA, a public mirror initially supplied the canonical-named
+label CSVs and a small set of DICOMs. That interim state was superseded on
+2026-08-04 by a manual official Kaggle aggregate download. Its full CRC/path
+audit passed, both CSV hashes reproduce the committed audit, and all 5,000
+selected PNGs were regenerated from official DICOMs before detector training.
+See `docs/DATASHEET.md` for exact hashes and provenance.
