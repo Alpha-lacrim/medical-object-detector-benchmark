@@ -25,6 +25,34 @@
 
 ---
 
+## Session 11 — 2026-08-10 — Publish Batches 2–3
+
+**What I did:**
+- Reverified the confirmed publication scope, GitHub repository, current
+  `agent/implementation-foundation` branch, and accepted Batch 2/3 artifacts.
+- Staged 94 intended files while explicitly excluding the user-owned deletion
+  of `Final project 1405.v1.pdf`, all failed/aborted diagnostic run directories,
+  and every ignored model checkpoint. The staged whitespace and size audits
+  passed.
+- Reran repository validation immediately before publication: 172 tests passed,
+  one expected metadata-only test skipped, and Ruff passed.
+- Created commit `5dfee2d` (`Complete Faster R-CNN and YOLO baselines`) and
+  pushed the branch, including its two earlier unpublished commits, to
+  `origin/agent/implementation-foundation`.
+
+**What's still incomplete / next step:**
+- Batch 4 remains unstarted and requires the user's review/approval of the
+  Batch 3 results and documented asymmetries.
+
+**Needs the user's review before proceeding:**
+- Confirm Batch 3 acceptance before requesting Batch 4.
+
+**Files touched:**
+- `HANDOFF.md`
+- Git history/remote branch only; excluded local files remain untouched.
+
+---
+
 ## Session 10 — 2026-08-10 — Batch 3 YOLO11s baseline
 
 **What I did:**
