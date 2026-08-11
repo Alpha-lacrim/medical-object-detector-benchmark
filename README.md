@@ -1,284 +1,217 @@
 # Medical Object Detector Benchmark
 
-Controlled comparison of Faster R-CNN and YOLO11s on medical object detection,
-covering predictive performance, compute, common-corruption robustness,
-explainability, and statistical uncertainty. The authoritative requirements and
-review checkpoints are in `PROJECT_SPEC.md` and `BATCHES.md`.
+This repository is a controlled comparison of Faster R-CNN and YOLO11s on the
+RSNA Pneumonia Detection Challenge. It measures clean detection performance,
+compute, common-corruption robustness, Grad-CAM localization, and paired
+statistical uncertainty under one patient-safe data and evaluation protocol.
 
-## Current status
+The project is complete. The 12-section study is in
+[`report/report.md`](report/report.md), the consolidated scope statement is in
+[`docs/LIMITATIONS.md`](docs/LIMITATIONS.md), and the exact generated evidence
+is under [`results/`](results/). This is a retrospective benchmark, not a
+clinical device or diagnostic system.
 
-Batch 6 / Phase 7 is complete and paused for explainability review. Faster
-R-CNN and YOLO11s were each trained with seeds 17, 42, and 137 for the Phase 5
-headline comparison. Phases 6 and 7 then use the primary seed-17 checkpoints on
-the same fixed, stratified 300-image/111-box test subset for common-corruption
-robustness and Grad-CAM localization respectively.
+## Headline result
 
-Across seeds, Faster R-CNN achieved mAP@0.5:0.95 of 0.1023 ± 0.0036 versus
-0.0549 ± 0.0080 for YOLO11s, while YOLO11s measured 52.94 ± 10.65 FPS versus
-17.42 ± 5.69 FPS. The full accuracy/compute comparison, metric definitions,
-and framework-timing caveat are in `docs/QUANTITATIVE_COMPARISON.md`. Across the
-35 corrupted conditions, clean-relative mAP@0.5:0.95 retention averages 0.7638
-for Faster R-CNN and 0.7091 for YOLO11s. The sampling procedure, curves, and
-interpretation are in `docs/ROBUSTNESS.md`. Phase 7 mean Grad-CAM energy-in-box
-is 0.0869 for Faster R-CNN and 0.0975 for YOLO11s, versus box-area references
-of 0.0713 and 0.0718. Pointing-game accuracy is only 0.1091 and 0.1261. The
-paired maps, definitions, and cautious interpretation are in
-`docs/EXPLAINABILITY.md`. Batch 7 must not start until these explainability
-results are reviewed.
+Across seeds 17, 42, and 137, Faster R-CNN achieves mAP@0.5:0.95 of
+0.1023 ± 0.0036 and recall of 0.6381 ± 0.0526, compared with 0.0549 ± 0.0080
+and 0.1356 ± 0.0094 for YOLO11s. YOLO11s is more selective and much cheaper:
+precision is 0.3730 ± 0.0395 versus 0.1626 ± 0.0439, throughput is
+52.94 ± 10.65 FPS versus 17.42 ± 5.69, and it has 9.43 M parameters versus
+43.26 M. The paired clean analysis retains Holm-corrected evidence for Faster
+R-CNN's recall and AP advantages and YOLO11s' precision advantage.
 
-Review artifacts:
+On the seed-17 300-image common-corruption sample, mean mAP@0.5:0.95 retention
+is 0.7638 for Faster R-CNN and 0.7091 for YOLO11s. Both detectors have weak
+Grad-CAM localization: mean energy-in-box is 0.0869 and 0.0975, with pointing
+accuracy 0.1091 and 0.1261. These values do not establish clinical validity.
 
-- `results/figures/gradcam_{good_predictions,bad_predictions,failure_cases}.png`
-  — paired stride-16 heatmaps with target and candidate boxes;
-- `results/tables/gradcam_localization_{summary,per_target}.csv` — aggregate
-  and all 222 detector-target explainability records;
-- `results/tables/gradcam_qualitative_cases.csv` — the objective case rubric
-  and selected evidence;
-- `results/logs/phase7_explainability/summary.json` — method, source,
-  checkpoint, sample, table, and figure provenance;
-- `docs/EXPLAINABILITY.md` — explicit where-is-it-looking answer and caveats;
-- `results/figures/robustness_map_50_95_{raw,relative}.png` — per-corruption
-  five-severity curves for both detectors;
-- `results/tables/robustness_results.csv` — all clean/corrupted raw and
-  relative metrics;
-- `results/tables/robustness_family_mean_curves.csv` — mean curves within the
-  four corruption families;
-- `results/logs/phase6_robustness/summary.json` — sample, config, checkpoint,
-  bundle, table, and figure provenance;
-- `docs/ROBUSTNESS.md` — exact sampling/corruption protocol, results, and
-  interpretation;
-- `results/tables/detector_comparison.csv` — side-by-side three-seed mean ± SD;
-- `results/tables/detector_comparison_per_seed.csv` — all six run-level rows;
-- `results/logs/phase5_evaluation/summary.json` — hashes, settings, and full
-  evaluation provenance;
-- `docs/QUANTITATIVE_COMPARISON.md` — metric definitions, caveats, results,
-  interpretation, and exact commands;
-- `docs/DATASET_CHOICE.md` — all three candidate inspections and the decision;
-- `docs/DATASHEET.md` — composition, patient grouping, preprocessing, terms,
-  exclusions, provenance, and biases;
-- `data/manifests/rsna-pneumonia-5000-audit.json` — machine-readable full
-  metadata audit and selected/split counts;
-- `results/figures/rsna_class_distribution.png` — split distribution;
-- `results/figures/rsna_annotation_samples.png` — 12 real radiographs with
-  labels and opacity boxes; and
-- `data/splits/rsna-pneumonia-5000/` — committed patient-safe manifests.
+## Reproduction assumptions
 
-## Setup and verification
+Run every command below from the repository root in Windows PowerShell. A clean
+reproduction requires:
 
-The measured detector runs target Python 3.11 on Windows. For a clean local
-environment from PowerShell:
+- Python 3.11 and [`uv`](https://docs.astral.sh/uv/);
+- an NVIDIA GPU/driver compatible with the pinned CUDA 12.4 Torch wheels;
+- sufficient disk space for the RSNA archive, 5,000 processed images,
+  checkpoints, prediction bundles, and logs;
+- a Kaggle account that has joined the RSNA competition and accepted its rules;
+  and
+- either `KAGGLE_USERNAME`/`KAGGLE_KEY` or a valid
+  `$HOME\.kaggle\kaggle.json`. Credentials must never be committed.
+
+Raw images, processed images, downloaded pretrained weights, and trained
+checkpoints are intentionally Git-ignored. The commands below regenerate them.
+The measured workstation used an RTX 4060 Laptop GPU with 8 GB VRAM, 16 GB RAM,
+and an i7-13650HX; timing will vary on other machines.
+
+## 1. Create the pinned environment
 
 ```powershell
 uv venv --python 3.11 .venv
 uv pip install --python .venv --default-index https://download.pytorch.org/whl/cu124 torch==2.6.0+cu124 torchvision==0.21.0+cu124
 uv pip install --python .venv -r requirements.txt
 uv pip install --python .venv --no-deps --editable .
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m ruff check src tests
-```
 
-`requirements.txt` is the authoritative phased-workflow environment. For the
-GPU run, the CUDA 12.4 Torch wheels carry their runtime and use the installed
-NVIDIA driver; the machine-wide CUDA toolkit is not used. This workstation's
-Batch 2 run reuses the verified Anaconda environment without replacing its
-working CUDA Torch build:
-
-```powershell
-$benchmarkPython = 'C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe'
-uv pip install --python $benchmarkPython -r requirements.txt
-uv pip install --python $benchmarkPython --no-deps --editable .
+$benchmarkPython = (Resolve-Path .\.venv\Scripts\python.exe).Path
 & $benchmarkPython -m pip check
+& $benchmarkPython -m pytest -q
+& $benchmarkPython -m ruff check src tests
 ```
 
-The tested operating-point and COCO metric modules under
-`src/meddet_benchmark/` are now reused by the Faster R-CNN validation adapter;
-the legacy experiment schema in that package and `configs/smoke.yaml` remain
-non-authoritative.
+`requirements.txt` is the authoritative exact dependency list. Each experiment
+also writes `pip_freeze.txt` and `run_environment.json` before CUDA
+initialization. Deterministic algorithms use warning mode because the pinned
+Torchvision CUDA ROI Align backward used by Grad-CAM is not bitwise
+deterministic.
 
-## Reproduce dataset preparation and EDA
+## 2. Acquire and prepare the dataset
 
-First join the Kaggle competition and accept its rules. Configure either both
-`KAGGLE_USERNAME`/`KAGGLE_KEY` or `~/.kaggle/kaggle.json`; credentials must never
-be placed in this repository.
+The downloader requests the three official Stage 2 files declared in
+`configs/dataset.yaml`. The official mapping is fetched directly from RSNA.
 
 ```powershell
-python -m src.data.download --check-credentials
-python -m src.data.download --config configs/dataset.yaml
+& $benchmarkPython -m src.data.download --check-credentials
+& $benchmarkPython -m src.data.download --config configs/dataset.yaml
 Expand-Archive -LiteralPath data/raw/rsna-pneumonia/stage_2_train_images.zip -DestinationPath data/raw/rsna-pneumonia -Force
 Invoke-WebRequest -Uri "https://s3.amazonaws.com/east1.public.rsna.org/AI/2018/pneumonia-challenge-dataset-mappings_2018.json" -OutFile data/raw/rsna-pneumonia/mappings.json
-python -m src.data.prepare --config configs/dataset.yaml --convert-images
-python -m src.data.visualize --config configs/dataset.yaml
+& $benchmarkPython -m src.data.prepare --config configs/dataset.yaml --convert-images
+& $benchmarkPython -m src.data.visualize --config configs/dataset.yaml
 ```
 
-The measured local run used Kaggle's manually downloaded aggregate archive
-after the API route was denied. The equivalent extraction command, restricted
-to training pixels, is:
+Preparation verifies the pinned mapping digest, audits all 26,684 labeled
+studies, reconstructs true NIH patient groups, writes the exact 5,000-study
+70/15/15 split, converts the selected DICOMs, and creates canonical COCO JSON.
+Visualization regenerates:
+
+- `results/figures/rsna_class_distribution.png` (report Figure 1);
+- `results/figures/rsna_annotation_samples.png` (report Figure 2); and
+- `results/figures/rsna_eda_summary.json`.
+
+The dataset table in report Section 3 is a rounded rendering of
+`data/manifests/rsna-pneumonia-5000-audit.json` and the generated/committed split
+manifests from the preparation command. To regenerate metadata, splits, and
+COCO annotations without decoding pixels, use:
+
+```powershell
+& $benchmarkPython -m src.data.prepare --config configs/dataset.yaml --metadata-only
+```
+
+If Kaggle supplies the aggregate competition archive instead of the individual
+image ZIP, extract only its training-image member before preparation:
 
 ```powershell
 tar -xf data/raw/rsna-pneumonia/rsna-pneumonia-detection-challenge.zip -C data/raw/rsna-pneumonia stage_2_train_images
 ```
 
-For a metadata-only audit, COCO conversion, and split regeneration before DICOM
-pixels are available:
+## 3. Train and finalize the primary Faster R-CNN run
+
+`configs/faster_rcnn.yaml` fixes the seed-17 ResNet-50/FPN model, data,
+optimizer, float16 AMP, 640-pixel transform, physical batch 2, accumulation 2,
+and output identity. Run the required readiness, smoke, and three-epoch timing
+gate before the full run:
 
 ```powershell
-python -m src.data.prepare --config configs/dataset.yaml --metadata-only
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode preflight
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode smoke
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode benchmark
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json
 ```
 
-Preparation verifies the configured official-mapping SHA-256, audits all label
-rows, derives true NIH patient groups, rebuilds the fixed subset/manifests, and
-writes per-split canonical COCO JSON under the ignored processed-data tree.
-Image conversion streams selected DICOMs to PNG without holding the dataset in
-RAM. See `data/README.md` for acquisition behavior and the disclosed local
-mirror used only to make the review EDA when Kaggle access was unavailable.
+The train command regenerates the report Section 5 evidence:
 
-The metadata audit is complete for all 26,684 labeled studies. This checkout
-contains and has verified the full official training archive, while conversion
-materializes only the configured patient-safe 5,000-study subset.
+- `results/tables/faster_rcnn_baseline_validation.csv` (report Table 2);
+- `results/tables/faster_rcnn_compute.csv` (report Table 2); and
+- `results/figures/faster_rcnn_training_curves.png` (report Figure 3).
 
-## Faster R-CNN baseline and timing gate
-
-The chosen configuration is fully declared in `configs/faster_rcnn.yaml`:
-`fasterrcnn_resnet50_fpn_v2`, COCO transfer weights, 640-pixel short/long edge
-for these square radiographs, physical batch size 2, accumulation 2 (effective
-optimizer batch 4), float16 AMP, and frozen BatchNorm running statistics.
-Accumulation is an optimizer-batch mechanism; it does not combine BatchNorm
-statistics between forwards. No stochastic training augmentation is applied.
-
-Check readiness without importing Torch or accessing the test split:
+If optimization completed but final profiling or plotting was interrupted,
+regenerate the derived artifacts from the saved best checkpoint without
+retraining:
 
 ```powershell
-python -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode preflight
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode finalize
 ```
 
-After all 5,000 PNGs exist and the pinned CUDA environment is installed, run a
-two-batch GPU/AMP smoke check, then the required three complete train+validation
-benchmark epochs:
+## 4. Train and finalize the primary YOLO11s run
+
+The prepare mode makes an audited YOLO view of the canonical data. The remaining
+commands verify the pinned pretrained weight, run the GPU smoke/timing gate, and
+train seed 17:
 
 ```powershell
-python -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode smoke
-python -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode benchmark
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode prepare
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode preflight
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode smoke
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode benchmark
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode train
 ```
 
-Benchmark mode writes per-epoch loss, precision, recall, F1, AP50, AP50:95,
-timing, learning rate, and peak allocated GPU memory under
-`results/logs/faster_rcnn_rsna_seed17_benchmark/`. Its
-`benchmark_estimate.json` projects the configured 30-epoch upper bound using
-epoch one plus the median steady-state duration from epochs two and three. Each
-timed epoch includes equivalent best/last checkpoint writes. The approval
-artifact is bound to the YAML, train/validation annotation and image digests,
-implementation sources, Torch/torchvision versions, GPU identity, AMP, batch,
-and resolution. Stop and obtain the user's approval of that estimate before
-continuing.
+The train command regenerates the report Section 6 evidence:
 
-Only after approval, run the one-seed full baseline from the original COCO
-weights (the benchmark weights are deliberately not resumed):
+- `results/tables/yolo_baseline_validation.csv` (report Table 3);
+- `results/tables/yolo_compute.csv` (report Table 3); and
+- `results/figures/yolo_training_curves.png` (report Figure 4).
+
+If reporting was interrupted after training, use:
 
 ```powershell
-python -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode finalize
 ```
 
-Full mode early-stops on validation AP50:95, keeps the test split untouched,
-writes best/last checkpoints, and generates the validation/compute tables and
-training-curves figure. See `docs/FASTER_RCNN_BASELINE.md` for metric and
-profiling definitions.
+## 5. Train the additional seeds and run the unified test evaluator
 
-If training finishes but final profiling or plotting fails, the run remains in
-`trained_pending_finalization` state and can be finalized without retraining:
+The additional configs change only seed and artifact identity. First derive
+seed-specific timing approvals from the accepted seed-17 Faster R-CNN gate,
+then train seeds 42 and 137 for both detectors:
 
 ```powershell
-python -m src.models.train_faster_rcnn --config configs/faster_rcnn.yaml --mode finalize
-```
-
-## YOLO11s baseline
-
-Batch 3 uses the same seed-17 train/validation split, 640-pixel resolution,
-effective batch 4, SGD settings, bfloat16 AMP, native YOLO BatchNorm updates, and
-validation-mAP early-stopping policy as the Faster R-CNN arm. All additional
-Ultralytics stochastic augmentations are explicitly disabled in
-`configs/yolo.yaml`; see `docs/YOLO_BASELINE.md` for the controlled-comparison
-rationale and the documented constant-LR framework difference.
-
-Materialize the hardlinked YOLO view of the canonical COCO data and verify the
-pinned runtime, official pretrained checkpoint, CUDA device, and manifests:
-
-```powershell
-python -m src.models.train_yolo --config configs/yolo.yaml --mode prepare
-python -m src.models.train_yolo --config configs/yolo.yaml --mode preflight
-```
-
-Run the bounded smoke test, three-epoch full-data timing benchmark, and then the
-one-seed run. Full training restarts from the original `yolo11s.pt`; it never
-continues from timing-benchmark weights.
-
-```powershell
-python -m src.models.train_yolo --config configs/yolo.yaml --mode smoke
-python -m src.models.train_yolo --config configs/yolo.yaml --mode benchmark
-python -m src.models.train_yolo --config configs/yolo.yaml --mode train
-```
-
-The train command also evaluates the best checkpoint with the shared COCO and
-operating-point evaluator, profiles synchronized batch-1 model-plus-NMS
-latency/FPS and model-forward GFLOPs, writes tables and training curves, and
-keeps the test split untouched. If training finishes but finalization is
-interrupted, regenerate those derived artifacts without retraining:
-
-```powershell
-python -m src.models.train_yolo --config configs/yolo.yaml --mode finalize
-```
-
-## Unified three-seed comparison
-
-Phase 5 fixes seeds 17, 42, and 137 in `configs/evaluation.yaml`. The additional
-configs preserve the accepted detector hyperparameters and change only seed and
-artifact identity. Materialize auditable seed-only timing approvals from the
-accepted seed-17 measurements, then run the four additional trainings:
-
-```powershell
-$benchmarkPython = 'C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe'
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode seed-gates
+
 & $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed42.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed42_benchmark/benchmark_estimate.json
 & $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed137.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed137_benchmark/benchmark_estimate.json
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed42.yaml --mode train
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed137.yaml --mode train
-```
 
-Only after all validation-selected checkpoints exist, open the held-out test
-split through the one shared evaluator:
-
-```powershell
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode preflight
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode evaluate
 ```
 
-`src/evaluate.py` converts both frameworks' outputs to the same canonical
-records and applies one pycocotools/operating-point metric path. It writes all
-six per-seed rows, sample mean ± standard deviation tables, and hashed raw
-prediction bundles for the Phase 8 paired statistics. Framework-native mAP is
-retained only for validation checkpoint selection. Definitions and caveats are
-in `docs/QUANTITATIVE_COMPARISON.md`.
+Only the final two commands open the held-out test annotation. Both detector
+adapters feed one pycocotools/operating-point evaluator; framework-native mAP is
+not used in the comparison. The evaluate command regenerates:
 
-Phase 6 draws the fixed stratified sample, validates the frozen Phase 5
-identities, and runs/resumes every corruption condition with:
+- `results/tables/detector_comparison.csv` (report Tables 4a and 4b);
+- `results/tables/detector_comparison_mean_std.csv`;
+- `results/tables/detector_comparison_per_seed.csv`; and
+- `results/logs/phase5_evaluation/summary.json` plus the six frozen prediction
+  bundles used by statistics.
+
+## 6. Run the common-corruption benchmark
+
+The run command deterministically draws or verifies the 300-image sample,
+filters the clean seed-17 prediction evidence, and infers every one of the 70
+corrupted detector conditions. Completed condition bundles are resumable.
 
 ```powershell
 & $benchmarkPython -m src.robustness.run_robustness --config configs/corruptions.yaml --mode preflight
 & $benchmarkPython -m src.robustness.run_robustness --config configs/corruptions.yaml --mode run
 ```
 
-Each condition is saved immediately as a hashed prediction bundle, so an
-interrupted grid resumes without recomputing completed inference. The clean
-reference is filtered from the frozen Phase 5 seed-17 predictions; all 70
-corrupted detector conditions are inferred afresh. Exact severity values and
-outputs are defined in `configs/corruptions.yaml` and explained in
-`docs/ROBUSTNESS.md`.
+This regenerates the report Section 8 evidence:
 
-## Explainability analysis
+- `results/tables/robustness_results.csv` (report Table 5 and all raw/relative
+  metrics);
+- `results/tables/robustness_curves.csv`;
+- `results/tables/robustness_family_mean_curves.csv`;
+- `results/figures/robustness_map_50_95_raw.png` (report Figure 5);
+- `results/figures/robustness_map_50_95_relative.png` (report Figure 6); and
+- `results/logs/phase6_robustness/summary.json` plus 72 prediction bundles.
 
-Phase 7 verifies the completed Phase 6 identities and reuses its exact
-300-image sample. It first validates the paired population and objective
-qualitative case rubric, runs focused unit tests and a bounded two-image GPU
-smoke, then generates the full quantitative and qualitative artifacts:
+## 7. Run the Grad-CAM analysis
+
+Preflight binds the analysis to the completed robustness sample and primary
+checkpoint hashes. The smoke pass is bounded to two positive images per model;
+the full run covers all 111 boxes and the predeclared qualitative cases.
 
 ```powershell
 & $benchmarkPython -m src.explainability.run_explainability --config configs/explainability.yaml --mode preflight
@@ -287,51 +220,99 @@ smoke, then generates the full quantitative and qualitative artifacts:
 & $benchmarkPython -m src.explainability.run_explainability --config configs/explainability.yaml --mode run
 ```
 
-Both models hook a 40 by 40 stride-16 backbone tensor, target the ground-truth-
-associated retained foreground score, and use the same energy-in-box and
-pointing-game implementation. False negatives use clearly labeled low-threshold
-proxy targets rather than inventing a score for an absent detection. Exact
-target semantics, zero-map handling, objective case selection, and results are
-in `docs/EXPLAINABILITY.md`.
+This regenerates the report Section 9 evidence:
 
-## Statistical analysis
+- `results/tables/gradcam_localization_summary.csv` (report Table 6);
+- `results/tables/gradcam_localization_per_target.csv`;
+- `results/tables/gradcam_qualitative_cases.csv`;
+- `results/figures/gradcam_good_predictions.png` (report Figure 7);
+- `results/figures/gradcam_bad_predictions.png` (report Figure 8);
+- `results/figures/gradcam_failure_cases.png` (report Figure 9); and
+- `results/logs/phase7_explainability/summary.json`.
 
-Phase 8 reads the six frozen Phase 5 bundles and all 72 Phase 6 bundles; it does
-not rerun model inference. Preflight verifies upstream completion, configuration
-and annotation hashes, and the complete paired grid. Run the exact aggregate-
-metric bootstrap and permutation analysis with:
+## 8. Run the paired statistical analysis
+
+This CPU phase reads the six frozen clean bundles and all 72 robustness
+bundles. It does not rerun model inference.
 
 ```powershell
 & $benchmarkPython -m src.stats.run_statistics --config configs/statistics.yaml --mode preflight
 & $benchmarkPython -m src.stats.run_statistics --config configs/statistics.yaml --mode run
 ```
 
-The config fixes 2,000 paired bootstrap draws, 5,000 paired image-label
-permutations, 95% percentile intervals, paired jackknife Cohen's d, and Holm
-correction. The clean pass resamples the three paired seeds and 750 matched
-images. The 35-condition corruption pass reports both raw metrics and clean-
-relative retention on the matched 300-image sample. AP is recomputed as a
-dataset-level score in every draw rather than averaged from a per-image
-surrogate. See `docs/STATISTICAL_ANALYSIS.md` for the protocol, complete clean
-table, corruption summary, McNemar non-applicability decision, and limitations.
+This regenerates:
 
-## Reproducibility contract
+- `results/tables/statistical_clean_comparison.csv` (report Table 7);
+- `results/tables/statistical_robustness_comparison.csv` (the report Section 10
+  corruption results); and
+- `results/logs/phase8_statistics/summary.json`.
 
-Every future experiment entry point must initialize RNGs and write its
-environment snapshot before CUDA initialization:
+The configuration fixes 2,000 paired bootstrap draws, 5,000 paired
+permutations, 95% pointwise percentile intervals, paired jackknife Cohen's d,
+and Holm correction. Aggregate AP is reconstructed at every draw rather than
+approximated as a mean of per-image AP.
 
-```python
-from pathlib import Path
+## Report artifact-to-command index
 
-from src.utils.seed import initialize_reproducibility
+Report tables are rounded Markdown views of generated machine-readable
+artifacts; the report assembly step does not recompute values.
 
-initialize_reproducibility(seed=17, output_dir=Path("results/logs/example_run"))
+| Report item | Generated source | Regenerating command |
+|---|---|---|
+| Table 1; Figures 1–2 | audit/split manifests; `rsna_*.png` | `src.data.prepare`, then `src.data.visualize` in §2 |
+| Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
+| Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
+| Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
+| Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
+| Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
+| Table 7 and corruption inference | `statistical_*.csv` | statistics `--mode run` in §8 |
+
+## Definition of Done audit
+
+Every item in `PROJECT_SPEC.md` §9 is satisfied:
+
+- [x] **Two detectors under matched conditions.** Faster R-CNN and YOLO11s are
+  trained on identical patient-safe splits, resolution, seed grid, evaluation
+  protocol, and no-augmentation policy. Necessary precision, normalization,
+  learning-rate, batch, and scheduler asymmetries are documented in the model
+  reports and `docs/LIMITATIONS.md`.
+- [x] **Standardized predictive and compute benchmark.** `src/evaluate.py`
+  routes both adapters through the same operating-point matcher and
+  pycocotools evaluator; comparison artifacts include accuracy, latency/FPS,
+  parameters, GFLOPs, memory, and training time.
+- [x] **Multi-family, multi-severity robustness.** Seven corruption types in
+  four families are evaluated at five severities, with raw and clean-relative
+  curves and complete result tables.
+- [x] **Qualitative and quantitative Grad-CAM.** Three paired figure categories
+  cover good predictions, false positives, and false-negative proxies; all 111
+  boxes receive energy-in-box and pointing-game analysis, with one explicit
+  zero-energy map.
+- [x] **Statistical inference.** The frozen clean and corruption predictions
+  have paired bootstrap CIs, paired permutation p-values, paired jackknife
+  effect sizes, and Holm correction. Non-estimable rows and the reason McNemar
+  is inapplicable are explicit.
+- [x] **Scenario-grounded discussion.** Report Section 11 weighs measured
+  accuracy, robustness, interpretability, and compute for high-sensitivity
+  retrospective screening, constrained point-of-care assistance, and
+  autonomous use.
+- [x] **Honest consolidated limitations.** `docs/LIMITATIONS.md` covers the
+  single dataset, three-seed headline scope, primary-seed 300-image/111-box
+  robustness and explainability scope, augmentation choice, detector
+  asymmetries, and RTX 4060 8 GB / 16 GB RAM constraints.
+- [x] **Clean-checkout reproduction commands.** Sections 1–8 above provide the
+  exact ordered commands and the artifact index maps every report table and
+  figure to its generating command.
+
+## Repository verification
+
+After a reproduction or code change, run:
+
+```powershell
+& $benchmarkPython -m pytest -q
+& $benchmarkPython -m ruff check src tests
+git diff --check
 ```
 
-The run directory receives `pip_freeze.txt` and `run_environment.json`, including
-seed, determinism, package, platform, CUDA, GPU, and driver information. See
-`docs/REPRODUCIBILITY.md` for worker setup and determinism limitations.
-
-Raw/processed images, credentials, weights, and checkpoints are excluded from
-Git. This repository is a research benchmark and does not establish clinical
-validity.
+See `docs/REPRODUCIBILITY.md` for the seed/environment contract and the
+phase-specific documents under `docs/` for complete metric, corruption,
+Grad-CAM, and inference definitions.

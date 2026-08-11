@@ -25,6 +25,57 @@
 
 ---
 
+## Session 18 — 2026-08-11 — Batch 8 report assembly and wrap-up
+
+**What I did:**
+- Assembled `report/report.md` from the frozen Phase 1–8 evidence without
+  running training, inference, robustness, Grad-CAM, or statistical
+  recomputation. The report follows all 12 required sections and links every
+  displayed result table and figure to its committed source artifact.
+- Grounded the Discussion in the measured operating-point, AP, corruption,
+  Grad-CAM, latency, model-size, parameter, and FLOP trade-offs. It recommends
+  Faster R-CNN for accuracy-/recall-sensitive GPU-backed screening, treats
+  YOLO11s as a conditional option for compute-constrained human-in-the-loop
+  assistance, rejects autonomous use for both, and includes the prospective
+  clinical/regulatory validation scope boundary.
+- Reorganized all accumulated entries in `docs/LIMITATIONS.md` into one
+  coherent statement covering dataset/annotation scope, hardware and sampling,
+  detector asymmetries, metric/compute measurement, robustness,
+  explainability, statistics, deployment, and regulation.
+- Rewrote `README.md` as an ordered clean-checkout reproduction guide. It maps
+  Tables 1–7 and Figures 1–9 to the exact generating command and source
+  artifact, and records an explicit eight-item Definition of Done audit with
+  every item satisfied.
+- Independently checked the completion evidence: exactly 12 report sections;
+  two detector arms and 14 comparison metrics; four corruption families,
+  seven types, five severities each, and 72 result rows; 111 Grad-CAM targets
+  per detector and three qualitative figure categories; seven clean and 497
+  robustness statistical rows with the expected four non-estimable rows.
+  All local Markdown links resolve, all 17 citation keys exist in
+  `report/references.bib`, and all nine documented CLI entry points accept the
+  stated arguments. Final validation is 198 tests passed, one expected
+  metadata-only skip, Ruff clean, and `git diff --check` clean.
+- Updated `CODEX.md` to mark Batch 8, Phases 9–12, all eight Definition of Done
+  requirements, and the overall project complete. The existing user-owned PDF
+  deletion and excluded failed/aborted/rejected diagnostic directories were
+  preserved untouched.
+
+**What's still incomplete / next step:**
+- No required experiment, report, documentation, or validation work remains.
+  The Batch 8 changes are local and have not been committed or pushed; review
+  and publication are the only optional next steps.
+
+**Needs the user's review before proceeding:**
+- Review the scenario-specific recommendations and scope-of-claims language in
+  `report/report.md`, the consolidated `docs/LIMITATIONS.md`, and the
+  clean-checkout command sequence/Definition of Done audit in `README.md`.
+
+**Files touched:**
+- `report/report.md`, `docs/LIMITATIONS.md`, `README.md`, `CODEX.md`, and
+  `HANDOFF.md`.
+
+---
+
 ## Session 17 — 2026-08-11 — Main-branch promotion
 
 **What I did:**

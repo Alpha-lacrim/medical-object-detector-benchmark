@@ -19,6 +19,24 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 Newest entries appear first; superseded decisions remain recorded.
 
+- **Project and final report complete:** Batch 8 assembled the frozen Phase
+  1--8 evidence into `report/report.md` using the authoritative 12-section
+  structure without rerunning inference, statistics, or artifact generation.
+  The Discussion assigns Faster R-CNN to accuracy-/recall-sensitive,
+  GPU-backed screening and YOLO11s conditionally to compute-constrained,
+  human-in-the-loop assistance, while rejecting autonomous clinical use for
+  both. It weighs the measured accuracy, robustness, Grad-CAM, and compute
+  evidence and includes the required prospective/regulatory scope boundary.
+  `docs/LIMITATIONS.md` is consolidated by validity domain, and `README.md`
+  now provides a clean-checkout command sequence plus an explicit mapping from
+  every report table/figure to its generating artifact and command. All eight
+  Definition of Done items pass an evidence audit: 12 report sections, two
+  detectors, 14 comparison metrics, four corruption families/seven types at
+  five severities, three Grad-CAM figure categories over 111 targets per
+  detector, and the complete seven-clean/497-robustness statistical tables.
+  Validation is 198 tests passed, one expected metadata-only skip, Ruff clean,
+  all local report/doc links and 17 BibTeX citation keys valid, all documented
+  CLI parsers valid, and `git diff --check` clean (Session 18 / Batch 8).
 - **Agent branch promoted to `main`:** GitHub's existing default branch `main`
   was a strict ancestor of `agent/implementation-foundation`, with zero commits
   unique to `main` and 14 commits unique to the agent branch. It was safely
@@ -392,7 +410,7 @@ Newest entries appear first; superseded decisions remain recorded.
 |---|---|---|
 | `PROJECT_SPEC.md`, `BATCHES.md`, `AGENTS.md` | Static requirements, sequence, and session protocol | authoritative |
 | `CODEX.md`, `HANDOFF.md` | Living decisions and append-only session state | living |
-| `README.md`, `data/README.md` | Exact setup, official aggregate preparation, training, unified evaluation, robustness, explainability, and statistics commands | documented through Batch 7 |
+| `README.md`, `data/README.md` | Exact clean-checkout setup, complete experiment sequence, report-artifact command index, and Definition of Done audit | complete through Batch 8 |
 | `.python-version`, `requirements.txt`, `pyproject.toml`, `uv.lock` | Exact Python 3.11 / CUDA 12.4 phased-workflow dependency pins | aligned for adopted runtime |
 | `configs/dataset.yaml` | RSNA paths, class/stratum map, conversion, subset, split, and EDA settings | done |
 | `configs/yolo.yaml` | Strict YOLO11s data/model/runtime/training/evaluation/profile/artifact config | implemented; smoke, timing gate, full run, and profiling complete |
@@ -410,42 +428,41 @@ Newest entries appear first; superseded decisions remain recorded.
 | `docs/DATASET_CHOICE.md` | Three-candidate inspection and selection rationale | done |
 | `docs/DATASHEET.md` | Collection, composition, patient split, audit, processing, terms, bias | done |
 | `docs/LITERATURE_REVIEW.md` | YOLO11, detector paradigms, Grad-CAM/XAI, related work, robustness | done |
-| `report/references.bib` | Phase 1 primary/official BibTeX sources | done |
-| `docs/LIMITATIONS.md` | Dataset and predeclared compute limitations | living |
+| `report/report.md`, `report/references.bib` | Final 12-section report grounded in frozen artifacts and its primary/official BibTeX sources | complete |
+| `docs/LIMITATIONS.md` | Consolidated dataset, compute, comparison, robustness, explainability, statistics, deployment, and regulatory limitations | complete |
 | `docs/FASTER_RCNN_BASELINE.md` | Batch 2 architecture, optimization, metrics, timing, and profiling protocol | complete with final measurements |
 | `docs/YOLO_BASELINE.md` | Batch 3 architecture, parity/stability decisions, timing, metrics, and profiling | complete with final measurements |
-| `docs/QUANTITATIVE_COMPARISON.md` | Unified metric definitions, compute caveats, commands, and three-seed held-out results | complete; pending user review |
-| `docs/ROBUSTNESS.md`, `docs/LIMITATIONS.md` | Phase 6 sampling, corruption grid, raw/relative results, interpretation, and scope | complete; pending user review |
+| `docs/QUANTITATIVE_COMPARISON.md` | Unified metric definitions, compute caveats, commands, and three-seed held-out results | complete; incorporated in report |
+| `docs/ROBUSTNESS.md`, `docs/LIMITATIONS.md` | Phase 6 sampling, corruption grid, raw/relative results, interpretation, and scope | complete; incorporated in report |
 | `src/utils/seed.py`, `docs/REPRODUCIBILITY.md` | Reproducibility utilities and contract | done |
 | `tests/test_{download,prepare,visualize}.py` | Batch 1 acquisition/conversion/split/EDA tests | done |
 | `src/models/faster_rcnn_*.py`, `src/models/train_faster_rcnn.py` | Strict data adapter, model, AMP trainer, unified validation, reporting, profiling, and gates | implemented; smoke, benchmark, full run, and profiling complete |
 | `src/models/yolo_*.py`, `src/models/train_yolo.py` | Strict YOLO data view, mixed-precision trainer, unified validation, reporting, profiling, and gates | implemented; smoke, benchmark, full run, and profiling complete |
 | `src/evaluate.py`, `tests/test_evaluate.py` | One canonical adapter-to-pycocotools evaluation path and three-seed aggregation | implemented and verified on six checkpoints |
-| `results/tables/detector_comparison*.csv`, `results/logs/phase5_evaluation/` | Per-seed metrics, mean ± sample SD, full provenance, and six prediction bundles | complete; pending user review |
+| `results/tables/detector_comparison*.csv`, `results/logs/phase5_evaluation/` | Per-seed metrics, mean ± sample SD, full provenance, and six prediction bundles | complete; incorporated in report |
 | `src/robustness/`, `src/meddet_benchmark/corruptions.py`, `tests/test_{corruptions,robustness}.py` | Deterministic Albumentations grid, sample audit, resumable dual-detector inference, aggregation, plots, and tests | implemented; full grid complete |
-| `results/tables/robustness*.csv`, `results/figures/robustness*.png`, `results/logs/phase6_robustness/` | Raw/relative/family curves, 72 bundles, hashes, and full Phase 6 summary | complete; pending user review |
+| `results/tables/robustness*.csv`, `results/figures/robustness*.png`, `results/logs/phase6_robustness/` | Raw/relative/family curves, 72 bundles, hashes, and full Phase 6 summary | complete; incorporated in report |
 | `configs/explainability.yaml`, `src/explainability/`, `tests/test_{gradcam,pointing_game,explainability}.py` | Strict paired Grad-CAM targets, stride-matched hooks, localization metrics, case selection, figures, and regression tests | complete |
-| `results/tables/gradcam*.csv`, `results/figures/gradcam*.png`, `results/logs/phase7_explainability/` | All 222 per-target records, six aggregate rows, 18 paired qualitative records, three figures, hashes, and full Phase 7 summary | complete; pending user review |
-| `docs/EXPLAINABILITY.md` | Exact target/layer/metric protocol, results, explicit interpretation, reproduction, and caveats | complete; pending user review |
+| `results/tables/gradcam*.csv`, `results/figures/gradcam*.png`, `results/logs/phase7_explainability/` | All 222 per-target records, six aggregate rows, 18 paired qualitative records, three figures, hashes, and full Phase 7 summary | complete; incorporated in report |
+| `docs/EXPLAINABILITY.md` | Exact target/layer/metric protocol, results, explicit interpretation, reproduction, and caveats | complete; incorporated in report |
 | `configs/statistics.yaml`, `src/stats/`, `tests/test_statistics.py` | Strict paired bootstrap/permutation/effect-size engine, exact AP reconstruction, Holm correction, runner, and regression tests | complete |
-| `results/tables/statistical_*.csv`, `results/logs/phase8_statistics/` | Seven clean and 497 clean/corruption raw/retention comparisons with CIs, p-values, effects, hashes, and full summary | complete; pending user review |
-| `docs/STATISTICAL_ANALYSIS.md` | Exact estimands, inference protocol, complete clean results, corruption conclusions, McNemar decision, reproduction, and caveats | complete; pending user review |
-| `tests/test_faster_rcnn_*.py`, `tests/test_train_faster_rcnn.py`, `tests/test_yolo_*.py` | Batch 2/3 config/data/model/control/reporting/gate regressions | included in 190 passing tests; one expected metadata-only skip |
+| `results/tables/statistical_*.csv`, `results/logs/phase8_statistics/` | Seven clean and 497 clean/corruption raw/retention comparisons with CIs, p-values, effects, hashes, and full summary | complete; incorporated in report |
+| `docs/STATISTICAL_ANALYSIS.md` | Exact estimands, inference protocol, complete clean results, corruption conclusions, McNemar decision, reproduction, and caveats | complete; incorporated in report |
+| `tests/` | Data, model, evaluator, corruption, explainability, statistics, reproducibility, and reporting regressions | 198 passing; one expected metadata-only skip |
 | `pyproject.toml`, `uv.lock`, older tests/configs | Pre-workflow legacy implementation | non-authoritative; reconcile before use |
 | `src/meddet_benchmark/` | Shared tested operating-point and COCO evaluator used by both detector baselines | reconciled for package-relative imports; other legacy surfaces non-authoritative |
 
 ## Current phase
 
-**Batch 7 / Phase 8 is complete.** The seven clean three-seed comparisons and
-497 primary-seed clean/corruption raw/retention comparisons report pointwise
-95% confidence intervals, paired permutation p-values, Holm-adjusted p-values,
-and paired jackknife Cohen's d wherever estimable. Four darkest-condition
-conditional IoU/Dice rows are explicitly not estimable. All point estimates,
-correction families, hashes, row counts, and finite result fields pass an
-independent audit; repository validation is 198 passed with one expected skip.
-Stop here for the user's statistical-results review before Batch 8.
+**Batch 8 / Phases 9--12 and the project are complete.** The final report has
+all 12 required sections and is grounded only in the existing Phase 1--8
+artifacts. The consolidated limitations, clean-checkout reproduction guide,
+artifact-to-command index, deployment/regulatory scope note, and explicit
+eight-item Definition of Done audit are complete. Repository validation is 198
+tests passed with one expected skip, Ruff clean, Markdown links/citations and
+documented CLI parsers valid, and `git diff --check` clean.
 
-## Known open issues / risks
+## Residual limitations / reproducibility risks
 
 - Kaggle API/OAuth remains denied on the current route, but it no longer blocks
   Batch 2 because the complete official aggregate archive was acquired manually
