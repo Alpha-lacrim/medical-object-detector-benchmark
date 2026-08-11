@@ -19,6 +19,15 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 Newest entries appear first; superseded decisions remain recorded.
 
+- **Batches 4–7 publication checkpoint:** the accepted evaluation,
+  multi-seed, robustness, explainability, and statistical-analysis scope was
+  committed as `99ee5e3` (`Complete evaluation robustness explainability and
+  statistics`) and pushed over HTTPS to
+  `origin/agent/implementation-foundation`. Publication followed a 192-file
+  index audit, 198 passing tests with one expected metadata-only skip, clean
+  Ruff and staged-diff checks, and explicit exclusion of the local PDF deletion
+  plus failed/aborted/rejected and orchestration diagnostic runs. Batch 8 remains
+  blocked on the user's Batch 7 review (Session 16).
 - **Paired statistical analysis complete:** Phase 8 reconstructs the exact
   seven unified predictive metrics from all six frozen Phase 5 bundles and all
   72 Phase 6 bundles without model inference. The clean analysis uses 2,000

@@ -25,6 +25,36 @@
 
 ---
 
+## Session 16 — 2026-08-11 — Batches 4–7 publication
+
+**What I did:**
+- Revalidated the GitHub account and the repository's HTTPS remote, then audited
+  the accepted Batch 4–7 publication scope before staging. The user-owned
+  deletion of `Final project 1405.v1.pdf`, all failed/aborted/rejected diagnostic
+  run directories, and `results/logs/phase5_orchestration/` remained unstaged.
+- Removed seven trailing blank lines caught by the staged diff check, then
+  validated the exact publication source with the documented benchmark
+  interpreter: 198 tests passed, one metadata-only test skipped as expected,
+  Ruff passed, and `git diff --cached --check` passed.
+- Committed the 192-file accepted scope as `99ee5e3` (`Complete evaluation
+  robustness explainability and statistics`) and pushed it over HTTPS to
+  `origin/agent/implementation-foundation`.
+
+**What's still incomplete / next step:**
+- Publication of the completed Batch 4–7 work is complete. Stop here; Batch 8
+  report assembly remains gated on the user's Batch 7 statistical-results
+  review.
+
+**Needs the user's review before proceeding:**
+- Review the Batch 7 statistical tables and interpretation listed in Session 15.
+  Do not begin Batch 8 until the user explicitly approves proceeding.
+
+**Files touched:**
+- Publication bookkeeping: `CODEX.md` and `HANDOFF.md`.
+- Published scope: the 192 files recorded by commit `99ee5e3`.
+
+---
+
 ## Session 15 — 2026-08-11 — Batch 7 statistical analysis
 
 **What I did:**
