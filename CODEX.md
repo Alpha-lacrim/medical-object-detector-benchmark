@@ -19,6 +19,13 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 Newest entries appear first; superseded decisions remain recorded.
 
+- **Agent branch promoted to `main`:** GitHub's existing default branch `main`
+  was a strict ancestor of `agent/implementation-foundation`, with zero commits
+  unique to `main` and 14 commits unique to the agent branch. It was safely
+  fast-forwarded from `317dca0` to the accepted Batch 4–7 publication tip
+  `f0e0f00`; no force-push, history rewrite, merge commit, or source-tree change
+  was used. The Session 17 bookkeeping record is synchronized to both refs.
+  Batch 8 remains gated on the user's statistical-results review (Session 17).
 - **Batches 4–7 publication checkpoint:** the accepted evaluation,
   multi-seed, robustness, explainability, and statistical-analysis scope was
   committed as `99ee5e3` (`Complete evaluation robustness explainability and

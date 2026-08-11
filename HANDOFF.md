@@ -25,6 +25,30 @@
 
 ---
 
+## Session 17 — 2026-08-11 — Main-branch promotion
+
+**What I did:**
+- Confirmed that GitHub's default branch is `main` and fetched the current
+  `main` and `agent/implementation-foundation` refs over authenticated HTTPS.
+- Verified that `main` at `317dca0` was an ancestor of the agent branch and was
+  exactly 14 commits behind with no divergent commits.
+- Fast-forwarded `main` to the accepted Batch 4–7 publication tip `f0e0f00`
+  without a force-push, history rewrite, merge commit, or working-tree change.
+  This bookkeeping record is synchronized to both branch refs so `main` and
+  `agent/implementation-foundation` remain aligned.
+
+**What's still incomplete / next step:**
+- Branch promotion is complete. Stop before Batch 8; report assembly remains
+  gated on the user's Batch 7 statistical-results review.
+
+**Needs the user's review before proceeding:**
+- Review the Batch 7 statistical outputs and conclusions recorded in Session 15.
+
+**Files touched:**
+- Publication bookkeeping only: `CODEX.md` and `HANDOFF.md`.
+
+---
+
 ## Session 16 — 2026-08-11 — Batches 4–7 publication
 
 **What I did:**
