@@ -1,21 +1,123 @@
-schema_version: 1
-seed: 2026
-levels:
-  - {name: darker-0.8, kind: brightness, value: 0.8}
-  - {name: darker-0.6, kind: brightness, value: 0.6}
-  - {name: brighter-1.2, kind: brightness, value: 1.2}
-  - {name: brighter-1.4, kind: brightness, value: 1.4}
-  - {name: gaussian-noise-0.02, kind: gaussian_noise, value: 0.02}
-  - {name: gaussian-noise-0.05, kind: gaussian_noise, value: 0.05}
-  - {name: gaussian-noise-0.10, kind: gaussian_noise, value: 0.10}
-  - {name: salt-pepper-0.01, kind: salt_pepper, value: 0.01}
-  - {name: salt-pepper-0.03, kind: salt_pepper, value: 0.03}
-  - {name: salt-pepper-0.05, kind: salt_pepper, value: 0.05}
-  - {name: gaussian-blur-1, kind: gaussian_blur, value: 1}
-  - {name: gaussian-blur-2, kind: gaussian_blur, value: 2}
-  - {name: gaussian-blur-3, kind: gaussian_blur, value: 3}
-  - {name: motion-blur-5, kind: motion_blur, value: 5}
-  - {name: motion-blur-9, kind: motion_blur, value: 9}
-  - {name: motion-blur-15, kind: motion_blur, value: 15}
-  - {name: jpeg-50, kind: jpeg, value: 50}
-  - {name: jpeg-20, kind: jpeg, value: 20}
+schema_version: 2
+experiment_id: rsna-phase6-primary-seed-robustness
+seed: 17
+
+phase5_evaluation_config: configs/evaluation.yaml
+phase5_summary: results/logs/phase5_evaluation/summary.json
+
+sampling:
+  source_manifest: data/splits/rsna-pneumonia-5000/test.csv
+  output_manifest: data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv
+  size: 300
+  split_column: split
+  split_value: test
+  id_column: processed_file
+  stratum_column: study_stratum
+  allocation: proportional_largest_remainder
+
+evaluation:
+  score_threshold: 0.25
+  match_iou_threshold: 0.5
+  coco_minimum_score: 0.001
+  nms_iou_threshold: 0.5
+  max_detections: 100
+
+runtime:
+  device: cuda
+  inference_batch_size: 1
+  num_workers: 0
+  pin_memory: true
+
+detectors:
+  - detector: faster_rcnn
+    training_config: configs/faster_rcnn.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt
+    clean_prediction_bundle: results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz
+  - detector: yolo11s
+    training_config: configs/yolo.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt
+    clean_prediction_bundle: results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz
+
+# Five ordered, ImageNet-C-style stress-test severities are used for every
+# corruption. Values are config data, never hidden in implementation code.
+corruptions:
+  - name: darker
+    family: lighting
+    kind: brightness
+    unit: multiplier
+    levels:
+      - {severity: 1, value: 0.90}
+      - {severity: 2, value: 0.80}
+      - {severity: 3, value: 0.70}
+      - {severity: 4, value: 0.60}
+      - {severity: 5, value: 0.50}
+  - name: brighter
+    family: lighting
+    kind: brightness
+    unit: multiplier
+    levels:
+      - {severity: 1, value: 1.10}
+      - {severity: 2, value: 1.20}
+      - {severity: 3, value: 1.30}
+      - {severity: 4, value: 1.40}
+      - {severity: 5, value: 1.50}
+  - name: gaussian_noise
+    family: noise
+    kind: gaussian_noise
+    unit: fraction_of_uint8_range_std
+    levels:
+      - {severity: 1, value: 0.010}
+      - {severity: 2, value: 0.020}
+      - {severity: 3, value: 0.035}
+      - {severity: 4, value: 0.050}
+      - {severity: 5, value: 0.075}
+  - name: salt_and_pepper
+    family: noise
+    kind: salt_pepper
+    unit: affected_pixel_fraction
+    levels:
+      - {severity: 1, value: 0.0025}
+      - {severity: 2, value: 0.0050}
+      - {severity: 3, value: 0.0100}
+      - {severity: 4, value: 0.0200}
+      - {severity: 5, value: 0.0400}
+  - name: gaussian_blur
+    family: blur
+    kind: gaussian_blur
+    unit: sigma_pixels
+    levels:
+      - {severity: 1, value: 0.5}
+      - {severity: 2, value: 1.0}
+      - {severity: 3, value: 1.5}
+      - {severity: 4, value: 2.0}
+      - {severity: 5, value: 3.0}
+  - name: motion_blur
+    family: blur
+    kind: motion_blur
+    unit: kernel_pixels
+    levels:
+      - {severity: 1, value: 3}
+      - {severity: 2, value: 5}
+      - {severity: 3, value: 9}
+      - {severity: 4, value: 13}
+      - {severity: 5, value: 17}
+  - name: jpeg
+    family: compression
+    kind: jpeg
+    unit: quality_percent
+    levels:
+      - {severity: 1, value: 90}
+      - {severity: 2, value: 70}
+      - {severity: 3, value: 50}
+      - {severity: 4, value: 35}
+      - {severity: 5, value: 20}
+
+outputs:
+  log_dir: results/logs/phase6_robustness
+  prediction_bundles_dir: results/logs/phase6_robustness/predictions
+  summary_json: results/logs/phase6_robustness/summary.json
+  detailed_table: results/tables/robustness_results.csv
+  curve_table: results/tables/robustness_curves.csv
+  family_mean_table: results/tables/robustness_family_mean_curves.csv
+  raw_curve_figure: results/figures/robustness_map_50_95_raw.png
+  relative_curve_figure: results/figures/robustness_map_50_95_relative.png

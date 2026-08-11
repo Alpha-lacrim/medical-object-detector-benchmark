@@ -1,0 +1,32 @@
+schema_version: 1
+experiment_id: rsna-phase8-paired-statistical-analysis
+seed: 20260811
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  phase6_config: configs/corruptions.yaml
+  phase6_summary: results/logs/phase6_robustness/summary.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+
+analysis:
+  detector_a: faster_rcnn
+  detector_b: yolo11s
+  metrics: [precision, recall, f1, iou, dice, map_50, map_50_95]
+  confidence_level: 0.95
+  bootstrap_resamples: 2000
+  permutation_resamples: 5000
+  bootstrap_method: paired_hierarchical_percentile
+  permutation_method: paired_image_label_swap
+  effect_size: paired_jackknife_cohens_d
+  multiple_comparison_correction: holm
+  clean_correction_scope: across_7_predictive_metrics
+  corruption_correction_scope: per_metric_and_estimand_across_35_corrupted_conditions
+  include_raw_corruption_comparisons: true
+  include_clean_relative_retention_comparisons: true
+
+outputs:
+  log_dir: results/logs/phase8_statistics
+  summary_json: results/logs/phase8_statistics/summary.json
+  clean_table: results/tables/statistical_clean_comparison.csv
+  robustness_table: results/tables/statistical_robustness_comparison.csv

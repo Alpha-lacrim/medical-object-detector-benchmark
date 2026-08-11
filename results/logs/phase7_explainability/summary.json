@@ -1,0 +1,292 @@
+{
+  "aggregate": [
+    {
+      "detector": "faster_rcnn",
+      "image_count": 68,
+      "image_macro_mean_energy_in_box": 0.08958975737554671,
+      "image_macro_pointing_game_accuracy": 0.11029411764705882,
+      "mean_box_area_fraction": 0.07128912318836558,
+      "mean_energy_in_box": 0.08689488001202586,
+      "mean_energy_lift_over_area": 0.015605756823660272,
+      "median_energy_in_box": 0.03736769252568773,
+      "operating_status": "all",
+      "pointing_game_accuracy": 0.10909090909090909,
+      "target_count": 111,
+      "valid_cam_count": 110,
+      "zero_energy_cam_count": 1
+    },
+    {
+      "detector": "faster_rcnn",
+      "image_count": 54,
+      "image_macro_mean_energy_in_box": 0.10720824431300478,
+      "image_macro_pointing_game_accuracy": 0.1388888888888889,
+      "mean_box_area_fraction": 0.08621117943211605,
+      "mean_energy_in_box": 0.112224617517692,
+      "mean_energy_lift_over_area": 0.02601343808557593,
+      "median_energy_in_box": 0.054886519768977314,
+      "operating_status": "true_positive",
+      "pointing_game_accuracy": 0.14473684210526316,
+      "target_count": 77,
+      "valid_cam_count": 76,
+      "zero_energy_cam_count": 1
+    },
+    {
+      "detector": "faster_rcnn",
+      "image_count": 30,
+      "image_macro_mean_energy_in_box": 0.032862554901547845,
+      "image_macro_pointing_game_accuracy": 0.03333333333333333,
+      "mean_box_area_fraction": 0.037933938643511605,
+      "mean_energy_in_box": 0.030275466764066273,
+      "mean_energy_lift_over_area": -0.007658471879445326,
+      "median_energy_in_box": 0.007437961692209493,
+      "operating_status": "false_negative",
+      "pointing_game_accuracy": 0.029411764705882353,
+      "target_count": 34,
+      "valid_cam_count": 34,
+      "zero_energy_cam_count": 0
+    },
+    {
+      "detector": "yolo11s",
+      "image_count": 68,
+      "image_macro_mean_energy_in_box": 0.09398041368694321,
+      "image_macro_pointing_game_accuracy": 0.1323529411764706,
+      "mean_box_area_fraction": 0.07178361566217097,
+      "mean_energy_in_box": 0.09749095611722909,
+      "mean_energy_lift_over_area": 0.025707340455058122,
+      "median_energy_in_box": 0.07196775751942583,
+      "operating_status": "all",
+      "pointing_game_accuracy": 0.12612612612612611,
+      "target_count": 111,
+      "valid_cam_count": 111,
+      "zero_energy_cam_count": 0
+    },
+    {
+      "detector": "yolo11s",
+      "image_count": 17,
+      "image_macro_mean_energy_in_box": 0.14139599536676364,
+      "image_macro_pointing_game_accuracy": 0.14705882352941177,
+      "mean_box_area_fraction": 0.10572026905260588,
+      "mean_energy_in_box": 0.1447804626220079,
+      "mean_energy_lift_over_area": 0.03906019356940202,
+      "median_energy_in_box": 0.15224470054985703,
+      "operating_status": "true_positive",
+      "pointing_game_accuracy": 0.15789473684210525,
+      "target_count": 19,
+      "valid_cam_count": 19,
+      "zero_energy_cam_count": 0
+    },
+    {
+      "detector": "yolo11s",
+      "image_count": 61,
+      "image_macro_mean_energy_in_box": 0.08151061880500438,
+      "image_macro_pointing_game_accuracy": 0.11475409836065574,
+      "mean_box_area_fraction": 0.06477495898371158,
+      "mean_energy_in_box": 0.08772464499124215,
+      "mean_energy_lift_over_area": 0.02294968600753057,
+      "median_energy_in_box": 0.0599761343054262,
+      "operating_status": "false_negative",
+      "pointing_game_accuracy": 0.11956521739130435,
+      "target_count": 92,
+      "valid_cam_count": 92,
+      "zero_energy_cam_count": 0
+    }
+  ],
+  "artifacts": {
+    "aggregate_table": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/tables/gradcam_localization_summary.csv",
+    "aggregate_table_sha256": "dbdf9869737a71d64d3d0e540ca1def2a31b5bbe2992d51e7288ae11119f9c7b",
+    "bad_figure": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/figures/gradcam_bad_predictions.png",
+    "bad_figure_sha256": "2083bc0ed0fc014a50f9530708b0f2439528aecd25f661ebf97b3ff60ce1dd04",
+    "failure_figure": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/figures/gradcam_failure_cases.png",
+    "failure_figure_sha256": "bc31dbf44c930611045529adff641d5fec82e8cf7e0fa45683c7d903384eb1d6",
+    "good_figure": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/figures/gradcam_good_predictions.png",
+    "good_figure_sha256": "d33cf4fe3944770aecfe1cb8bfde3d64943e2aead3477125725fd23d27c82373",
+    "qualitative_manifest": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/tables/gradcam_qualitative_cases.csv",
+    "qualitative_manifest_sha256": "8420f7959c060049f2eb9fa325d74333e1cbee6588a081a64fcd70d22c132a33",
+    "target_table": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/tables/gradcam_localization_per_target.csv",
+    "target_table_sha256": "ae457ba9a95f481786028d93015d5f70638ab4a6acb3aaa7265562169375650a"
+  },
+  "checkpoints": {
+    "faster_rcnn": "9ec35c5d761f8e4bf7a43f7999f388ac1ffc0d533f62746409db280706dffab4",
+    "yolo11s": "65909164e82c1ef53c0d38e0d898d37bbbec5f46cb9f5cd029e76ba486c0371c"
+  },
+  "config_path": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/configs/explainability.yaml",
+  "config_sha256": "ffdbd1bc856ff5c75e0287c91e2bbc892352c6d80ec8b2bba6d5e13a76a05679",
+  "experiment_id": "rsna-phase7-primary-seed-gradcam",
+  "method": {
+    "align_corners": false,
+    "candidate_score_floor": 0.0,
+    "epsilon": 1e-12,
+    "interpolation_mode": "bilinear",
+    "max_candidates": 100,
+    "method": "grad_cam",
+    "nms_iou_threshold": 0.5,
+    "target_score": "post_activation_foreground_probability",
+    "target_selection": "highest_iou_then_score_low_threshold_retained_candidate",
+    "yolo_max_nms_candidates": 30000,
+    "yolo_nms_time_limit_seconds": 1.0,
+    "zero_energy_epsilon": 1e-12,
+    "zero_energy_policy": "exclude_and_report"
+  },
+  "metric": {
+    "box_rasterization": "pixel_center",
+    "population": "every_ground_truth_box_in_phase6_sample",
+    "primary": "energy_in_box",
+    "random_baseline": "rasterized_box_area_fraction",
+    "secondary": "pointing_game",
+    "unit": "ground_truth_box"
+  },
+  "paired_descriptive_comparison": {
+    "both_pointing_hit_count": 1,
+    "equal_energy_count": 0,
+    "faster_higher_energy_count": 34,
+    "faster_only_pointing_hit_count": 11,
+    "mean_energy_difference_faster_minus_yolo": -0.00909869739983784,
+    "median_energy_difference_faster_minus_yolo": -0.024015302737743424,
+    "neither_pointing_hit_count": 86,
+    "paired_valid_target_count": 110,
+    "yolo_higher_energy_count": 76,
+    "yolo_only_pointing_hit_count": 12
+  },
+  "phase6_provenance": {
+    "config_path": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/configs/corruptions.yaml",
+    "config_sha256": "f0b86d036209c0ce73f7041a9a5c9f848b1632035bf1b69fd829ecd84b0113af",
+    "sample_manifest": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv",
+    "sample_manifest_sha256": "63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e",
+    "summary_path": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/logs/phase6_robustness/summary.json",
+    "summary_sha256": "4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b"
+  },
+  "population": {
+    "ground_truth_box_count": 111,
+    "negative_image_count": 232,
+    "negative_images_excluded_reason": "Energy-in-box and pointing-game metrics require a ground-truth box.",
+    "positive_image_count": 68,
+    "quantitative_record_count": 222,
+    "sample_image_count": 300
+  },
+  "qualitative_selection": {
+    "case_count": 9,
+    "cases": [
+      {
+        "category": "good_prediction",
+        "image_id": "6f47bae9-705f-41c8-8a28-d5cf88927b0e.png",
+        "rank": 1,
+        "selection_quantile": null,
+        "selection_score": 0.8236339494984741,
+        "target_index": 0
+      },
+      {
+        "category": "good_prediction",
+        "image_id": "b52a4969-16fc-43c1-9d87-66392415d139.png",
+        "rank": 2,
+        "selection_quantile": null,
+        "selection_score": 0.7931193506643591,
+        "target_index": 1
+      },
+      {
+        "category": "good_prediction",
+        "image_id": "c5a8e91a-2d40-4355-91af-73abf5f0fdf1.png",
+        "rank": 3,
+        "selection_quantile": null,
+        "selection_score": 0.7695864359736171,
+        "target_index": 1
+      },
+      {
+        "category": "bad_prediction",
+        "image_id": "a029f3a3-aed3-41ad-8255-262b8553cd06.png",
+        "rank": 1,
+        "selection_quantile": null,
+        "selection_score": 0.5516594648361206,
+        "target_index": null
+      },
+      {
+        "category": "bad_prediction",
+        "image_id": "e4a25524-a786-4297-9bf5-40a13a357e4a.png",
+        "rank": 2,
+        "selection_quantile": null,
+        "selection_score": 0.4186874032020569,
+        "target_index": null
+      },
+      {
+        "category": "bad_prediction",
+        "image_id": "4031034b-bb69-4102-8916-d47d7403db48.png",
+        "rank": 3,
+        "selection_quantile": null,
+        "selection_score": 0.41390669345855713,
+        "target_index": null
+      },
+      {
+        "category": "failure_case",
+        "image_id": "72de14b5-3dd0-4971-8fa2-137e4f91bb90.png",
+        "rank": 1,
+        "selection_quantile": 0.2,
+        "selection_score": 0.2822513284909411,
+        "target_index": 0
+      },
+      {
+        "category": "failure_case",
+        "image_id": "db798a1e-84b8-43ff-b4d5-990470c2579d.png",
+        "rank": 2,
+        "selection_quantile": 0.5,
+        "selection_score": 0.45973871395094357,
+        "target_index": 1
+      },
+      {
+        "category": "failure_case",
+        "image_id": "81d9d146-e9bb-478b-aeed-c2431780030e.png",
+        "rank": 3,
+        "selection_quantile": 0.8,
+        "selection_score": 0.6110989031047638,
+        "target_index": 0
+      }
+    ],
+    "settings": {
+      "bad_selection": "highest_minimum_score_shared_false_positive_negative_image",
+      "candidate_color": "cyan",
+      "cases_per_category": 3,
+      "colormap": "inferno",
+      "dpi": 180,
+      "failure_quantiles": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "failure_selection": "shared_false_negative_proxy_iou_quantiles_unique_image",
+      "good_selection": "highest_minimum_iou_shared_true_positive_unique_image",
+      "ground_truth_color": "lime",
+      "line_width": 1.6,
+      "overlay_alpha": 0.48,
+      "panel_width_inches": 4.2,
+      "row_height_inches": 4.0
+    }
+  },
+  "schema_version": 1,
+  "seed_scope": {
+    "scope": "primary checkpoint only for both detectors",
+    "training_seed": 17
+  },
+  "source_identity": {
+    "configs/explainability.yaml": "ffdbd1bc856ff5c75e0287c91e2bbc892352c6d80ec8b2bba6d5e13a76a05679",
+    "src/explainability/config.py": "c371abe438b798afde397a9ae4af5b746eb4042be9af67b15caca9d066b6ec19",
+    "src/explainability/gradcam.py": "2330e783c93921073a8ffc58c1a262b42ec15a54584a63835412917a5acb64fe",
+    "src/explainability/pointing_game.py": "d605dcb0587efec2966464e013957c4fcb2132b206b753bfd07bb13fb4a62cb1",
+    "src/explainability/run_explainability.py": "19f454c76fb9e26e04f9aa93526474b11c7a2a7ac9ade8a78c1c4b753fb1cd26",
+    "src/explainability/selection.py": "f431c1726267aa6cda016b8c4f2182ba8c30be4751bc46883f15546f4ae14553"
+  },
+  "status": "complete",
+  "target_layers": [
+    {
+      "detector": "faster_rcnn",
+      "expected_spatial_size": 40,
+      "expected_stride": 16,
+      "module_path": "backbone.body.layer3",
+      "stage_description": "ResNet-50 C4 output before FPN"
+    },
+    {
+      "detector": "yolo11s",
+      "expected_spatial_size": 40,
+      "expected_stride": 16,
+      "module_path": "model.6",
+      "stage_description": "YOLO11 backbone P4 block before the stride-32 stage and PAN neck"
+    }
+  ]
+}

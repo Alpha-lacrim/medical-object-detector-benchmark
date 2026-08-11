@@ -19,6 +19,117 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 Newest entries appear first; superseded decisions remain recorded.
 
+- **Paired statistical analysis complete:** Phase 8 reconstructs the exact
+  seven unified predictive metrics from all six frozen Phase 5 bundles and all
+  72 Phase 6 bundles without model inference. The clean analysis uses 2,000
+  paired hierarchical image/seed bootstrap draws, 5,000 paired image-label
+  permutations, pointwise 95% percentile intervals, and paired jackknife
+  Cohen's d. After Holm correction across seven endpoints, Faster R-CNN retains
+  evidence for higher recall (difference 0.50249, 95% CI 0.43005 to 0.57596,
+  adjusted p 0.00140), mAP@0.5 (0.14413, 0.09673 to 0.19488, adjusted p
+  0.00140), and mAP@0.5:0.95 (0.04737, 0.03105 to 0.06833, adjusted p
+  0.00160); YOLO11s retains higher precision (difference -0.21045, -0.30500 to
+  -0.11773, adjusted p 0.00140). F1 and conditional IoU/Dice do not cross the
+  0.05 Holm threshold (Session 15 / Batch 7).
+- **Corruption-grid inference contract and result:** Every one of the 35
+  primary-seed conditions has raw and clean-relative detector comparisons for
+  all seven metrics. Holm correction is separate by metric and estimand; IoU
+  and Dice contain 34 estimable tests because YOLO has no true positive under
+  darkness severity 5. That condition is the only AP comparison surviving
+  grid-wide correction: raw mAP@0.5:0.95 difference 0.11565 (95% CI 0.07122 to
+  0.17024, adjusted p 0.00700, d 0.241) and retention difference 0.70287
+  (0.39816 to 0.84242, adjusted p 0.00700, d 0.433). The two final table hashes
+  are `9eb05cf8df7e26e237d8bf7b0c5eb85cdc1130477db46213e125217b692d819f`
+  and `8b766f59b3e69aa7d011f2a8ac5499636cbf30ed7eb943b3c1ad8c753a49940b`;
+  summary SHA-256 is
+  `064bba1317195e749562f29a8fa089ac59a40957b6205f51d27c65babc3c3937`
+  (Session 15 / Batch 7).
+- **McNemar non-applicability decision:** no McNemar test is reported. The
+  benchmark has multiple targets plus negative-image false positives rather
+  than one independent binary image outcome. Collapsing to correct/incorrect
+  would discard detection structure, while target decisions are nested within
+  images and repeated across seeds/conditions. The aggregate-metric paired
+  permutation directly tests the detector comparison without forcing a
+  classification endpoint (Session 15 / Batch 7).
+- **Primary-seed stride-matched Grad-CAM analysis complete:** Phase 7 reuses
+  the exact Phase 6 seed-17 300-image manifest and both primary checkpoints.
+  Ordinary ReLU Grad-CAM hooks 40 by 40 stride-16 backbone tensors: ResNet-50
+  `backbone.body.layer3` before FPN and YOLO11s `model.6` before the stride-32
+  stage/PAN neck. Every one of the sample's 111 ground-truth boxes receives a
+  low-threshold highest-IoU retained-candidate target per detector; operating-
+  point false negatives are explicitly labeled proxy targets. Faster R-CNN
+  has 110 valid CAMs and one reported zero map; YOLO11s has 111. Mean energy in
+  box is 0.08689 versus 0.09749 against box-area references 0.07129 versus
+  0.07178, and pointing accuracy is 0.10909 versus 0.12613. Among 110 paired
+  valid targets, YOLO has higher energy for 76 and Faster R-CNN for 34; mean
+  Faster-minus-YOLO energy is -0.00910. Both remain weakly localized and often
+  emphasize anatomy, borders, markers, and devices. The complete summary
+  SHA-256 is
+  `2b8d2d5835c113e8dc24af9eecbece62571cc5bcc689bcb245c1f74e1c23a848`.
+  Stop for explainability review before Batch 7 (Session 14 / Batch 6).
+- **Phase 7 qualitative and metric contract:** the primary metric is
+  pixel-center energy-in-box, with pointing-game accuracy secondary and
+  rasterized box area as a reference. Zero-energy maps are excluded and
+  reported rather than coerced to zero. Three shared high-IoU true positives,
+  three shared false positives on box-negative `No Lung Opacity / Not Normal`
+  images, and three shared false negatives spanning proxy-IoU quantiles are
+  selected from frozen predictions before CAM values are known. CUDA ROI Align
+  backward is seeded but only deterministic-warn-only in the pinned
+  Torchvision build. These maps are association diagnostics, not causal or
+  clinical reasoning evidence (Session 14 / Batch 6).
+- **Primary-seed common-corruption robustness grid complete:** Phase 6 fixes a
+  seed-17 proportional stratified sample of 300 held-out test images: 68 Lung
+  Opacity, 132 No Lung Opacity / Not Normal, and 100 Normal, containing 111
+  boxes and 183 patients. The committed manifest SHA-256 is
+  `63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e`.
+  Both primary checkpoints were scored on seven corruption types at five
+  config-defined severities (35 conditions each) through the same Phase 5
+  evaluator. Every condition has a resumable hashed 300-prediction bundle;
+  clean references are exact filters of the frozen Phase 5 seed-17 bundles.
+  Across all 35 conditions, Faster R-CNN versus YOLO11s mean raw
+  mAP@0.5:0.95 is 0.11290 versus 0.05410, while mean clean-relative retention
+  is 0.76385 versus 0.70908 (23.62% versus 29.09% degradation). Faster R-CNN
+  has higher raw mAP in all 36 matched clean/corrupted conditions; salt-and-
+  pepper severity 5 is the worst relative condition for both. The complete
+  summary SHA-256 is
+  `4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b`.
+  Stop for robustness review before Batch 6 (Session 13 / Batch 5).
+- **Phase 6 corruption and reporting contract:** Albumentations 2.0.8 applies
+  geometry-preserving, deterministically seeded brightness, Gaussian/impulse
+  noise, Gaussian/motion blur, and JPEG transforms. Each type has five ordered
+  severities; JPEG explicitly includes qualities 50 and 20. Tables report raw
+  precision/recall/F1/conditional IoU/Dice/mAP and corrupted/clean ratios plus
+  `1 - ratio`, with null conditional ratios preserved when a condition has no
+  true positives. Family means are descriptive equal-weight averages rather
+  than physically calibrated deployment expectations (Session 13 / Batch 5).
+- **Unified three-seed held-out comparison complete:** seeds 17, 42, and 137
+  are complete for both detectors under the accepted Batch 2/3 hyperparameter
+  contracts. The additional Faster R-CNN runs selected epochs 9 and 2 after
+  14 and 8 completed epochs; the additional YOLO11s runs selected epochs 10
+  and 14 after 14 and 19 completed epochs. Only after all six checkpoints were
+  frozen, one `src/evaluate.py` path evaluated every checkpoint on the same 750
+  test images/268 boxes with the same operating-point matcher and official
+  pycocotools COCO evaluator. Across three seeds, Faster R-CNN versus YOLO11s
+  produced mAP@0.5:0.95 0.1023 ± 0.0036 versus 0.0549 ± 0.0080, mAP@0.5
+  0.3084 ± 0.0123 versus 0.1643 ± 0.0226, recall 0.6381 ± 0.0526 versus
+  0.1356 ± 0.0094, and F1 0.2558 ± 0.0493 versus 0.1981 ± 0.0048. YOLO11s
+  has higher precision (0.3730 ± 0.0395 versus 0.1626 ± 0.0439) and conditional
+  matched-box IoU/Dice, plus 52.94 ± 10.65 FPS versus 17.42 ± 5.69. The final
+  publication/per-seed/long-form table SHA-256 values are respectively
+  `6b467c706dd39a9a240d99a552eb0218734c8b9eaf38b0bfbc70d347f921449c`,
+  `ab4574589da9c63f4463e6ef13e4fef26dc565cd514cbd19118491ac0e7c09a8`,
+  and `91affca6abe7fadcc70e0b5ca5836e74394d99df1b1af982ea7240dbcab9d482`.
+  Six hashed prediction bundles preserve image-level evidence for the later
+  paired tests. The final evaluation summary SHA-256 is
+  `e6018a9fc2117ac41cc51ab395c22316e61ba40c030b8f54ce6e64c641ea8245`.
+  Stop for the user's table review before Batch 5 (Session 12 / Batch 4).
+- **Additional-seed timing gates reuse the accepted seed-17 measurements:**
+  seeds 42 and 137 differ only in RNG and artifact identity, so Phase 5 derived
+  explicit provenance-bearing timing approvals rather than spending four more
+  redundant three-epoch benchmarks. Every full run measured its own training
+  time and peak allocated memory. A briefly started Faster R-CNN seed-42
+  redundant benchmark was stopped before any epoch/checkpoint and preserved as
+  an excluded diagnostic; it contributes no result (Session 12 / Batch 4).
 - **YOLO11s one-seed baseline complete:** the exact benchmark-approved seed-17
   run restarted from pinned COCO weights and early-stopped at epoch 15 after
   1,975.64 seconds (32.93 minutes); epoch 10 is the selected checkpoint. Shared
@@ -265,11 +376,13 @@ Newest entries appear first; superseded decisions remain recorded.
 |---|---|---|
 | `PROJECT_SPEC.md`, `BATCHES.md`, `AGENTS.md` | Static requirements, sequence, and session protocol | authoritative |
 | `CODEX.md`, `HANDOFF.md` | Living decisions and append-only session state | living |
-| `README.md`, `data/README.md` | Exact setup, official aggregate preparation, benchmark-gate, training, and finalization commands | documented through Batch 3 |
+| `README.md`, `data/README.md` | Exact setup, official aggregate preparation, training, unified evaluation, robustness, explainability, and statistics commands | documented through Batch 7 |
 | `.python-version`, `requirements.txt`, `pyproject.toml`, `uv.lock` | Exact Python 3.11 / CUDA 12.4 phased-workflow dependency pins | aligned for adopted runtime |
 | `configs/dataset.yaml` | RSNA paths, class/stratum map, conversion, subset, split, and EDA settings | done |
 | `configs/yolo.yaml` | Strict YOLO11s data/model/runtime/training/evaluation/profile/artifact config | implemented; smoke, timing gate, full run, and profiling complete |
 | `configs/faster_rcnn.yaml` | Strict Faster R-CNN model/runtime/training/evaluation/profile/artifact config | implemented; timing gate and full run complete |
+| `configs/{faster_rcnn,yolo}_seed{42,137}.yaml`, `configs/evaluation.yaml` | Seed-only rerun identities and the frozen six-run Phase 5 evaluation contract | complete |
+| `configs/corruptions.yaml` | Fixed Phase 6 sample, checkpoint, evaluator, 7×5 corruption, and output contract | complete |
 | `src/data/download.py` | Secret-safe Kaggle competition downloader and clear failure diagnostics | done |
 | `src/data/prepare.py` | Metadata audit, digest check, patient grouping, subset/split, COCO, DICOM conversion | done |
 | `src/data/visualize.py` | Deterministic distribution and annotation-sample EDA | done |
@@ -285,23 +398,36 @@ Newest entries appear first; superseded decisions remain recorded.
 | `docs/LIMITATIONS.md` | Dataset and predeclared compute limitations | living |
 | `docs/FASTER_RCNN_BASELINE.md` | Batch 2 architecture, optimization, metrics, timing, and profiling protocol | complete with final measurements |
 | `docs/YOLO_BASELINE.md` | Batch 3 architecture, parity/stability decisions, timing, metrics, and profiling | complete with final measurements |
+| `docs/QUANTITATIVE_COMPARISON.md` | Unified metric definitions, compute caveats, commands, and three-seed held-out results | complete; pending user review |
+| `docs/ROBUSTNESS.md`, `docs/LIMITATIONS.md` | Phase 6 sampling, corruption grid, raw/relative results, interpretation, and scope | complete; pending user review |
 | `src/utils/seed.py`, `docs/REPRODUCIBILITY.md` | Reproducibility utilities and contract | done |
 | `tests/test_{download,prepare,visualize}.py` | Batch 1 acquisition/conversion/split/EDA tests | done |
 | `src/models/faster_rcnn_*.py`, `src/models/train_faster_rcnn.py` | Strict data adapter, model, AMP trainer, unified validation, reporting, profiling, and gates | implemented; smoke, benchmark, full run, and profiling complete |
 | `src/models/yolo_*.py`, `src/models/train_yolo.py` | Strict YOLO data view, mixed-precision trainer, unified validation, reporting, profiling, and gates | implemented; smoke, benchmark, full run, and profiling complete |
-| `tests/test_faster_rcnn_*.py`, `tests/test_train_faster_rcnn.py`, `tests/test_yolo_*.py` | Batch 2/3 config/data/model/control/reporting/gate regressions | 172 pass repository-wide; one expected metadata-only skip |
-| `src/robustness/`, `src/explainability/`, `src/stats/` | Later-batch implementation directories | deferred |
+| `src/evaluate.py`, `tests/test_evaluate.py` | One canonical adapter-to-pycocotools evaluation path and three-seed aggregation | implemented and verified on six checkpoints |
+| `results/tables/detector_comparison*.csv`, `results/logs/phase5_evaluation/` | Per-seed metrics, mean ± sample SD, full provenance, and six prediction bundles | complete; pending user review |
+| `src/robustness/`, `src/meddet_benchmark/corruptions.py`, `tests/test_{corruptions,robustness}.py` | Deterministic Albumentations grid, sample audit, resumable dual-detector inference, aggregation, plots, and tests | implemented; full grid complete |
+| `results/tables/robustness*.csv`, `results/figures/robustness*.png`, `results/logs/phase6_robustness/` | Raw/relative/family curves, 72 bundles, hashes, and full Phase 6 summary | complete; pending user review |
+| `configs/explainability.yaml`, `src/explainability/`, `tests/test_{gradcam,pointing_game,explainability}.py` | Strict paired Grad-CAM targets, stride-matched hooks, localization metrics, case selection, figures, and regression tests | complete |
+| `results/tables/gradcam*.csv`, `results/figures/gradcam*.png`, `results/logs/phase7_explainability/` | All 222 per-target records, six aggregate rows, 18 paired qualitative records, three figures, hashes, and full Phase 7 summary | complete; pending user review |
+| `docs/EXPLAINABILITY.md` | Exact target/layer/metric protocol, results, explicit interpretation, reproduction, and caveats | complete; pending user review |
+| `configs/statistics.yaml`, `src/stats/`, `tests/test_statistics.py` | Strict paired bootstrap/permutation/effect-size engine, exact AP reconstruction, Holm correction, runner, and regression tests | complete |
+| `results/tables/statistical_*.csv`, `results/logs/phase8_statistics/` | Seven clean and 497 clean/corruption raw/retention comparisons with CIs, p-values, effects, hashes, and full summary | complete; pending user review |
+| `docs/STATISTICAL_ANALYSIS.md` | Exact estimands, inference protocol, complete clean results, corruption conclusions, McNemar decision, reproduction, and caveats | complete; pending user review |
+| `tests/test_faster_rcnn_*.py`, `tests/test_train_faster_rcnn.py`, `tests/test_yolo_*.py` | Batch 2/3 config/data/model/control/reporting/gate regressions | included in 190 passing tests; one expected metadata-only skip |
 | `pyproject.toml`, `uv.lock`, older tests/configs | Pre-workflow legacy implementation | non-authoritative; reconcile before use |
 | `src/meddet_benchmark/` | Shared tested operating-point and COCO evaluator used by both detector baselines | reconciled for package-relative imports; other legacy surfaces non-authoritative |
 
 ## Current phase
 
-**Batch 3 / Phase 4 is complete.** YOLO11s is pinned, augmentation parity was
-decided before training, the official train/validation views validate, and the
-stable bfloat16/fp32-loss run passed smoke and the three-epoch timing gate. The
-one-seed full run early-stopped at epoch 15; final shared validation, compute,
-speed, checkpoint, and curve artifacts all validate. Stop here for the user's
-review before starting Batch 4 / Phase 5.
+**Batch 7 / Phase 8 is complete.** The seven clean three-seed comparisons and
+497 primary-seed clean/corruption raw/retention comparisons report pointwise
+95% confidence intervals, paired permutation p-values, Holm-adjusted p-values,
+and paired jackknife Cohen's d wherever estimable. Four darkest-condition
+conditional IoU/Dice rows are explicitly not estimable. All point estimates,
+correction families, hashes, row counts, and finite result fields pass an
+independent audit; repository validation is 198 passed with one expected skip.
+Stop here for the user's statistical-results review before Batch 8.
 
 ## Known open issues / risks
 
@@ -323,12 +449,28 @@ review before starting Batch 4 / Phase 5.
 - YOLO augmentation parity is resolved: all Ultralytics-only stochastic
   augmentations are disabled for the controlled baseline. This may understate
   performance under YOLO's conventional augmentation-rich recipe.
-- Both detectors currently have only one completed training seed, as
-  predeclared by the hardware scope. Their validation curves and point metrics
-  do not characterize across-seed variance; two additional seeds per detector
-  remain reserved for the later headline quantitative comparison.
+- Both detectors now have the predeclared three completed training seeds for
+  headline metrics. Three seeds provide only a coarse estimate of seed
+  variation; robustness and explainability are complete but remain scoped to
+  the primary seed-17 checkpoints and do not characterize across-seed
+  variability.
+- Phase 8's clean hierarchical bootstrap can only resample three paired seeds,
+  so seed uncertainty remains coarse. Corruption inference and tests remain
+  conditional on the primary seed-17 checkpoints.
+- Statistical resampling follows the specified image-level unit, but repeated
+  exams mean those units are not fully independent by patient. Permutation
+  tests condition on the observed checkpoints, while clean intervals also
+  resample seed pairs; pointwise intervals are not simultaneous. Holm controls
+  the declared p-value families but does not remove within-patient dependence
+  or make corruption conditions independent deployment cohorts.
 - YOLO required bfloat16 forward/backward with float32 assignment/loss, native
   BatchNorm updates, a lower LR, and a one-epoch warmup for numerical stability;
   Faster R-CNN used float16, frozen normalization, LR 0.005, and a plateau
   scheduler. These disclosed optimization/precision asymmetries limit a purely
   architecture-only interpretation of the comparison.
+- Phase 7 uses coarse 40 by 40 Grad-CAM maps and remains one-primary-seed
+  evidence. Missed findings require annotation-guided proxy candidates;
+  Grad-CAM does not explain proposal generation, NMS, box regression, or
+  causality. Box metrics exclude 232 images without target boxes, one Faster
+  R-CNN map has zero Grad-CAM energy, and CUDA ROI Align backward is not
+  bitwise deterministic under the pinned Torchvision build.

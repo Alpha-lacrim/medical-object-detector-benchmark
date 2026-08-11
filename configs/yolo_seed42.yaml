@@ -1,0 +1,117 @@
+schema_version: 1
+experiment_id: yolo11s-rsna-phase5-seed42
+seed: 42
+
+data:
+  images_dir: data/processed/rsna-pneumonia-5000/images
+  train_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_train.json
+  val_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_val.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+  yolo_root: data/processed/rsna-pneumonia-5000/yolo
+  dataset_yaml: data/processed/rsna-pneumonia-5000/yolo/dataset.yaml
+  smoke_dataset_yaml: data/processed/rsna-pneumonia-5000/yolo/dataset_smoke.yaml
+  link_mode: hardlink
+
+model:
+  family: YOLO11
+  scale: small
+  weights: yolo11s.pt
+  weights_path: results/checkpoints/pretrained/yolo11s.pt
+  implementation: ultralytics
+  ultralytics_version: 8.4.110
+  pretrained: true
+  input_size: 640
+  batch_norm_policy: train_statistics
+  rationale: established anchor-free baseline with more independent literature than YOLO26
+
+runtime:
+  device: 0
+  amp: true
+  amp_dtype: bfloat16
+  loss_dtype: float32
+  batch_size: 4
+  nominal_batch_size: 4
+  workers: 2
+  cache: false
+  deterministic: true
+
+training:
+  max_epochs: 30
+  optimizer:
+    name: SGD
+    learning_rate: 0.001
+    final_learning_rate_fraction: 1.0
+    momentum: 0.9
+    weight_decay: 0.0005
+    nesterov: false
+    warmup_epochs: 1.0
+    warmup_bias_learning_rate: 0.0
+    warmup_momentum: 0.9
+  loss:
+    box: 7.5
+    cls: 0.5
+    dfl: 1.5
+  early_stopping:
+    metric: val_map_50_95
+    mode: max
+    patience: 5
+    min_delta: 0.001
+    min_epochs: 8
+  augmentation:
+    policy: match_faster_rcnn_none
+    hsv_h: 0.0
+    hsv_s: 0.0
+    hsv_v: 0.0
+    degrees: 0.0
+    translate: 0.0
+    scale: 0.0
+    shear: 0.0
+    perspective: 0.0
+    flipud: 0.0
+    fliplr: 0.0
+    bgr: 0.0
+    mosaic: 0.0
+    mixup: 0.0
+    cutmix: 0.0
+    copy_paste: 0.0
+    auto_augment: null
+    erasing: 0.0
+    close_mosaic: 0
+    multi_scale: 0.0
+
+evaluation:
+  inference_minimum_score: 0.001
+  score_threshold: 0.25
+  match_iou_threshold: 0.5
+  nms_iou_threshold: 0.5
+  max_detections: 100
+
+benchmark:
+  epochs: 3
+
+smoke:
+  epochs: 1
+  train_images: 8
+  val_images: 4
+
+profiling:
+  batch_size: 1
+  warmup_batches: 10
+  timed_batches: 100
+  profile_flops: true
+
+outputs:
+  logs_dir: results/logs
+  checkpoints_dir: results/checkpoints
+  tables_dir: results/tables
+  figures_dir: results/figures
+  smoke_run_name: yolo11s_rsna_seed42_smoke
+  benchmark_run_name: yolo11s_rsna_seed42_benchmark
+  train_run_name: yolo11s_rsna_seed42_full
+  checkpoint_dir: results/checkpoints/yolo11s_rsna_seed42_full
+  validation_table: results/tables/seeds/yolo_seed42_validation.csv
+  compute_table: results/tables/seeds/yolo_seed42_compute.csv
+  training_curves: results/figures/seeds/yolo_seed42_training_curves.png
+  summary_name: summary.json
+  epoch_timing_name: epoch_timing.jsonl
+  benchmark_estimate_name: benchmark_estimate.json

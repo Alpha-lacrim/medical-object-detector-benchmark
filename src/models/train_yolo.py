@@ -393,6 +393,7 @@ def _finalize(config: YoloConfig, base_summary: dict[str, Any] | None = None) ->
         results_csv,
         config.resolve(config.outputs.training_curves),
         best_epoch=best_epoch,
+        run_id=config.outputs.train_run_name,
     )
     artifacts = {
         "best_checkpoint": model_artifact,

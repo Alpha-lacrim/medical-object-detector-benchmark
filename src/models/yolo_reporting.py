@@ -323,7 +323,9 @@ def write_yolo_tables(
     return {"validation_table": validation_path, "compute_table": compute_path}
 
 
-def plot_yolo_training_curves(results_csv: Path, destination: Path, *, best_epoch: int) -> Path:
+def plot_yolo_training_curves(
+    results_csv: Path, destination: Path, *, best_epoch: int, run_id: str
+) -> Path:
     """Create the Batch 3 four-panel curve figure from Ultralytics' CSV log."""
 
     import matplotlib
@@ -374,7 +376,7 @@ def plot_yolo_training_curves(results_csv: Path, destination: Path, *, best_epoc
         axis.set_ylabel(ylabel)
         axis.grid(alpha=0.3)
         axis.legend()
-    figure.suptitle("YOLO11s training curves — yolo11s_rsna_seed17_full")
+    figure.suptitle(f"YOLO11s training curves — {run_id}")
     destination.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(destination, dpi=160)
     plt.close(figure)

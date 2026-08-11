@@ -25,6 +25,287 @@
 
 ---
 
+## Session 15 — 2026-08-11 — Batch 7 statistical analysis
+
+**What I did:**
+- Implemented a strict, config-driven Phase 8 statistical pipeline over the six
+  frozen Phase 5 and 72 frozen Phase 6 prediction bundles. It reconstructs the
+  exact operating-point metrics and COCO AP from per-image sufficient evidence,
+  including weighted score-ordered matches at all ten COCO IoU thresholds; all
+  78 original bundle metrics reproduce within absolute tolerance `5e-12`.
+- Ran 2,000 paired percentile-bootstrap draws and 5,000 two-sided paired
+  image-label permutations for every comparison. The 750-image clean analysis
+  also resamples the three paired training seeds. The 300-image corruption
+  analysis jointly resamples clean/corrupted evidence and reports both raw and
+  clean-relative estimands. Every estimable row includes both detector CIs, a
+  Faster-minus-YOLO difference CI, raw and Holm-adjusted p-values, and paired
+  leave-one-image-out jackknife Cohen's d.
+- Applied Holm correction across the seven clean endpoints and separately for
+  every metric/estimand family across the 35 corruption conditions. Conditional
+  IoU/Dice have 34 estimable grid tests because YOLO has no true positive under
+  darkness severity 5; the four affected raw/retention rows are explicitly
+  marked not estimable. McNemar is not forced onto the detector outputs because
+  they do not provide one independent binary decision per image.
+- On the clean three-seed comparison, Faster R-CNN retains corrected evidence
+  for higher recall (difference 0.50249, 95% CI 0.43005 to 0.57596, Holm p
+  0.00140), mAP@0.5 (0.14413, 0.09673 to 0.19488, Holm p 0.00140), and
+  mAP@0.5:0.95 (0.04737, 0.03105 to 0.06833, Holm p 0.00160); YOLO retains
+  higher precision (-0.21045, -0.30500 to -0.11773, Holm p 0.00140). F1 and
+  conditional IoU/Dice do not cross the corrected 0.05 threshold.
+- Across the corruption grid, darkness severity 5 is the only AP comparison to
+  survive family-wise correction. Faster-minus-YOLO mAP@0.5:0.95 is 0.11565
+  (0.07122 to 0.17024, Holm p 0.00700, d 0.241) in raw performance and 0.70287
+  (0.39816 to 0.84242, Holm p 0.00700, d 0.433) in clean-relative retention.
+  All exact condition/metric rows remain in the publication CSV.
+- Independently audited all seven clean and 497 robustness rows against the
+  Phase 5/6 point estimates, recomputed every Holm family, checked finite CIs,
+  p-values/effects and valid-resample counts for all 493 estimable robustness
+  rows, verified the exact four null rows, and validated all source/input/output
+  hashes. Final clean/robustness/summary SHA-256 values are
+  `9eb05cf8df7e26e237d8bf7b0c5eb85cdc1130477db46213e125217b692d819f`,
+  `8b766f59b3e69aa7d011f2a8ac5499636cbf30ed7eb943b3c1ad8c753a49940b`,
+  and `064bba1317195e749562f29a8fa089ac59a40957b6205f51d27c65babc3c3937`.
+  Repository checks pass: 198 tests, one expected metadata-only skip, Ruff
+  clean, and `git diff --check` clean.
+
+**What's still incomplete / next step:**
+- Batch 7 is complete. Do not start Batch 8 report assembly until the user
+  reviews the statistical estimands, correction families, results, effect-size
+  definition, and McNemar non-applicability decision.
+
+**Needs the user's review before proceeding:**
+- Review `results/tables/statistical_clean_comparison.csv`,
+  `results/tables/statistical_robustness_comparison.csv`, and
+  `docs/STATISTICAL_ANALYSIS.md`. In particular, confirm the pointwise-versus-
+  family-wise interpretation, the conclusion that clean AP/recall and precision
+  differences survive correction while F1/localization do not, and the result
+  that only severe darkness survives the grid-wide AP correction.
+
+**Files touched:**
+- Config/code/tests: `configs/statistics.yaml`, `src/stats/__init__.py`,
+  `src/stats/paired.py`, `src/stats/run_statistics.py`, and
+  `tests/test_statistics.py`.
+- Documentation/state: `README.md`, `docs/STATISTICAL_ANALYSIS.md`,
+  `docs/QUANTITATIVE_COMPARISON.md`, `docs/ROBUSTNESS.md`,
+  `docs/LIMITATIONS.md`, `CODEX.md`, and `HANDOFF.md`.
+- Generated artifacts: `results/logs/phase8_statistics/` and
+  `results/tables/statistical_{clean,robustness}_comparison.csv`.
+- All pre-existing Batch 4–6 changes, diagnostic directories, ignored
+  checkpoints, and the user-owned deletion of `Final project 1405.v1.pdf` were
+  preserved.
+
+---
+
+## Session 14 — 2026-08-11 — Batch 6 explainability analysis
+
+**What I did:**
+- Implemented a strict, config-driven Phase 7 Grad-CAM pipeline for the two
+  frozen seed-17 checkpoints. The comparable hooks are the 40 by 40 stride-16
+  ResNet-50 `backbone.body.layer3` output before FPN and YOLO11s `model.6`
+  output before its stride-32 stage/PAN neck. Both target the differentiable
+  post-activation foreground probability of a low-threshold, post-NMS retained
+  candidate; false negatives are explicitly labeled annotation-guided proxy
+  targets rather than ordinary emitted detections.
+- Reused the exact committed Phase 6 sample manifest, SHA-256
+  `63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e`.
+  Quantitative energy-in-box and pointing-game metrics cover every one of its
+  111 boxes across 68 positive images for both detectors (222 target records).
+  The 232 box-negative images are correctly excluded from box metrics but
+  remain available for qualitative false-positive cases.
+- Completed the focused nine-test suite and two-positive-image-per-model GPU
+  smoke. The full pass produced 110/111 valid Faster R-CNN maps with one
+  explicit zero-energy map, and 111/111 valid YOLO maps. Faster R-CNN versus
+  YOLO11s mean energy-in-box is 0.08689 versus 0.09749, compared with mean box-
+  area references 0.07129 versus 0.07178; pointing accuracy is 0.10909 versus
+  0.12613. On 110 paired valid targets, YOLO has higher energy in 76 and Faster
+  R-CNN in 34; mean Faster-minus-YOLO energy is -0.00910.
+- Selected heatmap cases from frozen predictions before consulting CAM values:
+  three unique shared high-IoU true positives, three shared false positives on
+  box-negative `No Lung Opacity / Not Normal` images, and three unique shared
+  false negatives at proxy-IoU quantiles 0.2/0.5/0.8. Generated and visually
+  inspected all three side-by-side figures. Faster R-CNN is generally more
+  clustered but not reliably lesion-centered; YOLO is more diffuse/punctate
+  with a small energy advantage. Both often emphasize non-box anatomy, borders,
+  markers, and devices, and neither supports a clinical-reasoning claim.
+- Documented the exact target/layer definitions, quantitative results, explicit
+  where-is-it-looking answer, objective case rubric, box/proxy/seed caveats,
+  and the CUDA ROI Align backward deterministic-warn-only limitation. The
+  independent audit verified 222 target rows, 18 qualitative rows, all pairings,
+  all recomputed means/pointing rates, six artifact hashes, and six source
+  hashes. Final summary SHA-256:
+  `2b8d2d5835c113e8dc24af9eecbece62571cc5bcc689bcb245c1f74e1c23a848`.
+  Repository checks pass: 190 tests, one expected metadata-only skip, Ruff
+  clean, and `git diff --check` clean.
+
+**What's still incomplete / next step:**
+- Batch 6 is complete. Do not start Batch 7 statistical analysis until the user
+  reviews and accepts the Grad-CAM target/layer choice, proxy-target caveat,
+  energy/pointing results, and paired qualitative interpretation.
+
+**Needs the user's review before proceeding:**
+- Review `results/figures/gradcam_good_predictions.png`,
+  `results/figures/gradcam_bad_predictions.png`,
+  `results/figures/gradcam_failure_cases.png`,
+  `results/tables/gradcam_localization_summary.csv`, and
+  `docs/EXPLAINABILITY.md`. In particular, confirm the conclusion that both
+  models are weakly lesion-focused, YOLO's modest energy advantage coexists
+  with more diffuse maps, and false-negative proxies are conditional diagnostics
+  rather than explanations of emitted detections.
+
+**Files touched:**
+- Config/code/tests: `configs/explainability.yaml`, `src/explainability/`,
+  `tests/test_gradcam.py`, `tests/test_pointing_game.py`, and
+  `tests/test_explainability.py`.
+- Documentation/state: `README.md`, `docs/EXPLAINABILITY.md`,
+  `docs/LIMITATIONS.md`, `CODEX.md`, and `HANDOFF.md`.
+- Generated artifacts: `results/logs/phase7_explainability/`,
+  `results/tables/gradcam*.csv`, and `results/figures/gradcam*.png`; checkpoints
+  remain ignored.
+- All pre-existing Batch 4/5 changes, diagnostic directories, and the user-owned
+  deletion of `Final project 1405.v1.pdf` were preserved.
+
+---
+
+## Session 13 — 2026-08-11 — Batch 5 robustness evaluation
+
+**What I did:**
+- Drew the fixed seed-17 proportional stratified robustness sample from the
+  750-image held-out test manifest using largest-remainder allocation and one
+  NumPy PCG64 generator. The 300-image result is 68 Lung Opacity, 132 No Lung
+  Opacity / Not Normal, and 100 Normal images, with 68 positives, 232 negatives,
+  111 boxes, and 183 patients. Committed manifest SHA-256:
+  `63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e`.
+- Replaced the deferred corruption placeholder with a strict, config-driven
+  Albumentations 2.0.8 pipeline. Darker/brighter lighting, Gaussian and salt-
+  pepper noise, Gaussian and motion blur, and JPEG compression each have five
+  ordered severities; JPEG spans qualities 90/70/50/35/20. Geometry is
+  preserved, stochastic transforms derive a per-image/condition seed, and both
+  detectors receive identical corrupted pixels.
+- Implemented the resumable Phase 6 runner. It validates the frozen Phase 5
+  thresholds, primary seed-17 configs/checkpoints, clean prediction provenance,
+  canonical test annotations, and sample identities before CUDA. Each condition
+  writes an atomic hashed prediction bundle immediately. Clean subset metrics
+  reuse exact filtered Phase 5 predictions; all 70 corrupted detector
+  conditions were inferred afresh.
+- Completed the full 21,000-corrupted-image grid in 2,073.4 seconds end to end.
+  Faster R-CNN and YOLO11s each have 36 clean/corrupted bundles with 300 records
+  apiece. Across the 35 corruptions, Faster R-CNN versus YOLO11s mean raw
+  mAP@0.5:0.95 is 0.11290 versus 0.05410 and mean clean-relative retention is
+  0.76385 versus 0.70908 (23.62% versus 29.09% degradation). Faster R-CNN has
+  higher raw mAP in all 36 matched conditions. Salt-and-pepper severity 5 is
+  worst for both; YOLO11s also collapses at the darkest operating point.
+- Generated raw/relative per-type figures, wide and tidy metric tables, and
+  family-mean severity curves. Documented the exact method, results, null
+  conditional IoU/Dice edge case, digital-corruption limits, primary-seed
+  scope, image-level sampling, repeated patients, and 111-box sample size.
+- Independently audited all 72 table rows/bundles, hashes, 300-prediction
+  counts, matched condition sets, severity counts, sample allocation, and every
+  defined corrupted/clean ratio. Final summary SHA-256:
+  `4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b`.
+  Repository checks pass: 181 tests, one expected metadata-only skip, Ruff
+  clean, and `git diff --check` clean. Both figures were visually inspected.
+
+**What's still incomplete / next step:**
+- Batch 5 is complete. Do not start Batch 6 until the user reviews and accepts
+  the robustness sample, severity grid, raw/relative curves, and limitations.
+- After approval, Batch 6 should reuse
+  `data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv` for the
+  quantitative pointing-game metric, as required by the existing scope.
+
+**Needs the user's review before proceeding:**
+- Review `results/figures/robustness_map_50_95_raw.png`,
+  `results/figures/robustness_map_50_95_relative.png`,
+  `results/tables/robustness_results.csv`, and `docs/ROBUSTNESS.md`. In
+  particular, confirm the 300-image image-stratified sample, five severity
+  values, clean-relative definition, primary-seed scope, and interpretation of
+  the severe salt-and-pepper/darkness failures before Batch 6.
+
+**Files touched:**
+- Config/code/tests: `configs/corruptions.yaml`,
+  `src/meddet_benchmark/corruptions.py`, `src/robustness/`,
+  `tests/test_corruptions.py`, and `tests/test_robustness.py`.
+- Documentation/state: `README.md`, `docs/ROBUSTNESS.md`,
+  `docs/LIMITATIONS.md`, `CODEX.md`, and `HANDOFF.md`.
+- Generated accepted artifacts: the committed 300-image sample manifest,
+  `results/logs/phase6_robustness/`, `results/tables/robustness*.csv`, and
+  `results/figures/robustness*.png`; checkpoints remain ignored.
+- All pre-existing Batch 4 changes, diagnostic directories, and the user-owned
+  deletion of `Final project 1405.v1.pdf` were preserved.
+
+---
+
+## Session 12 — 2026-08-10 — Batch 4 unified comparison
+
+**What I did:**
+- Fixed the Phase 5 seed grid at 17, 42, and 137 and added seed-only Faster
+  R-CNN/YOLO11s configs plus `configs/evaluation.yaml`. Contract validation
+  confirms that model/data/optimizer/runtime/evaluation hyperparameters are
+  identical within each detector except for seed and artifact identity.
+- Derived provenance-bearing seed-42/137 timing approvals from the accepted
+  seed-17 gates. A redundant Faster R-CNN seed-42 benchmark was briefly started
+  and stopped before any epoch/checkpoint after the unchanged shape/memory
+  contract was confirmed; its incomplete log is preserved under
+  `faster_rcnn_rsna_seed42_benchmark_aborted-redundant-timing` and excluded.
+- Completed four additional full trainings without test access. Faster R-CNN
+  seed 42 stopped after 14 epochs (best 9, 8,278.03 s, 1,557.08 MiB) and seed
+  137 after 8 epochs (best 2, 3,338.41 s, 1,557.08 MiB). YOLO11s seed 42
+  stopped after 14 epochs (best 10, 1,586.39 s, 1,148.16 MiB) and seed 137
+  after 19 epochs (best 14, 1,937.62 s, 1,148.16 MiB). All checkpoint, table,
+  curve, summary, config, and source identities validate.
+- Implemented `src/evaluate.py`, the single held-out adapter-to-metric harness.
+  Both detectors emit canonical original-image boxes/scores/category IDs and
+  are evaluated by the same score-ordered matcher and official pycocotools
+  COCO evaluator. It reports precision, recall, F1, conditional matched-box
+  IoU/Dice, mAP@0.5, mAP@0.5:0.95, FPS/latency, parameters, GFLOPs, peak GPU
+  memory, and training time. Framework-native mAP remains checkpoint-selection
+  evidence only.
+- Evaluated all six frozen checkpoints on the 750-image/268-box held-out test
+  split. Faster R-CNN versus YOLO11s mean ± sample SD: precision 0.1626 ±
+  0.0439 versus 0.3730 ± 0.0395; recall 0.6381 ± 0.0526 versus 0.1356 ±
+  0.0094; F1 0.2558 ± 0.0493 versus 0.1981 ± 0.0048; mAP@0.5 0.3084 ±
+  0.0123 versus 0.1643 ± 0.0226; and mAP@0.5:0.95 0.1023 ± 0.0036 versus
+  0.0549 ± 0.0080. YOLO11s is faster at 52.94 ± 10.65 FPS versus 17.42 ±
+  5.69, with 9.43M versus 43.26M parameters and 21.42 versus 450.76 GFLOPs.
+- Audited the final six-row grid independently: all requested values are
+  finite, all means/sample SDs reproduce, all six checkpoint hashes match,
+  and all six gzip bundles contain 750 prediction records and match their
+  recorded hashes. Final publication/per-seed/long-form table SHA-256 values:
+  `6b467c706dd39a9a240d99a552eb0218734c8b9eaf38b0bfbc70d347f921449c`,
+  `ab4574589da9c63f4463e6ef13e4fef26dc565cd514cbd19118491ac0e7c09a8`,
+  and `91affca6abe7fadcc70e0b5ca5836e74394d99df1b1af982ea7240dbcab9d482`.
+  Summary SHA-256:
+  `e6018a9fc2117ac41cc51ab395c22316e61ba40c030b8f54ce6e64c641ea8245`.
+- Corrected the YOLO curve title to use each run ID. A reporting-only refresh
+  initially remeasured speed; the comparison was then restored to each run's
+  original immutable completion profile and the associated artifact hashes
+  were revalidated. Final repository checks: 175 passed, one expected
+  metadata-only skip, Ruff clean, and `git diff --check` clean.
+
+**What's still incomplete / next step:**
+- Batch 4 is complete. Do not start Batch 5 until the user reviews and accepts
+  the comparison tables; these prediction bundles/metrics are the frozen basis
+  for the later paired statistical tests.
+
+**Needs the user's review before proceeding:**
+- Review `results/tables/detector_comparison.csv` and the six detailed rows in
+  `results/tables/detector_comparison_per_seed.csv`, with the definitions and
+  timing caveat in `docs/QUANTITATIVE_COMPARISON.md`. In particular, confirm
+  the accuracy/efficiency trade-off and the conditional interpretation of IoU
+  and Dice before Batch 5.
+
+**Files touched:**
+- Config/code/tests: `configs/evaluation.yaml`, four seed configs,
+  `src/evaluate.py`, `tests/test_evaluate.py`, and the YOLO curve-title code/test.
+- Documentation/state: `README.md`, `docs/LIMITATIONS.md`,
+  `docs/QUANTITATIVE_COMPARISON.md`, `CODEX.md`, and `HANDOFF.md`.
+- Generated accepted artifacts: four seed training/derived-gate log trees and
+  tables/curves, `results/logs/phase5_evaluation/`, and
+  `results/tables/detector_comparison*.csv`; checkpoints remain ignored.
+- The user-owned deletion of `Final project 1405.v1.pdf` and pre-existing
+  failed/aborted diagnostic directories were left untouched.
+
+---
+
 ## Session 11 — 2026-08-10 — Publish Batches 2–3
 
 **What I did:**

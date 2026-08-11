@@ -2,15 +2,16 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-import yaml
 from PIL import Image
 from pydantic import ValidationError
 
 from meddet_benchmark.corruptions import (
-    CorruptionConfig,
-    CorruptionLevel,
+    CorruptionCondition,
+    CorruptionDefinition,
+    SeverityLevel,
     apply_corruption,
     corruption_fingerprint,
+    expand_conditions,
     load_corruptions,
 )
 
@@ -18,66 +19,98 @@ CONFIG_PATH = Path(__file__).parents[1] / "configs" / "corruptions.yaml"
 
 
 def patterned_image() -> Image.Image:
-    values = np.arange(32 * 24 * 3, dtype=np.uint16).reshape(24, 32, 3) % 256
-    return Image.fromarray(values.astype(np.uint8), mode="RGB")
+    checker = (np.indices((64, 64)).sum(axis=0) % 2 * 255).astype(np.uint8)
+    return Image.fromarray(np.repeat(checker[:, :, None], 3, axis=2), mode="RGB")
 
 
-def test_required_corruption_matrix_is_frozen() -> None:
+def condition(name: str, kind: str, value: float) -> CorruptionCondition:
+    families = {
+        "brightness": "lighting",
+        "gaussian_noise": "noise",
+        "salt_pepper": "noise",
+        "gaussian_blur": "blur",
+        "motion_blur": "blur",
+        "jpeg": "compression",
+    }
+    return CorruptionCondition(
+        name=name,
+        family=families[kind],
+        kind=kind,
+        unit="test",
+        severity=1,
+        value=value,
+    )
+
+
+def high_frequency_energy(image: Image.Image) -> float:
+    values = np.asarray(image, dtype=np.float32)
+    horizontal = np.diff(values, axis=1)
+    vertical = np.diff(values, axis=0)
+    return float(np.mean(np.abs(horizontal)) + np.mean(np.abs(vertical)))
+
+
+def test_phase6_matrix_has_all_required_types_and_five_levels() -> None:
     config = load_corruptions(CONFIG_PATH)
-    kinds = {level.kind for level in config.levels}
-    jpeg_qualities = {level.value for level in config.levels if level.kind == "jpeg"}
+    by_name = {item.name: item for item in config.corruptions}
 
-    assert kinds == {
-        "brightness",
+    assert set(by_name) == {
+        "darker",
+        "brighter",
         "gaussian_noise",
-        "salt_pepper",
+        "salt_and_pepper",
         "gaussian_blur",
         "motion_blur",
         "jpeg",
     }
-    assert jpeg_qualities == {20, 50}
+    assert all(len(item.levels) == 5 for item in by_name.values())
+    assert [level.value for level in by_name["jpeg"].levels] == [90, 70, 50, 35, 20]
+    assert len(expand_conditions(config)) == 35
     assert len(corruption_fingerprint(config)) == 64
 
 
-def test_every_corruption_is_deterministic_and_preserves_geometry() -> None:
+def test_every_condition_is_deterministic_and_preserves_geometry() -> None:
     config = load_corruptions(CONFIG_PATH)
     clean = patterned_image()
     clean_before = np.asarray(clean).copy()
 
-    for level in config.levels:
-        first = apply_corruption(clean, level, base_seed=config.seed, image_id="case-1")
-        second = apply_corruption(clean, level, base_seed=config.seed, image_id="case-1")
+    for item in expand_conditions(config):
+        first = apply_corruption(clean, item, base_seed=config.seed, image_id="case-1")
+        second = apply_corruption(clean, item, base_seed=config.seed, image_id="case-1")
         assert first.mode == "RGB"
         assert first.size == clean.size
-        np.testing.assert_array_equal(first, second, err_msg=level.name)
+        np.testing.assert_array_equal(first, second, err_msg=item.condition_id)
 
     np.testing.assert_array_equal(clean, clean_before)
 
 
-def test_stochastic_corruption_is_order_independent_per_image() -> None:
+@pytest.mark.parametrize("kind,value", [("gaussian_noise", 0.05), ("motion_blur", 9)])
+def test_stochastic_conditions_are_order_independent_per_image(
+    kind: str, value: float
+) -> None:
     clean = patterned_image()
-    level = CorruptionLevel(name="noise", kind="gaussian_noise", value=0.05)
+    item = condition(kind, kind, value)
 
-    first = apply_corruption(clean, level, base_seed=7, image_id="first")
-    apply_corruption(clean, level, base_seed=7, image_id="unrelated")
-    repeated = apply_corruption(clean, level, base_seed=7, image_id="first")
-    other = apply_corruption(clean, level, base_seed=7, image_id="other")
+    first = apply_corruption(clean, item, base_seed=7, image_id="first")
+    apply_corruption(clean, item, base_seed=7, image_id="unrelated")
+    repeated = apply_corruption(clean, item, base_seed=7, image_id="first")
+    other = apply_corruption(clean, item, base_seed=7, image_id="other")
 
     np.testing.assert_array_equal(first, repeated)
     assert not np.array_equal(first, other)
 
 
 def test_brightness_direction_is_correct() -> None:
-    clean = patterned_image()
+    values = np.full((32, 32, 3), 100, dtype=np.uint8)
+    clean = Image.fromarray(values, mode="RGB")
     dark = apply_corruption(
         clean,
-        CorruptionLevel(name="dark", kind="brightness", value=0.6),
+        condition("dark", "brightness", 0.6),
         base_seed=1,
         image_id="case",
     )
     bright = apply_corruption(
         clean,
-        CorruptionLevel(name="bright", kind="brightness", value=1.4),
+        condition("bright", "brightness", 1.4),
         base_seed=1,
         image_id="case",
     )
@@ -86,17 +119,61 @@ def test_brightness_direction_is_correct() -> None:
     assert np.asarray(bright).mean() > np.asarray(clean).mean()
 
 
+@pytest.mark.parametrize("kind,value", [("gaussian_blur", 2), ("motion_blur", 9)])
+def test_blur_reduces_high_frequency_content(kind: str, value: float) -> None:
+    clean = patterned_image()
+    blurred = apply_corruption(
+        clean,
+        condition(kind, kind, value),
+        base_seed=3,
+        image_id="case",
+    )
+
+    assert high_frequency_energy(blurred) < high_frequency_energy(clean)
+
+
 @pytest.mark.parametrize(
-    "level",
+    "definition",
     [
-        {"name": "bad", "kind": "motion_blur", "value": 4},
-        {"name": "bad", "kind": "jpeg", "value": 101},
-        {"name": "bad", "kind": "salt_pepper", "value": 1.1},
+        {
+            "name": "bad_motion",
+            "family": "blur",
+            "kind": "motion_blur",
+            "unit": "pixels",
+            "levels": [
+                {"severity": 1, "value": 4},
+                {"severity": 2, "value": 5},
+                {"severity": 3, "value": 7},
+            ],
+        },
+        {
+            "name": "bad_jpeg",
+            "family": "compression",
+            "kind": "jpeg",
+            "unit": "quality",
+            "levels": [
+                {"severity": 1, "value": 80},
+                {"severity": 2, "value": 90},
+                {"severity": 3, "value": 20},
+            ],
+        },
     ],
 )
-def test_invalid_severity_is_rejected(level: dict) -> None:
-    payload = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
-    payload["levels"] = [level]
-
+def test_invalid_severity_curves_are_rejected(definition: dict) -> None:
     with pytest.raises(ValidationError):
-        CorruptionConfig.model_validate(payload)
+        CorruptionDefinition.model_validate(definition)
+
+
+def test_severity_must_be_contiguous() -> None:
+    with pytest.raises(ValidationError):
+        CorruptionDefinition(
+            name="noise",
+            family="noise",
+            kind="gaussian_noise",
+            unit="std",
+            levels=(
+                SeverityLevel(severity=1, value=0.01),
+                SeverityLevel(severity=3, value=0.02),
+                SeverityLevel(severity=4, value=0.03),
+            ),
+        )

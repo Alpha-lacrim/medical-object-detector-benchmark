@@ -1,0 +1,69 @@
+schema_version: 1
+experiment_id: rsna-phase5-three-seed-comparison
+
+seeds: [17, 42, 137]
+split: test
+
+evaluation:
+  score_threshold: 0.25
+  match_iou_threshold: 0.5
+  coco_minimum_score: 0.001
+  nms_iou_threshold: 0.5
+  max_detections: 100
+
+runtime:
+  device: cuda
+  inference_batch_size: 1
+  num_workers: 0
+  pin_memory: true
+  statistics_ddof: 1
+
+timing_sources:
+  faster_rcnn: results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json
+  yolo11s: results/logs/yolo11s_rsna_seed17_benchmark/benchmark_estimate.json
+
+runs:
+  - detector: faster_rcnn
+    seed: 17
+    training_config: configs/faster_rcnn.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed17_full/summary.json
+    compute_table: results/tables/faster_rcnn_compute.csv
+  - detector: faster_rcnn
+    seed: 42
+    training_config: configs/faster_rcnn_seed42.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed42_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed42_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed42_compute.csv
+  - detector: faster_rcnn
+    seed: 137
+    training_config: configs/faster_rcnn_seed137.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed137_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed137_compute.csv
+  - detector: yolo11s
+    seed: 17
+    training_config: configs/yolo.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed17_full/summary.json
+    compute_table: results/tables/yolo_compute.csv
+  - detector: yolo11s
+    seed: 42
+    training_config: configs/yolo_seed42.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed42_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed42_compute.csv
+  - detector: yolo11s
+    seed: 137
+    training_config: configs/yolo_seed137.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed137_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed137_compute.csv
+
+outputs:
+  log_dir: results/logs/phase5_evaluation
+  prediction_bundles_dir: results/logs/phase5_evaluation/predictions
+  summary_json: results/logs/phase5_evaluation/summary.json
+  per_seed_table: results/tables/detector_comparison_per_seed.csv
+  mean_std_table: results/tables/detector_comparison_mean_std.csv
+  publication_table: results/tables/detector_comparison.csv

@@ -34,7 +34,9 @@ def test_plot_yolo_training_curves_writes_valid_png(tmp_path: Path) -> None:
         )
     destination = tmp_path / "curve.png"
 
-    result = plot_yolo_training_curves(source, destination, best_epoch=2)
+    result = plot_yolo_training_curves(
+        source, destination, best_epoch=2, run_id="yolo11s_test"
+    )
 
     assert result == destination
     with Image.open(destination) as image:
