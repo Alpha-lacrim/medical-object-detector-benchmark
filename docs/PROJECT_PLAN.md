@@ -1,23 +1,51 @@
 # Project plan: medical object detector benchmark
 
-Document status: **protocol draft v0.3**
+## Reconciliation Note
 
-Prepared: **2026-07-28**
+This document was originally written on 2026-07-28, before the dataset and
+model decisions were finalized. It is retained as a reconciled planning record,
+not as evidence that every original proposal was implemented unchanged.
+
+The delivered benchmark differs from the draft in three concrete ways:
+
+- **Dataset:** two brain-tumor candidates were investigated, but the benchmark
+  ultimately selected the RSNA Pneumonia Detection Challenge 2018, Stage 2.
+  The evidence and selection criteria are in
+  [DATASET_CHOICE.md](DATASET_CHOICE.md), and the completed audit is in
+  [DATASHEET.md](DATASHEET.md).
+- **YOLO model:** the draft made YOLO26s primary and YOLO11s a compatibility
+  fallback; V1 actually uses Ultralytics YOLO11s. The change is **not separately
+  logged** in a current `docs/DECISION_LOG.md`, because that file is not present.
+  The frozen [YOLO configuration](../configs/yolo.yaml) records the delivered
+  choice and its stated rationale: YOLO11 is an established anchor-free baseline
+  with more independent literature than YOLO26. No additional rationale is
+  inferred here.
+- **Comparison scope:** the proposed Track B architecture-optimized study was
+  descoped and was not run. The current repository contains neither a D-002
+  entry nor a decision-log file, so there is no D-002 target to link and no
+  separately logged rationale to reproduce. V1 contains one controlled,
+  three-seed comparison; this note records that delivered scope without
+  retroactively inventing a decision.
+
+Document status: **reconciled V1 implementation record (2026-08-12)**
+
+Original protocol prepared: **2026-07-28 (draft v0.3)**
 
 Requirements baseline: `Final project 1405.v1.pdf`
 
-Implementation checkpoint (2026-07-28): the locked lightweight environment,
-strict configuration/run gates, deterministic seeding, canonical records,
-operating-point metrics, official COCO AP, exact dataset audit, and corruption
-engine are implemented with tests. Real data, model adapters, training,
-profiling, Grad-CAM, and statistical resampling remain incomplete.
+Implementation checkpoint (2026-08-12): **V1 is complete within its delivered
+scope.** Dataset selection and audit, patient-grouped splits, both detector
+implementations, three-seed training and clean evaluation, compute profiling,
+robustness, explainability, paired statistics, the 12-section report, tests, and
+reproduction documentation are present. Track B and the additional analyses
+identified below as not attempted are outside the V1 evidence base.
 
 ## 1. Aim and research questions
 
-The project will compare one specified Faster R-CNN implementation with one
-specified modern YOLO implementation on the medical-image dataset approved
-after the interpretation gate. The recommended brain-MRI scope remains
-provisional.
+The delivered project compares one Faster R-CNN implementation with one YOLO
+implementation on a patient-grouped subset of the RSNA Pneumonia Detection
+Challenge. The original recommended brain-MRI scope was provisional and is
+superseded by the documented RSNA decision.
 
 Primary research question:
 
@@ -25,563 +53,447 @@ Primary research question:
 > Faster R-CNN and YOLO implementations differ in detection quality, efficiency,
 > corruption robustness, explanation localization, and deployment suitability?
 
-Secondary questions:
+Secondary questions addressed by V1:
 
 1. Are clean-test performance differences statistically and practically
-   meaningful?
-2. Which corruption families cause the largest absolute and relative
-   degradation?
-3. Do Grad-CAM maps concentrate on annotated tumor regions, and does that
-   behavior change on failures or corrupted inputs?
-4. Does the accuracy/robustness benefit, if any, justify each model's latency,
-   memory, size, and licensing constraints?
+   meaningful across the three training seeds?
+2. Which corruption types and families cause the largest absolute and relative
+   degradation for the primary seed checkpoints?
+3. Do Grad-CAM maps concentrate on annotated lung-opacity boxes across selected
+   true-positive, false-positive, and false-negative cases?
+4. How should the measured accuracy, robustness, latency, memory, model size,
+   and explanation evidence constrain deployment recommendations?
+
+V1 does not study brain tumors, corrupted-input Grad-CAM changes, clinical
+outcomes, or universal one-stage-versus-two-stage superiority. Those boundaries
+are stated in [LIMITATIONS.md](LIMITATIONS.md) and the
+[final report](../report/report.md).
 
 ## 2. Definition of success
 
-The result is complete only when:
+For the delivered V1 scope, success means that:
 
-- a clean environment can reproduce data manifests, training, evaluation,
-  figures, and tables from documented commands;
-- Track A compares both detectors under the same frozen assignment-aligned
-  contract except for unavoidable architecture-specific components;
-- Track B compares competently optimized detector configurations under the same
-  predeclared tuning budget without test-set feedback;
-- every metric requested by the PDF is reported with an explicit definition;
-- robustness includes every required corruption and JPEG quality 20 and 50;
-- Grad-CAM covers paired successes and failures for both models;
-- uncertainty, paired significance, effect sizes, and multiplicity handling are
-  reported;
-- the final conclusion uses accuracy, robustness, compute, explanations, and
+- the fixed data manifests, configs, checkpoints, prediction bundles, tables,
+  figures, and documented command chain make every reported number traceable;
+- both detectors use the same patient-grouped split, 640 x 640 input, three
+  seeds, no stochastic training augmentation, validation-based checkpoint
+  selection, unified evaluator, and frozen operating point;
+- all requested predictive and compute metrics are explicitly defined;
+- robustness covers seven corruption types in four families at five severities;
+- Grad-CAM covers paired good predictions, false positives, and shared false
+  negatives and includes quantitative localization measures;
+- clean and corruption comparisons include paired uncertainty, permutation
+  tests, effect sizes, and Holm multiplicity correction;
+- the conclusion integrates accuracy, robustness, compute, explainability, and
   deployment evidence; and
-- limitations explicitly cover public-dataset quality, leakage risk, missing
-  external validation, lack of clinical validation, and the inability of two
-  selected variants to establish a universal one-stage-versus-two-stage claim.
+- limitations cover dataset quality, leakage/dependence risk, fixed-threshold
+  sensitivity, missing external and clinical validation, restricted seed/sample
+  scope, and the inability of two variants to establish a universal detector-
+  family result.
+
+The original definition also required a separately reported Track A and Track B,
+a completed deviation matrix, corrupted-input Grad-CAM, and additional sanity
+checks. Those items were not part of delivered V1 and are not silently counted
+as complete.
 
 ### Outcome-first decision framework
 
-The assignment is the grading and traceability baseline, not an infallible
-scientific protocol. Use this priority order: safety/ethics/law/privacy/research
-integrity; scientific validity and reproducibility; assignment coverage; then
-convenience.
+The original priority order remains appropriate: safety, ethics, law, privacy,
+and research integrity; scientific validity and reproducibility; assignment
+coverage; then convenience. Decisions must not be selected, hidden, or relabeled
+after test performance is known.
 
-Every deviation must be entered in a versioned decision log before test access.
-The entry must quote or locate the affected requirement, state the conflict,
-cite the evidence, record the compliant alternative considered, identify the
-expected benefit and grading risk, and list affected configs and results. Keep
-the compliant Track A result whenever feasible. Never choose, hide, or relabel a
-deviation after seeing test performance.
+The draft required every deviation to be preregistered in a versioned decision
+log. That record is not present in the current repository. Consequently, V1's
+traceable sources of truth are the dataset documents, model and analysis
+configs, resolved run records, result artifacts, limitations, and final report.
+This reconciliation identifies the missing log rather than claiming that the
+original logging requirement was met.
 
 ## 3. Requirements traceability
 
-| Brief requirement | Planned evidence |
+| Requirement | Delivered V1 evidence |
 |---|---|
-| Literature review | Curated bibliography on the source paper, Faster R-CNN, selected YOLO generation, medical detection, Grad-CAM, robustness, and paired inference |
-| Exact dataset preparation | Archive hash, source metadata, file inventory, class map, split manifests, annotation audit, duplicate audit, and sample grid |
-| Faster R-CNN transfer learning | Versioned config, pretrained-weight identifier/hash, training logs, curves, checkpoint, and evaluation JSON |
-| YOLOv8 or newer | Versioned config, pretrained-weight identifier/hash, training logs, curves, checkpoint, and evaluation JSON |
-| Identical conditions | Machine-readable experiment contract plus a generated difference report listing only model-specific fields |
-| Detection metrics | Shared evaluator output for precision, recall, F1, IoU, Dice, AP50, and AP50:95, aggregate and per class |
-| Compute metrics | Repeated model-only and end-to-end latency/FPS, parameters, FLOPs, peak GPU memory, training time, inference time, and serialized size |
-| Robustness | Deterministic corruption manifests, per-severity results, retention ratios, absolute/relative drops, and plots |
-| Grad-CAM | Detection-target definition, paired case-selection manifest, heatmaps, box-overlap attention scores, and sanity checks |
-| Statistics | Paired intervals/tests, effect sizes, adjusted p-values, and a declared statistical unit |
-| Scientific discussion | Evidence-weighted comparison, deployment scenarios, limitations, and future work |
-| Final report | Twelve sections in the exact order given by the brief |
-| Instruction deviations | Preregistered decision log plus a report matrix linking each deviation to evidence, configs, Track A, and Track B |
+| Literature review | [LITERATURE_REVIEW.md](LITERATURE_REVIEW.md) and [references.bib](../report/references.bib) |
+| Dataset selection and preparation | [DATASET_CHOICE.md](DATASET_CHOICE.md), [DATASHEET.md](DATASHEET.md), `configs/dataset.yaml`, `data/manifests/`, and `data/splits/` |
+| Faster R-CNN transfer learning | `configs/faster_rcnn*.yaml`, `src/models/faster_rcnn_*`, training logs, checkpoints, curves, and [FASTER_RCNN_BASELINE.md](FASTER_RCNN_BASELINE.md) |
+| YOLOv8 or newer | `configs/yolo*.yaml`, `src/models/yolo_*`, training logs, checkpoints, curves, and [YOLO_BASELINE.md](YOLO_BASELINE.md) |
+| Controlled conditions | Resolved configs and matched-training contracts in `results/logs/`; the remaining architecture-specific differences are disclosed in the report |
+| Detection metrics | `src/meddet_benchmark/evaluation.py`, `src/meddet_benchmark/coco_evaluation.py`, `configs/evaluation.yaml`, and `results/tables/detector_comparison*` |
+| Compute metrics | Per-seed compute tables, benchmark estimates, and [QUANTITATIVE_COMPARISON.md](QUANTITATIVE_COMPARISON.md) |
+| Robustness | `configs/corruptions.yaml`, `results/logs/phase6_robustness/`, robustness tables/figures, and [ROBUSTNESS.md](ROBUSTNESS.md) |
+| Grad-CAM | `configs/explainability.yaml`, `results/logs/phase7_explainability/`, Grad-CAM tables/figures, and [EXPLAINABILITY.md](EXPLAINABILITY.md) |
+| Statistics | `configs/statistics.yaml`, `src/stats/`, statistical tables, and [STATISTICAL_ANALYSIS.md](STATISTICAL_ANALYSIS.md) |
+| Scientific discussion and limitations | Sections 11-12 of the [final report](../report/report.md) and [LIMITATIONS.md](LIMITATIONS.md) |
+| Final report | [report/report.md](../report/report.md), with all 12 required sections |
+| Reproducibility | [REPRODUCIBILITY.md](REPRODUCIBILITY.md), `README.md`, configs, environment captures, hashes, and committed evidence |
+| Instruction deviations | This reconciliation note records the delivered deviations; a separate decision/deviation log is not present |
 
-### Named acceptance artifacts
+Generated evidence lives under `results/`, not the draft's proposed `reports/`
+directory. Result summaries link back to configs, seeds, input hashes,
+checkpoint hashes, environment captures, and prediction bundles where relevant.
 
-The repository must produce these explicit deliverables before submission:
+## 4. Interpretation gate as originally written (brain-tumor scope, superseded)
 
-- `docs/DECISION_LOG.md`: preregistered interpretations and deviations,
-  including evidence, alternatives, risks, controls, and test-access state;
-- `reports/literature_review/`: reviewed sources on YOLOv8 or newer, XAI, and
-  Grad-CAM, with a traceable bibliography;
-- `reports/dataset_report/`: dataset-version report, class-distribution
-  table/plot, annotation audit, and labeled random-sample figures;
-- `reports/training/faster_rcnn/`: loss, precision, recall, and mAP curves plus
-  baseline performance tables and figures;
-- `reports/training/yolo/`: performance report, loss/precision/recall/mAP
-  curves, and inference-speed evidence;
-- `reports/tables/detector_comparison.*`: final detection and computational
-  comparison tables;
-- `reports/robustness/`: all condition tables, degradation/retention plots, and
-  family-balanced summaries;
-- `reports/explainability/`: good, bad, and failure-case heatmaps with the case
-  manifest and quantitative attention results; and
-- `reports/statistics/`: hypotheses, confidence intervals, p-values, effect
-  sizes, multiplicity adjustments, and reproducible test output.
+The original gate presupposed a brain-tumor reproduction problem and asked the
+project to resolve:
 
-Exact file formats will be frozen with the implementation schema. Generated
-artifacts must link back to result JSON, configs, seeds, and Git commits.
+1. whether the intended source was Alsufyani (2025);
+2. the source paper's contradictory 3,903-image/four-group and
+   9,900-image/three-group descriptions;
+3. whether augmentation explained the larger count and which split was
+   authoritative;
+4. the phrase "five classes" when the likely data described four image
+   categories, a model-internal background label, and possibly box-negative
+   no-tumor images;
+5. whether "three two detectors" meant two detectors;
+6. whether YOLO26 end-to-end inference and numerically identical training
+   settings were required; and
+7. the deadline, submission format, and compute budget.
 
-## 4. Interpretation gate
+These questions are preserved because they explain why the brain-tumor
+candidates required scrutiny. They do not describe the delivered dataset or
+model protocol.
 
-The PDF has no numeric rubric and contains several inconsistencies. Seek answers
-before expensive final runs, then activate and freeze the documented fallbacks
-for any unanswered item:
+### Resolved
 
-1. Confirm that the intended source is
-   [Alsufyani 2025](https://doi.org/10.3934/bioeng.2025001).
-2. Resolve the paper's contradiction between:
-   - 3,903 images, four groups, and 70/20/10 in its dataset section; and
-   - 6,930/1,980/990 images (9,900 total) and three groups in its
-     experiment/conclusion.
-3. Confirm the selected dataset, exact version, whether augmentation explains
-   the 9,900 count, and the authoritative split manifests.
-4. Resolve “five classes.” The likely dataset has four image categories; a
-   background label is model-internal, and a no-tumor image may have no object.
-5. Confirm that the page-8 phrase “three two detectors” means two detectors.
-6. Confirm whether YOLO26 in standard end-to-end NMS-free mode is acceptable
-   and whether “identical” includes the numeric learning rate, effective batch
-   size, and epoch budget.
-7. Obtain the deadline, submission format, and available GPU/time budget.
+The completed evidence review selected RSNA Stage 2; see
+[DATASET_CHOICE.md](DATASET_CHOICE.md). The brain-tumor source-paper count,
+augmentation, and "five classes" puzzles therefore do not determine V1. The
+delivered RSNA task has one foreground detection class, **Lung Opacity**;
+background is model-internal, while Normal and No Lung Opacity / Not Normal are
+study-level sampling strata rather than detection classes. The project uses
+exactly two detectors. The hardware scope is the recorded RTX 4060 Laptop GPU
+(8 GB VRAM), 16 GB system RAM, and i7-13650HX environment.
 
-Lack of an instructor response is not an indefinite blocker. Preserve every
-assumption and fallback in the versioned decision record, run the scientifically
-safest predeclared interpretation, and never claim that the ambiguity was
-resolved.
+## 5. Dataset candidates as originally evaluated (superseded)
 
-## 5. Dataset selection
+The following table preserves the draft's historical verdicts. Its final column
+is explicitly superseded and must not be read as the delivered selection.
 
-### Candidate comparison
-
-| Candidate | Advantages | Conflicts/risks | Decision |
+| Candidate | Advantages considered | Conflicts/risks considered | Original verdict (superseded) |
 |---|---|---|---|
-| RSNA Pneumonia Detection Challenge | Clinically recognized source, large X-ray localization task | Multi-gigabyte download, different anatomy/task, not five classes, heavier compute | Not preferred |
-| Medical Image DataSet: Brain Tumor Detection | 3,903 images; reported 70/20/10 split; matches likely source paper; manageable | Data provenance and patient IDs unclear; four image categories; annotation semantics need audit | **Provisional choice** |
-| MRI for Brain Tumor with Bounding Boxes | 5,249 images; bounding boxes; four reported groups | Data card reports only train/validation partitions; a new test split would violate exact reproduction | Backup only |
+| RSNA Pneumonia Detection Challenge | Clinically recognized source; large radiograph localization task | Multi-gigabyte download; different anatomy from the provisional brain-MRI framing; not five classes; heavier compute | Not preferred |
+| Medical Image DataSet: Brain Tumor Detection | Advertised 3,903 images and 70/20/10 split; appeared to match the likely source paper; manageable scale | Provenance and patient IDs unclear; four image categories; annotation semantics required audit | **Provisional choice** |
+| MRI for Brain Tumor with Bounding Boxes | Advertised 5,249 images and four groups; bounding boxes available | Publisher supplied train/validation only; no authoritative test split; provenance and label integrity concerns | Backup only |
 
-### Required audit
+### Resolved
 
-Do not trust data-card counts without checking the downloaded version.
+The actual selection is **RSNA Pneumonia Detection Challenge 2018, Stage 2**, as
+documented in [DATASET_CHOICE.md](DATASET_CHOICE.md). RSNA was selected after
+source inspection because it provides a verifiable 26,684-study inventory,
+9,555 valid positive boxes, clear task semantics, official provenance and
+terms, and an official mapping that enables NIH patient grouping. The two
+brain-tumor alternatives could not provide the same combination of auditability,
+patient-safe splitting, and authoritative partitioning.
 
-1. Record source URL, owner, version/update timestamp, license, archive size, and
-   SHA-256.
-2. Inventory every image and label, then compare actual and documented counts.
-3. Parse all boxes and reject/report:
-   - missing image/label pairs;
-   - non-finite or out-of-range coordinates;
-   - zero/negative-area boxes;
-   - unknown class IDs;
-   - exact duplicate boxes;
-   - unreadable or unexpected image formats.
-4. Determine whether `no tumor` is encoded as an empty label, image-level
-   category, or bounding box. Do not infer.
-5. Compute image and box counts per class and split.
-6. Detect exact duplicates using cryptographic hashes and near duplicates using
-   perceptual hashes. Check whether clusters cross splits.
-7. Use patient/study grouping if identifiers exist. If not, state that
-   patient-level leakage cannot be excluded.
-8. Create deterministic sample grids with images, boxes, labels, dimensions,
-   and split names.
-9. Reproduce the confirmed paper dataset/version and split as the primary
-   analysis. Use the supplied dataset split only after verifying it is
-   identical. If the paper cannot be reconstructed, declare the supplied split
-   as a fallback benchmark and do not label it an exact reproduction. If
-   leakage is found, retain the approved primary split for traceability and
-   report a predeclared grouped sensitivity analysis.
-10. Convert once to a canonical COCO-style annotation file; verify round-trip
-    conversion against the source boxes.
+V1 uses a deterministic, hardware-scoped 5,000-study subset from 2,136 NIH
+patient groups. The fixed train/validation/test counts are 3,500/750/750, with
+no patient-key overlap. The sole foreground class is Lung Opacity. Images are
+converted from DICOM and annotations to canonical COCO and YOLO forms; raw data
+remain outside Git. The exact audit, split composition, integrity checks,
+provenance, and known risks are in [DATASHEET.md](DATASHEET.md), the committed
+manifest, and the split CSV files.
 
-Raw data remains outside Git. Commit only scripts, metadata, manifests, hashes,
-and small license-compatible examples.
+The original audit principles remain applicable: verify downloaded counts and
+boxes, preserve hashes and provenance, check pairing and duplicates, group by
+patient where possible, visualize deterministic samples, validate conversions,
+and keep raw data outside version control. V1 completed exact-duplicate and
+annotation checks; it did not claim a perceptual near-duplicate sensitivity
+analysis beyond the documented audit.
 
 ## 6. Models and fairness contract
 
-### Models
+### Delivered models
 
-- Faster R-CNN: Torchvision `fasterrcnn_resnet50_fpn_v2`, COCO-pretrained,
-  prediction head replaced for the audited detector classes plus background.
-- YOLO: Ultralytics `YOLO26s`, COCO-pretrained.
-- YOLO26 head mode: standard end-to-end one-to-one NMS-free inference
-  (`end2end=True`), frozen before preflight. The optional one-to-many/NMS path
-  is a different configuration and must not be substituted mid-study.
-- Compatibility fallback: `YOLO11s`, allowed only if the YOLO26 explainability
-  or training-control preflight fails and the reason is recorded before final
-  runs.
+- **Faster R-CNN:** Torchvision
+  `fasterrcnn_resnet50_fpn_v2`, COCO-pretrained, with its prediction head
+  replaced for one foreground class plus background.
+- **YOLO:** Ultralytics YOLO11s (`ultralytics==8.4.110`), COCO-pretrained.
 
-### Track A — assignment-aligned controlled fields
+The original YOLO26s primary / YOLO11s fallback hierarchy is superseded.
+`configs/yolo.yaml` records YOLO11s as an established anchor-free baseline with
+more independent literature than YOLO26. Because no current decision-log entry
+records the switch, this document does not add a retrospective trigger or claim
+that a specific YOLO26 preflight failed.
 
-The PDF unambiguously requires the same dataset, augmentation, and optimizer.
-If the instructor does not clarify whether every numeric training setting must
-also match, use the strict, scientifically conservative default below. Once
-frozen, both models must share:
+### Delivered controlled comparison
 
-- exact train/validation/test manifests;
-- decoded pixels and grayscale-to-three-channel conversion;
-- aspect-ratio-preserving resize/letterbox rule and interpolation;
-- the same deterministic offline/shared augmentation corpus;
-- no additional framework-native augmentation;
-- the exact optimizer implementation and settings;
-- learning-rate schedule and warm-up definition;
-- fixed epoch budget and validation cadence;
-- effective batch size, using gradient accumulation if required;
-- random seeds;
-- pretrained initialization policy;
-- checkpoint selection rule based on validation AP50:95;
-- stopping rule (prefer a fixed epoch budget; no model-specific early stopping);
-- one shared evaluator and operating-point policy; and
-- the same final hardware and precision protocol.
+V1 is one controlled comparison and is not reported as separate Track A and
+Track B results. Both detector arms share:
 
-Unavoidable differences—loss functions, proposal generation, heads,
-architecture-internal normalization, and postprocessing—are detector
-components, not experimental controls. List them explicitly in the report.
+- the exact patient-grouped train, validation, and test manifests;
+- one foreground class, grayscale-to-three-channel conversion, and 640 x 640
+  inputs;
+- COCO-pretrained initialization;
+- no stochastic training augmentation or multi-scale training;
+- seeds 17, 42, and 137;
+- a maximum of 30 epochs, validation each epoch, minimum eight epochs,
+  early-stopping patience five, and validation mAP@0.5:0.95 checkpoint
+  selection;
+- SGD, momentum 0.9, weight decay 0.0005;
+- the shared canonical prediction schema, evaluator, score/matching thresholds,
+  hardware, and batch-1 AMP profiling protocol.
 
-### Track B — architecture-optimized fields
+Architecture/runtime-specific fields are disclosed rather than presented as
+identical: Faster R-CNN uses physical batch 2 with two-step gradient
+accumulation, float16 AMP, learning rate 0.005, frozen batch-normalization
+statistics, gradient clipping, and a plateau scheduler. YOLO11s uses
+physical/effective batch 4, bfloat16 forward/backward with float32 loss,
+learning rate 0.001, native training batch-normalization statistics, a one-epoch
+warm-up, and a constant post-warm-up learning rate. Losses, proposal/head logic,
+and postprocessing remain detector components. These differences and the
+accepted numerical-stability exceptions are documented in
+[LIMITATIONS.md](LIMITATIONS.md) and report section 4.1.
 
-Track B keeps the audited data, immutable splits and test set, canonical
-prediction schema, evaluator, metric definitions, reporting schema, and final
-profiling hardware identical. It permits model-specific optimizer settings,
-schedules, effective batch sizes, input resolutions, native augmentations, and
-training duration when they are part of a predeclared search space.
+### Track B (descoped from V1)
 
-Give each detector the same tuning opportunity, defined before tuning as the
-same number of trials and a comparable wall-clock or accelerator-hour ceiling.
-Use training and validation data only; freeze the chosen configuration before
-test access. Report Track B separately from Track A and publish the search
-space, trial ledger, rejected configurations, selection criterion, and compute
-consumed. Track B cannot retroactively replace an unfavorable Track A result.
+The draft proposed an architecture-optimized Track B with equal tuning
+opportunity, model-specific schedules, resolutions, augmentations, and trial
+ledgers. It was not attempted and has no Track B results. No current D-002 entry
+exists, so its descoping rationale is not separately logged. Track B must not be
+implied by the exploratory or failed run directories preserved outside the
+frozen result set.
 
-### Input-size rule
+### Input, augmentation, and training as delivered
 
-For Track A, freeze one shared size after the dataset audit and before model
-training:
+The input size is fixed at 640 x 640 in both model configs. The draft's
+brain-MRI candidate simulation over `{128, 256, 320, 512, 640}` was not the
+selection procedure used for RSNA. Both arms disable stochastic augmentation,
+including YOLO HSV, geometric, mosaic, mixup, cutmix, copy-paste,
+auto-augmentation, erasing, and multi-scale options. Robustness corruptions are
+test-time stressors only and were never used to fine-tune the models.
 
-1. Determine the confirmed paper's exact resize/crop behavior. It reports
-   approximately 139x132 native images resized to 128x128, but this must be
-   reconciled with the downloaded files.
-2. Using training annotations only, simulate candidates
-   `{128, 256, 320, 512, 640}` with aspect-ratio-preserving letterboxing.
-3. Discard a candidate when more than 5% of training boxes would have a
-   shortest side below 4 pixels or the median shortest side would be below 16
-   pixels after resizing.
-4. Choose the smallest remaining candidate supported by both detectors. If no
-   candidate passes, use 640 and state the unresolved small-lesion limitation.
-5. Record interpolation, padding value, lesion-size distribution, and the
-   reason for any deviation from the confirmed paper's 128x128 preprocessing.
-
-This rule uses label geometry rather than test performance and prevents a
-resolution that erases small lesions.
-
-### Augmentation
-
-Split first. For Track A, generate a deterministic, versioned training-only
-augmentation manifest or corpus that both frameworks consume identically.
-Start with conservative transforms whose box geometry is unambiguous:
-
-- horizontal flip only if medically justified;
-- small rotation/translation/scale with clipped, validated boxes;
-- mild brightness/contrast variation; and
-- no mosaic, mixup, copy-paste, or framework-specific HSV defaults.
-
-Do not use robustness-test corruptions as uncontrolled training augmentation
-unless the protocol explicitly defines a separate robustness-training study.
-
-### Initial training budget
-
-Use two stages for each frozen track:
-
-1. **Preflight:** a tiny subset and 1–2 epochs to verify data parity, finite
-   losses, checkpointing, evaluation, profiling, and Grad-CAM end to end.
-2. **Final:** at least three fixed seeds, the track-specific frozen budget,
-   validation each epoch, and the best validation AP50:95 checkpoint per seed.
-
-Track A starts with a fixed 100-epoch budget. Track B uses the configuration and
-duration selected within its equal tuning budget. If compute cannot support
-three final seeds for both tracks, prioritize a multi-seed Track A, label any
-single-seed Track B result exploratory, and use image-level paired uncertainty
-without implying training-seed stability.
-
-The proposed starting optimizer is AdamW with cosine decay and a shared
-effective batch size for Track A. Freeze exact values only after a
-training-only/validation pilot; do not use test results. Track B may use
-model-specific search spaces, but both detectors must receive the same
-predeclared trial and compute opportunity.
+Both adapters completed smoke/preflight checks and three final training seeds.
+The original AdamW/cosine, fixed 100-epoch, equal-effective-batch proposal is
+superseded by the frozen SGD-based configs summarized above.
 
 ## 7. Shared evaluation protocol
 
-### Detection matching
+Both detectors write the same canonical per-image prediction representation and
+are evaluated by the same implementation.
 
-- Convert both predictions to the same COCO schema.
-- Use class-aware one-to-one matching, highest score first, at IoU >= 0.50 for
-  operating-point metrics.
-- Use standard COCO IoU thresholds 0.50:0.05:0.95 for AP50:95.
-- State maximum detections per image and treatment of empty images.
+### Detection matching and operating point
 
-### Required metrics
+- Official `pycocotools.COCOeval` supplies bounding-box AP at IoU 0.50 and the
+  COCO 0.50:0.05:0.95 range.
+- Global micro precision, recall, and F1 use a fixed score threshold of 0.25,
+  class-aware one-to-one matching at IoU 0.50, and at most 100 detections per
+  image.
+- COCO AP retains predictions down to score 0.001 and is not computed from the
+  0.25-filtered operating-point set.
+- Conditional mean IoU is computed only over matched true-positive box pairs;
+  conditional box Dice is `2 * IoU / (1 + IoU)` over the same pairs. These
+  measures do not penalize missed or extra detections and are not segmentation
+  Dice.
+- Empty and box-negative images contribute to false-positive/false-negative
+  counts as appropriate. Conditional localization is undefined when a detector
+  has no matched true positive.
 
-- AP50 and AP50:95: shared COCO-style evaluator, macro and per class.
-- Precision, recall, F1: report at:
-  1. a fixed documented threshold for comparability; and
-  2. a model-specific threshold selected once on validation data for a realistic
-     operating point.
-- IoU:
-  - localization-only mean IoU over class-aware matched true-positive box
-    pairs, macro-averaged by class and clearly labeled as not penalizing misses;
-  - detection-aware set IoU by rasterizing the union of all above-threshold
-    predicted rectangles and ground-truth rectangles per image and class, then
-    macro-averaging image-class units. False-positive area enlarges the union;
-    false-negative area reduces the intersection. Define empty/empty as 1 and
-    one-sided empty as 0.
-- Dice:
-  - detection-aware set Dice on the same per-image/per-class union masks,
-    `2 * |P intersect G| / (|P| + |G|)`, with the same empty-set conventions;
-  - optional matched-pair box Dice `2 * IoU / (1 + IoU)` as a
-    localization-only secondary measure.
-  State explicitly that box-mask Dice is not tumor-segmentation Dice.
-- Confusion/error analysis: true positives, false positives, false negatives,
-  localization errors, class confusions, and empty-image behavior.
-
-Report mean and dispersion across seeds, plus per-class values. Keep raw,
-per-image predictions so every statistic is reproducible.
+V1 did **not** add model-specific validation-selected thresholds, rasterized
+set-IoU/set-Dice, or a separate per-class analysis beyond the sole foreground
+class. The fixed threshold and conditional-metric limitations are stated in
+[LIMITATIONS.md](LIMITATIONS.md). Raw prediction bundles are preserved for all
+three clean-evaluation seeds.
 
 ## 8. Computational benchmark
 
-Run on one otherwise idle device with versions and clocks/power mode recorded.
+The delivered compute protocol uses the recorded RTX 4060 Laptop GPU, batch-1
+AMP inference, 10 warm-up images, 100 timed images, and CUDA synchronization.
+It reports parameters, serialized checkpoint size, estimated GFLOPs for
+registered operations, FPS, mean/p50/p95 latency, measured training time,
+best-checkpoint epoch, and peak allocated training memory. Per-seed evidence is
+retained in `results/tables/` and the corresponding run summaries.
 
-For each model and precision:
-
-1. report parameter count and serialized checkpoint/export size;
-2. compute FLOPs with the same input shape and the same counting library,
-   acknowledging unsupported operations;
-3. reset and record peak allocated GPU memory for training and inference;
-4. record wall-clock training time and best-checkpoint epoch;
-5. run at least 50 warm-up iterations and 500 measured iterations;
-6. synchronize CUDA before and after every timed region;
-7. report median, mean, standard deviation, p95 latency, and FPS;
-8. measure batch size 1 as primary, with a secondary throughput batch if useful;
-9. separate model-only latency from end-to-end decode/preprocess/model/NMS
-   latency; and
-10. report FP32 primary results and predeclared FP16 deployment results only if
-    both models support the same precision path.
-
-Do not mix TensorRT numbers for one detector with eager PyTorch numbers for the
-other.
+The draft's 50 warm-up / 500 measured iteration target, FP32-primary comparison,
+and fully separate model-only versus end-to-end timing were not implemented.
+Faster R-CNN resizing occurs inside its timed forward, while YOLO resizing is
+outside the timed forward-plus-NMS interval. The report therefore treats speed
+as deployment-relevant under the measured wrappers, not as a pure architecture
+kernel benchmark. No TensorRT/eager-framework mixture is reported.
 
 ## 9. Robustness benchmark
 
-Apply corruptions only to the frozen test images. Keep geometry and annotations
-unchanged. Generate every corrupted image independently from the clean source,
-never cumulatively. Use deterministic seeds and save a corruption manifest.
+Robustness uses only the validation-selected seed-17 checkpoints and a fixed,
+stratified 300-image sample from the held-out test split. Each corrupted image
+is generated independently from clean input with unchanged geometry and labels.
+The committed manifest and `configs/corruptions.yaml` make sampling and
+generation deterministic.
 
-| Family | Required conditions | Prespecified severity proposal |
+The grid contains seven types across four families, each at five ordered
+severities (35 corrupted conditions per detector):
+
+| Family | Types | Frozen severity values |
 |---|---|---|
-| Brightness | darker, brighter | factors 0.6/0.8 and 1.2/1.4 |
-| Gaussian noise | Gaussian | normalized sigma 0.02/0.05/0.10 |
-| Impulse noise | salt-and-pepper | pixel probability 0.01/0.03/0.05 |
-| Gaussian blur | Gaussian blur | sigma 1/2/3 with recorded kernel |
-| Motion blur | motion blur | kernel length 5/9/15, seeded angle |
-| JPEG | quality 20%, 50% | exactly Q=20 and Q=50 |
+| Lighting | darker, brighter | multipliers 0.90-0.50 and 1.10-1.50 |
+| Noise | Gaussian, salt-and-pepper | sigma fractions 0.010-0.075; affected fractions 0.0025-0.0400 |
+| Blur | Gaussian, motion | sigma 0.5-3.0 pixels; kernels 3-17 pixels |
+| Compression | JPEG | quality 90, 70, 50, 35, 20 |
 
-Before freezing, verify on a small training-only sample that severities are
-visible but not dominated by implementation artifacts.
+For each condition V1 preserves all seven predictive metrics, absolute clean
+change, clean-relative retention, type/severity curves, and four-family
+summaries. The same checkpoints, thresholds, NMS, and evaluator are used
+throughout; no corrupted test image is used for training. Robustness is not
+averaged across the three training seeds, and the 300-image/111-box scope limits
+generality, as documented in [ROBUSTNESS.md](ROBUSTNESS.md).
 
-For every model, seed, corruption, and severity, report:
+## 10. Explainability plan as delivered
 
-- the condition-specific value of every PDF-listed detection metric;
-- absolute change from clean;
-- relative retention, for example `AP_corrupt / AP_clean`;
-- worst-case drop;
-- a family-balanced mean: average severities within each corruption type, types
-  within each family, and then families equally so families with more
-  severities do not dominate; and
-- performance-versus-severity curves.
+V1 computes ordinary ReLU Grad-CAM for all 111 ground-truth boxes in the same
+seed-17, 300-image sample used for robustness. Faster R-CNN has 110 valid maps
+because one target produced zero heatmap energy and was excluded under the
+declared policy; YOLO11s has 111 valid maps. The matched stride-16, 40 x 40
+layers are:
 
-Use the same clean model checkpoints; do not fine-tune on corrupted test data.
+- Faster R-CNN: `backbone.body.layer3`;
+- YOLO11s: `model.6`.
 
-## 10. Explainability plan
+For each ground-truth target, the scalar is the post-activation foreground
+probability of the retained low-threshold candidate with highest IoU to that
+box, using score as a deterministic tie-breaker. An operating-point false
+negative therefore uses the best available pre-threshold candidate as an
+explicit proxy. The outputs retain target, layer, score, IoU, checkpoint, and
+image provenance.
 
-Grad-CAM for detectors needs a defined scalar target. For each analyzed
-detection:
+Quantitative measures are energy inside the ground-truth box and pointing-game
+success, with the rasterized box-area fraction as a random baseline. Qualitative
+panels contain three shared high-IoU true positives, three shared false
+positives on box-negative images, and three shared false negatives selected at
+proxy-IoU quantiles.
 
-1. target the pre-postprocessing class score associated with a matched or
-   selected detection;
-2. choose and record the last spatial feature layer appropriate to each
-   architecture;
-3. upsample and normalize heatmaps using one shared visualization rule;
-4. preserve the prediction, ground-truth box, class, score, IoU, checkpoint,
-   image hash, and target-layer name.
-
-Build a deterministic paired case manifest from evaluation outputs:
-
-- high-confidence true positives;
-- low-confidence or poor-localization true positives;
-- false positives;
-- false negatives using the highest relevant pre-NMS response when possible;
-- corruption-induced failures; and
-- the same images for both detectors wherever possible.
-
-In addition to required panels, quantify:
-
-- fraction of positive heatmap energy inside the ground-truth box;
-- pointing-game success (heatmap maximum inside the box);
-- change in these measures under corruption; and
-- model-parameter randomization or target-label sanity checks on a subset.
-
-Do not claim that Grad-CAM proves causal reasoning or clinical trustworthiness.
+The draft's poor-localization true-positive category, corrupted-input CAM
+comparison, parameter-randomization test, and target-label sanity test were not
+implemented. Grad-CAM is treated as a coarse, target- and layer-dependent
+association map, not evidence of causal reasoning or clinical trustworthiness;
+see [EXPLAINABILITY.md](EXPLAINABILITY.md).
 
 ## 11. Statistical analysis
 
-Declare the image (or patient, if identifiers exist) as the paired evaluation
-unit. Preserve per-image predictions and metrics.
+The clean analysis covers all 750 test images and paired training seeds 17, 42,
+and 137. For each of the seven predictive metrics, the detector difference is
+computed within seed and then averaged across paired seeds. Inference uses:
 
-Primary estimand:
+- 2,000 paired hierarchical percentile bootstrap draws over image indices and
+  paired seed indices;
+- 5,000 two-sided paired image-label permutation draws;
+- pointwise 95% bootstrap intervals;
+- paired jackknife Cohen's d; and
+- Holm correction across the seven clean endpoints.
 
-- the Track A difference in clean-test COCO AP50:95 between the two selected
-  implementations, averaged across final training seeds.
+Dataset-level AP is recomputed from complete prediction bundles in every draw;
+the analysis does not average a fictional per-image AP. Precision, recall, F1,
+and conditional localization metrics are rebuilt from their sufficient
+per-image contributions.
 
-Primary inference:
+The corruption analysis uses the paired seed-17 predictions on the fixed
+300-image sample. It evaluates both raw detector differences and differences in
+clean-relative retention for each of 35 conditions, with Holm correction within
+each metric-and-estimand family.
 
-- a stratified paired bootstrap with at least 10,000 image resamples, or patient
-  resamples when IDs exist. Resample matched units, keep each unit's complete
-  prediction bundle, recompute dataset-level AP for each model/seed, average
-  across seeds, and then compute the paired difference and 95% interval;
-- a paired permutation test that swaps complete matched prediction bundles and
-  recomputes dataset-level AP; and
-- a practical effect reported as the absolute AP-point difference and its
-  relative change.
+The draft's patient-cluster bootstrap, at least 10,000 resamples, formal Track A
+primary/Track B secondary split, McNemar test, and Wilcoxon signed-rank tests
+were not implemented. Image-level resampling leaves residual within-patient
+dependence, and three seeds give only a coarse estimate of training variation.
+The exact estimands and results are in
+[STATISTICAL_ANALYSIS.md](STATISTICAL_ANALYSIS.md).
 
-Secondary analysis:
+## 12. Implementation sequence and completion status
 
-- the separately labeled Track B clean-test AP50:95 difference, with the same
-  paired uncertainty machinery but no substitution for an unfavorable Track A
-  outcome;
-- paired intervals/tests for AP50, frozen-threshold F1, robustness retention,
-  attention-inside-box score, and other declared outcomes;
-- McNemar's test only for a clearly defined paired binary outcome, such as
-  whether each image contains at least one correctly localized target;
-- Wilcoxon signed-rank for paired continuous per-image scores when its
-  assumptions and zero handling are documented; and
-- Holm correction within each declared family of secondary tests.
+The original milestone exit criteria are reconciled below. "Partially met"
+means that useful delivered work satisfies part of the original criterion but a
+named draft-only requirement did not occur.
 
-For multiple training seeds, report seed-level variation and use a hierarchical
-bootstrap over seeds and images where feasible. AP remains a dataset-level
-metric: never calculate or average “per-image AP,” and do not treat thousands of
-boxes from one image as independent observations.
+| Milestone | Exit criterion | Status |
+|---|---|---|
+| 0 - Clarify and freeze | Dataset, classes, models, hardware, scope, and acceptance criteria are frozen, with every material interpretation recorded before test access; delivered choices are frozen, but the brain-MRI gate was superseded and a complete decision/deviation log is not present | **Partially met** |
+| 1 - Reproducible foundation | A clean environment can run lint, unit checks, and the tiny CPU smoke path from locked metadata | **Met** |
+| 2 - Dataset pipeline | Source inventory, annotation audit, patient-grouped split, conversion, hashes, and visual checks reconcile or disclose discrepancies | **Met** |
+| 3 - Shared evaluator first | Both adapters yield identical metrics for identical canonical toy predictions, including official COCO AP checks | **Met** |
+| 4 - Detector adapters and preflight | Both adapters produce canonical predictions and pass data, evaluation, profiling, checkpoint, and Grad-CAM preflight; the delivered single-comparison paths passed, but the proposed two-track preflight was not attempted | **Partially met** |
+| 5 - Controlled and optimized training | Both detectors complete three traceable seeds and both proposed tracks are complete; three full seeds per detector exist, but no separate Track B search/results exist | **Partially met** |
+| 6 - Full benchmark | Clean evaluation, compute, corruption matrix, Grad-CAM outputs, and paired statistics exist with provenance for the delivered V1 scope | **Met** |
+| 7 - Report and reproduction | Generated evidence feeds the 12-section report and a documented reproduction chain, with citations, links, limitations, and consistency checked; no Track A/Track B compliance matrix or recorded full fresh-GPU rerun is claimed | **Partially met** |
 
-Publish the statistical-analysis script, frozen hypotheses, and
-machine-readable test results before writing the conclusion.
+## 13. Actual repository architecture
 
-## 12. Implementation sequence
-
-### Milestone 0 — Clarify and freeze
-
-- Seek instructor answers and record responses or non-response.
-- Activate a documented fallback for every unresolved interpretation.
-- Freeze the initial deviation and decision log before test access.
-- Record hardware/storage budget.
-- Pin the repository scope and acceptance criteria.
-
-Exit criterion: every interpretation that could change data, classes, models,
-or evaluation has either an answer or a preregistered fallback.
-
-### Milestone 1 — Reproducible foundation
-
-- Add environment lock and package metadata.
-- Add config schema and deterministic seed utilities.
-- Add continuous integration for lint, unit tests, and a tiny CPU smoke test.
-
-Exit criterion: a clean environment passes checks without real data.
-
-### Milestone 2 — Dataset pipeline
-
-- Add authenticated/manual download instructions.
-- Audit, convert, hash, and visualize the selected dataset.
-- Freeze split and augmentation manifests.
-
-Exit criterion: counts and annotations reconcile, or discrepancies are
-documented and approved.
-
-### Milestone 3 — Shared evaluator first
-
-- Implement prediction schema, matching, metrics, curves, and test fixtures.
-- Validate with hand-calculated toy cases and, where possible, a trusted COCO
-  implementation.
-
-Exit criterion: both adapter formats yield identical metrics for identical toy
-predictions.
-
-### Milestone 4 — Detector adapters and preflight
-
-- Implement Faster R-CNN and YOLO adapters, training, checkpoint selection, and
-  profiling.
-- Disable YOLO native augmentation for Track A and expose Track B choices in
-  explicit config.
-- Complete tiny end-to-end preflights for both models and both tracks.
-
-Exit criterion: both adapters produce the canonical prediction schema; data,
-evaluation, profiling, checkpointing, and Grad-CAM paths pass preflight.
-
-### Milestone 5 — Controlled and optimized training
-
-- Freeze the Track A contract and generate its model-config difference report.
-- Complete Track A final seeds for both detectors.
-- Run the equal-budget Track B validation search, freeze winners, and complete
-  final seeds for both detectors.
-- Preserve all trial ledgers, rejected configurations, and resource accounting.
-
-Exit criterion: Track A differs only in declared detector components, Track B
-used equal tuning opportunity, and both tracks have separately traceable logs,
-curves, checkpoints, and predictions.
-
-### Milestone 6 — Full benchmark
-
-- Separate Track A and Track B clean evaluation and compute profiling.
-- Corruption matrix.
-- Grad-CAM panels and quantitative attention checks.
-- Paired statistical analysis.
-
-Exit criterion: every PDF-required metric and artifact exists with provenance.
-
-### Milestone 7 — Report and reproduction
-
-- Generate tables/figures from results.
-- Write the 12 required sections.
-- Add a compliance/deviation matrix and keep Track A and Track B conclusions
-  separate.
-- Re-run from a clean checkout or container.
-- Check citations, limitations, artifact hashes, and result consistency.
-
-Exit criterion: one documented command chain reproduces the submitted evidence.
-
-## 13. Planned repository architecture
+The following tree reflects a fresh 2026-08-12 inventory of the delivered
+research repository. Generated/raw data subtrees and repeated per-seed result
+files are condensed with descriptive names, but directory names are exact.
 
 ```text
 .
+|-- .github/
+|   `-- workflows/ci.yml
+|-- .gitattributes
+|-- .gitignore
+|-- .python-version
 |-- README.md
-|-- Final project 1405.v1.pdf
+|-- pyproject.toml
+|-- requirements.txt
+|-- uv.lock
 |-- configs/
-|   |-- experiment.yaml
-|   `-- corruptions.yaml
+|   |-- dataset.yaml
+|   |-- faster_rcnn.yaml (+ seed42/seed137 variants)
+|   |-- yolo.yaml (+ seed42/seed137 variants)
+|   |-- evaluation.yaml
+|   |-- corruptions.yaml
+|   |-- explainability.yaml
+|   |-- statistics.yaml
+|   `-- smoke.yaml
 |-- data/
 |   |-- README.md
-|   `-- manifests/
+|   |-- manifests/rsna-pneumonia-5000-audit.json
+|   |-- raw/
+|   |-- processed/
+|   `-- splits/rsna-pneumonia-5000/
+|       |-- train.csv
+|       |-- val.csv
+|       |-- test.csv
+|       `-- test_robustness_seed17_n300.csv
 |-- docs/
-|   |-- DECISION_LOG.md
+|   |-- DATASET_CHOICE.md
+|   |-- DATASHEET.md
+|   |-- FASTER_RCNN_BASELINE.md
+|   |-- YOLO_BASELINE.md
+|   |-- QUANTITATIVE_COMPARISON.md
+|   |-- ROBUSTNESS.md
+|   |-- EXPLAINABILITY.md
+|   |-- STATISTICAL_ANALYSIS.md
+|   |-- LIMITATIONS.md
+|   |-- LITERATURE_REVIEW.md
+|   |-- REPRODUCIBILITY.md
 |   `-- PROJECT_PLAN.md
-|-- reports/
-|   |-- figures/
-|   |-- tables/
-|   `-- report/
+|-- notebooks/
+|-- report/
+|   |-- report.md
+|   `-- references.bib
+|-- results/
+|   |-- checkpoints/
+|   |-- figures/ (dataset, training, robustness, and Grad-CAM figures)
+|   |-- logs/ (training plus phase5-phase8 provenance and predictions)
+|   `-- tables/ (clean, compute, robustness, Grad-CAM, and statistics tables)
 |-- src/
-|   `-- meddet_benchmark/
-|       |-- data/
-|       |-- models/
-|       |-- evaluation/
-|       |-- profiling/
-|       |-- robustness/
-|       |-- explainability/
-|       `-- statistics/
-`-- tests/
+|   |-- data/
+|   |-- models/
+|   |-- robustness/
+|   |-- explainability/
+|   |-- stats/
+|   |-- utils/
+|   |-- meddet_benchmark/
+|   `-- evaluate.py
+`-- tests/ (26 test modules)
 ```
 
-Create directories when their first real file is needed; do not fill the
-repository with unowned placeholders.
+The draft's `reports/` tree was never used; the actual generated evidence root
+is `results/`, while the assembled manuscript and bibliography live in
+`report/`. A standalone `src/meddet_benchmark/evaluation/` package was not
+created; shared evaluation modules live directly under `src/meddet_benchmark/`
+with the evaluation entry point at `src/evaluate.py`.
 
 ## 14. Final report mapping
 
-Use the exact order required by the brief:
+The delivered [report/report.md](../report/report.md) uses the exact required
+top-level order:
 
 1. Introduction
 2. Literature Review
@@ -596,25 +508,27 @@ Use the exact order required by the brief:
 11. Discussion
 12. Conclusions and Future Work
 
-Each results section must point to the config, result file, seed(s), and commit
-that generated its claims. Experimental Methodology must include the
-compliance/deviation matrix, and every quantitative section must label Track A
-and Track B rather than blending them.
+The quantitative sections point to their source tables and figures; the
+reproduction documentation maps those artifacts to commands, configs, and
+stored inputs. The draft requirement to label separate Track A and Track B
+results and include a Track compliance/deviation matrix is superseded because
+V1 contains only one controlled comparison. The reconciliation note and
+methodology disclosure provide the accurate scope record.
 
 ## 15. Major risks and mitigations
 
-| Risk | Mitigation |
+| Risk | V1 mitigation and remaining limitation |
 |---|---|
-| Class-count ambiguity | Instructor confirmation plus annotation-derived class map |
-| A silent instructor override harms grading or validity | Preregistered decision log, preserved Track A, separate Track B, and explicit report matrix |
-| Patient or duplicate leakage | Patient grouping when possible; exact/near-duplicate audit; sensitivity analysis |
-| “Identical” conditions hide framework defaults | Shared/offline augmentations, disabled native augmentation, generated config diff |
-| Test-set tuning | Validation-only thresholds and model selection; freeze before test |
-| Different metric implementations | One model-independent evaluator |
-| Single-seed winner | At least three seeds or explicitly exploratory claims |
-| Decorative Grad-CAM | Detection targets, paired manifest, quantitative localization and sanity checks |
-| Timing bias | Same hardware/runtime/precision, warm-up, synchronization, repeated distributions |
-| Multiple statistical tests | Predeclared primary outcome and Holm correction |
-| Public data lacks external validity | Explicit limitation; no clinical claims |
-| Large artifacts or credentials enter Git | `.gitignore`, pre-commit checks, manifests/hashes only |
-| YOLO licensing affects deployment | Document AGPL/enterprise terms in deployment analysis |
+| Class-count ambiguity | Resolved from the audited annotations: one foreground Lung Opacity class; background is model-internal and study strata are not detection classes |
+| Undocumented protocol deviations | Dataset/model choices are traceable to dataset docs and configs, and this reconciliation exposes the missing decision log and Track B; no claim is made that the original preregistration mechanism was completed |
+| Patient or duplicate leakage | Official NIH keys enforce patient-disjoint splits and exact-duplicate/annotation checks are recorded; repeated exams within a split remain dependent, and no near-duplicate sensitivity claim is made |
+| Framework defaults obscure fairness | Stochastic/native augmentation is disabled, resolved configs are retained, and architecture/training differences are disclosed; no generated two-track config-difference report is claimed |
+| Test-set tuning | Checkpoints are selected by validation mAP@0.5:0.95 and the test operating threshold is frozen at 0.25; threshold sensitivity/calibration was not performed |
+| Different metric implementations | One model-independent evaluator and official pycocotools AP are used for both detectors |
+| Single-seed winner | Clean results use three full training seeds; robustness and explainability remain primary-seed-only and are labeled accordingly |
+| Decorative or overclaimed Grad-CAM | Detection-specific targets, matched layers, paired cases, energy-in-box, pointing game, and a random area baseline are retained; corruption and parameter-randomization sanity tests were not run |
+| Timing bias | Same device, AMP, batch size, warm-up count, synchronization, and repeated timing summaries are used; wrapper-level resize asymmetry remains disclosed |
+| Multiple statistical tests | A declared seven-metric clean family and per-metric/per-estimand corruption families use Holm correction |
+| Public-data external validity | The report limits claims to this fixed RSNA subset and rejects clinical deployment without prospective, external-site validation |
+| Large artifacts or credentials enter Git | Raw images remain outside Git; manifests, hashes, configs, compact prediction bundles, tables, figures, and documentation provide provenance |
+| YOLO licensing affects deployment | No deployment-license clearance analysis was completed; V1 recommendations are research-scenario comparisons and must not be read as legal approval for deployment |
