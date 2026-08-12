@@ -269,7 +269,7 @@ artifacts; the report assembly step does not recompute values.
 
 ## Definition of Done audit
 
-Every item in `PROJECT_SPEC.md` §9 is satisfied:
+Every item in the benchmark's Definition of Done is satisfied:
 
 - [x] **Two detectors under matched conditions.** Faster R-CNN and YOLO11s are
   trained on identical patient-safe splits, resolution, seed grid, evaluation

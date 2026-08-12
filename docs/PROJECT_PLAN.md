@@ -119,7 +119,7 @@ artifacts must link back to result JSON, configs, seeds, and Git commits.
 
 The PDF has no numeric rubric and contains several inconsistencies. Seek answers
 before expensive final runs, then activate and freeze the documented fallbacks
-in `Codex.md` for any unanswered item:
+for any unanswered item:
 
 1. Confirm that the intended source is
    [Alsufyani 2025](https://doi.org/10.3934/bioeng.2025001).
@@ -549,9 +549,6 @@ Exit criterion: one documented command chain reproduces the submitted evidence.
 
 ```text
 .
-|-- AGENTS.md
-|-- Codex.md
-|-- Handoff.md
 |-- README.md
 |-- Final project 1405.v1.pdf
 |-- configs/

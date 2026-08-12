@@ -6,8 +6,8 @@ This project selects the **RSNA Pneumonia Detection Challenge 2018, Stage 2
 training set**. The detector has one foreground class, `Lung Opacity`; normal
 and abnormal-without-opacity studies are negative images, not additional object
 classes. The full labeled set is reduced to a deterministic, patient-grouped,
-stratified subset of 5,000 studies for the RTX 4060 Laptop / 16 GB RAM compute
-budget in `PROJECT_SPEC.md` §3.
+stratified subset of 5,000 studies for the predeclared RTX 4060 Laptop / 16 GB
+RAM compute budget.
 
 The decision prioritizes trustworthy localization annotations and a defensible
 leakage-safe split over the convenience of the two smaller MRI compilations.
