@@ -14,8 +14,7 @@ The delivered benchmark differs from the draft in three concrete ways:
   [DATASET_CHOICE.md](DATASET_CHOICE.md), and the completed audit is in
   [DATASHEET.md](DATASHEET.md).
 - **YOLO model:** the draft made YOLO26s primary and YOLO11s a compatibility
-  fallback; V1 actually uses Ultralytics YOLO11s. The change is **not separately
-  logged** in a current `docs/DECISION_LOG.md`, because that file is not present.
+  fallback; V1 actually uses Ultralytics YOLO11s.
   The frozen [YOLO configuration](../configs/yolo.yaml) records the delivered
   choice and its stated rationale: YOLO11 is an established anchor-free baseline
   with more independent literature than YOLO26. No additional rationale is
