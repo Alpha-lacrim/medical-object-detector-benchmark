@@ -20,11 +20,7 @@ The delivered benchmark differs from the draft in three concrete ways:
   with more independent literature than YOLO26. No additional rationale is
   inferred here.
 - **Comparison scope:** the proposed Track B architecture-optimized study was
-  descoped and was not run. The current repository contains neither a D-002
-  entry nor a decision-log file, so there is no D-002 target to link and no
-  separately logged rationale to reproduce. V1 contains one controlled,
-  three-seed comparison; this note records that delivered scope without
-  retroactively inventing a decision.
+  descoped and was not run.
 
 Document status: **reconciled V1 implementation record (2026-08-12)**
 
