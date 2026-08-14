@@ -54,6 +54,81 @@ model forward, while the YOLO profile performs resize/tensor conversion before
 the timed forward-plus-NMS interval; this inherited framework asymmetry is
 reported rather than treated as an architecture-only difference.
 
+### GFLOP counting contract and sanity check
+
+The frozen values are 450.7637248 GFLOPs/image for Faster R-CNN and
+21.4198784 GFLOPs/image for YOLO11s, a 21.04-fold registered-operation gap.
+They were produced under the locked PyTorch 2.6.0+cu124 environment by
+`torch.utils.flop_counter.FlopCounterMode`, in evaluation and inference mode,
+on batch 1 and the first validation image. Both model inputs become 640 x 640;
+AMP changes dtype, not the dense shape-based operation formulas. The values in
+the CSVs remain unchanged.
+
+The [PyTorch 2.6 counter source](https://github.com/pytorch/pytorch/blob/v2.6.0/torch/utils/flop_counter.py)
+registers formulas for convolution, `mm`, `addmm`, `bmm`, `baddbmm`, and several
+scaled-dot-product/flash/efficient-attention forward and backward operators.
+Its convolution and matrix formulas use two FLOPs per multiply-add and do not
+add bias operations. Unregistered operations contribute no FLOPs unless they
+decompose into a registered operator. This inference-only workload executes no
+backward or attention kernels. A read-only replay of the exact profiling path
+reproduced the CSV totals and observed only these counted operations:
+
+| Profiled forward | Convolution | `addmm` | `bmm` | Total |
+|---|---:|---:|---:|---:|
+| Faster R-CNN | 425.0531328 G | 25.7105920 G | 0 G | 450.7637248 G |
+| YOLO11s | 21.2969984 G | 0 G | 0.1228800 G | 21.4198784 G |
+
+Consequently, these totals exclude work such as image decoding and transfer,
+elementwise activations, normalization, ordinary pooling, box clipping and
+decoding, thresholding, sorting/top-k, softmax/sigmoid, RoIAlign, and NMS except
+where an operation happens to decompose into one of the registered operators.
+The synchronized latency/FPS profiles do include much of that runtime work and
+remain the primary deployment-efficiency evidence.
+
+**Faster R-CNN scope and proposals.** The counter encloses the complete
+Torchvision model call, so it includes registered convolution/linear work in
+the ResNet-50 backbone and FPN, RPN head, v2 RoI box head, and final class/box
+predictor. It does not count RPN or final NMS itself, anchor/proposal
+bookkeeping, or MultiScaleRoIAlign. The configured model retains Torchvision's
+evaluation defaults of the top 1,000 candidates per FPN level before RPN NMS
+(up to 5,000 across its five levels) and at most 1,000 proposals per image
+after RPN NMS, with RPN score threshold 0.0. Those candidate-selection steps
+are uncounted; the registered RPN-head convolutions run over all anchors on the
+feature maps. The configured model also retains the default
+100-detection final cap and 0.5 box NMS threshold, while lowering the
+model-internal box score threshold from 0.05 to 0.0; the shared evaluator later
+applies its frozen 0.25 operating threshold. The profiled image
+`0004cfab-14fd-4e49-80ba-63a80b6bddd6.png` reached the 1,000 post-NMS proposal
+cap, and all 1,000 proposals entered the RoI head. The count is therefore an
+observed, data-dependent full-forward value—not a fixed hypothetical-proposal
+formula. Its module attribution is 113.1282432 G for backbone+FPN,
+80.7138816 G for the RPN head, and 256.9216000 G for the RoI heads. The
+proposal-heavy four-convolution v2 RoI head explains why resolution-only
+backbone scaling is not a valid estimate for this detector.
+
+**YOLO11s scope.** The model is fused, evaluated on one pre-resized
+`[1, 3, 640, 640]` tensor, and its full network forward is inside the counter.
+The detected registered work is convolution plus a small `bmm` contribution
+from the head path. Native NMS is deliberately outside the FLOP context but
+inside the latency interval; decode/selection operations without registered
+formulas do not add to the FLOP total.
+
+**External magnitude check.** The official
+[Ultralytics YOLO11 model table](https://docs.ultralytics.com/models/yolo11#performance-metrics)
+reports 21.5B FLOPs and 9.4M parameters for YOLO11s at 640 pixels. The local
+21.4199 G/9.428M profile is effectively the same scale. Torchvision 0.21's
+[official Faster R-CNN v2 weight metadata](https://docs.pytorch.org/vision/0.21/models/generated/torchvision.models.detection.fasterrcnn_resnet50_fpn_v2.html)
+reports 280.37 GFLOPs and 43.7M parameters for the stock COCO model, versus the
+local 450.76 G and 43.26M. The parameter agreement and order of magnitude are
+sound; the FLOP totals are not directly interchangeable because the published
+metadata does not establish the same image, proposal realization, class head,
+or operator-counting convention. For reference, the local two-FLOPs-per-MAC
+total is 225.3818624 GMAC-equivalent before accounting for those other
+differences. The defensible claim is therefore the internally consistent
+21.04-fold registered-op gap under this documented profiler, supported by the
+separately measured latency/FPS gap—not that every paper using the label
+"GFLOPs" should reproduce either absolute value.
+
 ## Across-seed summary
 
 All requested metrics are retained per seed. The publication table reports the
