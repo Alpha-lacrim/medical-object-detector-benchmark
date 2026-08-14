@@ -19,6 +19,17 @@ def _safe_average(values: np.ndarray) -> float | None:
     return float(np.mean(valid)) if valid.size else None
 
 
+def _precision_curve(values: np.ndarray) -> list[float | None]:
+    """Average a COCO precision slice while preserving its 101 recall positions."""
+
+    if values.ndim < 2:
+        raise ValueError("COCO precision curve input must include recall and averaging axes")
+    return [
+        _safe_average(np.take(values, recall_index, axis=1))
+        for recall_index in range(values.shape[1])
+    ]
+
+
 def _record_maps(
     predictions: list[ImagePrediction], targets: list[ImageTarget]
 ) -> tuple[dict[str, ImagePrediction], dict[str, ImageTarget]]:
@@ -55,8 +66,9 @@ def evaluate_coco(
     class_names: dict[int, str] | None = None,
     minimum_score: float = 0.0,
     max_detections: int = 100,
+    include_precision_recall: bool = False,
 ) -> dict[str, Any]:
-    """Compute AP50 and AP50:95 through the official pycocotools evaluator."""
+    """Compute COCO AP and optionally expose its official 101-point PR curves."""
 
     if (
         not class_ids
@@ -169,7 +181,7 @@ def evaluate_coco(
         }
 
     stats = evaluator.stats
-    return {
+    result = {
         "ap50_95": float(stats[0]) if stats[0] >= 0 else None,
         "ap50": float(stats[1]) if stats[1] >= 0 else None,
         "per_class": per_class,
@@ -178,3 +190,25 @@ def evaluate_coco(
         "prediction_count": len(detections),
         "max_detections": max_detections,
     }
+    if include_precision_recall:
+        # precision has shape [IoU, recall, class, area, max detections]. Values
+        # below zero are pycocotools' sentinel for an undefined category/recall.
+        full_slice = precision[:, :, :, 0, -1]
+        iou_50_slice = precision[iou_50_index : iou_50_index + 1, :, :, 0, -1]
+        result["precision_recall"] = {
+            "recall": [float(value) for value in evaluator.params.recThrs],
+            "precision_iou_50": _precision_curve(iou_50_slice),
+            "precision_iou_50_95": _precision_curve(full_slice),
+            "per_class": {
+                str(class_id): {
+                    "precision_iou_50": _precision_curve(
+                        iou_50_slice[:, :, position : position + 1]
+                    ),
+                    "precision_iou_50_95": _precision_curve(
+                        full_slice[:, :, position : position + 1]
+                    ),
+                }
+                for position, class_id in enumerate(class_ids)
+            },
+        }
+    return result

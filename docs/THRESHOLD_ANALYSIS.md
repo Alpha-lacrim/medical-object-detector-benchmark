@@ -1,0 +1,115 @@
+# Confidence-Threshold and Precision-Recall Analysis
+
+## Plain finding
+
+The fixed confidence threshold of 0.25 exaggerated YOLO11s's low-recall appearance, but it
+did not create the underlying performance gap. Lowering the threshold to 0.01 raises
+YOLO11s mean recall from 0.1356 to 0.3321 and mean F1 from 0.1981 to 0.2840. Its best F1 in
+the requested sweep is therefore at the lower boundary, not at 0.25.
+
+The apparent YOLO11s *precision advantage*, however, does not persist on the matched
+precision-recall curve. Faster R-CNN has higher mean interpolated precision at 96 of the 101
+official AP@0.5 recall positions; the remaining five positions are equal and YOLO11s is
+higher at none. For the IoU-averaged AP@0.5:0.95 curve, Faster R-CNN is higher at 96
+positions, YOLO11s at one near-zero-recall position, and four are equal. The corresponding
+AP values reproduce the frozen comparison: 0.3084 +/- 0.0123 versus 0.1643 +/- 0.0226 at
+IoU 0.50 and 0.1023 +/- 0.0036 versus 0.0549 +/- 0.0080 across IoU 0.50:0.95.
+
+The defensible conclusion is therefore narrower than "distinct operating regimes." The two
+models have differently calibrated score distributions at the same nominal threshold, and
+YOLO11s remains coverage-limited across the full curve, but it does not define a generally
+superior high-precision regime. At matched recall or precision constraints, Faster R-CNN is
+better on the tested targets. Later paper text should describe the 0.25 result as a
+fixed-threshold operating-point difference, not as an architecture-inherent precision
+advantage.
+
+## Protocol
+
+The analysis reads the six frozen clean prediction bundles for Faster R-CNN and YOLO11s at
+seeds 17, 42, and 137. Their SHA-256 hashes, test-annotation hash, detector/seed identities,
+and evaluator settings are checked against the completed Phase 5 summary before any metric
+is accepted. It performs no training, checkpoint loading, model inference, NMS, or other
+prediction processing.
+
+For each seed, 99 confidence thresholds from 0.01 through 0.99 in increments of 0.01 are
+passed to the same `evaluate_operating_point` function used by `src/evaluate.py`. That
+function retains the frozen post-NMS detections with score greater than or equal to the
+threshold, caps each image at the same 100 detections, and applies the same score-ordered,
+same-class greedy matching at IoU 0.50. Precision, recall, and F1 are micro-aggregated across
+all 750 test images within a seed. The published threshold curve is the arithmetic mean and
+sample standard deviation across the three seeds, consistent with Tables 4a and 4b.
+
+The precision-recall figure does not reconstruct or approximate AP from the threshold grid.
+It exposes pycocotools' official 101-recall-point interpolated precision tensor directly,
+using the all-area, maximum-100-detections slice. The left panel is the IoU 0.50 slice
+underlying AP@0.5; the right panel averages the ten IoU slices from 0.50 through 0.95 that
+underlie AP@0.5:0.95. Lines and bands are the mean and sample standard deviation across the
+three seed-specific official curves.
+
+## Threshold behavior
+
+| Detector | Threshold 0.25: precision / recall / F1 | Maximum mean recall in 0.01-0.99 | Peak mean F1 (threshold) |
+|---|---:|---:|---:|
+| Faster R-CNN | 0.1626 / 0.6381 / 0.2558 | 0.8532 at 0.01 | 0.3549 at 0.63 |
+| YOLO11s | 0.3730 / 0.1356 / 0.1981 | 0.3321 at 0.01 | 0.2840 at 0.01 |
+
+The YOLO11s F1 optimum lies on the lower sweep boundary, so 0.2840 is the best *observed*
+value in the predeclared range rather than a claimed global optimum. The official COCO
+curves, which use the frozen predictions down to the Phase 5 minimum score of 0.001, retain
+positive mean precision through recall 0.54 for YOLO11s and 0.96 for Faster R-CNN. Thus the
+complete curve confirms that YOLO11s can recover more recall below 0.01, but also confirms a
+substantial remaining coverage gap.
+
+## Fixed operating targets
+
+Targets are selected on each detector's three-seed mean threshold curve. For recall at fixed
+precision, the reported point is the maximum mean recall among swept thresholds whose mean
+precision meets the target. Precision at fixed recall is selected analogously. There is no
+interpolation or extrapolation. The standard deviation is the across-seed sample SD at the
+selected common threshold.
+
+| Constraint on mean curve | Faster R-CNN response | YOLO11s response |
+|---|---:|---:|
+| Precision >= 0.50 | Recall 0.2189 +/- 0.1490 at threshold 0.78 | Recall 0.0759 +/- 0.0533 at threshold 0.44 |
+| Precision >= 0.90 | Not reachable at any threshold | Not reachable at any threshold |
+| Recall >= 0.30 | Precision 0.4208 +/- 0.1483 at threshold 0.73 | Precision 0.2547 +/- 0.0360 at threshold 0.01 |
+| Recall >= 0.50 | Precision 0.2532 +/- 0.0343 at threshold 0.53 | Not reachable at any threshold |
+
+"Not reachable" here means that no common threshold in the 0.01-0.99 grid makes the
+three-seed *mean* satisfy the target. It does not conceal seed heterogeneity: at least one
+threshold reaches precision 0.90 in two of three Faster R-CNN seeds and all three YOLO11s
+seeds, but not at one common threshold whose detector-level mean reaches 0.90. For the
+recall-0.30 target, all three Faster R-CNN seeds and two of three YOLO11s seeds reach the
+target somewhere in the grid. No YOLO11s seed reaches recall 0.50.
+
+These fixed-target comparisons reinforce the official curves. When mean precision is held
+to at least 0.50, Faster R-CNN retains about 2.9 times the recall of YOLO11s. When mean recall
+is held to at least 0.30, Faster R-CNN has about 1.65 times the precision. YOLO11s's higher
+precision at the shared threshold 0.25 is therefore principally a selectivity/calibration
+effect rather than a superior precision-recall frontier.
+
+## Artifacts and reproduction
+
+- `results/tables/threshold_sweep.csv`: detector-level mean and sample SD at all 99
+  thresholds.
+- `results/tables/threshold_sweep_per_seed.csv`: the 594 seed-specific operating points.
+- `results/tables/precision_recall_curves.csv`: detector-level mean and sample SD on both
+  official 101-point COCO curves.
+- `results/tables/precision_recall_curves_per_seed.csv`: the 1,212 seed-specific COCO curve
+  points.
+- `results/tables/threshold_operating_targets.csv`: the fixed-target results and per-seed
+  reachability counts.
+- `results/figures/precision_recall_curves.png` and
+  `results/figures/f1_vs_threshold.png`: the review figures.
+- `results/logs/phase10_threshold_sweep/summary.json`: source hashes, bundle hashes,
+  reproduction checks, target results, finding summary, and artifact hashes.
+
+From the repository root in the pinned Python 3.11 environment:
+
+```powershell
+& $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep.yaml --mode preflight
+& $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep.yaml --mode run
+```
+
+The run takes only frozen JSON prediction records as model evidence. Re-running either model
+is neither required nor permitted by this analysis contract.

@@ -186,6 +186,27 @@ not used in the comparison. The evaluate command regenerates:
 - `results/logs/phase5_evaluation/summary.json` plus the six frozen prediction
   bundles used by statistics.
 
+### 5a. Reprocess the frozen bundles across confidence thresholds
+
+The research-track threshold analysis is CPU-only and reads the six completed
+Phase 5 bundles. It does not load a checkpoint, train a model, or run inference.
+Preflight verifies every bundle and annotation hash before the run exposes the
+official pycocotools precision-recall tensors and evaluates 99 common confidence
+thresholds through the same unified matcher:
+
+```powershell
+& $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep.yaml --mode preflight
+& $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep.yaml --mode run
+```
+
+The run regenerates `results/tables/threshold_sweep*.csv`,
+`results/tables/precision_recall_curves*.csv`,
+`results/tables/threshold_operating_targets.csv`,
+`results/figures/precision_recall_curves.png`,
+`results/figures/f1_vs_threshold.png`, and the hashed summary under
+`results/logs/phase10_threshold_sweep/`. Definitions and interpretation are in
+`docs/THRESHOLD_ANALYSIS.md`.
+
 ## 6. Run the common-corruption benchmark
 
 The run command deterministically draws or verifies the 300-image sample,
@@ -263,6 +284,7 @@ artifacts; the report assembly step does not recompute values.
 | Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
 | Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
 | Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
+| Research-track PR/F1 figures | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
 | Table 7 and corruption inference | `statistical_*.csv` | statistics `--mode run` in §8 |

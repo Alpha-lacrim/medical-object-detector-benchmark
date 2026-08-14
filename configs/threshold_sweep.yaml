@@ -1,0 +1,28 @@
+schema_version: 1
+experiment_id: rsna-phase5-threshold-sweep
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+
+sweep:
+  start: 0.01
+  stop: 0.99
+  steps: 99
+  precision_targets: [0.5, 0.9]
+  recall_targets: [0.3, 0.5]
+
+plots:
+  dpi: 180
+
+outputs:
+  log_dir: results/logs/phase10_threshold_sweep
+  summary_json: results/logs/phase10_threshold_sweep/summary.json
+  threshold_table: results/tables/threshold_sweep.csv
+  threshold_per_seed_table: results/tables/threshold_sweep_per_seed.csv
+  precision_recall_table: results/tables/precision_recall_curves.csv
+  precision_recall_per_seed_table: results/tables/precision_recall_curves_per_seed.csv
+  operating_targets_table: results/tables/threshold_operating_targets.csv
+  precision_recall_figure: results/figures/precision_recall_curves.png
+  f1_figure: results/figures/f1_vs_threshold.png

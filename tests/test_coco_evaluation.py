@@ -35,6 +35,24 @@ def test_perfect_detection_has_perfect_coco_ap_and_silent_output(capsys) -> None
     json.dumps(metrics, allow_nan=False)
 
 
+def test_official_precision_recall_curves_are_exposed_on_request() -> None:
+    metrics = evaluate_coco(
+        [prediction("case", [[2, 2, 8, 8]], [0], [0.9])],
+        [target("case", [[2, 2, 8, 8]], [0])],
+        class_ids=(0,),
+        include_precision_recall=True,
+    )
+
+    curve = metrics["precision_recall"]
+    assert len(curve["recall"]) == 101
+    assert curve["recall"][0] == 0
+    assert curve["recall"][-1] == 1
+    assert curve["precision_iou_50"] == pytest.approx([1] * 101)
+    assert curve["precision_iou_50_95"] == pytest.approx([1] * 101)
+    assert curve["per_class"]["0"]["precision_iou_50"] == pytest.approx([1] * 101)
+    json.dumps(metrics, allow_nan=False)
+
+
 def test_missed_target_has_zero_ap() -> None:
     metrics = evaluate_coco(
         [prediction("case")],
