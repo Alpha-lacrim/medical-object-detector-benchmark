@@ -13,7 +13,7 @@ import math
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -168,11 +168,13 @@ def _validate_relative_file_name(value: Any, location: str) -> str:
 
     file_name = _require_string(value, location)
     path = Path(file_name)
-    if (
-        path.is_absolute()
-        or path.drive
-        or path.root
-        or any(part in {"", ".", ".."} or ":" in part for part in path.parts)
+    portable_paths = (PurePosixPath(file_name), PureWindowsPath(file_name))
+    if any(
+        candidate.is_absolute()
+        or candidate.drive
+        or candidate.root
+        or any(part in {"", ".", ".."} or ":" in part for part in candidate.parts)
+        for candidate in portable_paths
     ):
         raise CocoValidationError(
             f"{location} must be a safe path relative to processed_images_dir"
