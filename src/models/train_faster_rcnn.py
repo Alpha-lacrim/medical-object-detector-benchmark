@@ -54,9 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--approved-benchmark",
         type=Path,
-        help=(
-            "Benchmark-estimate JSON explicitly approved by the user; required for train mode"
-        ),
+        help=("Benchmark-estimate JSON explicitly approved by the user; required for train mode"),
     )
     return parser
 
@@ -157,9 +155,7 @@ def _dataset_summary(
             "expected_images": dataset.preflight.expected_images,
             "available_images": dataset.preflight.available_images,
             "missing_images": len(dataset.preflight.missing_files),
-            "missing_file_paths": [
-                path.as_posix() for path in dataset.preflight.missing_files
-            ],
+            "missing_file_paths": [path.as_posix() for path in dataset.preflight.missing_files],
             "available_image_bytes": available_bytes,
             "available_image_manifest_sha256": manifest.hexdigest(),
             "annotations": sum(len(record.annotations) for record in dataset.records),
@@ -169,8 +165,7 @@ def _dataset_summary(
 
     return {
         "categories": {
-            str(category_id): name
-            for category_id, name in train_dataset.category_names.items()
+            str(category_id): name for category_id, name in train_dataset.category_names.items()
         },
         "category_id_to_model_label": {
             str(category_id): label
@@ -187,9 +182,7 @@ def _available_subset(dataset: CocoDetectionDataset) -> Any:
 
     from torch.utils.data import Subset
 
-    indices = [
-        index for index in range(len(dataset)) if dataset.image_path(index).is_file()
-    ]
+    indices = [index for index in range(len(dataset)) if dataset.image_path(index).is_file()]
     if not indices:
         raise RuntimeError(f"No images are locally available for smoke split {dataset.split}")
     return Subset(dataset, indices)
@@ -213,9 +206,7 @@ def _make_data_loader(
 
     worker_count = config.runtime.num_workers if num_workers is None else num_workers
     keep_workers = (
-        config.runtime.persistent_workers
-        if persistent_workers is None
-        else persistent_workers
+        config.runtime.persistent_workers if persistent_workers is None else persistent_workers
     )
     if worker_count == 0:
         keep_workers = False
@@ -409,12 +400,7 @@ def _implementation_identity(config: FasterRCNNConfig) -> dict[str, Any]:
         config.project_root / "src" / "utils",
     )
     files = sorted(
-        {
-            path.resolve()
-            for root in source_roots
-            for path in root.rglob("*.py")
-            if path.is_file()
-        }
+        {path.resolve() for root in source_roots for path in root.rglob("*.py") if path.is_file()}
         | {
             path.resolve()
             for path in (
@@ -491,8 +477,7 @@ def _execution_identity(config: FasterRCNNConfig) -> dict[str, Any]:
         "PyYAML",
     )
     package_versions = {
-        distribution: installed_version(distribution)
-        for distribution in required_distributions
+        distribution: installed_version(distribution) for distribution in required_distributions
     }
     missing_distributions = [
         name for name, installed in package_versions.items() if installed is None
@@ -785,19 +770,13 @@ def _final_artifacts(
                 "best_epoch": best_epoch,
                 "split": "validation",
                 "operating_point_score_threshold": config.evaluation.score_threshold,
-                "operating_point_match_iou_threshold": (
-                    config.evaluation.match_iou_threshold
-                ),
+                "operating_point_match_iou_threshold": (config.evaluation.match_iou_threshold),
                 "coco_minimum_score": config.evaluation.coco_minimum_score,
                 "max_detections": config.evaluation.max_detections,
                 "image_count": best_metrics["val_image_count"],
                 "target_count": best_metrics["val_annotation_count"],
-                "operating_point_prediction_count": best_metrics[
-                    "val_prediction_count"
-                ],
-                "coco_prediction_count": best_metrics[
-                    "val_coco_prediction_count"
-                ],
+                "operating_point_prediction_count": best_metrics["val_prediction_count"],
+                "coco_prediction_count": best_metrics["val_coco_prediction_count"],
                 "true_positives": best_metrics["val_true_positives"],
                 "false_positives": best_metrics["val_false_positives"],
                 "false_negatives": best_metrics["val_false_negatives"],
@@ -965,15 +944,11 @@ def _run_training(
         best_checkpoint = config.resolve(config.outputs.best_checkpoint_path)
         last_checkpoint = config.resolve(config.outputs.last_checkpoint_path)
     else:
-        checkpoint_dir = config.resolve(
-            config.outputs.benchmark_timing_checkpoints_dir
-        )
+        checkpoint_dir = config.resolve(config.outputs.benchmark_timing_checkpoints_dir)
         best_checkpoint = checkpoint_dir / config.outputs.best_checkpoint_path.name
         last_checkpoint = checkpoint_dir / config.outputs.last_checkpoint_path.name
     checkpoint_dir = best_checkpoint.parent
-    if mode in {"benchmark", "train"} and (
-        best_checkpoint.exists() or last_checkpoint.exists()
-    ):
+    if mode in {"benchmark", "train"} and (best_checkpoint.exists() or last_checkpoint.exists()):
         raise FileExistsError(f"Refusing to overwrite checkpoints in {checkpoint_dir}")
 
     global_optimizer_steps = 0
@@ -1063,16 +1038,19 @@ def _run_training(
             "train_loss_box_reg": losses["loss_box_reg"],
             "train_loss_objectness": losses["loss_objectness"],
             "train_loss_rpn_box_reg": losses["loss_rpn_box_reg"],
-            **{key: validation[key] for key in (
-                "val_precision",
-                "val_recall",
-                "val_f1",
-                "val_map_50",
-                "val_map_50_95",
-                "val_true_positives",
-                "val_false_positives",
-                "val_false_negatives",
-            )},
+            **{
+                key: validation[key]
+                for key in (
+                    "val_precision",
+                    "val_recall",
+                    "val_f1",
+                    "val_map_50",
+                    "val_map_50_95",
+                    "val_true_positives",
+                    "val_false_positives",
+                    "val_false_negatives",
+                )
+            },
             "train_seconds": train_seconds,
             "validation_seconds": validation_seconds,
             "epoch_seconds": epoch_seconds,
@@ -1167,9 +1145,7 @@ def _run_training(
             raise RuntimeError("full training completed without a best validation checkpoint")
         base_summary["checkpoint_path"] = best_checkpoint.as_posix()
         base_summary["last_state_path"] = last_checkpoint.as_posix()
-        write_atomic_json(
-            config.run_artifact_path(mode, config.outputs.summary_path), base_summary
-        )
+        write_atomic_json(config.run_artifact_path(mode, config.outputs.summary_path), base_summary)
         profile_loader = _make_data_loader(
             val_dataset,
             config,
@@ -1196,15 +1172,11 @@ def _run_training(
         finally:
             _shutdown_data_loader(profile_loader)
         base_summary["status"] = "complete"
-    write_atomic_json(
-        config.run_artifact_path(mode, config.outputs.summary_path), base_summary
-    )
+    write_atomic_json(config.run_artifact_path(mode, config.outputs.summary_path), base_summary)
     return base_summary
 
 
-def _completed_artifacts_intact(
-    summary: dict[str, Any], config: FasterRCNNConfig
-) -> bool:
+def _completed_artifacts_intact(summary: dict[str, Any], config: FasterRCNNConfig) -> bool:
     """Return whether a complete summary's configured final artifacts still exist."""
 
     artifacts = summary.get("artifacts")
@@ -1256,8 +1228,7 @@ def _run_finalization(
     summary_path = config.run_artifact_path("train", config.outputs.summary_path)
     if not summary_path.is_file():
         raise FileNotFoundError(
-            "finalize mode requires the full-run summary written after training: "
-            f"{summary_path}"
+            f"finalize mode requires the full-run summary written after training: {summary_path}"
         )
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     if summary.get("status") not in {"trained_pending_finalization", "complete"}:
@@ -1339,9 +1310,7 @@ def _run_finalization(
             best_epoch=best_epoch,
             best_metrics=best_metrics,
             training_seconds=float(summary["total_training_seconds"]),
-            peak_train_gpu_memory_mib=float(
-                summary["runtime"]["peak_train_gpu_memory_mib"]
-            ),
+            peak_train_gpu_memory_mib=float(summary["runtime"]["peak_train_gpu_memory_mib"]),
         )
     finally:
         _shutdown_data_loader(profile_loader)

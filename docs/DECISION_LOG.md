@@ -69,3 +69,38 @@ performance.
   its evidence, but it does not need a separate Track B training/tuning program.
 - Reviving architecture-specific tuning would be a new, explicitly approved
   study with its own budget and claims, not completion work for D-001.
+
+## D-003 — Decline to revive a Track-B-style native/best-practice comparison
+
+- **Date:** 2026-08-18
+- **Status:** Accepted; does not reopen D-002
+
+### Context
+
+An independent technical review recommended reviving a second,
+architecture-optimized comparison (each detector under its own best-practice
+recipe, equal tuning budget) to isolate “one-stage vs two-stage detectors” from
+“this Faster R-CNN pipeline vs this YOLO11s pipeline.”
+
+### Decision
+
+D-002's descoping is reaffirmed. The project's current claims do not depend on
+isolating architecture family in the abstract—they depend on the
+already-disclosed comparison of two specific, documented pipelines under
+shared constraints, which remains scientifically sound. A full Track B under
+an equal-opportunity tuning budget would multiply training compute
+substantially on the project's fixed hardware (RTX 4060 Laptop, 8 GB VRAM), for
+a claim-strengthening addition rather than a correctness fix, while several
+correctness fixes (patient-cluster statistics, threshold-selection
+methodology, CI) are still outstanding and higher priority.
+
+### Consequences
+
+- A much cheaper partial alternative remains available as optional future
+  work: a single native-defaults run per detector (not a tuning search),
+  explicitly framed as an exploratory robustness-of-conclusion check rather
+  than a formal second track. This is not committed work and should only be
+  considered after Batches 13–15 are complete and if compute time remains.
+- The paper's contribution stays framed around the controlled comparison, the
+  multi-axis trade-off characterization, and the threshold/score-scale
+  mismatch finding—not an architecture-family claim.

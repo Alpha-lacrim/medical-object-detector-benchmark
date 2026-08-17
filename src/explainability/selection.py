@@ -182,13 +182,9 @@ def select_qualitative_cases(
                         "frozen_evidence": target_evidence,
                     }
                 )
-            elif all(
-                item["status"] == "false_negative" for item in target_evidence.values()
-            ):
+            elif all(item["status"] == "false_negative" for item in target_evidence.values()):
                 proxies = {
-                    detector: _best_proxy(
-                        predictions[detector][image_id], target, target_index
-                    )
+                    detector: _best_proxy(predictions[detector][image_id], target, target_index)
                     for detector in DETECTORS
                 }
                 failure.append(
@@ -222,8 +218,7 @@ def select_qualitative_cases(
                         "image_id": image_id,
                         "target_index": None,
                         "selection_score": min(
-                            float(item["score"])
-                            for item in top_false_positives.values()
+                            float(item["score"]) for item in top_false_positives.values()
                         ),
                         "frozen_evidence": top_false_positives,
                     }

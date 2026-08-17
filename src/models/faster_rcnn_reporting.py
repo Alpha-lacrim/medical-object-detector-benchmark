@@ -401,9 +401,7 @@ def append_epoch_metrics(
             return _write_epoch_files(destination_csv, destination_jsonl, existing)
 
     run_epochs = [
-        previous["epoch"]
-        for previous in existing
-        if previous["run_id"] == normalized["run_id"]
+        previous["epoch"] for previous in existing if previous["run_id"] == normalized["run_id"]
     ]
     if run_epochs and normalized["epoch"] <= max(run_epochs):
         raise ValueError("epoch records for a run must be appended in increasing order")
@@ -427,8 +425,7 @@ def _normalize_flat_rows(
         unknown = sorted(set(row) - expected)
         if missing or unknown:
             raise ValueError(
-                f"table row {index} does not match schema; "
-                f"missing={missing}, unknown={unknown}"
+                f"table row {index} does not match schema; missing={missing}, unknown={unknown}"
             )
         ordered: dict[str, Any] = {}
         for field in fieldnames:
@@ -484,11 +481,7 @@ def build_benchmark_projection(
     scenarios: dict[str, float] = {}
     seen: set[int] = set()
     for epoch_count in scenario_epochs:
-        if (
-            isinstance(epoch_count, bool)
-            or not isinstance(epoch_count, int)
-            or epoch_count <= 0
-        ):
+        if isinstance(epoch_count, bool) or not isinstance(epoch_count, int) or epoch_count <= 0:
             raise ValueError("scenario epochs must be positive integers")
         if epoch_count in seen:
             raise ValueError("scenario epochs must be unique")
@@ -591,8 +584,7 @@ def summarize_inference_timings(
     total_seconds = sum(normalized_durations)
     total_images = sum(image_counts)
     per_image_seconds = [
-        duration / count
-        for duration, count in zip(normalized_durations, image_counts, strict=True)
+        duration / count for duration, count in zip(normalized_durations, image_counts, strict=True)
     ]
     return {
         "timed_batches": len(normalized_durations),

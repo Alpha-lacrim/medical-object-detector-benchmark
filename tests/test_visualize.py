@@ -63,9 +63,7 @@ def test_run_eda_creates_distribution_samples_and_summary(tmp_path: Path) -> Non
         ],
         "categories": [{"id": 1, "name": "Lung Opacity"}],
     }
-    (annotations_dir / "train.json").write_text(
-        json.dumps(coco), encoding="utf-8"
-    )
+    (annotations_dir / "train.json").write_text(json.dumps(coco), encoding="utf-8")
 
     config = {
         "dataset": {

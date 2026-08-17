@@ -245,9 +245,7 @@ def test_tensor_contract_and_empty_negative_target(tmp_path: Path) -> None:
     assert positive_image.shape == (3, 6, 8)
     assert float(positive_image.min()) >= 0.0
     assert float(positive_image.max()) <= 1.0
-    assert torch.equal(
-        positive_target["boxes"], torch.tensor([[1.0, 2.0, 4.0, 4.0]])
-    )
+    assert torch.equal(positive_target["boxes"], torch.tensor([[1.0, 2.0, 4.0, 4.0]]))
     assert torch.equal(positive_target["labels"], torch.tensor([1]))
     assert torch.equal(positive_target["area"], torch.tensor([6.0]))
     assert torch.equal(positive_target["iscrowd"], torch.tensor([0]))

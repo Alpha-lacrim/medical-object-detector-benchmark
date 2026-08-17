@@ -58,9 +58,7 @@ def build_faster_rcnn(
             raise RuntimeError("PyTorch and torchvision are required for Faster R-CNN") from error
         raise
 
-    weights = (
-        FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT if use_pretrained_weights else None
-    )
+    weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT if use_pretrained_weights else None
     model = fasterrcnn_resnet50_fpn_v2(
         weights=weights,
         weights_backbone=None,

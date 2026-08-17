@@ -17,9 +17,7 @@ def test_phase5_config_declares_complete_three_seed_grid() -> None:
     assert config.seeds == (17, 42, 137)
     assert config.split == "test"
     assert {(run.detector, run.seed) for run in config.runs} == {
-        (detector, seed)
-        for detector in ("faster_rcnn", "yolo11s")
-        for seed in config.seeds
+        (detector, seed) for detector in ("faster_rcnn", "yolo11s") for seed in config.seeds
     }
     assert len(load_and_validate_training_configs(config)) == 6
 
@@ -59,9 +57,7 @@ def test_unified_metrics_include_conditional_iou_and_dice() -> None:
 
     assert first == second
     assert first["operating_point"]["overall"]["matched_mean_iou"] == 0.5
-    assert first["operating_point"]["overall"]["matched_mean_box_dice"] == pytest.approx(
-        2 / 3
-    )
+    assert first["operating_point"]["overall"]["matched_mean_box_dice"] == pytest.approx(2 / 3)
     assert first["coco"]["ap50"] == pytest.approx(1)
 
 
@@ -89,8 +85,6 @@ def test_aggregation_uses_sample_standard_deviation() -> None:
     assert faster_precision["n"] == 3
     assert comparison[0]["yolo11s_std"] == 2.0
     faster_gflops = next(
-        row
-        for row in long_rows
-        if row["detector"] == "faster_rcnn" and row["metric"] == "gflops"
+        row for row in long_rows if row["detector"] == "faster_rcnn" and row["metric"] == "gflops"
     )
     assert faster_gflops["std"] == 0.0

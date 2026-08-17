@@ -79,11 +79,7 @@ def test_run_scoped_output_paths_and_finalize_alias_use_configured_names() -> No
     assert config.outputs.run_name("finalize") == config.outputs.train_run_name
     assert config.run_dir("finalize") == config.run_dir("train")
     assert config.run_artifact_path("benchmark", config.outputs.epoch_csv_path) == (
-        PROJECT_ROOT
-        / "results"
-        / "logs"
-        / "faster_rcnn_rsna_seed17_benchmark"
-        / "epochs.csv"
+        PROJECT_ROOT / "results" / "logs" / "faster_rcnn_rsna_seed17_benchmark" / "epochs.csv"
     )
 
 

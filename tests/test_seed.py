@@ -152,9 +152,7 @@ def test_initialization_can_defer_environment_writes_until_after_a_gate(
 ) -> None:
     monkeypatch.setattr(seed_utils, "_optional_torch", lambda: None)
 
-    report = seed_utils.initialize_reproducibility(
-        17, tmp_path, log_environment=False
-    )
+    report = seed_utils.initialize_reproducibility(17, tmp_path, log_environment=False)
 
     assert report.seed == 17
     assert list(tmp_path.iterdir()) == []

@@ -162,9 +162,7 @@ def _write_clean_fixture(tmp_path: Path, *, image_count: int = 30) -> Path:
             )
         class_rows.append({"exam_ref": exam_id, "label": study_class})
 
-    Path(dataset["paths"]["mapping_json"]).write_text(
-        json.dumps(mapping), encoding="utf-8"
-    )
+    Path(dataset["paths"]["mapping_json"]).write_text(json.dumps(mapping), encoding="utf-8")
     _write_csv(
         Path(dataset["paths"]["labels_csv"]),
         ["exam", "left", "top", "box_width", "box_height", "flag"],
@@ -230,9 +228,7 @@ def test_audit_reports_invalid_and_duplicate_boxes(tmp_path: Path) -> None:
         }
         for index, exam_id in enumerate(exam_ids)
     ]
-    Path(dataset["paths"]["mapping_json"]).write_text(
-        json.dumps(mapping), encoding="utf-8"
-    )
+    Path(dataset["paths"]["mapping_json"]).write_text(json.dumps(mapping), encoding="utf-8")
     rows = [
         ["good", "1", "2", "10", "12", "yes"],
         ["malformed", "bad", "2", "10", "12", "yes"],
@@ -303,12 +299,8 @@ def test_preparation_is_deterministic_exact_and_patient_disjoint(tmp_path: Path)
         "test": 3,
     }
     assert {
-        name: [record.exam_id for record in records]
-        for name, records in first_splits.items()
-    } == {
-        name: [record.exam_id for record in records]
-        for name, records in second_splits.items()
-    }
+        name: [record.exam_id for record in records] for name, records in first_splits.items()
+    } == {name: [record.exam_id for record in records] for name, records in second_splits.items()}
 
     patient_sets = {
         name: {record.nih_patient_id for record in records}
@@ -334,13 +326,12 @@ def test_preparation_is_deterministic_exact_and_patient_disjoint(tmp_path: Path)
         Path(summary["outputs"]["audit_summary"]).read_text(encoding="utf-8")
     )
     assert audit_summary["audit"]["issue_count"] == 0
-    assert all(
-        overlap == 0 for overlap in audit_summary["split_group_overlap"].values()
-    )
+    assert all(overlap == 0 for overlap in audit_summary["split_group_overlap"].values())
     label_path = Path(config["dataset"]["paths"]["labels_csv"])
-    assert audit_summary["input_files"]["labels_csv"]["sha256"] == hashlib.sha256(
-        label_path.read_bytes()
-    ).hexdigest()
+    assert (
+        audit_summary["input_files"]["labels_csv"]["sha256"]
+        == hashlib.sha256(label_path.read_bytes()).hexdigest()
+    )
 
 
 def test_preparation_rejects_mismatched_official_mapping_hash(tmp_path: Path) -> None:

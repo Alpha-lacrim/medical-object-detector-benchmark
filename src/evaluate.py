@@ -113,9 +113,7 @@ class Phase5Config(StrictModel):
         if len(set(self.seeds)) != len(self.seeds):
             raise ValueError("seeds must contain three unique values")
         expected = {
-            (detector, seed)
-            for detector in ("faster_rcnn", "yolo11s")
-            for seed in self.seeds
+            (detector, seed) for detector in ("faster_rcnn", "yolo11s") for seed in self.seeds
         }
         actual = {(run.detector, run.seed) for run in self.runs}
         if len(actual) != len(self.runs):
@@ -538,9 +536,7 @@ def _collect_yolo_predictions(
                 [yolo_to_category[int(label)] for label in yolo_labels], dtype=np.int64
             )
         except KeyError as error:
-            raise ValueError(
-                f"YOLO predicted an unknown class label: {error.args[0]}"
-            ) from error
+            raise ValueError(f"YOLO predicted an unknown class label: {error.args[0]}") from error
         predictions.append(
             ImagePrediction(
                 image_id=record.file_name,
@@ -668,12 +664,8 @@ def _artifact_row(
         "evaluation_fps": coco["image_count"] / inference_seconds,
         "profile_fps": _number(compute["throughput_fps"], field="throughput_fps"),
         "inference_time_ms": _number(compute["mean_latency_ms"], field="mean_latency_ms"),
-        "p50_inference_time_ms": _number(
-            compute["p50_latency_ms"], field="p50_latency_ms"
-        ),
-        "p95_inference_time_ms": _number(
-            compute["p95_latency_ms"], field="p95_latency_ms"
-        ),
+        "p50_inference_time_ms": _number(compute["p50_latency_ms"], field="p50_latency_ms"),
+        "p95_inference_time_ms": _number(compute["p95_latency_ms"], field="p95_latency_ms"),
         "total_parameters": int(compute["total_parameters"]),
         "trainable_parameters": int(compute["trainable_parameters"]),
         "gflops": _number(compute["estimated_gflops"], field="estimated_gflops"),
@@ -681,9 +673,7 @@ def _artifact_row(
         "training_time_seconds": _number(training_seconds, field="training_seconds"),
         "checkpoint_size_mib": _number(compute["model_size_mib"], field="model_size_mib"),
         "checkpoint_sha256": checkpoint_sha256,
-        "prediction_bundle": bundle_path.resolve().relative_to(
-            config.project_root
-        ).as_posix(),
+        "prediction_bundle": bundle_path.resolve().relative_to(config.project_root).as_posix(),
     }
 
 
@@ -704,11 +694,7 @@ def aggregate_rows(
             if len(values) <= ddof or not np.isfinite(values).all():
                 raise ValueError(f"cannot aggregate {detector} {metric}")
             mean = float(np.mean(values))
-            std = (
-                0.0
-                if np.all(values == values[0])
-                else float(np.std(values, ddof=ddof))
-            )
+            std = 0.0 if np.all(values == values[0]) else float(np.std(values, ddof=ddof))
             entry = {
                 "detector": detector,
                 "metric": metric,
@@ -810,34 +796,25 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
             if not isinstance(reporting_identity, dict):
                 raise ValueError("YOLO summary lacks its post-training reporting identity")
             reporting_files = {
-                item["path"]: item["sha256"]
-                for item in reporting_identity["source_files"]
+                item["path"]: item["sha256"] for item in reporting_identity["source_files"]
             }
             current_reporting_files = {
-                item["path"]: item["sha256"]
-                for item in current_identity["source_files"]
+                item["path"]: item["sha256"] for item in current_identity["source_files"]
             }
             reporting_drift = {
                 path
                 for path, digest in reporting_files.items()
-                if path != "src/models/__init__.py"
-                and current_reporting_files.get(path) != digest
+                if path != "src/models/__init__.py" and current_reporting_files.get(path) != digest
             }
             if reporting_drift:
                 raise ValueError(
                     "YOLO source drifted after its recorded reporting recovery: "
                     + ", ".join(sorted(reporting_drift))
                 )
-        source_files = {
-            item["path"]: item["sha256"] for item in source_identity["source_files"]
-        }
-        current_files = {
-            item["path"]: item["sha256"] for item in current_identity["source_files"]
-        }
+        source_files = {item["path"]: item["sha256"] for item in source_identity["source_files"]}
+        current_files = {item["path"]: item["sha256"] for item in current_identity["source_files"]}
         changed_existing = {
-            path
-            for path, digest in source_files.items()
-            if current_files.get(path) != digest
+            path for path, digest in source_files.items() if current_files.get(path) != digest
         }
         additions = set(current_files) - set(source_files)
         allowed_faster_additions = {
@@ -857,13 +834,9 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
             "src/models/yolo_reporting.py",
         }
         allowed_changes = (
-            allowed_faster_changes
-            if detector == "faster_rcnn"
-            else allowed_yolo_reporting_changes
+            allowed_faster_changes if detector == "faster_rcnn" else allowed_yolo_reporting_changes
         )
-        disallowed_changes = changed_existing - (
-            allowed_changes
-        )
+        disallowed_changes = changed_existing - (allowed_changes)
         if disallowed_changes or (
             additions and not (detector == "faster_rcnn" and additions <= allowed_faster_additions)
         ):
@@ -1073,9 +1046,7 @@ def run_evaluation(config: Phase5Config) -> dict[str, Any]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=Path("configs/evaluation.yaml"))
-    parser.add_argument(
-        "--mode", choices=("preflight", "seed-gates", "evaluate"), required=True
-    )
+    parser.add_argument("--mode", choices=("preflight", "seed-gates", "evaluate"), required=True)
     return parser
 
 

@@ -191,9 +191,7 @@ def _input_file_metadata(dataset: Mapping[str, Any]) -> dict[str, dict[str, Any]
 
     supplements = dataset.get("official_supplements")
     if supplements is not None:
-        supplement_config = _require_mapping(
-            supplements, "dataset.official_supplements"
-        )
+        supplement_config = _require_mapping(supplements, "dataset.official_supplements")
         expected = _require_string(
             supplement_config,
             "mapping_sha256",
@@ -206,8 +204,7 @@ def _input_file_metadata(dataset: Mapping[str, Any]) -> dict[str, dict[str, Any]
         actual = str(result["mapping_json"]["sha256"])
         if actual != expected:
             raise ValueError(
-                "official RSNA mapping SHA-256 mismatch: "
-                f"expected {expected}, found {actual}"
+                f"official RSNA mapping SHA-256 mismatch: expected {expected}, found {actual}"
             )
         result["mapping_json"]["expected_sha256"] = expected
         result["mapping_json"]["sha256_verified"] = True
@@ -281,12 +278,8 @@ def _load_patient_mapping(
 
     mapping_config = _require_mapping(dataset.get("mapping"), "dataset.mapping")
     exam_field = _require_string(mapping_config, "exam_id_field", "dataset.mapping")
-    original_field = _require_string(
-        mapping_config, "original_image_field", "dataset.mapping"
-    )
-    pattern_text = _require_string(
-        mapping_config, "patient_id_pattern", "dataset.mapping"
-    )
+    original_field = _require_string(mapping_config, "original_image_field", "dataset.mapping")
+    pattern_text = _require_string(mapping_config, "patient_id_pattern", "dataset.mapping")
     pattern = re.compile(pattern_text)
     if "patient_id" not in pattern.groupindex:
         raise ValueError("dataset.mapping.patient_id_pattern must define patient_id")
@@ -376,27 +369,17 @@ def load_and_audit_records(config: Mapping[str, Any]) -> AuditResult:
         _require_string(annotation, "width_field", "dataset.annotation"),
         _require_string(annotation, "height_field", "dataset.annotation"),
     )
-    class_exam_field = _require_string(
-        annotation, "class_info_exam_id_field", "dataset.annotation"
-    )
-    class_field = _require_string(
-        annotation, "class_info_class_field", "dataset.annotation"
-    )
-    positive_target = _require_string(
-        annotation, "positive_target", "dataset.annotation"
-    )
-    negative_target = _require_string(
-        annotation, "negative_target", "dataset.annotation"
-    )
+    class_exam_field = _require_string(annotation, "class_info_exam_id_field", "dataset.annotation")
+    class_field = _require_string(annotation, "class_info_class_field", "dataset.annotation")
+    positive_target = _require_string(annotation, "positive_target", "dataset.annotation")
+    negative_target = _require_string(annotation, "negative_target", "dataset.annotation")
     if positive_target == negative_target:
         raise ValueError("Positive and negative targets must differ")
 
     width = _require_int(image, "width", "dataset.image")
     height = _require_int(image, "height", "dataset.image")
     study_strata = _require_strings(classes, "study_strata", "dataset.classes")
-    positive_stratum = _require_string(
-        classes, "positive_study_stratum", "dataset.classes"
-    )
+    positive_stratum = _require_string(classes, "positive_study_stratum", "dataset.classes")
     if positive_stratum not in study_strata:
         raise ValueError("positive_study_stratum must be listed in study_strata")
 
@@ -617,9 +600,7 @@ def load_and_audit_records(config: Mapping[str, Any]) -> AuditResult:
             exam_id=exam_id,
         )
 
-    valid_patient_counts = Counter(
-        record.nih_patient_id for record in records if record.valid
-    )
+    valid_patient_counts = Counter(record.nih_patient_id for record in records if record.valid)
     input_counts = {
         "mapping_entries": mapping_entries,
         "mapped_exam_ids": len(patient_mapping),
@@ -708,9 +689,7 @@ def _balanced_group_order(
     ordered: list[PatientGroup] = []
     while len(ordered) < len(groups):
         candidates = [
-            bucket[offsets[name]]
-            for name, bucket in buckets.items()
-            if offsets[name] < len(bucket)
+            bucket[offsets[name]] for name, bucket in buckets.items() if offsets[name] < len(bucket)
         ]
         scored: list[tuple[int, bytes, PatientGroup]] = []
         for candidate in candidates:
@@ -770,9 +749,7 @@ def _select_groups_by_size(
             raise ValueError(
                 f"Patient groups cannot satisfy the exact requested image count {target}"
             )
-        actual_target = next(
-            (total for total in range(target - 1, -1, -1) if reachable[total]), 0
-        )
+        actual_target = next((total for total in range(target - 1, -1, -1) if reachable[total]), 0)
     selected_indices: set[int] = set()
     cursor = actual_target
     while cursor > 0:
@@ -781,14 +758,10 @@ def _select_groups_by_size(
             raise RuntimeError("Internal subset-sum reconstruction failure")
         selected_indices.add(group_index)
         cursor = previous_total[cursor]
-    return [
-        group for index, group in enumerate(ordered_groups) if index in selected_indices
-    ]
+    return [group for index, group in enumerate(ordered_groups) if index in selected_indices]
 
 
-def subsample_records(
-    records: Sequence[ExamRecord], config: Mapping[str, Any]
-) -> list[ExamRecord]:
+def subsample_records(records: Sequence[ExamRecord], config: Mapping[str, Any]) -> list[ExamRecord]:
     """Create a deterministic, group-safe, image-stratified bounded subsample."""
 
     dataset = _dataset_section(config)
@@ -853,12 +826,8 @@ def split_records(
     split_names = list(targets)
     result: dict[str, list[ExamRecord]] = {}
     for split_name in split_names[:-1]:
-        ordered = _balanced_group_order(
-            remaining_groups, strata, seed, f"split:{split_name}"
-        )
-        selected = _select_groups_by_size(
-            ordered, targets[split_name], allow_under=False
-        )
+        ordered = _balanced_group_order(remaining_groups, strata, seed, f"split:{split_name}")
+        selected = _select_groups_by_size(ordered, targets[split_name], allow_under=False)
         selected_ids = {group.group_id for group in selected}
         result[split_name] = sorted(
             (record for group in selected for record in group.records),
@@ -887,9 +856,7 @@ def build_coco(records: Sequence[ExamRecord], config: Mapping[str, Any]) -> dict
     classes = _require_mapping(dataset.get("classes"), "dataset.classes")
     image = _require_mapping(dataset.get("image"), "dataset.image")
     foreground = _require_strings(classes, "foreground", "dataset.classes")
-    positive_stratum = _require_string(
-        classes, "positive_study_stratum", "dataset.classes"
-    )
+    positive_stratum = _require_string(classes, "positive_study_stratum", "dataset.classes")
     category_by_name = {name: index for index, name in enumerate(foreground, start=1)}
     if positive_stratum not in category_by_name:
         raise ValueError("positive_study_stratum must also be a foreground class")
@@ -932,9 +899,7 @@ def build_coco(records: Sequence[ExamRecord], config: Mapping[str, Any]) -> dict
         },
         "images": images,
         "annotations": annotations,
-        "categories": [
-            {"id": category_by_name[name], "name": name} for name in foreground
-        ],
+        "categories": [{"id": category_by_name[name], "name": name} for name in foreground],
     }
 
 
@@ -1015,9 +980,7 @@ def _convert_one_dicom(
         import pydicom
         from PIL import Image
     except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            "DICOM conversion requires pydicom, numpy, and Pillow"
-        ) from exc
+        raise RuntimeError("DICOM conversion requires pydicom, numpy, and Pillow") from exc
 
     dataset = pydicom.dcmread(source)
     pixels = np.asarray(dataset.pixel_array, dtype=np.float32).squeeze()
@@ -1031,15 +994,10 @@ def _convert_one_dicom(
     pixels = np.nan_to_num(pixels, nan=low, posinf=high, neginf=low)
     if (
         invert_monochrome1
-        and str(getattr(dataset, "PhotometricInterpretation", "")).upper()
-        == "MONOCHROME1"
+        and str(getattr(dataset, "PhotometricInterpretation", "")).upper() == "MONOCHROME1"
     ):
         pixels = high + low - pixels
-    pixels = (
-        (pixels - low) * (255.0 / (high - low))
-        if high > low
-        else np.zeros_like(pixels)
-    )
+    pixels = (pixels - low) * (255.0 / (high - low)) if high > low else np.zeros_like(pixels)
     output = np.clip(np.rint(pixels), 0, 255).astype(np.uint8)
     destination.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(output).save(destination)
@@ -1063,15 +1021,9 @@ def convert_available_dicoms(
     expected_width = _require_int(image, "width", "dataset.image")
     expected_height = _require_int(image, "height", "dataset.image")
     conversion = _require_mapping(image.get("conversion"), "dataset.image.conversion")
-    normalization = _require_string(
-        conversion, "normalization", "dataset.image.conversion"
-    )
-    output_bit_depth = _require_int(
-        conversion, "output_bit_depth", "dataset.image.conversion"
-    )
-    invert_monochrome1 = _require_bool(
-        conversion, "invert_monochrome1", "dataset.image.conversion"
-    )
+    normalization = _require_string(conversion, "normalization", "dataset.image.conversion")
+    output_bit_depth = _require_int(conversion, "output_bit_depth", "dataset.image.conversion")
+    invert_monochrome1 = _require_bool(conversion, "invert_monochrome1", "dataset.image.conversion")
 
     available = 0
     converted = 0
@@ -1130,9 +1082,7 @@ def convert_available_dicoms(
     }
 
 
-def _record_distribution(
-    records: Sequence[ExamRecord], field: str
-) -> dict[str, int]:
+def _record_distribution(records: Sequence[ExamRecord], field: str) -> dict[str, int]:
     """Count records by a configured metadata field."""
 
     return dict(sorted(Counter(_record_field(record, field) for record in records).items()))
@@ -1158,9 +1108,7 @@ def _audit_summary(
     subsample = _require_mapping(dataset.get("subsample"), "dataset.subsample")
     split = _require_mapping(dataset.get("split"), "dataset.split")
     subsample_group = _require_string(subsample, "group_by", "dataset.subsample")
-    subsample_stratum = _require_string(
-        subsample, "stratify_by", "dataset.subsample"
-    )
+    subsample_stratum = _require_string(subsample, "stratify_by", "dataset.subsample")
     split_group = _require_string(split, "group_by", "dataset.split")
     split_stratum = _require_string(split, "stratify_by", "dataset.split")
     issue_codes = Counter(issue.code for issue in audit.issues)
@@ -1239,14 +1187,10 @@ def prepare_dataset(
         outputs[f"coco_{split_name}"] = str(coco_path)
 
     conversion_enabled = not metadata_only and convert_images is not False
-    image_processing = convert_available_dicoms(
-        selected, config, enabled=conversion_enabled
-    )
+    image_processing = convert_available_dicoms(selected, config, enabled=conversion_enabled)
     audit_path = _path_from_config(dataset, "audit_json")
     outputs["audit_summary"] = str(audit_path)
-    summary = _audit_summary(
-        config, audit, selected, splits, image_processing, outputs
-    )
+    summary = _audit_summary(config, audit, selected, splits, image_processing, outputs)
     _write_json(audit_path, summary)
     return summary
 

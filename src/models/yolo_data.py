@@ -174,8 +174,7 @@ def _label_text(record: CocoImageRecord, category_to_yolo: dict[int, int]) -> st
         if any(value <= 0 or value > 1 for value in values):
             raise ValueError(f"invalid normalized YOLO box for {record.file_name}")
         lines.append(
-            f"{category_to_yolo[category_id]} "
-            + " ".join(f"{value:.10f}" for value in values)
+            f"{category_to_yolo[category_id]} " + " ".join(f"{value:.10f}" for value in values)
         )
     return "\n".join(lines) + ("\n" if lines else "")
 

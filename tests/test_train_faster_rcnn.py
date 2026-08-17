@@ -168,9 +168,7 @@ def test_approved_benchmark_binds_data_execution_and_implementation(
 ) -> None:
     base = load_faster_rcnn_config(CONFIG_PATH)
     config = replace(base, project_root=tmp_path.resolve())
-    path = config.run_artifact_path(
-        "benchmark", config.outputs.benchmark_estimate_path
-    )
+    path = config.run_artifact_path("benchmark", config.outputs.benchmark_estimate_path)
     path.parent.mkdir(parents=True)
     dataset_identity = {"categories": {"1": "opacity"}, "train": {"images": 1}}
     execution_identity = {"gpu_name": "test-gpu", "amp": True}
@@ -188,13 +186,16 @@ def test_approved_benchmark_binds_data_execution_and_implementation(
         encoding="utf-8",
     )
 
-    assert _approved_benchmark(
-        config,
-        path,
-        dataset_identity=dataset_identity,
-        execution_identity=execution_identity,
-        implementation_identity=implementation_identity,
-    )["completed_epochs"] == config.benchmark.epochs
+    assert (
+        _approved_benchmark(
+            config,
+            path,
+            dataset_identity=dataset_identity,
+            execution_identity=execution_identity,
+            implementation_identity=implementation_identity,
+        )["completed_epochs"]
+        == config.benchmark.epochs
+    )
     with pytest.raises(ValueError, match="dataset_identity"):
         _approved_benchmark(
             config,

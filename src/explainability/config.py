@@ -22,9 +22,7 @@ class GradCamSettings(StrictModel):
 
     method: Literal["grad_cam"]
     target_score: Literal["post_activation_foreground_probability"]
-    target_selection: Literal[
-        "highest_iou_then_score_low_threshold_retained_candidate"
-    ]
+    target_selection: Literal["highest_iou_then_score_low_threshold_retained_candidate"]
     candidate_score_floor: float = Field(ge=0, le=1)
     nms_iou_threshold: float = Field(gt=0, le=1)
     max_candidates: int = Field(gt=0)
@@ -71,12 +69,8 @@ class QualitativeSettings(StrictModel):
 
     cases_per_category: int = Field(ge=1, le=5)
     good_selection: Literal["highest_minimum_iou_shared_true_positive_unique_image"]
-    bad_selection: Literal[
-        "highest_minimum_score_shared_false_positive_negative_image"
-    ]
-    failure_selection: Literal[
-        "shared_false_negative_proxy_iou_quantiles_unique_image"
-    ]
+    bad_selection: Literal["highest_minimum_score_shared_false_positive_negative_image"]
+    failure_selection: Literal["shared_false_negative_proxy_iou_quantiles_unique_image"]
     failure_quantiles: tuple[float, ...]
     overlay_alpha: float = Field(gt=0, le=1)
     colormap: str = Field(min_length=1)

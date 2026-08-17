@@ -218,17 +218,13 @@ def test_benchmark_projection_uses_first_epoch_and_steady_median(tmp_path: Path)
 
 
 def test_validation_and_compute_tables_enforce_exact_finite_schema(tmp_path: Path) -> None:
-    validation_path = write_validation_metrics_csv(
-        tmp_path / "validation.csv", [validation_row()]
-    )
+    validation_path = write_validation_metrics_csv(tmp_path / "validation.csv", [validation_row()])
     compute_path = write_compute_metrics_csv(tmp_path / "compute.csv", [compute_row()])
 
     assert validation_path.read_text(encoding="utf-8").splitlines()[0] == ",".join(
         VALIDATION_FIELDNAMES
     )
-    assert compute_path.read_text(encoding="utf-8").splitlines()[0] == ",".join(
-        COMPUTE_FIELDNAMES
-    )
+    assert compute_path.read_text(encoding="utf-8").splitlines()[0] == ",".join(COMPUTE_FIELDNAMES)
 
     malformed = validation_row()
     malformed.pop("f1")

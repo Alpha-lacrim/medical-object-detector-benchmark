@@ -84,9 +84,7 @@ def test_every_condition_is_deterministic_and_preserves_geometry() -> None:
 
 
 @pytest.mark.parametrize("kind,value", [("gaussian_noise", 0.05), ("motion_blur", 9)])
-def test_stochastic_conditions_are_order_independent_per_image(
-    kind: str, value: float
-) -> None:
+def test_stochastic_conditions_are_order_independent_per_image(kind: str, value: float) -> None:
     clean = patterned_image()
     item = condition(kind, kind, value)
 

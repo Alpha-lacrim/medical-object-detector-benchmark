@@ -57,9 +57,7 @@ def pixel_center_box_mask(shape: tuple[int, int], box_xyxy: ArrayLike) -> NDArra
     x1, y1, x2, y2 = _validated_box(box_xyxy, width=width, height=height)
     xs = np.arange(width, dtype=np.float64) + 0.5
     ys = np.arange(height, dtype=np.float64) + 0.5
-    return ((ys[:, None] >= y1) & (ys[:, None] < y2)) & (
-        (xs[None, :] >= x1) & (xs[None, :] < x2)
-    )
+    return ((ys[:, None] >= y1) & (ys[:, None] < y2)) & ((xs[None, :] >= x1) & (xs[None, :] < x2))
 
 
 def evaluate_box_attention(

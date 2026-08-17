@@ -66,8 +66,7 @@ def test_load_download_settings_uses_repository_schema(tmp_path: Path) -> None:
     [
         ("dataset: null\n", "dataset must be a mapping"),
         (
-            "dataset:\n  kaggle:\n    competition: c\n    files: []\n  paths:\n"
-            "    raw_dir: raw\n",
+            "dataset:\n  kaggle:\n    competition: c\n    files: []\n  paths:\n    raw_dir: raw\n",
             "dataset.kaggle.files must be a non-empty list",
         ),
         (

@@ -250,9 +250,7 @@ def _prepare(config: ExplainabilityConfig) -> dict[str, Any]:
     ):
         raise ValueError("canonical annotations no longer match the Phase 6 sample audit")
     predictions = {
-        detector: _load_clean_predictions(
-            config, phase6, detector, selected_names, sample_sha256
-        )
+        detector: _load_clean_predictions(config, phase6, detector, selected_names, sample_sha256)
         for detector in DETECTORS
     }
     cases = select_qualitative_cases(
@@ -597,9 +595,7 @@ def _run_detector(
     if smoke:
         positive_names = positive_names[: config.runtime.smoke_positive_images]
     selected_cases = {
-        _case_key(case): case
-        for case in prepared["cases"]
-        if case["category"] != "bad_prediction"
+        _case_key(case): case for case in prepared["cases"] if case["category"] != "bad_prediction"
     }
 
     if detector == "faster_rcnn":
@@ -626,16 +622,14 @@ def _run_detector(
                     )
                 )
             else:
-                activation, candidate_boxes, candidate_scores, feature_output_size = (
-                    _yolo_forward(
-                        model,
-                        device,
-                        model_config,
-                        capture,
-                        pil_image,
-                        config,
-                        subset.num_foreground_classes,
-                    )
+                activation, candidate_boxes, candidate_scores, feature_output_size = _yolo_forward(
+                    model,
+                    device,
+                    model_config,
+                    capture,
+                    pil_image,
+                    config,
+                    subset.num_foreground_classes,
                 )
             score_values = candidate_scores.detach().float().cpu().numpy().astype(np.float64)
             selections = [
@@ -688,9 +682,7 @@ def _run_detector(
                 )
 
         if not smoke:
-            bad_cases = [
-                case for case in prepared["cases"] if case["category"] == "bad_prediction"
-            ]
+            bad_cases = [case for case in prepared["cases"] if case["category"] == "bad_prediction"]
             for case in bad_cases:
                 image_id = str(case["image_id"])
                 index = indices[image_id]
@@ -722,9 +714,7 @@ def _run_detector(
                 reference = np.asarray(
                     case["frozen_evidence"][detector]["box_xyxy"], dtype=np.float64
                 )
-                score_values = (
-                    candidate_scores.detach().float().cpu().numpy().astype(np.float64)
-                )
+                score_values = candidate_scores.detach().float().cpu().numpy().astype(np.float64)
                 candidate_index, reference_iou = _best_candidate_index(
                     candidate_boxes, score_values, reference
                 )
@@ -770,9 +760,7 @@ def aggregate_localization(records: Sequence[Mapping[str, Any]]) -> list[dict[st
             energies = np.asarray([item["energy_in_box"] for item in valid], dtype=np.float64)
             hits = np.asarray([item["pointing_hit"] for item in valid], dtype=np.float64)
             areas = np.asarray([item["box_pixel_fraction"] for item in valid], dtype=np.float64)
-            lifts = np.asarray(
-                [item["energy_lift_over_area"] for item in valid], dtype=np.float64
-            )
+            lifts = np.asarray([item["energy_lift_over_area"] for item in valid], dtype=np.float64)
             by_image: defaultdict[str, list[Mapping[str, Any]]] = defaultdict(list)
             for item in valid:
                 by_image[str(item["image_id"])].append(item)
@@ -817,8 +805,7 @@ def _paired_summary(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     paired = [
         (by_key[(*key, "faster_rcnn")], by_key[(*key, "yolo11s")])
         for key in keys
-        if by_key[(*key, "faster_rcnn")]["valid_cam"]
-        and by_key[(*key, "yolo11s")]["valid_cam"]
+        if by_key[(*key, "faster_rcnn")]["valid_cam"] and by_key[(*key, "yolo11s")]["valid_cam"]
     ]
     differences = np.asarray(
         [float(faster["energy_in_box"]) - float(yolo["energy_in_box"]) for faster, yolo in paired],
@@ -836,8 +823,7 @@ def _paired_summary(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "yolo_higher_energy_count": int(np.sum(differences < 0)),
         "equal_energy_count": int(np.sum(differences == 0)),
         "both_pointing_hit_count": sum(
-            bool(faster["pointing_hit"]) and bool(yolo["pointing_hit"])
-            for faster, yolo in paired
+            bool(faster["pointing_hit"]) and bool(yolo["pointing_hit"]) for faster, yolo in paired
         ),
         "faster_only_pointing_hit_count": sum(
             bool(faster["pointing_hit"]) and not bool(yolo["pointing_hit"])
@@ -1098,8 +1084,7 @@ def run_explainability(config: ExplainabilityConfig, *, smoke: bool = False) -> 
     }
     phase6 = prepared["phase6"]
     checkpoint_hashes = {
-        item.detector: sha256_file(phase6.resolve(item.checkpoint))
-        for item in phase6.detectors
+        item.detector: sha256_file(phase6.resolve(item.checkpoint)) for item in phase6.detectors
     }
     artifacts = {
         "target_table": target_path.as_posix(),

@@ -53,20 +53,12 @@ def test_stratified_sample_is_reproducible_and_preserves_allocations(tmp_path: P
         stratum_column="study_stratum",
         allocation="proportional_largest_remainder",
     )
-    second_settings = first_settings.model_copy(
-        update={"output_manifest": tmp_path / "second.csv"}
-    )
+    second_settings = first_settings.model_copy(update={"output_manifest": tmp_path / "second.csv"})
 
-    first, first_audit = draw_stratified_subsample(
-        first_settings, project_root=ROOT, seed=17
-    )
-    second, second_audit = draw_stratified_subsample(
-        second_settings, project_root=ROOT, seed=17
-    )
+    first, first_audit = draw_stratified_subsample(first_settings, project_root=ROOT, seed=17)
+    second, second_audit = draw_stratified_subsample(second_settings, project_root=ROOT, seed=17)
 
-    assert [row["processed_file"] for row in first] == [
-        row["processed_file"] for row in second
-    ]
+    assert [row["processed_file"] for row in first] == [row["processed_file"] for row in second]
     assert first_audit["sample_stratum_counts"] == {
         "Lung Opacity": 68,
         "No Lung Opacity / Not Normal": 132,

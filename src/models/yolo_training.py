@@ -101,8 +101,7 @@ class ComparableEarlyStopping:
         self.best_fitness = float(self._stopper.best_metric or 0.0)
         self.best_epoch = int(self._stopper.best_epoch or 0)
         self.possible_stop = (
-            epoch >= self.min_epochs
-            and self.epochs_without_improvement >= self.patience - 1
+            epoch >= self.min_epochs and self.epochs_without_improvement >= self.patience - 1
         )
         return observation.should_stop
 
@@ -189,6 +188,7 @@ class MatchedDetectionTrainer(DetectionTrainer):
             model.load(weights)
         return model
 
+
 class YoloRunTracker:
     """Enforce runtime parity and record complete epoch timings."""
 
@@ -236,9 +236,7 @@ class YoloRunTracker:
             {
                 "amp": bool(trainer.amp),
                 "amp_dtype": self.config.runtime.amp_dtype,
-                "amp_validation": (
-                    "cuda_bfloat16_support_plus_per_batch_numerical_guards"
-                ),
+                "amp_validation": ("cuda_bfloat16_support_plus_per_batch_numerical_guards"),
                 "augmentation_policy": self.config.training.augmentation.policy,
                 "dataset_augment": dataset_augment,
                 "batch_norm_policy": self.config.model.batch_norm_policy,
@@ -294,9 +292,7 @@ class YoloRunTracker:
             )
         classification_loss = float(loss_items["cls_loss"].detach().cpu())
         self.consecutive_zero_classification_losses = (
-            self.consecutive_zero_classification_losses + 1
-            if classification_loss == 0.0
-            else 0
+            self.consecutive_zero_classification_losses + 1 if classification_loss == 0.0 else 0
         )
         if self.consecutive_zero_classification_losses >= 5:
             _atomic_json(
@@ -348,16 +344,12 @@ class YoloRunTracker:
             self.total_wall_seconds = time.perf_counter() - self.run_started
 
 
-def build_ultralytics_train_args(
-    config: YoloConfig, mode: YoloRunMode
-) -> dict[str, Any]:
+def build_ultralytics_train_args(config: YoloConfig, mode: YoloRunMode) -> dict[str, Any]:
     """Translate the strict project config into explicit Ultralytics arguments."""
 
     augmentation = config.training.augmentation
     optimizer = config.training.optimizer
-    dataset_yaml = (
-        config.data.smoke_dataset_yaml if mode == "smoke" else config.data.dataset_yaml
-    )
+    dataset_yaml = config.data.smoke_dataset_yaml if mode == "smoke" else config.data.dataset_yaml
     epochs = {
         "smoke": config.smoke.epochs,
         "benchmark": config.benchmark.epochs,

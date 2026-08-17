@@ -128,8 +128,7 @@ class SweepSettings(StrictModel):
         """Return the inclusive, numerically stable threshold grid."""
 
         return tuple(
-            float(value)
-            for value in np.round(np.linspace(self.start, self.stop, self.steps), 12)
+            float(value) for value in np.round(np.linspace(self.start, self.stop, self.steps), 12)
         )
 
 
@@ -282,16 +281,13 @@ def _validate_upstream(
     if phase5.evaluation.coco_minimum_score > config.sweep.start:
         raise ValueError("frozen bundles discard scores required by the configured sweep")
     if not any(
-        np.isclose(value, phase5.evaluation.score_threshold)
-        for value in config.sweep.thresholds()
+        np.isclose(value, phase5.evaluation.score_threshold) for value in config.sweep.thresholds()
     ):
         raise ValueError("threshold grid must include the frozen Phase 5 operating point")
 
     targets, category_names = load_coco_targets(annotation_path)
     expected = {
-        (detector, seed)
-        for detector in ("faster_rcnn", "yolo11s")
-        for seed in phase5.seeds
+        (detector, seed) for detector in ("faster_rcnn", "yolo11s") for seed in phase5.seeds
     }
     bundles: list[dict[str, Any]] = []
     seen: set[tuple[str, int]] = set()
@@ -470,9 +466,7 @@ def _precision_recall_rows(
             }
         )
 
-    grouped: defaultdict[tuple[str, str, str, float], list[Mapping[str, Any]]] = defaultdict(
-        list
-    )
+    grouped: defaultdict[tuple[str, str, str, float], list[Mapping[str, Any]]] = defaultdict(list)
     for row in per_seed_rows:
         grouped[
             (
@@ -520,17 +514,13 @@ def select_operating_targets(
         seed_rows = [row for row in per_seed_rows if row["detector"] == detector]
         seed_count = len({int(row["seed"]) for row in seed_rows})
         requests = [
-            *(('precision', value, 'recall') for value in precision_targets),
-            *(('recall', value, 'precision') for value in recall_targets),
+            *(("precision", value, "recall") for value in precision_targets),
+            *(("recall", value, "precision") for value in recall_targets),
         ]
         for target_metric, target_value, response_metric in requests:
-            candidates = [
-                row for row in mean_rows if float(row[target_metric]) >= target_value
-            ]
+            candidates = [row for row in mean_rows if float(row[target_metric]) >= target_value]
             seed_reachability = {
-                int(row["seed"])
-                for row in seed_rows
-                if float(row[target_metric]) >= target_value
+                int(row["seed"]) for row in seed_rows if float(row[target_metric]) >= target_value
             }
             selection_rule = (
                 f"maximum mean {response_metric} among swept thresholds with mean "
@@ -652,8 +642,7 @@ def _plot_precision_recall(
             axis.grid(alpha=0.25)
             axis.legend(loc="upper right")
         figure.suptitle(
-            "Official COCO precision-recall curves "
-            f"(mean ± sample SD, {seed_count} seeds)"
+            f"Official COCO precision-recall curves (mean ± sample SD, {seed_count} seeds)"
         )
         return _atomic_figure(path, figure, dpi=dpi)
     finally:
@@ -721,8 +710,7 @@ def _plot_f1(
             label=f"Main threshold {reference_threshold:g}",
         )
         axis.set_title(
-            "F1 across frozen confidence thresholds "
-            f"(mean ± sample SD, {seed_count} seeds)"
+            f"F1 across frozen confidence thresholds (mean ± sample SD, {seed_count} seeds)"
         )
         axis.set_xlabel("Confidence threshold")
         axis.set_ylabel("F1 at match IoU = 0.50")
@@ -752,18 +740,13 @@ def _finding_summary(
     for detector in ("faster_rcnn", "yolo11s"):
         selected = [row for row in threshold_rows if row["detector"] == detector]
         fixed = next(
-            row
-            for row in selected
-            if np.isclose(float(row["threshold"]), reference_threshold)
+            row for row in selected if np.isclose(float(row["threshold"]), reference_threshold)
         )
         peak = max(selected, key=lambda row: float(row["f1"]))
         result["detectors"][detector] = {
             "reference_operating_point": {
                 "threshold": reference_threshold,
-                **{
-                    metric: fixed[metric]
-                    for metric in ("precision", "recall", "f1")
-                },
+                **{metric: fixed[metric] for metric in ("precision", "recall", "f1")},
             },
             "maximum_mean_recall": max(float(row["recall"]) for row in selected),
             "peak_mean_f1": peak["f1"],
@@ -796,9 +779,7 @@ def _finding_summary(
             ),
             "maximum_recall_with_positive_mean_precision": {
                 detector: max(
-                    recall
-                    for recall, precision in values.items()
-                    if precision > tolerance
+                    recall for recall, precision in values.items() if precision > tolerance
                 )
                 for detector, values in by_detector.items()
             },
@@ -879,9 +860,7 @@ def run_threshold_sweep(config: ThresholdSweepConfig) -> dict[str, Any]:
         THRESHOLD_PER_SEED_FIELDS,
         per_seed_threshold,
     )
-    pr_path = _atomic_csv(
-        config.resolve(config.outputs.precision_recall_table), PR_FIELDS, pr_rows
-    )
+    pr_path = _atomic_csv(config.resolve(config.outputs.precision_recall_table), PR_FIELDS, pr_rows)
     pr_per_seed_path = _atomic_csv(
         config.resolve(config.outputs.precision_recall_per_seed_table),
         PR_PER_SEED_FIELDS,
@@ -985,13 +964,9 @@ def run_threshold_sweep(config: ThresholdSweepConfig) -> dict[str, Any]:
         ),
         "artifacts": {
             "threshold_table": _artifact(threshold_path, config.project_root),
-            "threshold_per_seed_table": _artifact(
-                threshold_per_seed_path, config.project_root
-            ),
+            "threshold_per_seed_table": _artifact(threshold_per_seed_path, config.project_root),
             "precision_recall_table": _artifact(pr_path, config.project_root),
-            "precision_recall_per_seed_table": _artifact(
-                pr_per_seed_path, config.project_root
-            ),
+            "precision_recall_per_seed_table": _artifact(pr_per_seed_path, config.project_root),
             "operating_targets_table": _artifact(targets_path, config.project_root),
             "precision_recall_figure": _artifact(pr_figure_path, config.project_root),
             "f1_figure": _artifact(f1_figure_path, config.project_root),

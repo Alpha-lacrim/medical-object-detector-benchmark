@@ -231,9 +231,7 @@ def _parse_images(payload: Mapping[str, Any]) -> tuple[_ImageMetadata, ...]:
         location = f"COCO images[{index}]"
         item = _require_mapping(raw, location)
         image_id = _require_int(item.get("id"), f"{location}.id")
-        file_name = _validate_relative_file_name(
-            item.get("file_name"), f"{location}.file_name"
-        )
+        file_name = _validate_relative_file_name(item.get("file_name"), f"{location}.file_name")
         width = _require_int(item.get("width"), f"{location}.width", minimum=1)
         height = _require_int(item.get("height"), f"{location}.height", minimum=1)
         normalized_name = file_name.casefold()
@@ -271,15 +269,11 @@ def _parse_annotations(
         item = _require_mapping(raw, location)
         annotation_id = _require_int(item.get("id"), f"{location}.id")
         image_id = _require_int(item.get("image_id"), f"{location}.image_id")
-        category_id = _require_int(
-            item.get("category_id"), f"{location}.category_id", minimum=1
-        )
+        category_id = _require_int(item.get("category_id"), f"{location}.category_id", minimum=1)
         if annotation_id in seen_annotation_ids:
             raise CocoValidationError(f"Duplicate COCO annotation id: {annotation_id}")
         if image_id not in image_by_id:
-            raise CocoValidationError(
-                f"{location}.image_id references unknown image id {image_id}"
-            )
+            raise CocoValidationError(f"{location}.image_id references unknown image id {image_id}")
         if category_id not in category_ids:
             raise CocoValidationError(
                 f"{location}.category_id references unknown category id {category_id}"
@@ -330,10 +324,7 @@ def _parse_annotations(
                 iscrowd=iscrowd,
             )
         )
-    return {
-        image.id: tuple(annotations_by_image[image.id])
-        for image in images
-    }
+    return {image.id: tuple(annotations_by_image[image.id]) for image in images}
 
 
 def _configured_path(value: Any, location: str, project_root: Path) -> Path:
@@ -348,8 +339,7 @@ def _validate_split(split: str) -> str:
     """Reject path traversal while permitting conventional split names."""
 
     invalid_character = any(
-        not (character.isalnum() or character in {"_", "-"})
-        for character in split
+        not (character.isalnum() or character in {"_", "-"}) for character in split
     )
     if not split or invalid_character:
         raise ValueError("split must contain only letters, digits, underscores, or hyphens")
@@ -414,9 +404,7 @@ class CocoDetectionDataset:
         payload = _load_coco_payload(self.annotation_file)
         self.categories = _parse_categories(payload)
         image_metadata = _parse_images(payload)
-        annotations_by_image = _parse_annotations(
-            payload, image_metadata, self.categories
-        )
+        annotations_by_image = _parse_annotations(payload, image_metadata, self.categories)
         self.records = tuple(
             CocoImageRecord(
                 id=image.id,
@@ -429,12 +417,10 @@ class CocoDetectionDataset:
         )
         self.category_names = {category.id: category.name for category in self.categories}
         self.category_id_to_label = {
-            category.id: label
-            for label, category in enumerate(self.categories, start=1)
+            category.id: label for label, category in enumerate(self.categories, start=1)
         }
         self.label_to_category_id = {
-            label: category_id
-            for category_id, label in self.category_id_to_label.items()
+            label: category_id for category_id, label in self.category_id_to_label.items()
         }
         self.num_foreground_classes = len(self.categories)
         self.num_classes = self.num_foreground_classes + 1
@@ -488,18 +474,14 @@ class CocoDetectionDataset:
                     f"found {actual_size[0]}x{actual_size[1]}"
                 )
         if dimension_errors:
-            raise CocoValidationError(
-                "Image preflight failed:\n" + "\n".join(dimension_errors)
-            )
+            raise CocoValidationError("Image preflight failed:\n" + "\n".join(dimension_errors))
         return DatasetPreflight(
             expected_images=len(paths),
             available_images=len(paths) - len(missing),
             missing_files=missing,
         )
 
-    def __getitem__(
-        self, index: int
-    ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    def __getitem__(self, index: int) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         """Load one RGB float tensor and its torchvision detection target."""
 
         torch = _require_torch()

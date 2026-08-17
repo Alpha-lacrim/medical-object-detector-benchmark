@@ -100,11 +100,7 @@ def gradcam_from_tensors(
         align_corners=align_corners,
     )[0, 0]
     maximum = cam.max()
-    cam = (
-        cam / maximum
-        if torch.isfinite(maximum) and maximum > epsilon
-        else torch.zeros_like(cam)
-    )
+    cam = cam / maximum if torch.isfinite(maximum) and maximum > epsilon else torch.zeros_like(cam)
     if not torch.isfinite(cam).all():
         raise ValueError("Grad-CAM produced non-finite values")
     return cam

@@ -306,9 +306,7 @@ def _validate_publication_summary(
     summary_rows = _read_csv(config.inputs.comparison_summary)
     map_rows = [row for row in summary_rows if row.get("metric") == "map_50_95"]
     if len(map_rows) != 1:
-        raise ValueError(
-            f"{config.inputs.comparison_summary}: expected one map_50_95 summary row"
-        )
+        raise ValueError(f"{config.inputs.comparison_summary}: expected one map_50_95 summary row")
     row = map_rows[0]
     for detector, settings in config.detectors.items():
         observed = np.mean([point.map_50_95 for point in points if point.detector == detector])
@@ -383,20 +381,16 @@ def strict_detector_dominance(
         candidate_points = [point for point in points if point.detector == candidate]
         alternative_points = [point for point in points if point.detector == alternative]
         candidate_x = min(
-            _directed(float(getattr(point, x_field)), x_direction)
-            for point in candidate_points
+            _directed(float(getattr(point, x_field)), x_direction) for point in candidate_points
         )
         alternative_x = max(
-            _directed(float(getattr(point, x_field)), x_direction)
-            for point in alternative_points
+            _directed(float(getattr(point, x_field)), x_direction) for point in alternative_points
         )
         candidate_y = min(
-            _directed(float(getattr(point, y_field)), y_direction)
-            for point in candidate_points
+            _directed(float(getattr(point, y_field)), y_direction) for point in candidate_points
         )
         alternative_y = max(
-            _directed(float(getattr(point, y_field)), y_direction)
-            for point in alternative_points
+            _directed(float(getattr(point, y_field)), y_direction) for point in alternative_points
         )
         if candidate_x > alternative_x and candidate_y > alternative_y:
             return candidate
@@ -633,8 +627,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for detector in config.detectors
     }
     print(
-        f"Validated {len(points)} frozen seed rows; "
-        f"thresholds={thresholds}; dominance={dominance}"
+        f"Validated {len(points)} frozen seed rows; thresholds={thresholds}; dominance={dominance}"
     )
     if args.mode == "run":
         output = plot_pareto_frontier(points, config)

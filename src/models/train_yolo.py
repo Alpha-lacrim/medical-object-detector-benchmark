@@ -78,12 +78,7 @@ def _implementation_identity(config: YoloConfig) -> dict[str, Any]:
         config.project_root / "src" / "meddet_benchmark",
         config.project_root / "src" / "utils",
     )
-    paths = {
-        path.resolve()
-        for root in roots
-        for path in root.rglob("*.py")
-        if path.is_file()
-    }
+    paths = {path.resolve() for root in roots for path in root.rglob("*.py") if path.is_file()}
     paths |= {
         path.resolve()
         for path in (
@@ -432,9 +427,7 @@ def _finalize(config: YoloConfig, base_summary: dict[str, Any] | None = None) ->
             {
                 "mode": "train",
                 "run_id": config.outputs.train_run_name,
-                "epoch_seconds": [
-                    float(record["epoch_seconds"]) for record in timing_records
-                ],
+                "epoch_seconds": [float(record["epoch_seconds"]) for record in timing_records],
                 "training_wall_seconds": training_seconds,
             }
         )

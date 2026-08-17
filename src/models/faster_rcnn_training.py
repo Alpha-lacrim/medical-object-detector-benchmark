@@ -66,10 +66,7 @@ class EarlyStopper:
             self.epochs_without_improvement = 0
         else:
             self.epochs_without_improvement += 1
-        should_stop = (
-            epoch >= self.min_epochs
-            and self.epochs_without_improvement >= self.patience
-        )
+        should_stop = epoch >= self.min_epochs and self.epochs_without_improvement >= self.patience
         return EarlyStopObservation(
             is_new_best=is_new_best,
             is_significant_improvement=is_significant_improvement,

@@ -26,8 +26,8 @@ jobs:
           enable-cache: true
       - run: uv python install
       - run: uv lock --check
-      - run: uv sync --locked --group dev
-      - run: uv run --locked ruff format --check src tests
-      - run: uv run --locked ruff check src tests
-      - run: uv run --locked pytest -q
-      - run: uv run --locked python -m meddet_benchmark smoke configs/smoke.yaml
+      - run: uv sync --locked --group dev --extra cpu
+      - run: uv run --locked --extra cpu ruff format --check src tests
+      - run: uv run --locked --extra cpu ruff check src tests
+      - run: uv run --locked --extra cpu python -m pytest -q
+      - run: uv run --locked --extra cpu python -m meddet_benchmark smoke configs/smoke.yaml

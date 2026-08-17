@@ -36,10 +36,7 @@ def _target(record: CocoImageRecord) -> ImageTarget:
     """Convert one canonical COCO record to the shared target type."""
 
     boxes = np.asarray(
-        [
-            (x, y, x + width, y + height)
-            for x, y, width, height in record.boxes_xywh
-        ],
+        [(x, y, x + width, y + height) for x, y, width, height in record.boxes_xywh],
         dtype=np.float64,
     ).reshape(-1, 4)
     return ImageTarget(
@@ -97,9 +94,7 @@ def evaluate_yolo_checkpoint(config: YoloConfig, checkpoint: Path) -> dict[str, 
                 [yolo_to_category[int(label)] for label in yolo_labels], dtype=np.int64
             )
         except KeyError as error:
-            raise ValueError(
-                f"YOLO predicted an unknown class label: {error.args[0]}"
-            ) from error
+            raise ValueError(f"YOLO predicted an unknown class label: {error.args[0]}") from error
         predictions.append(
             ImagePrediction(
                 image_id=file_name,
@@ -228,8 +223,7 @@ def profile_yolo_checkpoint(config: YoloConfig, checkpoint: Path) -> dict[str, A
                     estimated_gflops = float(counter.get_total_flops()) / 1e9
                 except Exception as error:
                     raise RuntimeError(
-                        "mandatory YOLO GFLOP profiling failed: "
-                        f"{type(error).__name__}: {error}"
+                        f"mandatory YOLO GFLOP profiling failed: {type(error).__name__}: {error}"
                     ) from error
 
     if estimated_gflops is None or not math.isfinite(estimated_gflops) or estimated_gflops <= 0:

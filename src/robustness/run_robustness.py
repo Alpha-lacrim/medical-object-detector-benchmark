@@ -188,9 +188,7 @@ def _atomic_json(path: Path, payload: Any) -> Path:
     return _atomic_bytes(path, encoded)
 
 
-def _atomic_csv(
-    path: Path, fieldnames: Sequence[str], rows: Sequence[Mapping[str, Any]]
-) -> Path:
+def _atomic_csv(path: Path, fieldnames: Sequence[str], rows: Sequence[Mapping[str, Any]]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
         dir=path.parent, prefix=f".{path.stem}.", suffix=path.suffix
@@ -279,17 +277,14 @@ def draw_stratified_subsample(
     selected: list[dict[str, str]] = []
     for name in sorted(by_stratum):
         candidates = sorted(by_stratum[name], key=lambda row: row[settings.id_column])
-        chosen_indices = generator.choice(
-            len(candidates), size=allocation[name], replace=False
-        )
+        chosen_indices = generator.choice(len(candidates), size=allocation[name], replace=False)
         selected.extend(candidates[int(index)] for index in sorted(chosen_indices))
     selected.sort(key=lambda row: row[settings.id_column])
     if len(selected) != settings.size:
         raise AssertionError("stratified sampler returned the wrong image count")
 
     output_rows = [
-        {**row, "robustness_sample_index": str(index)}
-        for index, row in enumerate(selected)
+        {**row, "robustness_sample_index": str(index)} for index, row in enumerate(selected)
     ]
     output_fields = [*fieldnames, "robustness_sample_index"]
     _atomic_csv(output, output_fields, output_rows)
@@ -506,9 +501,7 @@ def _source_identity(config: Phase6Config) -> dict[str, str]:
         config.project_root / "src" / "meddet_benchmark" / "corruptions.py",
         config.project_root / "src" / "evaluate.py",
     )
-    return {
-        path.relative_to(config.project_root).as_posix(): sha256_file(path) for path in paths
-    }
+    return {path.relative_to(config.project_root).as_posix(): sha256_file(path) for path in paths}
 
 
 def _bundle_identity(
@@ -708,9 +701,7 @@ def _collect_yolo_predictions(
                 [yolo_to_category[int(label)] for label in yolo_labels], dtype=np.int64
             )
         except KeyError as error:
-            raise ValueError(
-                f"YOLO predicted an unknown class label: {error.args[0]}"
-            ) from error
+            raise ValueError(f"YOLO predicted an unknown class label: {error.args[0]}") from error
         predictions.append(
             ImagePrediction(
                 image_id=record.file_name,
@@ -853,9 +844,7 @@ def _write_aggregate_artifacts(
         for record in records
         if record["condition"]["condition_id"] == "clean"
     }
-    rows = [
-        _result_row(record, clean_values[record["detector"]]) for record in records
-    ]
+    rows = [_result_row(record, clean_values[record["detector"]]) for record in records]
     condition_order = [
         "clean",
         *[item.condition_id for item in expand_conditions(config.corruption_config)],
@@ -927,9 +916,7 @@ def _write_aggregate_artifacts(
         "relative_performance",
         "relative_degradation",
     )
-    curve_path = _atomic_csv(
-        config.resolve(config.outputs.curve_table), curve_fields, curve_rows
-    )
+    curve_path = _atomic_csv(config.resolve(config.outputs.curve_table), curve_fields, curve_rows)
 
     grouped: defaultdict[tuple[str, str, int, str], list[dict[str, Any]]] = defaultdict(list)
     for row in curve_rows:
@@ -1047,15 +1034,12 @@ def _prepare_experiment(config: Phase6Config) -> dict[str, Any]:
         raise ValueError("Phase 6 evaluation thresholds differ from frozen Phase 5")
     phase5_summary_path = config.resolve(config.phase5_summary)
     phase5_summary = json.loads(phase5_summary_path.read_text(encoding="utf-8"))
-    if (
-        phase5_summary.get("status") != "complete"
-        or phase5_summary.get("config_sha256") != sha256_file(phase5_config.source_path)
-    ):
+    if phase5_summary.get("status") != "complete" or phase5_summary.get(
+        "config_sha256"
+    ) != sha256_file(phase5_config.source_path):
         raise ValueError("Phase 5 summary is incomplete or does not match its config")
     training_configs = load_and_validate_training_configs(phase5_config)
-    primary_runs = {
-        run.detector: run for run in phase5_config.runs if run.seed == config.seed
-    }
+    primary_runs = {run.detector: run for run in phase5_config.runs if run.seed == config.seed}
     if set(primary_runs) != {"faster_rcnn", "yolo11s"}:
         raise ValueError("Phase 5 does not contain both configured primary-seed runs")
     for detector in config.detectors:
@@ -1085,9 +1069,7 @@ def _prepare_experiment(config: Phase6Config) -> dict[str, Any]:
         config.sampling, project_root=config.project_root, seed=config.seed
     )
     selected_names = {row[config.sampling.id_column] for row in selected_rows}
-    subset = CorruptedSubsetDataset(
-        base_dataset, selected_names, condition=None, seed=config.seed
-    )
+    subset = CorruptedSubsetDataset(base_dataset, selected_names, condition=None, seed=config.seed)
     targets = _targets_from_dataset(subset)
     if len(targets) != sample_audit["sample_image_count"]:
         raise ValueError("sample target count disagrees with the manifest")
@@ -1117,9 +1099,7 @@ def preflight(config: Phase6Config) -> dict[str, Any]:
         "severity_count_per_type": [len(item.levels) for item in config.corruptions],
         "corrupted_condition_count": len(conditions),
         "detector_count": len(config.detectors),
-        "corrupted_inference_count": len(conditions)
-        * len(config.detectors)
-        * config.sampling.size,
+        "corrupted_inference_count": len(conditions) * len(config.detectors) * config.sampling.size,
         "clean_baseline": "filtered from frozen Phase 5 seed-17 prediction bundles",
     }
 
@@ -1209,9 +1189,7 @@ def run_robustness(config: Phase6Config) -> dict[str, Any]:
                 prepared["base_dataset"], selected_names, condition=None, seed=config.seed
             )
             if detector.detector == "faster_rcnn":
-                model, device = _load_faster_model(
-                    detector, config, model_config, clean_subset
-                )
+                model, device = _load_faster_model(detector, config, model_config, clean_subset)
             else:
                 import torch
                 from ultralytics import YOLO

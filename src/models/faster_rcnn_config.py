@@ -374,12 +374,8 @@ def _parse_model(payload: Any) -> ModelSettings:
         box_detections_per_image=_positive_int(
             value["box_detections_per_image"], "model.box_detections_per_image"
         ),
-        box_score_threshold=_probability(
-            value["box_score_threshold"], "model.box_score_threshold"
-        ),
-        box_nms_threshold=_probability(
-            value["box_nms_threshold"], "model.box_nms_threshold"
-        ),
+        box_score_threshold=_probability(value["box_score_threshold"], "model.box_score_threshold"),
+        box_nms_threshold=_probability(value["box_nms_threshold"], "model.box_nms_threshold"),
         batch_norm_policy=value["batch_norm_policy"],
     )
 
@@ -419,9 +415,7 @@ def _parse_runtime(payload: Any) -> RuntimeSettings:
     ):
         if not isinstance(value[key], bool):
             raise ValueError(f"runtime.{key} must be boolean")
-    if (
-        value["persistent_workers"] or value["validation_persistent_workers"]
-    ) and workers == 0:
+    if (value["persistent_workers"] or value["validation_persistent_workers"]) and workers == 0:
         raise ValueError("persistent workers require runtime.num_workers > 0")
     return RuntimeSettings(
         device=value["device"],
@@ -459,9 +453,7 @@ def _parse_optimizer(payload: Any) -> OptimizerSettings:
         raise ValueError("training.optimizer.nesterov must be boolean")
     return OptimizerSettings(
         name=value["name"],
-        learning_rate=_positive_float(
-            value["learning_rate"], "training.optimizer.learning_rate"
-        ),
+        learning_rate=_positive_float(value["learning_rate"], "training.optimizer.learning_rate"),
         momentum=_probability(value["momentum"], "training.optimizer.momentum"),
         weight_decay=_positive_float(
             value["weight_decay"], "training.optimizer.weight_decay", allow_zero=True
@@ -532,9 +524,7 @@ def _parse_training(payload: Any) -> TrainingSettings:
         optimizer=_parse_optimizer(value["optimizer"]),
         scheduler=_parse_scheduler(value["scheduler"]),
         early_stopping=early_stopping,
-        log_every_batches=_positive_int(
-            value["log_every_batches"], "training.log_every_batches"
-        ),
+        log_every_batches=_positive_int(value["log_every_batches"], "training.log_every_batches"),
     )
 
 
@@ -554,9 +544,7 @@ def _parse_evaluation(payload: Any) -> EvaluationSettings:
         coco_minimum_score=_probability(
             value["coco_minimum_score"], "evaluation.coco_minimum_score"
         ),
-        score_threshold=_probability(
-            value["score_threshold"], "evaluation.score_threshold"
-        ),
+        score_threshold=_probability(value["score_threshold"], "evaluation.score_threshold"),
         match_iou_threshold=_probability(
             value["match_iou_threshold"],
             "evaluation.match_iou_threshold",
@@ -585,9 +573,7 @@ def _parse_smoke(payload: Any) -> SmokeSettings:
     if not isinstance(value["use_pretrained_weights"], bool):
         raise ValueError("smoke.use_pretrained_weights must be boolean")
     return SmokeSettings(
-        max_train_batches=_positive_int(
-            value["max_train_batches"], "smoke.max_train_batches"
-        ),
+        max_train_batches=_positive_int(value["max_train_batches"], "smoke.max_train_batches"),
         max_val_batches=_positive_int(value["max_val_batches"], "smoke.max_val_batches"),
         use_pretrained_weights=value["use_pretrained_weights"],
     )
@@ -615,9 +601,7 @@ def _parse_profiling(payload: Any) -> ProfilingSettings:
         batch_size=_positive_int(value["batch_size"], "profiling.batch_size"),
         num_workers=workers,
         persistent_workers=value["persistent_workers"],
-        warmup_batches=_non_negative_int(
-            value["warmup_batches"], "profiling.warmup_batches"
-        ),
+        warmup_batches=_non_negative_int(value["warmup_batches"], "profiling.warmup_batches"),
         timed_batches=_positive_int(value["timed_batches"], "profiling.timed_batches"),
         profile_flops=value["profile_flops"],
     )
@@ -703,9 +687,7 @@ def load_faster_rcnn_config(path: str | Path) -> FasterRCNNConfig:
         source_path=source_path,
     )
     if config.evaluation.coco_minimum_score != config.model.box_score_threshold:
-        raise ValueError(
-            "evaluation.coco_minimum_score must equal model.box_score_threshold"
-        )
+        raise ValueError("evaluation.coco_minimum_score must equal model.box_score_threshold")
     return config
 
 

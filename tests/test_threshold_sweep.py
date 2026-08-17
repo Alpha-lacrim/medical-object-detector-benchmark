@@ -89,11 +89,7 @@ def test_fixed_targets_do_not_interpolate_or_extrapolate() -> None:
             (0.3, 0.8, 0.2),
         )
     ]
-    per_seed = [
-        {**row, "seed": seed}
-        for seed in (17, 42, 137)
-        for row in aggregate
-    ]
+    per_seed = [{**row, "seed": seed} for seed in (17, 42, 137) for row in aggregate]
 
     rows = select_operating_targets(
         aggregate,
@@ -103,14 +99,10 @@ def test_fixed_targets_do_not_interpolate_or_extrapolate() -> None:
     )
 
     precision_05 = next(
-        row
-        for row in rows
-        if row["target_metric"] == "precision" and row["target_value"] == 0.5
+        row for row in rows if row["target_metric"] == "precision" and row["target_value"] == 0.5
     )
     precision_09 = next(
-        row
-        for row in rows
-        if row["target_metric"] == "precision" and row["target_value"] == 0.9
+        row for row in rows if row["target_metric"] == "precision" and row["target_value"] == 0.9
     )
     fixed_recall = next(row for row in rows if row["target_metric"] == "recall")
     assert precision_05["threshold"] == 0.2

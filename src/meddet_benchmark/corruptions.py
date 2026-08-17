@@ -60,18 +60,13 @@ class CorruptionDefinition(_StrictModel):
         if severities != list(range(1, len(self.levels) + 1)):
             raise ValueError("severity levels must be contiguous and ordered from 1")
         values = [level.value for level in self.levels]
-        if self.kind in {"gaussian_noise", "salt_pepper"} and any(
-            value > 1 for value in values
-        ):
+        if self.kind in {"gaussian_noise", "salt_pepper"} and any(value > 1 for value in values):
             raise ValueError(f"{self.kind} values must not exceed 1")
         if self.kind == "motion_blur" and any(
-            not value.is_integer() or int(value) < 3 or int(value) % 2 == 0
-            for value in values
+            not value.is_integer() or int(value) < 3 or int(value) % 2 == 0 for value in values
         ):
             raise ValueError("motion-blur kernels must be odd integers >= 3")
-        if self.kind == "jpeg" and any(
-            not value.is_integer() or value > 100 for value in values
-        ):
+        if self.kind == "jpeg" and any(not value.is_integer() or value > 100 for value in values):
             raise ValueError("JPEG qualities must be integers in [1, 100]")
         if self.kind == "brightness":
             all_dark = all(value < 1 for value in values)

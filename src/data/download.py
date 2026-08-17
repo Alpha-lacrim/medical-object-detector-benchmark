@@ -158,15 +158,11 @@ def load_download_settings(config_path: str | Path) -> DownloadSettings:
     if len(set(files)) != len(files):
         raise ConfigurationError("dataset.kaggle.files must not contain duplicates")
 
-    raw_dir_value = _require_nonempty_string(
-        paths.get("raw_dir"), key_path="dataset.paths.raw_dir"
-    )
+    raw_dir_value = _require_nonempty_string(paths.get("raw_dir"), key_path="dataset.paths.raw_dir")
     return DownloadSettings(competition=competition, files=files, raw_dir=Path(raw_dir_value))
 
 
-def _credential_file_path(
-    environ: Mapping[str, str], *, home: str | Path | None = None
-) -> Path:
+def _credential_file_path(environ: Mapping[str, str], *, home: str | Path | None = None) -> Path:
     """Resolve ``kaggle.json`` while honoring Kaggle's config-dir convention."""
 
     configured_dir = environ.get("KAGGLE_CONFIG_DIR")
