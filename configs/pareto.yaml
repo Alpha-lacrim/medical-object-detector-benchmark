@@ -1,0 +1,38 @@
+schema_version: 1
+analysis_id: rsna-phase11-pareto-frontier
+
+inputs:
+  comparison_summary: results/tables/detector_comparison.csv
+  comparison_per_seed: results/tables/detector_comparison_per_seed.csv
+  threshold_summary: results/tables/threshold_sweep.csv
+  threshold_per_seed: results/tables/threshold_sweep_per_seed.csv
+  compute_tables:
+    - results/tables/faster_rcnn_compute.csv
+    - results/tables/seeds/faster_rcnn_seed42_compute.csv
+    - results/tables/seeds/faster_rcnn_seed137_compute.csv
+    - results/tables/yolo_compute.csv
+    - results/tables/seeds/yolo_seed42_compute.csv
+    - results/tables/seeds/yolo_seed137_compute.csv
+
+analysis:
+  recall_operating_point: peak_mean_f1
+  numeric_tolerance: 1.0e-12
+
+detectors:
+  faster_rcnn:
+    label: Faster R-CNN
+    summary_prefix: faster_rcnn
+    color: "#1f77b4"
+  yolo11s:
+    label: YOLO11s
+    summary_prefix: yolo11s
+    color: "#d95f02"
+
+plot:
+  dpi: 180
+  figure_width: 13.2
+  figure_height: 10.2
+  marker_size: 78
+
+outputs:
+  figure: results/figures/pareto_frontier.png

@@ -207,6 +207,21 @@ The run regenerates `results/tables/threshold_sweep*.csv`,
 `results/logs/phase10_threshold_sweep/`. Definitions and interpretation are in
 `docs/THRESHOLD_ANALYSIS.md`.
 
+### 5b. Regenerate the accuracy-efficiency Pareto figure
+
+This CPU-only step joins the frozen Phase 5 accuracy rows, all six seed-specific
+compute tables, and the completed threshold sweep. It performs no training or
+inference. The recall panels use each detector's best observed mean-F1 threshold
+from the sweep, while the mAP panels remain threshold-independent:
+
+```powershell
+& $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto.yaml --mode preflight
+& $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto.yaml --mode run
+```
+
+The run regenerates `results/figures/pareto_frontier.png`; definitions and the
+scenario-conditional interpretation are in `docs/PARETO_ANALYSIS.md`.
+
 ## 6. Run the common-corruption benchmark
 
 The run command deterministically draws or verifies the 300-image sample,
