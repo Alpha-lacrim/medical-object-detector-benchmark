@@ -4,8 +4,8 @@ analysis_id: rsna-phase11-pareto-frontier
 inputs:
   comparison_summary: results/tables/detector_comparison.csv
   comparison_per_seed: results/tables/detector_comparison_per_seed.csv
-  threshold_summary: results/tables/threshold_sweep.csv
-  threshold_per_seed: results/tables/threshold_sweep_per_seed.csv
+  selected_operating_points: results/tables/selected_operating_points.csv
+  selected_operating_points_per_seed: results/tables/selected_operating_points_per_seed.csv
   compute_tables:
     - results/tables/faster_rcnn_compute.csv
     - results/tables/seeds/faster_rcnn_seed42_compute.csv
@@ -15,7 +15,7 @@ inputs:
     - results/tables/seeds/yolo_seed137_compute.csv
 
 analysis:
-  recall_operating_point: peak_mean_f1
+  recall_operating_point: validation_selected_maximum_mean_f1
   numeric_tolerance: 1.0e-12
 
 detectors:

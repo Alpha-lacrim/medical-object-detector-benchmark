@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 experiment_id: rsna-phase8-paired-statistical-analysis
 seed: 20260811
 
@@ -8,6 +8,7 @@ inputs:
   phase6_config: configs/corruptions.yaml
   phase6_summary: results/logs/phase6_robustness/summary.json
   test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+  test_split_manifest: data/splits/rsna-pneumonia-5000/test.csv
 
 analysis:
   detector_a: faster_rcnn
@@ -16,9 +17,11 @@ analysis:
   confidence_level: 0.95
   bootstrap_resamples: 2000
   permutation_resamples: 5000
-  bootstrap_method: paired_hierarchical_percentile
-  permutation_method: paired_image_label_swap
-  effect_size: paired_jackknife_cohens_d
+  bootstrap_method: paired_hierarchical_patient_cluster_percentile
+  permutation_method: paired_patient_cluster_label_swap
+  effect_size: paired_raw_difference_with_cluster_bootstrap_ci
+  manifest_image_column: processed_file
+  patient_group_column: nih_patient_id
   multiple_comparison_correction: holm
   clean_correction_scope: across_7_predictive_metrics
   corruption_correction_scope: per_metric_and_estimand_across_35_corrupted_conditions
@@ -30,3 +33,6 @@ outputs:
   summary_json: results/logs/phase8_statistics/summary.json
   clean_table: results/tables/statistical_clean_comparison.csv
   robustness_table: results/tables/statistical_robustness_comparison.csv
+  image_level_summary_archive: results/logs/phase8_statistics/summary_image_level_archive.json
+  image_level_clean_table_archive: results/tables/statistical_clean_comparison_image_level_archive.csv
+  image_level_robustness_table_archive: results/tables/statistical_robustness_comparison_image_level_archive.csv

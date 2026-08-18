@@ -16,12 +16,13 @@ AP values reproduce the frozen comparison: 0.3084 +/- 0.0123 versus 0.1643 +/- 0
 IoU 0.50 and 0.1023 +/- 0.0036 versus 0.0549 +/- 0.0080 across IoU 0.50:0.95.
 
 The defensible conclusion is therefore narrower than "distinct operating regimes." The two
-models have differently calibrated score distributions at the same nominal threshold, and
-YOLO11s remains coverage-limited across the full curve, but it does not define a generally
-superior high-precision regime. At matched recall or precision constraints, Faster R-CNN is
-better on the tested targets. Later paper text should describe the 0.25 result as a
-fixed-threshold operating-point difference, not as an architecture-inherent precision
-advantage.
+models have a score-scale/selectivity mismatch at the same nominal threshold, and YOLO11s
+remains coverage-limited across the full curve, but it does not define a generally superior
+high-precision regime. At matched recall or precision constraints, Faster R-CNN is better on
+the tested targets. Later paper text should describe the 0.25 result as a fixed-threshold
+operating-point difference, not as an architecture-inherent precision advantage. This sweep
+does not assess probabilistic calibration: it does not test whether, for example, predictions
+scored 0.8 are correct approximately 80% of the time.
 
 ## Protocol
 
@@ -39,6 +40,13 @@ same-class greedy matching at IoU 0.50. Precision, recall, and F1 are micro-aggr
 all 750 test images within a seed. The published threshold curve is the arithmetic mean and
 sample standard deviation across the three seeds, consistent with Tables 4a and 4b.
 
+This complete test-set sweep is descriptive and exploratory. Its peak-F1 thresholds must not
+be treated as selected deployment settings. Phase 14 separately applies the same 99-point
+protocol to validation predictions from the six already-trained, immutable best checkpoints.
+Because the earlier training artifacts retained validation aggregates but not raw scored
+detections, a one-time inference-only pass materializes hash-bound validation bundles; it
+does not train, resume, or alter either model. All later threshold selection is offline.
+
 The precision-recall figure does not reconstruct or approximate AP from the threshold grid.
 It exposes pycocotools' official 101-recall-point interpolated precision tensor directly,
 using the all-area, maximum-100-detections slice. The left panel is the IoU 0.50 slice
@@ -47,6 +55,9 @@ underlie AP@0.5:0.95. Lines and bands are the mean and sample standard deviation
 three seed-specific official curves.
 
 ## Threshold behavior
+
+The table in this section describes the exploratory **test** sweep. In particular, the final
+column is not used to select the final operating threshold.
 
 | Detector | Threshold 0.25: precision / recall / F1 | Maximum mean recall in 0.01-0.99 | Peak mean F1 (threshold) |
 |---|---:|---:|---:|
@@ -85,8 +96,27 @@ target somewhere in the grid. No YOLO11s seed reaches recall 0.50.
 These fixed-target comparisons reinforce the official curves. When mean precision is held
 to at least 0.50, Faster R-CNN retains about 2.9 times the recall of YOLO11s. When mean recall
 is held to at least 0.30, Faster R-CNN has about 1.65 times the precision. YOLO11s's higher
-precision at the shared threshold 0.25 is therefore principally a selectivity/calibration
-effect rather than a superior precision-recall frontier.
+precision at the shared threshold 0.25 is therefore principally a score-scale/selectivity
+mismatch rather than a superior precision-recall frontier.
+
+## Validation-selected final operating points
+
+The predeclared selection rule maximizes arithmetic mean F1 across the three validation
+seeds on the same 0.01--0.99 grid. F1 gives precision and recall equal weight without
+inventing an unvalidated clinical cost ratio and retains the already-reviewed Batch 10
+protocol. Exact mean-F1 ties are resolved toward the higher, more selective threshold. The
+rule selects 0.69 for Faster R-CNN and 0.05 for YOLO11s. These values are then frozen and
+each is applied exactly once to each corresponding frozen test bundle; the test results do
+not feed back into selection.
+
+| Detector | Validation precision / recall / F1 | Frozen threshold | Final test precision / recall / F1 |
+|---|---:|---:|---:|
+| Faster R-CNN | 0.4164 +/- 0.0769 / 0.4404 +/- 0.0663 / 0.4202 +/- 0.0078 | 0.69 | 0.3543 +/- 0.0746 / 0.3607 +/- 0.0608 / 0.3492 +/- 0.0135 |
+| YOLO11s | 0.4076 +/- 0.0107 / 0.3213 +/- 0.0315 / 0.3588 +/- 0.0209 | 0.05 | 0.3096 +/- 0.0134 / 0.2438 +/- 0.0302 / 0.2718 +/- 0.0181 |
+
+These are the authoritative single-threshold operating-point results for later analyses.
+The original 0.25 comparison and the complete test sweep remain useful, explicitly labeled
+protocol sensitivity analyses; neither supplies the final threshold choice.
 
 ## Artifacts and reproduction
 
@@ -103,13 +133,27 @@ effect rather than a superior precision-recall frontier.
   `results/figures/f1_vs_threshold.png`: the review figures.
 - `results/logs/phase10_threshold_sweep/summary.json`: source hashes, bundle hashes,
   reproduction checks, target results, finding summary, and artifact hashes.
+- `results/tables/validation_threshold_sweep*.csv`: validation-only threshold curves used
+  for selection.
+- `results/tables/selected_operating_points*.csv`: validation-selected thresholds and their
+  one-shot test precision, recall, and F1, in aggregate and per seed.
+- `results/logs/phase14_threshold_selection/`: the validation-bundle manifest, hashes,
+  inference environment, and final selection summary.
 
 From the repository root in the pinned Python 3.11 environment:
 
 ```powershell
 & $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep.yaml --mode preflight
 & $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep.yaml --mode run
+
+# One-time inference-only materialization from the immutable best checkpoints.
+& $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode preflight
+& $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode collect-validation
+
+# Offline validation sweep, threshold freeze, and one-shot test evaluation.
+& $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode run
 ```
 
-The run takes only frozen JSON prediction records as model evidence. Re-running either model
-is neither required nor permitted by this analysis contract.
+The Batch 10 run and the final selection run take only frozen JSON prediction records as
+model evidence. The separate materialization command performs validation inference because
+raw validation scores were not archived during training; it cannot train or update weights.

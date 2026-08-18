@@ -14,12 +14,20 @@ clinical device or diagnostic system.
 ## Headline result
 
 Across seeds 17, 42, and 137, Faster R-CNN achieves mAP@0.5:0.95 of
-0.1023 ± 0.0036 and recall of 0.6381 ± 0.0526, compared with 0.0549 ± 0.0080
-and 0.1356 ± 0.0094 for YOLO11s. YOLO11s is more selective and much cheaper:
-precision is 0.3730 ± 0.0395 versus 0.1626 ± 0.0439, throughput is
-52.94 ± 10.65 FPS versus 17.42 ± 5.69, and it has 9.43 M parameters versus
-43.26 M. The paired clean analysis retains Holm-corrected evidence for Faster
-R-CNN's recall and AP advantages and YOLO11s' precision advantage.
+0.1023 ± 0.0036 versus 0.0549 ± 0.0080 for YOLO11s. At thresholds selected
+by maximum mean validation F1, final test precision/recall/F1 is
+0.3543/0.3607/0.3492 versus 0.3096/0.2438/0.2718. Faster R-CNN has higher
+precision at 96 of 101 official AP@0.5 recall positions; YOLO11s' apparent
+precision advantage at the original shared score threshold of 0.25 is a
+score-scale/selectivity artifact, not a frontier advantage. The primary
+patient-cluster analysis retains Holm-corrected evidence for Faster R-CNN's
+original fixed-threshold recall and both AP advantages.
+
+The defensible trade-off is detection quality versus implementation-specific
+computational cost. YOLO11s delivers 52.94 ± 10.65 FPS versus
+17.42 ± 5.69, with 9.43 M parameters versus 43.26 M, while Faster R-CNN has
+higher sensitivity at every reported FROC false-positive budget. Neither
+detector strictly dominates the accuracy-efficiency Pareto panels.
 
 On the seed-17 300-image common-corruption sample, mean mAP@0.5:0.95 retention
 is 0.7638 for Faster R-CNN and 0.7091 for YOLO11s. Both detectors have weak
@@ -207,12 +215,50 @@ The run regenerates `results/tables/threshold_sweep*.csv`,
 `results/logs/phase10_threshold_sweep/`. Definitions and interpretation are in
 `docs/THRESHOLD_ANALYSIS.md`.
 
-### 5b. Regenerate the accuracy-efficiency Pareto figure
+### 5b. Select final operating thresholds on validation
+
+The original training runs retained validation aggregates but not the raw scored
+detections needed for a threshold sweep. Materialize those records once from the
+six immutable best checkpoints on the 750-image validation split, then perform
+selection and the final test application offline:
+
+```powershell
+& $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode preflight
+& $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode collect-validation
+& $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode run
+```
+
+`collect-validation` is inference-only: it neither trains nor changes a
+checkpoint, and it must reproduce each run's archived validation
+precision/recall/F1 before writing a hash-bound bundle. The offline run maximizes
+mean validation F1, freezes one threshold per detector, and applies each once to
+the frozen test bundles. It regenerates `validation_threshold_sweep*.csv`,
+`selected_operating_points*.csv`, and the manifest/summary under
+`results/logs/phase14_threshold_selection/`.
+
+### 5c. Reparameterize the test sweep as FROC curves
+
+This CPU-only step reads the unchanged Batch 10 per-seed table and describes the
+full test sweep as sensitivity versus false positives per image. It does not
+select a deployment threshold or perform training, checkpoint loading, or
+inference:
+
+```powershell
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc.yaml --mode preflight
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc.yaml --mode run
+```
+
+The run regenerates `results/figures/froc_curves.png`,
+`results/tables/froc_operating_points.csv`, and the provenance summary under
+`results/logs/phase14_froc/`. Definitions and interpretation are in
+`docs/FROC_ANALYSIS.md`.
+
+### 5d. Regenerate the accuracy-efficiency Pareto figure
 
 This CPU-only step joins the frozen Phase 5 accuracy rows, all six seed-specific
-compute tables, and the completed threshold sweep. It performs no training or
-inference. The recall panels use each detector's best observed mean-F1 threshold
-from the sweep, while the mAP panels remain threshold-independent:
+compute tables, and the validation-selected, test-evaluated operating points. It
+performs no training or inference. The recall panels use the thresholds selected
+in section 5b, while the mAP panels remain threshold-independent:
 
 ```powershell
 & $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto.yaml --mode preflight
@@ -268,8 +314,9 @@ This regenerates the report Section 9 evidence:
 
 ## 8. Run the paired statistical analysis
 
-This CPU phase reads the six frozen clean bundles and all 72 robustness
-bundles. It does not rerun model inference.
+This CPU phase reads the six frozen clean bundles, all 72 robustness bundles,
+and the committed Batch 1 image-to-patient mapping. It does not rerun model
+inference.
 
 ```powershell
 & $benchmarkPython -m src.stats.run_statistics --config configs/statistics.yaml --mode preflight
@@ -283,10 +330,14 @@ This regenerates:
   corruption results); and
 - `results/logs/phase8_statistics/summary.json`.
 
-The configuration fixes 2,000 paired bootstrap draws, 5,000 paired
-permutations, 95% pointwise percentile intervals, paired jackknife Cohen's d,
-and Holm correction. Aggregate AP is reconstructed at every draw rather than
-approximated as a mean of per-image AP.
+The configuration fixes 2,000 paired patient-cluster bootstrap draws, 5,000
+paired patient-cluster detector-label permutations, 95% pointwise percentile
+intervals, raw paired-difference effects, and Holm correction. Every sampled or
+swapped NIH patient group carries all of its observed images together.
+Aggregate AP is reconstructed at every draw rather than approximated as a mean
+of per-image AP. The first corrected run also preserves the superseded
+image-level CSVs and summary under `*_image_level_archive.*` paths for audit;
+reruns never replace those archives.
 
 ## Report artifact-to-command index
 
@@ -300,6 +351,9 @@ artifacts; the report assembly step does not recompute values.
 | Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
 | Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
 | Research-track PR/F1 figures | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
+| Validation-selected operating points | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
+| Research-track FROC figure | `froc_operating_points.csv`; `froc_curves.png` | offline `src.plot_froc_curves --mode run` in §5c |
+| Research-track Pareto figure | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
 | Table 7 and corruption inference | `statistical_*.csv` | statistics `--mode run` in §8 |
@@ -325,9 +379,9 @@ Every item in the benchmark's Definition of Done is satisfied:
   boxes receive energy-in-box and pointing-game analysis, with one explicit
   zero-energy map.
 - [x] **Statistical inference.** The frozen clean and corruption predictions
-  have paired bootstrap CIs, paired permutation p-values, paired jackknife
-  effect sizes, and Holm correction. Non-estimable rows and the reason McNemar
-  is inapplicable are explicit.
+  have patient-cluster bootstrap CIs, patient-cluster permutation p-values,
+  paired raw-difference effects, and Holm correction. Non-estimable rows and
+  the reason McNemar is inapplicable are explicit.
 - [x] **Scenario-grounded discussion.** Report Section 11 weighs measured
   accuracy, robustness, interpretability, and compute for high-sensitivity
   retrospective screening, constrained point-of-care assistance, and

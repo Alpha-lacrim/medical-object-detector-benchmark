@@ -1,0 +1,449 @@
+{
+  "analysis_id": "rsna-phase14-test-froc",
+  "artifacts": {
+    "figure": {
+      "path": "results/figures/froc_curves.png",
+      "sha256": "d1e3a51ab5a06960ef88c000ffb70265386712a82807c7411085747ae7969840",
+      "size_bytes": 125434
+    },
+    "operating_points_table": {
+      "path": "results/tables/froc_operating_points.csv",
+      "sha256": "c5b1fad22afbaedac90060056066beca62be2464f79cfb716a0db998836527c8",
+      "size_bytes": 2897
+    }
+  },
+  "config_path": "configs/froc.yaml",
+  "config_sha256": "043e362776df12333c3df32fe4a24e993fee3f59d96fa5040d24d6d4d1b8e578",
+  "counts": {
+    "curve_rows": 198,
+    "detectors": 2,
+    "images_per_seed": 750,
+    "operating_point_rows": 10,
+    "seeds_per_detector": 3,
+    "source_rows": 594
+  },
+  "operating_points": [
+    {
+      "achieved_fp_per_image": 0.11199999999999999,
+      "achieved_fp_per_image_std": 0.003527668414752787,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.125,
+      "seed_count": 3,
+      "selected_threshold_max": 0.83,
+      "selected_threshold_mean": 0.7733333333333334,
+      "selected_threshold_min": 0.7,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.2699004975124378,
+      "sensitivity_mean_plus_minus_std": "0.2699 \u00b1 0.01508",
+      "sensitivity_std": 0.015080044344505139
+    },
+    {
+      "achieved_fp_per_image": 0.244,
+      "achieved_fp_per_image_std": 0.00480740170061865,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.25,
+      "seed_count": 3,
+      "selected_threshold_max": 0.74,
+      "selected_threshold_mean": 0.7033333333333333,
+      "selected_threshold_min": 0.64,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.36069651741293535,
+      "sensitivity_mean_plus_minus_std": "0.360697 \u00b1 0.0248445",
+      "sensitivity_std": 0.024844507904773844
+    },
+    {
+      "achieved_fp_per_image": 0.48044444444444445,
+      "achieved_fp_per_image_std": 0.007343427396381482,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.5,
+      "seed_count": 3,
+      "selected_threshold_max": 0.61,
+      "selected_threshold_mean": 0.5433333333333333,
+      "selected_threshold_min": 0.47,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.4800995024875622,
+      "sensitivity_mean_plus_minus_std": "0.4801 \u00b1 0.0326004",
+      "sensitivity_std": 0.03260035428378398
+    },
+    {
+      "achieved_fp_per_image": 0.9484444444444445,
+      "achieved_fp_per_image_std": 0.04073400617738523,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 1.0,
+      "seed_count": 3,
+      "selected_threshold_max": 0.4,
+      "selected_threshold_mean": 0.3166666666666667,
+      "selected_threshold_min": 0.16,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.6032338308457711,
+      "sensitivity_mean_plus_minus_std": "0.603234 \u00b1 0.0155348",
+      "sensitivity_std": 0.015534820891538305
+    },
+    {
+      "achieved_fp_per_image": 1.8937777777777776,
+      "achieved_fp_per_image_std": 0.08743590244880546,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 2.0,
+      "seed_count": 3,
+      "selected_threshold_max": 0.18,
+      "selected_threshold_mean": 0.13,
+      "selected_threshold_min": 0.04,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.6927860696517413,
+      "sensitivity_mean_plus_minus_std": "0.692786 \u00b1 0.0205506",
+      "sensitivity_std": 0.020550636370470513
+    },
+    {
+      "achieved_fp_per_image": 0.11955555555555557,
+      "achieved_fp_per_image_std": 0.0076980035891950115,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.125,
+      "seed_count": 3,
+      "selected_threshold_max": 0.2,
+      "selected_threshold_mean": 0.15333333333333335,
+      "selected_threshold_min": 0.12,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.18034825870646767,
+      "sensitivity_mean_plus_minus_std": "0.180348 \u00b1 0.0212173",
+      "sensitivity_std": 0.021217316056258675
+    },
+    {
+      "achieved_fp_per_image": 0.23555555555555555,
+      "achieved_fp_per_image_std": 0.012024666007527716,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.25,
+      "seed_count": 3,
+      "selected_threshold_max": 0.05,
+      "selected_threshold_mean": 0.03,
+      "selected_threshold_min": 0.01,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.27487562189054726,
+      "sensitivity_mean_plus_minus_std": "0.274876 \u00b1 0.01508",
+      "sensitivity_std": 0.015080044344505165
+    },
+    {
+      "achieved_fp_per_image": 0.36000000000000004,
+      "achieved_fp_per_image_std": 0.11762841682367593,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.5,
+      "seed_count": 3,
+      "selected_threshold_max": 0.01,
+      "selected_threshold_mean": 0.01,
+      "selected_threshold_min": 0.01,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.33208955223880593,
+      "sensitivity_mean_plus_minus_std": "0.33209 \u00b1 0.0529009",
+      "sensitivity_std": 0.05290092118939488
+    },
+    {
+      "achieved_fp_per_image": 0.36000000000000004,
+      "achieved_fp_per_image_std": 0.11762841682367593,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 1.0,
+      "seed_count": 3,
+      "selected_threshold_max": 0.01,
+      "selected_threshold_mean": 0.01,
+      "selected_threshold_min": 0.01,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.33208955223880593,
+      "sensitivity_mean_plus_minus_std": "0.33209 \u00b1 0.0529009",
+      "sensitivity_std": 0.05290092118939488
+    },
+    {
+      "achieved_fp_per_image": 0.36000000000000004,
+      "achieved_fp_per_image_std": 0.11762841682367593,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 2.0,
+      "seed_count": 3,
+      "selected_threshold_max": 0.01,
+      "selected_threshold_mean": 0.01,
+      "selected_threshold_min": 0.01,
+      "selection_rule": "per seed: maximum observed sensitivity with FP/image <= budget; no interpolation; ties use fewer FP/image then higher threshold",
+      "sensitivity": 0.33208955223880593,
+      "sensitivity_mean_plus_minus_std": "0.33209 \u00b1 0.0529009",
+      "sensitivity_std": 0.05290092118939488
+    }
+  ],
+  "operating_points_per_seed": [
+    {
+      "achieved_fp_per_image": 0.11333333333333333,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.125,
+      "seed": 17,
+      "selected_threshold": 0.79,
+      "sensitivity": 0.27238805970149255
+    },
+    {
+      "achieved_fp_per_image": 0.23866666666666667,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.25,
+      "seed": 17,
+      "selected_threshold": 0.74,
+      "sensitivity": 0.332089552238806
+    },
+    {
+      "achieved_fp_per_image": 0.484,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.5,
+      "seed": 17,
+      "selected_threshold": 0.61,
+      "sensitivity": 0.44402985074626866
+    },
+    {
+      "achieved_fp_per_image": 0.984,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 1.0,
+      "seed": 17,
+      "selected_threshold": 0.4,
+      "sensitivity": 0.585820895522388
+    },
+    {
+      "achieved_fp_per_image": 1.8986666666666667,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 2.0,
+      "seed": 17,
+      "selected_threshold": 0.18,
+      "sensitivity": 0.6791044776119403
+    },
+    {
+      "achieved_fp_per_image": 0.11466666666666667,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.125,
+      "seed": 42,
+      "selected_threshold": 0.83,
+      "sensitivity": 0.2835820895522388
+    },
+    {
+      "achieved_fp_per_image": 0.24533333333333332,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.25,
+      "seed": 42,
+      "selected_threshold": 0.73,
+      "sensitivity": 0.373134328358209
+    },
+    {
+      "achieved_fp_per_image": 0.48533333333333334,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.5,
+      "seed": 42,
+      "selected_threshold": 0.47,
+      "sensitivity": 0.5074626865671642
+    },
+    {
+      "achieved_fp_per_image": 0.9573333333333334,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 1.0,
+      "seed": 42,
+      "selected_threshold": 0.16,
+      "sensitivity": 0.6082089552238806
+    },
+    {
+      "achieved_fp_per_image": 1.804,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 2.0,
+      "seed": 42,
+      "selected_threshold": 0.04,
+      "sensitivity": 0.6828358208955224
+    },
+    {
+      "achieved_fp_per_image": 0.108,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.125,
+      "seed": 137,
+      "selected_threshold": 0.7,
+      "sensitivity": 0.2537313432835821
+    },
+    {
+      "achieved_fp_per_image": 0.248,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.25,
+      "seed": 137,
+      "selected_threshold": 0.64,
+      "sensitivity": 0.376865671641791
+    },
+    {
+      "achieved_fp_per_image": 0.472,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 0.5,
+      "seed": 137,
+      "selected_threshold": 0.55,
+      "sensitivity": 0.48880597014925375
+    },
+    {
+      "achieved_fp_per_image": 0.904,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 1.0,
+      "seed": 137,
+      "selected_threshold": 0.39,
+      "sensitivity": 0.6156716417910447
+    },
+    {
+      "achieved_fp_per_image": 1.9786666666666666,
+      "detector": "faster_rcnn",
+      "fp_per_image_budget": 2.0,
+      "seed": 137,
+      "selected_threshold": 0.17,
+      "sensitivity": 0.7164179104477612
+    },
+    {
+      "achieved_fp_per_image": 0.124,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.125,
+      "seed": 17,
+      "selected_threshold": 0.14,
+      "sensitivity": 0.19776119402985073
+    },
+    {
+      "achieved_fp_per_image": 0.224,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.25,
+      "seed": 17,
+      "selected_threshold": 0.05,
+      "sensitivity": 0.26119402985074625
+    },
+    {
+      "achieved_fp_per_image": 0.468,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.5,
+      "seed": 17,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.373134328358209
+    },
+    {
+      "achieved_fp_per_image": 0.468,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 1.0,
+      "seed": 17,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.373134328358209
+    },
+    {
+      "achieved_fp_per_image": 0.468,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 2.0,
+      "seed": 17,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.373134328358209
+    },
+    {
+      "achieved_fp_per_image": 0.124,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.125,
+      "seed": 42,
+      "selected_threshold": 0.12,
+      "sensitivity": 0.1865671641791045
+    },
+    {
+      "achieved_fp_per_image": 0.248,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.25,
+      "seed": 42,
+      "selected_threshold": 0.03,
+      "sensitivity": 0.291044776119403
+    },
+    {
+      "achieved_fp_per_image": 0.37733333333333335,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.5,
+      "seed": 42,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.35074626865671643
+    },
+    {
+      "achieved_fp_per_image": 0.37733333333333335,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 1.0,
+      "seed": 42,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.35074626865671643
+    },
+    {
+      "achieved_fp_per_image": 0.37733333333333335,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 2.0,
+      "seed": 42,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.35074626865671643
+    },
+    {
+      "achieved_fp_per_image": 0.11066666666666666,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.125,
+      "seed": 137,
+      "selected_threshold": 0.2,
+      "sensitivity": 0.15671641791044777
+    },
+    {
+      "achieved_fp_per_image": 0.23466666666666666,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.25,
+      "seed": 137,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.27238805970149255
+    },
+    {
+      "achieved_fp_per_image": 0.23466666666666666,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 0.5,
+      "seed": 137,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.27238805970149255
+    },
+    {
+      "achieved_fp_per_image": 0.23466666666666666,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 1.0,
+      "seed": 137,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.27238805970149255
+    },
+    {
+      "achieved_fp_per_image": 0.23466666666666666,
+      "detector": "yolo11s",
+      "fp_per_image_budget": 2.0,
+      "seed": 137,
+      "selected_threshold": 0.01,
+      "sensitivity": 0.27238805970149255
+    }
+  ],
+  "protocol": {
+    "aggregation": "arithmetic mean and sample standard deviation across seeds",
+    "budget_selection": "within each seed, maximum observed sensitivity at or below the budget; no interpolation or extrapolation",
+    "budgets": [
+      0.125,
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "false_positives_per_image": "false-positive detections divided by all test images",
+    "performs_checkpoint_loading": false,
+    "performs_model_inference": false,
+    "performs_training": false,
+    "sensitivity": "operating-point recall at match IoU 0.50",
+    "source": "frozen Batch 10 test-set threshold sweep",
+    "threshold_selection_for_deployment": false
+  },
+  "schema_version": 1,
+  "source_identity": {
+    "src/plot_froc_curves.py": "260d725098335c7097fb78e67939713a47cf77abff349b3779612ac0412fc55f"
+  },
+  "status": "complete",
+  "upstream": {
+    "threshold_config": {
+      "path": "configs/threshold_sweep.yaml",
+      "sha256": "6f472d1737fc96e9d69e8576bff8e18225bb2f57f9a161b6912472b70fb55f3f",
+      "size_bytes": 987
+    },
+    "threshold_per_seed_table": {
+      "path": "results/tables/threshold_sweep_per_seed.csv",
+      "sha256": "09a501e7505645d2277677548a2e167c87f3d465e893c98dbc6c0868f7c9ef1d",
+      "size_bytes": 49761
+    },
+    "threshold_summary": {
+      "path": "results/logs/phase10_threshold_sweep/summary.json",
+      "sha256": "d58a1b2e5ef6f3dc5f2d6fc0e9ace2f3d5d92756193fb50a209850383e1a4c28",
+      "size_bytes": 12471
+    }
+  }
+}

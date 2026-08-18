@@ -22,7 +22,15 @@ The delivered benchmark differs from the draft in three concrete ways:
 - **Comparison scope:** the proposed Track B architecture-optimized study was
   descoped and was not run.
 
-Document status: **reconciled V1 implementation record (2026-08-12)**
+Research-track updates after the V1 freeze supersede two methodological parts
+of the historical record below: Batch 13 replaces image-level inference with
+patient-cluster bootstrap/permutation inference, and Batch 14 adds
+validation-selected detector thresholds, FROC curves, and corrected Pareto
+recall panels. Where a later statement below is explicitly labeled "V1," it
+describes the frozen course submission rather than the current primary method.
+
+Document status: **reconciled V1 implementation record with research-track
+updates through Batch 15 (2026-08-19)**
 
 Original protocol prepared: **2026-07-28 (draft v0.3)**
 
@@ -72,7 +80,7 @@ For the delivered V1 scope, success means that:
   figures, and documented command chain make every reported number traceable;
 - both detectors use the same patient-grouped split, 640 x 640 input, three
   seeds, no stochastic training augmentation, validation-based checkpoint
-  selection, unified evaluator, and frozen operating point;
+  selection, unified evaluator, and frozen evaluation contracts;
 - all requested predictive and compute metrics are explicitly defined;
 - robustness covers seven corruption types in four families at five severities;
 - Grad-CAM covers paired good predictions, false positives, and shared false
@@ -81,10 +89,10 @@ For the delivered V1 scope, success means that:
   tests, effect sizes, and Holm multiplicity correction;
 - the conclusion integrates accuracy, robustness, compute, explainability, and
   deployment evidence; and
-- limitations cover dataset quality, leakage/dependence risk, fixed-threshold
-  sensitivity, missing external and clinical validation, restricted seed/sample
-  scope, and the inability of two variants to establish a universal detector-
-  family result.
+- limitations cover dataset quality, leakage/dependence risk, threshold
+  sensitivity and selection, missing external and clinical validation,
+  restricted seed/sample scope, and the inability of two variants to establish
+  a universal detector-family result.
 
 The original definition also required a separately reported Track A and Track B,
 a completed deviation matrix, corrupted-input Grad-CAM, and additional sanity
@@ -291,6 +299,15 @@ class. The fixed threshold and conditional-metric limitations are stated in
 [LIMITATIONS.md](LIMITATIONS.md). Raw prediction bundles are preserved for all
 three clean-evaluation seeds.
 
+Batch 14 supersedes the threshold-selection part of that V1 statement for the
+current research-track result. Maximum arithmetic mean validation F1 on the
+predeclared 0.01--0.99 grid selects 0.69 for Faster R-CNN and 0.05 for YOLO11s;
+each is applied once to the frozen test bundles. The complete test sweep remains
+descriptive, and the original score-0.25 table remains a protocol-sensitivity
+record rather than the final threshold choice. See
+[THRESHOLD_ANALYSIS.md](THRESHOLD_ANALYSIS.md) and
+[FROC_ANALYSIS.md](FROC_ANALYSIS.md).
+
 ## 8. Computational benchmark
 
 The delivered compute protocol uses the recorded RTX 4060 Laptop GPU, batch-1
@@ -368,11 +385,12 @@ The clean analysis covers all 750 test images and paired training seeds 17, 42,
 and 137. For each of the seven predictive metrics, the detector difference is
 computed within seed and then averaged across paired seeds. Inference uses:
 
-- 2,000 paired hierarchical percentile bootstrap draws over image indices and
-  paired seed indices;
-- 5,000 two-sided paired image-label permutation draws;
+- 2,000 paired hierarchical percentile bootstrap draws over NIH patient groups
+  and paired seed indices;
+- 5,000 two-sided paired patient-group detector-label permutation draws;
 - pointwise 95% bootstrap intervals;
-- paired jackknife Cohen's d; and
+- the paired raw aggregate difference with its patient-cluster interval as the
+  effect; and
 - Holm correction across the seven clean endpoints.
 
 Dataset-level AP is recomputed from complete prediction bundles in every draw;
@@ -385,11 +403,13 @@ The corruption analysis uses the paired seed-17 predictions on the fixed
 clean-relative retention for each of 35 conditions, with Holm correction within
 each metric-and-estimand family.
 
-The draft's patient-cluster bootstrap, at least 10,000 resamples, formal Track A
-primary/Track B secondary split, McNemar test, and Wilcoxon signed-rank tests
-were not implemented. Image-level resampling leaves residual within-patient
-dependence, and three seeds give only a coarse estimate of training variation.
-The exact estimands and results are in
+Batch 13 corrected the V1 image-level independence error: every observed exam
+from one patient is resampled and permuted together in the current primary
+analysis. The exact V1 image-level outputs and former jackknife Cohen's d remain
+under explicit archive paths for audit only. The draft's at-least-10,000-draw
+target, formal Track A primary/Track B secondary split, McNemar test, and
+Wilcoxon signed-rank tests were not implemented. Three seeds still give only a
+coarse estimate of training variation. The exact estimands and results are in
 [STATISTICAL_ANALYSIS.md](STATISTICAL_ANALYSIS.md).
 
 ## 12. Implementation sequence and completion status
@@ -518,7 +538,7 @@ methodology disclosure provide the accurate scope record.
 | Undocumented protocol deviations | Dataset/model choices are traceable to dataset docs and configs, and this reconciliation exposes the missing decision log and Track B; no claim is made that the original preregistration mechanism was completed |
 | Patient or duplicate leakage | Official NIH keys enforce patient-disjoint splits and exact-duplicate/annotation checks are recorded; repeated exams within a split remain dependent, and no near-duplicate sensitivity claim is made |
 | Framework defaults obscure fairness | Stochastic/native augmentation is disabled, resolved configs are retained, and architecture/training differences are disclosed; no generated two-track config-difference report is claimed |
-| Test-set tuning | Checkpoints are selected by validation mAP@0.5:0.95 and the test operating threshold is frozen at 0.25; threshold sensitivity/calibration was not performed |
+| Test-set tuning | In the V1 course freeze, checkpoints were selected by validation mAP@0.5:0.95 and the operating threshold was fixed at 0.25; the later research-track correction selects thresholds on validation and uses the test sweep only descriptively, without claiming probabilistic calibration |
 | Different metric implementations | One model-independent evaluator and official pycocotools AP are used for both detectors |
 | Single-seed winner | Clean results use three full training seeds; robustness and explainability remain primary-seed-only and are labeled accordingly |
 | Decorative or overclaimed Grad-CAM | Detection-specific targets, matched layers, paired cases, energy-in-box, pointing game, and a random area baseline are retained; corruption and parameter-randomization sanity tests were not run |

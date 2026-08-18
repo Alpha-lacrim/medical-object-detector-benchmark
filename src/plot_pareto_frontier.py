@@ -6,7 +6,6 @@ import argparse
 import csv
 import os
 import tempfile
-from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,8 +29,8 @@ class InputSettings(StrictModel):
 
     comparison_summary: Path
     comparison_per_seed: Path
-    threshold_summary: Path
-    threshold_per_seed: Path
+    selected_operating_points: Path
+    selected_operating_points_per_seed: Path
     compute_tables: tuple[Path, ...]
 
     @model_validator(mode="after")
@@ -45,7 +44,7 @@ class InputSettings(StrictModel):
 class AnalysisSettings(StrictModel):
     """Operating-point selection and numeric validation settings."""
 
-    recall_operating_point: Literal["peak_mean_f1"]
+    recall_operating_point: Literal["validation_selected_maximum_mean_f1"]
     numeric_tolerance: float = Field(gt=0)
 
 
@@ -173,34 +172,6 @@ def _assert_close(
         raise ValueError(f"{context}: {actual:.17g} != {expected:.17g}")
 
 
-def _select_recall_thresholds(
-    rows: Sequence[Mapping[str, str]],
-    *,
-    detectors: set[str],
-    source: Path,
-) -> dict[str, float]:
-    """Select each detector's best observed mean-F1 threshold."""
-    grouped: dict[str, list[Mapping[str, str]]] = defaultdict(list)
-    for row in rows:
-        detector = row.get("detector", "")
-        if detector in detectors:
-            grouped[detector].append(row)
-    if set(grouped) != detectors:
-        raise ValueError(f"{source}: threshold detectors do not match config")
-
-    selected: dict[str, float] = {}
-    for detector, detector_rows in grouped.items():
-        best = min(
-            detector_rows,
-            key=lambda row: (
-                -_float(row, "f1", source=source),
-                _float(row, "threshold", source=source),
-            ),
-        )
-        selected[detector] = _float(best, "threshold", source=source)
-    return selected
-
-
 def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
     """Join and cross-check all frozen accuracy, threshold, and compute artifacts."""
     detector_names = set(config.detectors)
@@ -220,25 +191,47 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
             )
         comparison_by_run[run_id] = row
 
-    threshold_summary = _read_csv(config.inputs.threshold_summary)
-    thresholds = _select_recall_thresholds(
-        threshold_summary,
-        detectors=detector_names,
-        source=config.inputs.threshold_summary,
-    )
-    threshold_per_seed = _read_csv(config.inputs.threshold_per_seed)
+    selected_summary = _read_csv(config.inputs.selected_operating_points)
+    if {row.get("detector", "") for row in selected_summary} != detector_names:
+        raise ValueError("selected operating-point detectors do not match config")
+    if any(row.get("selection_split") != "validation" for row in selected_summary):
+        raise ValueError("Pareto recall thresholds must be selected on validation")
+    thresholds = {
+        row["detector"]: _float(
+            row,
+            "selected_threshold",
+            source=config.inputs.selected_operating_points,
+        )
+        for row in selected_summary
+    }
+    selected_per_seed = _read_csv(config.inputs.selected_operating_points_per_seed)
     recall_by_key: dict[tuple[str, int], float] = {}
-    for row in threshold_per_seed:
+    for row in selected_per_seed:
         detector = row.get("detector", "")
         if detector not in thresholds:
             continue
-        threshold = _float(row, "threshold", source=config.inputs.threshold_per_seed)
+        if row.get("selection_split") != "validation":
+            raise ValueError("Pareto per-seed recall thresholds must be selected on validation")
+        threshold = _float(
+            row,
+            "selected_threshold",
+            source=config.inputs.selected_operating_points_per_seed,
+        )
         if not np.isclose(threshold, thresholds[detector], rtol=0.0, atol=tolerance):
-            continue
-        key = (detector, _integer(row, "seed", source=config.inputs.threshold_per_seed))
+            raise ValueError(f"per-seed selected threshold differs for {detector}")
+        key = (
+            detector,
+            _integer(row, "seed", source=config.inputs.selected_operating_points_per_seed),
+        )
         if key in recall_by_key:
-            raise ValueError(f"{config.inputs.threshold_per_seed}: duplicate row for {key}")
-        recall_by_key[key] = _float(row, "recall", source=config.inputs.threshold_per_seed)
+            raise ValueError(
+                f"{config.inputs.selected_operating_points_per_seed}: duplicate row for {key}"
+            )
+        recall_by_key[key] = _float(
+            row,
+            "test_recall",
+            source=config.inputs.selected_operating_points_per_seed,
+        )
 
     points: list[ParetoPoint] = []
     seen_runs: set[str] = set()
@@ -283,7 +276,7 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
         raise ValueError(f"compute tables do not cover comparison runs: {missing}")
     _validate_seed_grid(points, detector_names)
     _validate_publication_summary(points, config)
-    _validate_threshold_summary(points, threshold_summary, config)
+    _validate_threshold_summary(points, selected_summary, config)
     return sorted(points, key=lambda point: (point.detector, point.seed))
 
 
@@ -328,24 +321,27 @@ def _validate_threshold_summary(
     summary_rows: Sequence[Mapping[str, str]],
     config: ParetoConfig,
 ) -> None:
-    """Verify selected seed recalls reproduce the threshold-sweep mean."""
+    """Verify seed recalls reproduce the validation-selected test summary."""
     for detector in config.detectors:
         detector_points = [point for point in points if point.detector == detector]
         threshold = detector_points[0].recall_threshold
-        matching = [
-            row
-            for row in summary_rows
-            if row.get("detector") == detector
-            and np.isclose(
-                _float(row, "threshold", source=config.inputs.threshold_summary),
-                threshold,
-                rtol=0.0,
-                atol=config.analysis.numeric_tolerance,
-            )
-        ]
+        matching = [row for row in summary_rows if row.get("detector") == detector]
         if len(matching) != 1:
-            raise ValueError(f"missing unique threshold summary for {detector} at {threshold}")
-        expected = _float(matching[0], "recall", source=config.inputs.threshold_summary)
+            raise ValueError(f"missing unique selected operating-point summary for {detector}")
+        selected_threshold = _float(
+            matching[0],
+            "selected_threshold",
+            source=config.inputs.selected_operating_points,
+        )
+        _assert_close(
+            threshold,
+            selected_threshold,
+            tolerance=config.analysis.numeric_tolerance,
+            context=f"{detector} validation-selected threshold",
+        )
+        expected = _float(
+            matching[0], "test_recall", source=config.inputs.selected_operating_points
+        )
         observed = float(np.mean([point.recall for point in detector_points]))
         _assert_close(
             observed,
@@ -412,11 +408,11 @@ def panel_specs() -> tuple[PanelSpec, ...]:
         ),
         PanelSpec(
             letter="b",
-            title="Threshold-aware recall vs latency",
+            title="Validation-selected recall vs latency",
             x_field="mean_latency_ms",
             y_field="recall",
             x_label="Mean latency (ms/image; lower is better)",
-            y_label="Recall at peak mean-F1 threshold (higher is better)",
+            y_label="Test recall at validation-selected threshold (higher is better)",
             x_direction="lower",
             y_direction="higher",
         ),
@@ -433,11 +429,11 @@ def panel_specs() -> tuple[PanelSpec, ...]:
         ),
         PanelSpec(
             letter="d",
-            title="Threshold-aware recall vs estimated GFLOPs",
+            title="Validation-selected recall vs estimated GFLOPs",
             x_field="estimated_gflops",
             y_field="recall",
             x_label="Estimated GFLOPs/image (lower is better)",
-            y_label="Recall at peak mean-F1 threshold (higher is better)",
+            y_label="Test recall at validation-selected threshold (higher is better)",
             x_direction="lower",
             y_direction="higher",
         ),
@@ -594,7 +590,8 @@ def plot_pareto_frontier(
         )
         figure.suptitle(
             f"Accuracy-efficiency trade-offs across {len(seeds)} training seeds\n"
-            f"Recall panels use each detector's peak mean-F1 sweep point ({threshold_text})",
+            "Recall panels evaluate each detector's validation-selected mean-F1 threshold "
+            f"once on test ({threshold_text})",
             fontsize=14,
             fontweight="bold",
         )

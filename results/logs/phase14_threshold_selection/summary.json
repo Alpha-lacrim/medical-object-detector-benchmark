@@ -1,0 +1,261 @@
+{
+  "analysis_id": "rsna-phase14-validation-threshold-selection",
+  "artifacts": {
+    "selected_operating_points_per_seed_table": {
+      "path": "results/tables/selected_operating_points_per_seed.csv",
+      "sha256": "cebedc9ced0d9bab1840bd8319d03865dc8d7e2cf9da53db7eff5eaa1f86b393",
+      "size_bytes": 1550
+    },
+    "selected_operating_points_table": {
+      "path": "results/tables/selected_operating_points.csv",
+      "sha256": "1b0c9fe80b5867f7e8f60fdd9af3489bd779c0a2f124029a6c5b1b8c13d7d58d",
+      "size_bytes": 1019
+    },
+    "validation_threshold_per_seed_table": {
+      "path": "results/tables/validation_threshold_sweep_per_seed.csv",
+      "sha256": "611b50fb79f493fca66ff72c2f0bdc2ca6c00a8ac000b4e82df8f5282b8e4b38",
+      "size_bytes": 49676
+    },
+    "validation_threshold_table": {
+      "path": "results/tables/validation_threshold_sweep.csv",
+      "sha256": "c95665ad0c66e999f948e371153b6f8b826eb1d0cb83df9712420e53f93fcb98",
+      "size_bytes": 37568
+    }
+  },
+  "config_path": "configs/threshold_selection.yaml",
+  "config_sha256": "f7ba5bae4d206f4081fe94546823867a2d6c554a03156ad03b9da9c7463e0a60",
+  "counts": {
+    "selected_test_rows_per_seed": 6,
+    "test_images_per_bundle": 750,
+    "validation_images_per_bundle": 750,
+    "validation_threshold_rows_aggregate": 198,
+    "validation_threshold_rows_per_seed": 594
+  },
+  "schema_version": 1,
+  "selection": {
+    "reason": "F1 gives precision and recall equal weight without inventing an unvalidated clinical cost ratio and preserves the predeclared Batch 10 grid",
+    "rule": "maximum arithmetic mean F1 across the three validation seeds",
+    "selected": {
+      "faster_rcnn": {
+        "threshold": 0.69,
+        "validation_f1": 0.4202466656023896,
+        "validation_precision": 0.416449481200931,
+        "validation_recall": 0.44043321299638993
+      },
+      "yolo11s": {
+        "threshold": 0.05,
+        "validation_f1": 0.358838521477681,
+        "validation_precision": 0.40761627906976744,
+        "validation_recall": 0.32129963898916963
+      }
+    },
+    "split": "validation",
+    "thresholds": [
+      0.01,
+      0.02,
+      0.03,
+      0.04,
+      0.05,
+      0.06,
+      0.07,
+      0.08,
+      0.09,
+      0.1,
+      0.11,
+      0.12,
+      0.13,
+      0.14,
+      0.15,
+      0.16,
+      0.17,
+      0.18,
+      0.19,
+      0.2,
+      0.21,
+      0.22,
+      0.23,
+      0.24,
+      0.25,
+      0.26,
+      0.27,
+      0.28,
+      0.29,
+      0.3,
+      0.31,
+      0.32,
+      0.33,
+      0.34,
+      0.35,
+      0.36,
+      0.37,
+      0.38,
+      0.39,
+      0.4,
+      0.41,
+      0.42,
+      0.43,
+      0.44,
+      0.45,
+      0.46,
+      0.47,
+      0.48,
+      0.49,
+      0.5,
+      0.51,
+      0.52,
+      0.53,
+      0.54,
+      0.55,
+      0.56,
+      0.57,
+      0.58,
+      0.59,
+      0.6,
+      0.61,
+      0.62,
+      0.63,
+      0.64,
+      0.65,
+      0.66,
+      0.67,
+      0.68,
+      0.69,
+      0.7,
+      0.71,
+      0.72,
+      0.73,
+      0.74,
+      0.75,
+      0.76,
+      0.77,
+      0.78,
+      0.79,
+      0.8,
+      0.81,
+      0.82,
+      0.83,
+      0.84,
+      0.85,
+      0.86,
+      0.87,
+      0.88,
+      0.89,
+      0.9,
+      0.91,
+      0.92,
+      0.93,
+      0.94,
+      0.95,
+      0.96,
+      0.97,
+      0.98,
+      0.99
+    ],
+    "tie_breaker": "highest threshold among exact mean-F1 ties"
+  },
+  "source_identity": {
+    "src/evaluate.py": "89de001f2bda3518ddef4c9167e971519712cdce1a53768fb0e45fc4a6a541c3",
+    "src/evaluate_threshold_selection.py": "f2689de09e99f98144113ce99f68c6ea345a42487cfe0a9582635347ef4c3de7",
+    "src/evaluate_threshold_sweep.py": "fbed7e1ab36efdb389af9c4ac6030585e3b7837734ab0d3af951a114d3a7c263"
+  },
+  "status": "complete",
+  "test_evaluation": {
+    "performs_checkpoint_loading": false,
+    "performs_model_inference": false,
+    "performs_training": false,
+    "policy": "apply each frozen detector threshold once to each frozen test bundle",
+    "selected_operating_points": [
+      {
+        "detector": "faster_rcnn",
+        "seed_count": 3,
+        "selected_threshold": 0.69,
+        "selection_rule": "maximum arithmetic mean F1 across three validation seeds",
+        "selection_split": "validation",
+        "test_f1": 0.34922525436788515,
+        "test_f1_std": 0.013474555738679596,
+        "test_precision": 0.35430836177616115,
+        "test_precision_std": 0.07459544478656999,
+        "test_recall": 0.36069651741293535,
+        "test_recall_std": 0.060780058322739375,
+        "tie_breaker": "highest threshold among exact mean-F1 ties",
+        "validation_f1": 0.4202466656023896,
+        "validation_f1_std": 0.0077603734217001445,
+        "validation_precision": 0.416449481200931,
+        "validation_precision_std": 0.07691957342798401,
+        "validation_recall": 0.44043321299638993,
+        "validation_recall_std": 0.06627277888334229
+      },
+      {
+        "detector": "yolo11s",
+        "seed_count": 3,
+        "selected_threshold": 0.05,
+        "selection_rule": "maximum arithmetic mean F1 across three validation seeds",
+        "selection_split": "validation",
+        "test_f1": 0.27175016035243316,
+        "test_f1_std": 0.01811032099731595,
+        "test_precision": 0.3095612153438674,
+        "test_precision_std": 0.013404690450672921,
+        "test_recall": 0.24378109452736316,
+        "test_recall_std": 0.03016008868901029,
+        "tie_breaker": "highest threshold among exact mean-F1 ties",
+        "validation_f1": 0.358838521477681,
+        "validation_f1_std": 0.02094276785821426,
+        "validation_precision": 0.40761627906976744,
+        "validation_precision_std": 0.010697200444505041,
+        "validation_recall": 0.32129963898916963,
+        "validation_recall_std": 0.031472194538199834
+      }
+    ],
+    "threshold_evaluations_per_bundle": 1
+  },
+  "upstream": {
+    "test_prediction_bundles": [
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b"
+      }
+    ],
+    "test_threshold_config": {
+      "path": "configs/threshold_sweep.yaml",
+      "sha256": "6f472d1737fc96e9d69e8576bff8e18225bb2f57f9a161b6912472b70fb55f3f",
+      "size_bytes": 987
+    },
+    "validation_manifest": {
+      "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+      "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+      "size_bytes": 8271
+    }
+  }
+}

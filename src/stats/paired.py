@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -76,6 +77,84 @@ class EvidencePair:
     @property
     def seed_count(self) -> int:
         return len(self.detector_a)
+
+
+@dataclass(frozen=True)
+class PatientClusters:
+    """Patient-group membership aligned to an evidence pair's image order."""
+
+    image_ids: tuple[str, ...]
+    patient_group_ids: tuple[str, ...]
+    image_to_group: IntArray
+
+    def __post_init__(self) -> None:
+        if not self.image_ids or not self.patient_group_ids:
+            raise ValueError("patient clusters must contain images and groups")
+        if self.image_to_group.shape != (len(self.image_ids),):
+            raise ValueError("patient-group indices must match image count")
+        if not np.issubdtype(self.image_to_group.dtype, np.integer):
+            raise ValueError("patient-group indices must be integers")
+        if np.any(self.image_to_group < 0) or np.any(
+            self.image_to_group >= len(self.patient_group_ids)
+        ):
+            raise ValueError("patient-group indices are out of range")
+        if set(self.image_to_group.tolist()) != set(range(len(self.patient_group_ids))):
+            raise ValueError("every declared patient group must contain at least one image")
+
+    @property
+    def patient_group_count(self) -> int:
+        return len(self.patient_group_ids)
+
+
+def build_patient_clusters(
+    image_ids: tuple[str, ...], group_by_image: Mapping[str, str]
+) -> PatientClusters:
+    """Build deterministic patient membership for the requested image IDs."""
+
+    if len(set(image_ids)) != len(image_ids):
+        raise ValueError("image IDs must be unique")
+    missing = sorted(set(image_ids) - set(group_by_image))
+    if missing:
+        raise ValueError(f"patient mapping lacks image IDs: {missing[:5]}")
+    group_ids_by_image = tuple(str(group_by_image[image_id]).strip() for image_id in image_ids)
+    if any(not group_id for group_id in group_ids_by_image):
+        raise ValueError("patient group IDs must be non-empty")
+    patient_group_ids = tuple(sorted(set(group_ids_by_image)))
+    group_indices = {group_id: index for index, group_id in enumerate(patient_group_ids)}
+    image_to_group = np.asarray(
+        [group_indices[group_id] for group_id in group_ids_by_image], dtype=np.int64
+    )
+    return PatientClusters(
+        image_ids=image_ids,
+        patient_group_ids=patient_group_ids,
+        image_to_group=image_to_group,
+    )
+
+
+def expand_patient_group_multiplicities(
+    patient_group_multiplicities: IntArray, patient_clusters: PatientClusters
+) -> IntArray:
+    """Apply each sampled patient multiplicity to all images in that patient group."""
+
+    if patient_group_multiplicities.shape != (patient_clusters.patient_group_count,):
+        raise ValueError("patient-group multiplicities must match patient-group count")
+    if not np.issubdtype(patient_group_multiplicities.dtype, np.integer) or np.any(
+        patient_group_multiplicities < 0
+    ):
+        raise ValueError("patient-group multiplicities must be non-negative integers")
+    return patient_group_multiplicities[patient_clusters.image_to_group]
+
+
+def expand_patient_group_choices(
+    patient_group_choices: BoolArray, patient_clusters: PatientClusters
+) -> BoolArray:
+    """Expand one detector-label choice per patient to its complete image cluster."""
+
+    if patient_group_choices.shape != (patient_clusters.patient_group_count,):
+        raise ValueError("patient-group choices must match patient-group count")
+    if patient_group_choices.dtype != np.bool_:
+        raise ValueError("patient-group choices must be boolean")
+    return patient_group_choices[patient_clusters.image_to_group]
 
 
 @dataclass(frozen=True)
@@ -498,6 +577,7 @@ def _retention(
 def analyze_pair(
     pair: EvidencePair,
     *,
+    patient_clusters: PatientClusters,
     base_seed: int,
     comparison_label: str,
     bootstrap_resamples: int,
@@ -505,7 +585,7 @@ def analyze_pair(
     confidence_level: float,
     reference_pair: EvidencePair | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
-    """Run paired bootstrap, image-label permutation, and jackknife effects."""
+    """Run patient-cluster bootstrap and paired patient-label permutation."""
 
     if bootstrap_resamples < 100 or permutation_resamples < 100:
         raise ValueError("at least 100 bootstrap and permutation resamples are required")
@@ -516,8 +596,11 @@ def analyze_pair(
         or reference_pair.seed_count != pair.seed_count
     ):
         raise ValueError("reference evidence must match current images and seeds")
+    if patient_clusters.image_ids != pair.detector_a[0].image_ids:
+        raise ValueError("patient clusters must match the evidence image order")
 
     n, seed_count = pair.image_count, pair.seed_count
+    patient_group_count = patient_clusters.patient_group_count
     prepared = tuple(
         prepare_hybrid(evidence_a, evidence_b)
         for evidence_a, evidence_b in zip(pair.detector_a, pair.detector_b, strict=True)
@@ -560,11 +643,16 @@ def analyze_pair(
         for name in estimands
     }
     rng = np.random.default_rng(stable_rng_seed(base_seed, comparison_label))
-    image_probabilities = np.full(n, 1 / n, dtype=np.float64)
+    patient_group_probabilities = np.full(
+        patient_group_count, 1 / patient_group_count, dtype=np.float64
+    )
     seed_probabilities = np.full(seed_count, 1 / seed_count, dtype=np.float64)
 
     for resample in range(bootstrap_resamples):
-        counts = rng.multinomial(n, image_probabilities).astype(np.int64, copy=False)
+        patient_group_counts = rng.multinomial(
+            patient_group_count, patient_group_probabilities
+        ).astype(np.int64, copy=False)
+        counts = expand_patient_group_multiplicities(patient_group_counts, patient_clusters)
         seed_counts = (
             rng.multinomial(seed_count, seed_probabilities).astype(np.int64, copy=False)
             if seed_count > 1
@@ -587,7 +675,10 @@ def analyze_pair(
             bootstrap["retention"][resample] = _retention(current, reference)
 
     for resample in range(permutation_resamples):
-        swap_mask = rng.integers(0, 2, size=n, dtype=np.int8).astype(np.bool_)
+        patient_group_swaps = rng.integers(0, 2, size=patient_group_count, dtype=np.int8).astype(
+            np.bool_
+        )
+        swap_mask = expand_patient_group_choices(patient_group_swaps, patient_clusters)
         current = estimate_pair(
             pair,
             multiplicities=ones,
@@ -606,30 +697,6 @@ def analyze_pair(
             )
             retained = _retention(current, reference)
             permutation["retention"][resample] = retained[0] - retained[1]
-
-    jackknife = {name: np.full((n, len(METRICS)), np.nan, dtype=np.float64) for name in estimands}
-    for index in range(n):
-        counts = ones.copy()
-        counts[index] = 0
-        current = estimate_pair(
-            pair,
-            multiplicities=counts,
-            seed_multiplicities=seed_ones,
-            prepared=prepared,
-        )
-        leave_out: dict[str, tuple[FloatArray, FloatArray]] = {"raw": current}
-        if reference_pair is not None:
-            reference = estimate_pair(
-                reference_pair,
-                multiplicities=counts,
-                seed_multiplicities=seed_ones,
-                prepared=reference_prepared,
-            )
-            leave_out["retention"] = _retention(current, reference)
-        for name in estimands:
-            full_difference = point[name][0] - point[name][1]
-            leave_out_difference = leave_out[name][0] - leave_out[name][1]
-            jackknife[name][index] = n * full_difference - (n - 1) * leave_out_difference
 
     output: dict[str, list[dict[str, Any]]] = {}
     for name in estimands:
@@ -656,14 +723,7 @@ def analyze_pair(
                 p_value = (exceedances + 1) / (len(valid_null) + 1)
             else:
                 p_value = np.nan
-            pseudo = jackknife[name][:, metric_index]
-            valid_pseudo = pseudo[np.isfinite(pseudo)]
-            pseudo_std = float(np.std(valid_pseudo, ddof=1)) if len(valid_pseudo) > 1 else np.nan
-            effect = (
-                float(np.mean(valid_pseudo) / pseudo_std)
-                if np.isfinite(pseudo_std) and pseudo_std > 0
-                else np.nan
-            )
+            effect = float(observed[metric_index])
             estimable = all(
                 np.isfinite(value)
                 for value in (
@@ -693,15 +753,14 @@ def analyze_pair(
                     "bootstrap_valid_difference": difference_valid,
                     "p_value_raw": float(p_value),
                     "permutation_valid": len(valid_null),
-                    "effect_size_name": "paired_jackknife_cohens_d",
+                    "effect_size_name": "paired_raw_difference",
                     "effect_size": effect,
-                    "effect_size_n": len(valid_pseudo),
+                    "effect_size_n": patient_group_count,
                     "status": "complete" if estimable else "not_estimable",
                     "reason": (
                         ""
                         if estimable
-                        else "The conditional metric is undefined for at least one detector "
-                        "or has zero jackknife variance."
+                        else "The conditional metric is undefined for at least one detector."
                     ),
                 }
             )

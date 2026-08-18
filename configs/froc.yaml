@@ -1,0 +1,31 @@
+schema_version: 1
+analysis_id: rsna-phase14-test-froc
+
+inputs:
+  threshold_config: configs/threshold_sweep.yaml
+  threshold_summary: results/logs/phase10_threshold_sweep/summary.json
+  threshold_per_seed_table: results/tables/threshold_sweep_per_seed.csv
+
+analysis:
+  fp_per_image_budgets: [0.125, 0.25, 0.5, 1.0, 2.0]
+  numeric_tolerance: 1.0e-12
+
+detectors:
+  faster_rcnn:
+    label: Faster R-CNN
+    color: "#1f77b4"
+  yolo11s:
+    label: YOLO11s
+    color: "#d95f02"
+
+plot:
+  dpi: 180
+  figure_width: 9.2
+  figure_height: 6.2
+  minimum_x: 0.0625
+  maximum_x: 8.0
+
+outputs:
+  operating_points_table: results/tables/froc_operating_points.csv
+  figure: results/figures/froc_curves.png
+  summary_json: results/logs/phase14_froc/summary.json

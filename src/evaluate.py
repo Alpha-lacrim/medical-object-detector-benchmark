@@ -418,6 +418,8 @@ def _collect_faster_rcnn_predictions(
     phase_config: Phase5Config,
     model_config: Any,
     dataset: Any,
+    *,
+    expected_config_sha256: str | None = None,
 ) -> tuple[list[ImagePrediction], float]:
     import torch
     from torch.utils.data import DataLoader
@@ -428,7 +430,8 @@ def _collect_faster_rcnn_predictions(
 
     checkpoint_path = phase_config.resolve(run.checkpoint)
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
-    if checkpoint.get("config_sha256") != config_fingerprint(model_config):
+    required_config_sha256 = expected_config_sha256 or config_fingerprint(model_config)
+    if checkpoint.get("config_sha256") != required_config_sha256:
         raise ValueError(f"Faster R-CNN checkpoint/config mismatch for seed {run.seed}")
     model, _metadata = build_faster_rcnn(
         dataset.num_foreground_classes,

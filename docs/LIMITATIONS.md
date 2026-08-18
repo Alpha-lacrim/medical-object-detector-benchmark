@@ -25,8 +25,11 @@ The official mapping supports NIH patient-level grouping, and the train,
 validation, and test patient-key intersections are empty. This controls known
 repeat-exam leakage, but the released metadata may not expose every encounter,
 device, or acquisition relationship. The held-out sets also contain repeated
-exams within a split, so image-level observations are not fully independent by
-patient.
+exams within a split. The resulting within-patient dependence was identified
+and corrected in Batch 13: primary confidence intervals resample NIH patient
+groups, and permutation swaps move every observed exam from one patient
+together. The remaining limitation is the finite number of observed patient
+groups, not unaddressed image-level clustering.
 
 ## Annotation and preprocessing scope
 
@@ -98,22 +101,29 @@ than experimental endpoints.
 
 ## Metric and compute-measurement scope
 
-Precision, recall, and F1 use one fixed score threshold of 0.25 and matching IoU
-of 0.50. Another calibrated threshold would move the precision-recall trade-off
-and requires a separate experiment. Conditional IoU and Dice average only
-matched true positives; they describe box quality after a successful detection
-and must not be read without recall. They are undefined when a condition has no
-true positive, as occurs for YOLO11s under the darkest corruption.
+The original Phase 5 precision, recall, and F1 table uses one shared score
+threshold of 0.25 and matching IoU of 0.50. Batch 14 separately selects
+detector-specific thresholds on validation by maximum mean F1 (0.69 for Faster
+R-CNN and 0.05 for YOLO11s) and applies them once to test; these are the primary
+single-threshold operating points. Equal-weight F1 is transparent but does not
+encode clinical false-negative and false-positive costs, and only three
+validation seeds inform the selection. The complete held-out threshold sweep
+is descriptive rather than a source of deployment settings. Conditional IoU
+and Dice average only matched true positives; they describe box quality after a
+successful detection and must not be read without recall. They are undefined
+when a condition has no true positive, as occurs for YOLO11s under the darkest
+corruption at the original score-0.25 operating point.
 
 Registered-operation GFLOPs omit unsupported operations and are estimates, not
 direct hardware timings. Synchronized batch-1 speed profiles include each
 framework's native detector forward and postprocessing, but Faster R-CNN
 resizing occurs inside its timed model forward while YOLO tensor resizing occurs
-before timing. FPS is therefore an implementation-level deployment comparison,
-not a pure architecture kernel benchmark. The external Anaconda environment
-used for the measured runs is captured by run-level package and hardware
-snapshots, but exact timing can still vary with GPU power state, driver, and
-system load.
+before timing. FPS is therefore an implementation-specific deployment
+comparison between these documented pipelines on the measured laptop, not an
+architecture-general claim or a pure kernel benchmark. The external Anaconda
+environment used for the measured runs is captured by run-level package and
+hardware snapshots, but exact timing can still vary with GPU power state,
+driver, and system load.
 
 ## Robustness scope
 
@@ -126,9 +136,9 @@ Albumentations applies brightness, synthetic noise/blur, and JPEG changes to
 post-conversion uint8 PNGs. These transformations do not reproduce scanner
 physics, DICOM window/VOI behavior, reconstruction failures, acquisition
 protocol changes, population shift, site shift, or adversarial manipulation.
-The grid cannot establish clinical robustness or safety. It repeatedly
-transforms the same 300 images, so corruption conditions are not independent
-deployment cohorts.
+The grid measures digital robustness under the specified transformations, not
+clinical robustness or safety. It repeatedly transforms the same 300 images,
+so corruption conditions are not independent deployment cohorts.
 
 ## Explainability scope
 
@@ -160,9 +170,11 @@ association diagnostic and not evidence of clinical reasoning.
 
 ## Statistical scope
 
-The required bootstrap resamples images, but repeated exams reduce the effective
-independent patient count. Its intervals can therefore be narrower than those
-from a patient-cluster bootstrap. The clean hierarchical bootstrap resamples
+Batch 13 identified and corrected the original image-level clustering error.
+The primary bootstrap now resamples all exams from each NIH patient together,
+and the paired permutation swaps detector labels once per patient group. The
+superseded image-level tables and summary remain explicitly archived for audit
+but are not primary evidence. The clean hierarchical bootstrap still resamples
 only three paired training seeds, while corruption inference remains
 conditional on the primary checkpoints.
 
@@ -170,9 +182,10 @@ Permutation p-values condition on the observed checkpoints, whereas clean
 confidence intervals also resample the three seed pairs. These answer related
 but different uncertainty questions. The 95% percentile intervals are
 pointwise rather than simultaneous; Holm-adjusted p-values govern family-wise
-claims. Holm correction does not remove within-patient dependence, make
-severity conditions independent, calibrate their clinical likelihood, or
-establish external-site robustness.
+claims. Patient clustering handles the observed within-patient dependence, but
+neither it nor Holm correction makes severity conditions independent,
+calibrates their clinical likelihood, guarantees transportability, or
+establishes external-site robustness.
 
 McNemar's test is omitted because the benchmark does not produce one
 independent binary outcome per image. Reducing multiple targets and

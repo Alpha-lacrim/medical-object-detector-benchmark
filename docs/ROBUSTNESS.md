@@ -98,8 +98,8 @@ Review artifacts:
 - `results/tables/robustness_family_mean_curves.csv`: severity curves averaged
   within lighting, noise, blur, and compression families; and
 - `results/logs/phase6_robustness/summary.json` plus 72 hashed prediction
-  bundles: complete provenance and the image-level evidence used by Phase 8's
-  paired tests in `docs/STATISTICAL_ANALYSIS.md`.
+  bundles: complete provenance and the per-image sufficient evidence used by
+  Phase 8's patient-cluster paired tests in `docs/STATISTICAL_ANALYSIS.md`.
 
 ## Interpretation limits
 
@@ -107,6 +107,8 @@ The benchmark tests deterministic digital transformations after the project's
 PNG conversion. Brightness and JPEG changes do not simulate scanner physics,
 DICOM window/VOI processing, reconstruction, population shift, or a new site.
 The 300-image sample contains only 111 boxes and repeated exams from some
-patients. Relative rankings can therefore be sample-sensitive, and image-level
-observations are not guaranteed independent. These results support a scoped
-common-corruption comparison, not clinical robustness or safety.
+patients. Batch 13's primary inference keeps all exams from each patient
+together during resampling and permutation, but the 183 patient groups and one
+checkpoint per detector still make relative rankings sample-sensitive. These
+results support a scoped digital common-corruption comparison, not clinical
+robustness or safety.

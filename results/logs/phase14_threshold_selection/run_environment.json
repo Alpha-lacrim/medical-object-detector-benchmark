@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-08-17T22:49:37.918710+00:00",
+  "captured_at_utc": "2026-08-18T21:49:37.058000+00:00",
   "determinism_notes": [
     "PYTHONHASHSEED affects hashing only in subsequently started interpreters.",
     "Unsupported deterministic PyTorch operations emit warnings and must be recorded with the affected run."
@@ -20,33 +20,40 @@
   },
   "pip_freeze": {
     "artifact": "pip_freeze.txt",
-    "method": "importlib.metadata",
-    "returncode": 1,
-    "status": "fallback",
-    "stderr": "c:\\Users\\Pouyan\\PycharmProjects\\Uni\\Deep Learning\\DP_Final_Project\\.venv\\Scripts\\python.exe: No module named pip"
+    "method": "pip freeze",
+    "returncode": 0,
+    "status": "ok",
+    "stderr": ""
   },
   "runtime": {
     "numpy_version": "2.4.4",
     "platform": "Windows-10-10.0.26200-SP0",
-    "python_executable": "c:\\Users\\Pouyan\\PycharmProjects\\Uni\\Deep Learning\\DP_Final_Project\\.venv\\Scripts\\python.exe",
+    "python_executable": "C:\\Users\\Pouyan\\.conda\\envs\\torch-gpu\\python.exe",
     "python_version": "3.11.15"
   },
   "seed": {
     "cublas_workspace_config": ":4096:8",
-    "cuda_available": false,
+    "cuda_available": true,
     "deterministic": true,
     "python_hash_seed_applies_on_restart": true,
-    "seed": 20260811,
-    "torch_available": false,
+    "seed": 17,
+    "torch_available": true,
     "warn_only": true
   },
   "torch": {
-    "available": false,
-    "cuda_available": false,
-    "cuda_build_version": null,
-    "cudnn_version": null,
-    "device_count": 0,
-    "devices": [],
-    "version": null
+    "available": true,
+    "cuda_available": true,
+    "cuda_build_version": "12.4",
+    "cudnn_version": 90100,
+    "device_count": 1,
+    "devices": [
+      {
+        "compute_capability": "8.9",
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "total_memory_bytes": 8585216000
+      }
+    ],
+    "version": "2.6.0+cu124"
   }
 }

@@ -23,8 +23,8 @@ in `src/meddet_benchmark/`:
   0.50:0.95;
 - one score-ordered, class-aware greedy matcher for precision, recall, F1,
   localization IoU, and box Dice; and
-- the same score threshold (0.25), matching IoU (0.50), COCO minimum score
-  (0.001), and maximum detections per image (100).
+- the same original Phase 5 score threshold (0.25), matching IoU (0.50), COCO
+  minimum score (0.001), and maximum detections per image (100).
 
 IoU and Dice are means over matched true-positive boxes at the frozen operating
 point. They measure localization quality conditional on detection and must be
@@ -134,7 +134,7 @@ separately measured latency/FPS gap—not that every paper using the label
 All requested metrics are retained per seed. The publication table reports the
 arithmetic mean and sample standard deviation (`ddof=1`, `n=3`) across seeds.
 This describes training-seed variation; it is not a confidence interval and is
-not a substitute for Phase 8's paired image-level resampling and testing.
+not a substitute for Phase 8's paired patient-cluster resampling and testing.
 
 ## Held-out results
 
@@ -162,14 +162,26 @@ deviation over seeds 17, 42, and 137.
 | Peak training GPU memory (MiB) | 1,556.92 ± 0.27 | **1,148.16 ± 0** |
 | Training time (seconds) | 6,211.41 ± 2,566.64 | **1,833.21 ± 214.60** |
 
-Faster R-CNN provides the stronger detection result under the frozen protocol:
+This table retains the original score-0.25 operating point. Faster R-CNN has
 about 1.86 times YOLO11s' mAP@0.5:0.95, substantially higher recall, and higher
-F1. YOLO11s is more selective and much cheaper: it has higher precision, about
-3.0 times the measured throughput, 78% fewer parameters, and about 21 times
-fewer estimated FLOPs. Its slightly higher IoU and Dice apply only to matched
-true positives and do not offset its low recall. Phase 8's predeclared paired
-tests retain Holm-corrected evidence for the recall and both AP differences,
-as well as YOLO's precision advantage; see `docs/STATISTICAL_ANALYSIS.md`.
+F1 there. YOLO11s' higher precision at the same nominal cutoff is a
+score-scale/selectivity artifact, not a genuine precision-recall frontier
+advantage: Faster R-CNN has higher mean precision at 96 of the 101 official
+AP@0.5 recall positions, with five ties and no YOLO11s-higher positions. At the
+validation-selected thresholds of 0.69 and 0.05, respectively, final test
+precision/recall/F1 is 0.3543/0.3607/0.3492 for Faster R-CNN versus
+0.3096/0.2438/0.2718 for YOLO11s.
+
+The defensible trade-off is detection quality versus computational cost.
+YOLO11s has about 3.0 times the measured throughput, 78% fewer parameters, and
+about 21 times fewer estimated registered operations, while Faster R-CNN has
+the stronger precision-recall frontier and higher sensitivity at every
+reported FROC budget. The accuracy-efficiency Pareto analysis therefore finds
+no strict cross-objective dominance. Phase 8's primary patient-cluster tests
+retain Holm-corrected evidence for recall and both AP differences and for the
+original fixed-threshold precision difference; the latter does not establish a
+frontier advantage. See `THRESHOLD_ANALYSIS.md`, `PARETO_ANALYSIS.md`,
+`FROC_ANALYSIS.md`, and `STATISTICAL_ANALYSIS.md`.
 
 ## Reproduction
 

@@ -27,6 +27,7 @@ from src.stats.paired import (
     EvidencePair,
     analyze_pair,
     build_evidence,
+    build_patient_clusters,
     estimate_pair,
     holm_adjust,
     json_number,
@@ -46,6 +47,7 @@ class InputSettings(StrictModel):
     phase6_config: Path
     phase6_summary: Path
     test_annotations: Path
+    test_split_manifest: Path
 
 
 class AnalysisSettings(StrictModel):
@@ -55,9 +57,11 @@ class AnalysisSettings(StrictModel):
     confidence_level: float = Field(gt=0, lt=1)
     bootstrap_resamples: int = Field(ge=100)
     permutation_resamples: int = Field(ge=100)
-    bootstrap_method: Literal["paired_hierarchical_percentile"]
-    permutation_method: Literal["paired_image_label_swap"]
-    effect_size: Literal["paired_jackknife_cohens_d"]
+    bootstrap_method: Literal["paired_hierarchical_patient_cluster_percentile"]
+    permutation_method: Literal["paired_patient_cluster_label_swap"]
+    effect_size: Literal["paired_raw_difference_with_cluster_bootstrap_ci"]
+    manifest_image_column: str = Field(min_length=1)
+    patient_group_column: str = Field(min_length=1)
     multiple_comparison_correction: Literal["holm"]
     clean_correction_scope: Literal["across_7_predictive_metrics"]
     corruption_correction_scope: Literal["per_metric_and_estimand_across_35_corrupted_conditions"]
@@ -78,10 +82,13 @@ class OutputSettings(StrictModel):
     summary_json: Path
     clean_table: Path
     robustness_table: Path
+    image_level_summary_archive: Path
+    image_level_clean_table_archive: Path
+    image_level_robustness_table_archive: Path
 
 
 class StatisticsConfig(StrictModel):
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     experiment_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     seed: int = Field(ge=0, le=2**32 - 1)
     inputs: InputSettings
@@ -106,6 +113,7 @@ TABLE_FIELDS = (
     "detector_a",
     "detector_b",
     "image_count",
+    "patient_group_count",
     "seed_count",
     "confidence_level",
     "detector_a_estimate",
@@ -196,6 +204,130 @@ def _read_bundle(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"expected gzip JSON object: {path}")
     return payload
+
+
+def load_patient_group_map(
+    path: Path, *, image_column: str, patient_group_column: str
+) -> dict[str, str]:
+    """Load the committed Batch 1 image-to-patient mapping without reconstructing it."""
+
+    mapping: dict[str, str] = {}
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise ValueError(f"patient manifest has no header: {path}")
+        missing_columns = {image_column, patient_group_column} - set(reader.fieldnames)
+        if missing_columns:
+            raise ValueError(
+                f"patient manifest lacks configured columns: {sorted(missing_columns)}"
+            )
+        for line_number, row in enumerate(reader, start=2):
+            image_id = str(row[image_column]).strip()
+            patient_group = str(row[patient_group_column]).strip()
+            if not image_id or not patient_group:
+                raise ValueError(f"empty image or patient group at {path}:{line_number}")
+            if image_id in mapping:
+                raise ValueError(f"duplicate image ID in patient manifest: {image_id}")
+            mapping[image_id] = patient_group
+    if not mapping:
+        raise ValueError(f"patient manifest contains no rows: {path}")
+    return mapping
+
+
+def _ensure_image_level_archives(config: StatisticsConfig) -> tuple[Path, Path, Path]:
+    """Preserve the superseded image-level tables and summary exactly once."""
+
+    current_summary = config.resolve(config.outputs.summary_json)
+    current_clean = config.resolve(config.outputs.clean_table)
+    current_robustness = config.resolve(config.outputs.robustness_table)
+    archive_summary = config.resolve(config.outputs.image_level_summary_archive)
+    archive_clean = config.resolve(config.outputs.image_level_clean_table_archive)
+    archive_robustness = config.resolve(config.outputs.image_level_robustness_table_archive)
+    archives = (archive_summary, archive_clean, archive_robustness)
+
+    if all(path.is_file() for path in archives):
+        return archives
+    if any(path.exists() for path in archives):
+        missing = [str(path) for path in archives if not path.is_file()]
+        raise ValueError(f"image-level archive is incomplete; missing {missing}")
+    sources = (current_summary, current_clean, current_robustness)
+    missing_sources = [str(path) for path in sources if not path.is_file()]
+    if missing_sources:
+        raise FileNotFoundError(
+            f"cannot archive superseded image-level results; missing {missing_sources}"
+        )
+    previous = _read_json(current_summary)
+    previous_analysis = previous.get("analysis", {})
+    if previous_analysis.get("permutation_method") != "paired_image_label_swap":
+        raise ValueError("current statistical outputs are not the expected image-level results")
+    expected_hashes = {
+        current_clean: previous["artifacts"]["clean_table"]["sha256"],
+        current_robustness: previous["artifacts"]["robustness_table"]["sha256"],
+    }
+    for source, expected_hash in expected_hashes.items():
+        if sha256_file(source) != expected_hash:
+            raise ValueError(f"image-level artifact differs from its frozen summary: {source}")
+    for source, destination in zip(sources, archives, strict=True):
+        _atomic_bytes(destination, source.read_bytes())
+    return archives
+
+
+def _read_csv_rows(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def compare_holm_significance(
+    current_rows: Sequence[Mapping[str, Any]],
+    archived_path: Path,
+    *,
+    alpha: float = 0.05,
+) -> dict[str, Any]:
+    """Compare Holm decisions between archived image- and patient-level results."""
+
+    key_fields = ("scope", "condition_id", "estimand", "metric")
+
+    def key(row: Mapping[str, Any]) -> tuple[str, ...]:
+        return tuple(str(row[field]) for field in key_fields)
+
+    def significant(row: Mapping[str, Any]) -> bool:
+        value = row.get("p_value_holm")
+        return row.get("status") == "complete" and value not in (None, "") and float(value) < alpha
+
+    archived_rows = _read_csv_rows(archived_path)
+    archived_by_key = {key(row): row for row in archived_rows}
+    current_by_key = {key(row): row for row in current_rows}
+    if len(archived_by_key) != len(archived_rows) or len(current_by_key) != len(current_rows):
+        raise ValueError("statistical comparison rows do not have unique identities")
+    if set(archived_by_key) != set(current_by_key):
+        raise ValueError("image- and patient-level statistical tables cover different comparisons")
+
+    became_non_significant: list[dict[str, Any]] = []
+    became_significant: list[dict[str, Any]] = []
+    for row_key in sorted(current_by_key):
+        archived = archived_by_key[row_key]
+        current = current_by_key[row_key]
+        old_significant = significant(archived)
+        new_significant = significant(current)
+        if old_significant == new_significant:
+            continue
+        change = {
+            **dict(zip(key_fields, row_key, strict=True)),
+            "image_level_p_holm": float(archived["p_value_holm"]),
+            "patient_cluster_p_holm": float(current["p_value_holm"]),
+            "difference_a_minus_b": float(current["difference_a_minus_b"]),
+        }
+        (became_non_significant if old_significant else became_significant).append(change)
+
+    return {
+        "alpha": alpha,
+        "comparison_count": len(current_rows),
+        "image_level_significant_count": sum(significant(row) for row in archived_rows),
+        "patient_cluster_significant_count": sum(significant(row) for row in current_rows),
+        "became_non_significant": became_non_significant,
+        "became_significant": became_significant,
+        "pattern_changed": bool(became_non_significant or became_significant),
+    }
 
 
 def _deserialize_predictions(payload: Mapping[str, Any]) -> list[ImagePrediction]:
@@ -422,6 +554,7 @@ def _decorate_rows(
     scope: str,
     condition: Mapping[str, Any],
     image_count: int,
+    patient_group_count: int,
     seed_count: int,
 ) -> list[dict[str, Any]]:
     return [
@@ -435,6 +568,7 @@ def _decorate_rows(
             "detector_a": config.analysis.detector_a,
             "detector_b": config.analysis.detector_b,
             "image_count": image_count,
+            "patient_group_count": patient_group_count,
             "seed_count": seed_count,
             "confidence_level": config.analysis.confidence_level,
             "bootstrap_resamples": config.analysis.bootstrap_resamples,
@@ -485,12 +619,23 @@ def _artifact_hash(path: Path, root: Path) -> dict[str, str]:
 def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
     initialize_reproducibility(config.seed, config.resolve(config.outputs.log_dir))
     phase5, phase6, phase5_summary, phase6_summary = _validate_upstream(config)
+    archive_summary, archive_clean, archive_robustness = _ensure_image_level_archives(config)
     annotation_path = config.resolve(config.inputs.test_annotations)
+    patient_manifest_path = config.resolve(config.inputs.test_split_manifest)
+    patient_group_map = load_patient_group_map(
+        patient_manifest_path,
+        image_column=config.analysis.manifest_image_column,
+        patient_group_column=config.analysis.patient_group_column,
+    )
     targets, category_names = load_coco_targets(annotation_path)
 
     clean_pair = _phase5_pairs(config, phase5, phase5_summary, targets, category_names)
+    clean_patient_clusters = build_patient_clusters(
+        clean_pair.detector_a[0].image_ids, patient_group_map
+    )
     clean_results = analyze_pair(
         clean_pair,
+        patient_clusters=clean_patient_clusters,
         base_seed=config.seed,
         comparison_label="phase5-clean-three-seed",
         bootstrap_resamples=config.analysis.bootstrap_resamples,
@@ -509,6 +654,7 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
         scope="phase5_clean_three_seed",
         condition=clean_condition,
         image_count=clean_pair.image_count,
+        patient_group_count=clean_patient_clusters.patient_group_count,
         seed_count=clean_pair.seed_count,
     )
     apply_clean_holm(clean_rows)
@@ -540,10 +686,14 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
         subset_targets,
         subset_category_names,
     )
+    robustness_patient_clusters = build_patient_clusters(
+        reference_pair.detector_a[0].image_ids, patient_group_map
+    )
 
     robustness_rows: list[dict[str, Any]] = []
     raw_clean = analyze_pair(
         reference_pair,
+        patient_clusters=robustness_patient_clusters,
         base_seed=config.seed,
         comparison_label="phase6-clean",
         bootstrap_resamples=config.analysis.bootstrap_resamples,
@@ -556,6 +706,7 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
         scope="phase6_primary_seed_robustness",
         condition=clean_condition,
         image_count=reference_pair.image_count,
+        patient_group_count=robustness_patient_clusters.patient_group_count,
         seed_count=1,
     )
     apply_clean_holm(robustness_clean_rows)
@@ -577,6 +728,7 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
         )
         results = analyze_pair(
             pair,
+            patient_clusters=robustness_patient_clusters,
             reference_pair=reference_pair,
             base_seed=config.seed,
             comparison_label=f"phase6-{condition.condition_id}",
@@ -592,6 +744,7 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
                     scope="phase6_primary_seed_robustness",
                     condition=condition_payload,
                     image_count=pair.image_count,
+                    patient_group_count=robustness_patient_clusters.patient_group_count,
                     seed_count=1,
                 )
             )
@@ -601,6 +754,10 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
     robustness_table = config.resolve(config.outputs.robustness_table)
     _atomic_csv(clean_table, clean_rows)
     _atomic_csv(robustness_table, robustness_rows)
+    significance_comparison = {
+        "clean": compare_holm_significance(clean_rows, archive_clean),
+        "robustness": compare_holm_significance(robustness_rows, archive_robustness),
+    }
     source_paths = (
         config.source_path,
         config.project_root / "src" / "stats" / "paired.py",
@@ -624,20 +781,25 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
                 config.resolve(config.inputs.phase6_summary), config.project_root
             ),
             "test_annotations": _artifact_hash(annotation_path, config.project_root),
+            "test_split_manifest": _artifact_hash(patient_manifest_path, config.project_root),
         },
         "analysis": config.analysis.model_dump(mode="json"),
         "inference_unit": {
             "bootstrap": (
-                "Matched images are resampled. The clean analysis also resamples the three "
-                "paired training seeds; each image draw is shared across seeds and detectors."
+                "Matched NIH patient groups are resampled with replacement; every sampled "
+                "group contributes all of its observed images with one shared multiplicity. "
+                "The clean analysis also resamples the three paired training seeds."
             ),
             "permutation": (
-                "Detector labels are swapped independently by image and consistently across "
-                "the paired seeds; retention swaps are shared by clean and corrupted evidence."
+                "Detector labels are swapped independently by NIH patient group, so every "
+                "image from a patient moves together. Swaps are shared across paired seeds "
+                "and, for retention, across clean and corrupted evidence."
             ),
             "effect_size": (
-                "Cohen's dz is computed from paired leave-one-image-out jackknife "
-                "pseudovalues of the aggregate detector difference."
+                "The unstandardized paired aggregate difference (A minus B) is the effect "
+                "size, accompanied by its patient-cluster bootstrap interval. The former "
+                "image-jackknife Cohen's d is archived but not carried forward because its "
+                "standardized interpretation is not established for unequal patient clusters."
             ),
         },
         "mcnemar": {
@@ -657,12 +819,14 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
         },
         "clean": {
             "image_count": clean_pair.image_count,
+            "patient_group_count": clean_patient_clusters.patient_group_count,
             "seed_count": clean_pair.seed_count,
             "comparison_count": len(clean_rows),
             "results": clean_rows,
         },
         "robustness": {
             "image_count": reference_pair.image_count,
+            "patient_group_count": robustness_patient_clusters.patient_group_count,
             "seed_count": 1,
             "condition_count_including_clean": 36,
             "corrupted_condition_count": 35,
@@ -670,6 +834,17 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
             "holm_scope": config.analysis.corruption_correction_scope,
             "results": robustness_rows,
         },
+        "superseded_image_level_results": {
+            "reason": (
+                "Image-level resampling treated repeated exams from the same NIH patient as "
+                "independent. The archived outputs are retained for audit only; patient-"
+                "cluster inference is primary."
+            ),
+            "summary": _artifact_hash(archive_summary, config.project_root),
+            "clean_table": _artifact_hash(archive_clean, config.project_root),
+            "robustness_table": _artifact_hash(archive_robustness, config.project_root),
+        },
+        "holm_significance_comparison": significance_comparison,
         "artifacts": {
             "clean_table": _artifact_hash(clean_table, config.project_root),
             "robustness_table": _artifact_hash(robustness_table, config.project_root),
@@ -687,11 +862,32 @@ def preflight(config: StatisticsConfig) -> dict[str, Any]:
     expected = 2 * (1 + len(conditions))
     if len(bundle_map) != expected:
         raise ValueError(f"expected {expected} Phase 6 bundles, found {len(bundle_map)}")
+    patient_group_map = load_patient_group_map(
+        config.resolve(config.inputs.test_split_manifest),
+        image_column=config.analysis.manifest_image_column,
+        patient_group_column=config.analysis.patient_group_column,
+    )
+    targets, _ = load_coco_targets(config.resolve(config.inputs.test_annotations))
+    clean_clusters = build_patient_clusters(
+        tuple(sorted(target.image_id for target in targets)), patient_group_map
+    )
+    clean_bundle_path = bundle_map[(config.analysis.detector_a, "clean")][0]
+    clean_bundle_path = (
+        clean_bundle_path if clean_bundle_path.is_absolute() else config.resolve(clean_bundle_path)
+    )
+    selected_names = {
+        item.image_id for item in _deserialize_predictions(_read_bundle(clean_bundle_path))
+    }
+    robustness_clusters = build_patient_clusters(tuple(sorted(selected_names)), patient_group_map)
     return {
         "status": "ready",
         "phase5_seed_count": len(phase5.seeds),
         "phase5_bundle_count": len(phase5_summary["runs"]),
+        "clean_image_count": len(targets),
+        "clean_patient_group_count": clean_clusters.patient_group_count,
         "phase6_bundle_count": len(bundle_map),
+        "robustness_image_count": len(selected_names),
+        "robustness_patient_group_count": robustness_clusters.patient_group_count,
         "corrupted_condition_count": len(conditions),
     }
 

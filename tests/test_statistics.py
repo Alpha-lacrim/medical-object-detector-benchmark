@@ -11,6 +11,9 @@ from src.stats.paired import (
     aggregate_hybrid,
     analyze_pair,
     build_evidence,
+    build_patient_clusters,
+    expand_patient_group_choices,
+    expand_patient_group_multiplicities,
     holm_adjust,
 )
 from src.stats.run_statistics import apply_clean_holm, apply_grid_holm, load_statistics_config
@@ -165,6 +168,24 @@ def test_holm_adjustment_is_monotone_in_sorted_p_values() -> None:
     assert holm_adjust([0.01, 0.04, 0.03]) == pytest.approx([0.03, 0.06, 0.06])
 
 
+def test_patient_group_draws_and_swaps_move_complete_clusters() -> None:
+    clusters = build_patient_clusters(
+        ("a.png", "b.png", "c.png", "d.png"),
+        {"a.png": "p1", "b.png": "p1", "c.png": "p2", "d.png": "p3"},
+    )
+
+    multiplicities = expand_patient_group_multiplicities(
+        np.asarray([2, 0, 1], dtype=np.int64), clusters
+    )
+    choices = expand_patient_group_choices(
+        np.asarray([True, False, True], dtype=np.bool_), clusters
+    )
+
+    assert clusters.patient_group_ids == ("p1", "p2", "p3")
+    assert multiplicities.tolist() == [2, 2, 0, 1]
+    assert choices.tolist() == [True, True, False, True]
+
+
 def test_grid_holm_excludes_explicitly_non_estimable_hypotheses() -> None:
     rows = [
         {
@@ -214,8 +235,13 @@ def test_paired_analysis_is_seeded_and_reports_every_metric() -> None:
         detector_a=(_evidence(detector_a, targets),),
         detector_b=(_evidence(detector_b, targets),),
     )
+    patient_clusters = build_patient_clusters(
+        pair.detector_a[0].image_ids,
+        {"a.png": "p1", "b.png": "p1", "c.png": "p2", "d.png": "p3"},
+    )
     first = analyze_pair(
         pair,
+        patient_clusters=patient_clusters,
         base_seed=123,
         comparison_label="unit-test",
         bootstrap_resamples=100,
@@ -224,6 +250,7 @@ def test_paired_analysis_is_seeded_and_reports_every_metric() -> None:
     )
     second = analyze_pair(
         pair,
+        patient_clusters=patient_clusters,
         base_seed=123,
         comparison_label="unit-test",
         bootstrap_resamples=100,
@@ -234,7 +261,11 @@ def test_paired_analysis_is_seeded_and_reports_every_metric() -> None:
     assert first == second
     assert tuple(row["metric"] for row in first["raw"]) == METRICS
     assert all(0 < row["p_value_raw"] <= 1 for row in first["raw"])
-    assert all(row["effect_size_name"] == "paired_jackknife_cohens_d" for row in first["raw"])
+    assert all(row["effect_size_name"] == "paired_raw_difference" for row in first["raw"])
+    assert all(row["effect_size_n"] == 3 for row in first["raw"])
+    assert all(
+        row["effect_size"] == pytest.approx(row["difference_a_minus_b"]) for row in first["raw"]
+    )
 
 
 def test_statistics_config_covers_three_seed_and_corruption_inputs() -> None:
@@ -243,7 +274,11 @@ def test_statistics_config_covers_three_seed_and_corruption_inputs() -> None:
     assert config.analysis.metrics == METRICS
     assert config.analysis.bootstrap_resamples == 2000
     assert config.analysis.permutation_resamples == 5000
+    assert config.analysis.bootstrap_method == "paired_hierarchical_patient_cluster_percentile"
+    assert config.analysis.permutation_method == "paired_patient_cluster_label_swap"
+    assert config.analysis.effect_size == "paired_raw_difference_with_cluster_bootstrap_ci"
     assert config.analysis.multiple_comparison_correction == "holm"
     assert config.analysis.clean_correction_scope == "across_7_predictive_metrics"
     assert config.resolve(config.inputs.phase5_summary).is_file()
     assert config.resolve(config.inputs.phase6_summary).is_file()
+    assert config.resolve(config.inputs.test_split_manifest).is_file()

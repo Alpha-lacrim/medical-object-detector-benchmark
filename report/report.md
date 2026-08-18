@@ -36,9 +36,9 @@ Both models consume the same canonical annotations, use 640-pixel inputs, are
 trained under the same seed grid and broadly matched optimization budget, and
 are scored by one evaluator. The study then adds a seven-corruption,
 five-severity stress test, matched-layer Grad-CAM analysis, and paired
-image-level inference. The intended contribution is a controlled,
-resource-scoped benchmark, not a claim that either detector is clinically
-effective or safe.
+patient-cluster bootstrap and permutation analysis. The intended contribution
+is a controlled, resource-scoped benchmark, not a claim that either detector
+is clinically effective or safe.
 
 ## 2. Literature Review
 
@@ -185,7 +185,8 @@ opens the held-out 750-image test set. Both frameworks emit original-image
 `xyxy` boxes, canonical category IDs, and scores. The common evaluator applies:
 
 - official pycocotools AP at IoU 0.50 and averaged over 0.50:0.95;
-- global micro precision, recall, and F1 at score 0.25 and matching IoU 0.50;
+- original Phase 5 global micro precision, recall, and F1 at score 0.25 and
+  matching IoU 0.50;
 - greedy, class-aware, score-ordered matching; and
 - mean IoU and box Dice only over matched true-positive boxes.
 
@@ -193,6 +194,16 @@ Conditional IoU and Dice do not penalize missed findings and must be read with
 recall. Framework-native validation mAP is used only to choose checkpoints.
 All reported summary values are arithmetic mean ± sample standard deviation
 over three seeds unless stated otherwise.
+
+The fixed 0.25 operating point is retained as the original Phase 5 protocol
+sensitivity result, not as the final deployment-threshold choice. For the
+authoritative single-threshold precision, recall, and F1 comparison, the same
+0.01--0.99 grid is applied to validation predictions and maximum mean
+validation F1 selects 0.69 for Faster R-CNN and 0.05 for YOLO11s; each frozen
+threshold is then applied once to the test bundles. The complete test sweep is
+descriptive only. Official COCO precision-recall curves and a free-response ROC
+(FROC) reparameterization describe the held-out frontier without choosing a
+deployment threshold from test results.
 
 ### 4.3 Compute, robustness, explainability, and inference
 
@@ -202,7 +213,8 @@ registered-operation GFLOPs, training time, and peak allocated training memory.
 FLOP counts exclude unsupported operations and are secondary to measured
 latency. Faster R-CNN performs resizing inside its timed forward, while the YOLO
 profile resizes before its timed forward-plus-NMS; the speed comparison is thus
-deployment-oriented, not a pure kernel benchmark.
+implementation-specific and deployment-oriented, not architecture-general or a
+pure kernel benchmark.
 
 Robustness uses the seed-17 checkpoints and a fixed proportional 300-image test
 sample containing 68 positive images, 232 negative images, 111 boxes, and 183
@@ -218,12 +230,15 @@ candidate with highest IoU to each ground-truth box. Missed operating-point
 detections use an explicitly labeled annotation-guided proxy candidate.
 
 Statistical analysis reconstructs every metric from frozen prediction bundles.
-The clean comparison uses 2,000 paired hierarchical image/seed bootstrap draws
-and 5,000 paired image-label permutations. The corruption analysis resamples
-clean and corrupted evidence jointly. It reports pointwise 95% percentile CIs,
-raw and Holm-adjusted p-values, and paired jackknife Cohen's d. Holm correction
-is applied across the seven clean endpoints and, for corruption, separately
-within each metric/estimand family across conditions.
+The clean comparison uses 2,000 paired two-stage patient-group/seed bootstrap
+draws over 323 patient groups and 5,000 paired patient-group detector-label
+permutations. The corruption analysis jointly resamples clean and corrupted
+evidence over its 183 patient groups. It reports pointwise 95% percentile CIs,
+raw and Holm-adjusted p-values, and the unstandardized paired aggregate
+difference as the effect. Holm correction is applied across the seven clean
+endpoints and, for corruption, separately within each metric/estimand family
+across conditions. The former image-level intervals, p-values, and jackknife
+Cohen's d are superseded and retained only in explicitly named audit archives.
 
 ## 5. Baseline Faster R-CNN Implementation
 
@@ -295,7 +310,7 @@ the six frozen checkpoints. Tables 4a and 4b are rounded presentations of
 six run-level records remain in
 [`detector_comparison_per_seed.csv`](../results/tables/detector_comparison_per_seed.csv).
 
-**Table 4a. Held-out predictive metrics, mean ± sample SD over three seeds.**
+**Table 4a. Original score-0.25 held-out predictive metrics, mean ± sample SD over three seeds.**
 
 | Predictive metric | Faster R-CNN | YOLO11s |
 |---|---:|---:|
@@ -318,12 +333,31 @@ six run-level records remain in
 | Peak training memory | 1,556.92 ± 0.27 MiB | **1,148.16 ± 0.00 MiB** |
 | Training time | 6,211.41 ± 2,566.64 s | **1,833.21 ± 214.60 s** |
 
-Faster R-CNN has about 1.86 times YOLO11s' mean mAP@0.5:0.95 and a 0.5025
-absolute recall advantage. YOLO11s is more selective, with a 0.2105 precision
-advantage, and substantially cheaper: roughly three times the measured
-throughput, 78% fewer parameters, and about 21 times fewer estimated GFLOPs.
-YOLO's slightly higher matched-box IoU and Dice describe only the relatively
-small set of findings it detects; they do not offset its much lower recall.
+Table 4a retains the original fixed-threshold comparison. Faster R-CNN has
+about 1.86 times YOLO11s' mean mAP@0.5:0.95 and, at score 0.25, a 0.5025
+absolute recall advantage. YOLO11s' 0.2105 higher precision at that same
+nominal threshold is not a general precision-recall advantage. The official
+AP@0.5 curve gives Faster R-CNN higher mean precision at 96 of 101 recall
+positions, five ties, and no YOLO11s-higher positions. YOLO's slightly higher
+matched-box IoU and Dice at 0.25 describe only matched true positives and do
+not offset its lower coverage.
+
+**Table 4c. Validation-selected thresholds and one-shot test operating points.**
+
+| Detector | Frozen threshold | Test precision | Test recall | Test F1 |
+|---|---:|---:|---:|---:|
+| Faster R-CNN | 0.69 | **0.3543 ± 0.0746** | **0.3607 ± 0.0608** | **0.3492 ± 0.0135** |
+| YOLO11s | 0.05 | 0.3096 ± 0.0134 | 0.2438 ± 0.0302 | 0.2718 ± 0.0181 |
+
+Table 4c contains the authoritative single-threshold precision, recall, and F1
+results. The defensible cross-system trade-off is therefore detection quality
+versus computational cost: YOLO11s provides roughly three times the measured
+throughput, 78% fewer parameters, and about 21 times fewer estimated registered
+operations, while Faster R-CNN has the stronger precision-recall frontier. The
+accuracy-efficiency [`Pareto frontier`](../results/figures/pareto_frontier.png)
+shows that neither system strictly dominates once compute is an objective, and
+the [`FROC curves`](../results/figures/froc_curves.png) show higher Faster R-CNN
+sensitivity at every reported false-positive budget.
 
 ## 8. Robustness Evaluation
 
@@ -414,35 +448,37 @@ Table 7 reports the clean three-seed paired analysis from
 Differences are Faster R-CNN minus YOLO11s. Intervals are pointwise 95%
 bootstrap CIs; family-wise claims use the Holm-adjusted p-value.
 
-**Table 7. Clean paired statistical comparison.**
+**Table 7. Primary patient-cluster clean paired statistical comparison.**
 
-| Metric | Faster R-CNN | YOLO11s | Difference [95% CI] | Holm p | d |
-|---|---:|---:|---:|---:|---:|
-| Precision | 0.1626 | 0.3730 | -0.2105 [-0.3050, -0.1177] | 0.0014 | -0.182 |
-| Recall | 0.6381 | 0.1356 | 0.5025 [0.4301, 0.5760] | 0.0014 | 0.624 |
-| F1 | 0.2558 | 0.1981 | 0.0577 [-0.0130, 0.1355] | 0.0510 | 0.076 |
-| Conditional IoU | 0.6732 | 0.6971 | -0.0239 [-0.0530, 0.0047] | 0.0510 | -0.075 |
-| Conditional Dice | 0.7997 | 0.8172 | -0.0174 [-0.0377, 0.0026] | 0.0510 | -0.076 |
-| mAP@0.5 | 0.3084 | 0.1643 | 0.1441 [0.0967, 0.1949] | 0.0014 | 0.095 |
-| mAP@0.5:0.95 | 0.1023 | 0.0549 | 0.0474 [0.0311, 0.0683] | 0.0016 | 0.236 |
+| Metric | Faster R-CNN | YOLO11s | Difference/effect [95% CI] | Holm p |
+|---|---:|---:|---:|---:|
+| Precision | 0.1626 | 0.3730 | -0.2105 [-0.3027, -0.1047] | 0.0014 |
+| Recall | 0.6381 | 0.1356 | 0.5025 [0.4311, 0.5712] | 0.0014 |
+| F1 | 0.2558 | 0.1981 | 0.0577 [-0.0116, 0.1448] | 0.0972 |
+| Conditional IoU | 0.6732 | 0.6971 | -0.0239 [-0.0560, 0.0038] | 0.0972 |
+| Conditional Dice | 0.7997 | 0.8172 | -0.0174 [-0.0408, 0.0024] | 0.0972 |
+| mAP@0.5 | 0.3084 | 0.1643 | 0.1441 [0.0947, 0.1914] | 0.0170 |
+| mAP@0.5:0.95 | 0.1023 | 0.0549 | 0.0474 [0.0300, 0.0649] | 0.0328 |
 
 After correction, the data retain evidence for Faster R-CNN's recall and both
 AP advantages, and for YOLO11s' precision advantage. F1 and conditional
-localization do not cross the 0.05 Holm threshold. The effect-size magnitudes
-differ from the raw aggregate gaps because paired jackknife Cohen's d
-standardizes image-level pseudovalues rather than treating mAP as a mean of
-per-image AP values.
+localization do not cross the 0.05 Holm threshold. Precision, recall, and F1 in
+this table retain the original score-0.25 definition; the significant YOLO11s
+precision difference is therefore a fixed-threshold score-scale/selectivity
+effect, not evidence of a superior precision-recall frontier. The reported
+effect is the paired raw aggregate difference with its patient-cluster
+bootstrap interval; the former image-level jackknife Cohen's d is audit-only.
 
 The corruption table contains 497 rows in
 [`statistical_robustness_comparison.csv`](../results/tables/statistical_robustness_comparison.csv).
 Although Faster R-CNN has higher point-estimate raw mAP@0.5:0.95 for all 35
-corruptions, only darkness severity 5 survives the grid-wide Holm correction
-for that endpoint. Raw mAP is 0.1282 versus 0.0126, a difference of 0.1156
-[0.0712, 0.1702] (`p_Holm=0.0070`, `d=0.241`). Clean-relative retention is
-0.8674 versus 0.1645, a difference of 0.7029 [0.3982, 0.8424]
-(`p_Holm=0.0070`, `d=0.433`). This distinction between point estimates and
-multiplicity-controlled evidence prevents overclaiming across a correlated
-grid.
+corruptions, no raw AP comparison survives the 35-condition patient-cluster
+Holm family. At darkness severity 5, raw mAP@0.5:0.95 is 0.1282 versus 0.0126,
+a difference of 0.1156 [0.0609, 0.1689] (`p_Holm=0.0770`). Its clean-relative
+retention is 0.8674 versus 0.1645, a difference of 0.7029 [0.2734, 0.8158]
+(`p_Holm=0.0070`). The raw advantage is therefore descriptive; the retention
+advantage remains multiplicity-controlled evidence. This distinction prevents
+overclaiming across a correlated grid.
 
 McNemar's test is intentionally omitted. The task has multiple targets per
 image plus false positives on negative images, not one independent binary
@@ -454,30 +490,40 @@ remain nested within images.
 
 ### 11.1 Accuracy and operating-point behavior
 
-The two paradigms occupy meaningfully different operating regimes. Faster
-R-CNN detects far more reference findings and achieves substantially higher AP;
-these advantages survive paired correction for recall and both AP endpoints.
-YOLO11s produces fewer detections and higher precision. Its slightly better
-conditional IoU and Dice do not establish superior overall localization because
-those statistics exclude missed findings, and their corrected comparisons are
-inconclusive. Therefore, the result is not simply “Faster R-CNN has higher
-mAP”: it is a recall-heavy proposal detector versus a selective, compact dense
-detector at the fixed threshold.
+Faster R-CNN has the stronger precision-recall frontier, not merely a different
+operating regime. Its mean precision is higher at 96 of 101 official AP@0.5
+recall positions, with five ties and no YOLO11s-higher positions. YOLO11s'
+apparent precision advantage at the original shared threshold of 0.25 is a
+score-scale/selectivity artifact: the same nominal cutoff retains very
+different fractions of the two score distributions. At thresholds selected by
+maximum mean validation F1 and applied once to test, Faster R-CNN is higher in
+precision, recall, and F1. Its AP advantages and its original fixed-threshold
+recall advantage also survive the primary patient-cluster paired analysis.
+YOLO11s' slightly higher conditional IoU and Dice at 0.25 exclude missed
+findings, and their patient-cluster comparisons are inconclusive.
 
-The absolute results are modest for both models. Faster R-CNN's mean precision
-is only 0.163 at the chosen operating point, while YOLO11s' mean recall is only
-0.136. Neither frozen system is an acceptable autonomous clinical detector.
-Threshold calibration could move each precision-recall trade-off, but it would
-be a new experiment and is not inferred from these fixed results.
+The defensible trade-off is detection quality versus implementation-specific
+computational cost. The [`Pareto frontier`](../results/figures/pareto_frontier.png)
+shows higher Faster R-CNN AP and validation-selected recall opposed by higher
+YOLO11s throughput and lower latency, parameter count, and registered-operation
+estimate; neither three-seed cloud strictly dominates when both axes matter.
+The [`FROC curves`](../results/figures/froc_curves.png) independently show
+higher Faster R-CNN sensitivity at every reported FP/image budget. Absolute
+performance remains modest: at the validation-selected thresholds, mean test
+precision/recall/F1 is 0.354/0.361/0.349 for Faster R-CNN and
+0.310/0.244/0.272 for YOLO11s. Neither frozen system is an acceptable
+autonomous clinical detector. These analyses diagnose score-scale/selectivity;
+they do not assess probabilistic calibration.
 
 ### 11.2 Robustness and explanation evidence
 
 Faster R-CNN combines its clean accuracy advantage with higher raw AP in every
 tested corruption condition and better mean retention over the full grid. Its
-darkness robustness is especially stronger, and that difference survives the
-35-condition correction. Yet both detectors are fragile to impulse noise, and
-the single primary-seed, digitally corrupted sample cannot establish real-world
-clinical robustness.
+darkness retention advantage is especially strong and survives the 35-condition
+correction, whereas the raw darkest-condition AP difference no longer does
+after patient clustering. Yet both detectors are fragile to impulse noise, and
+the single-primary-seed digital-corruption benchmark measures digital
+robustness, not real-world clinical robustness or safety.
 
 Explainability does not supply a reason to relax those concerns. YOLO11s has a
 small descriptive energy-in-box advantage, while Faster R-CNN maps are more
@@ -491,24 +537,28 @@ preference on interpretability grounds.
 
 For **high-sensitivity retrospective screening or server-side case
 prioritization**, Faster R-CNN is preferred. Its measured recall, AP, and
-corruption-grid raw performance are stronger. Although 17.42 FPS is slower than
-YOLO, it still processes images far faster than a human reading workflow on the
-tested GPU. The cost is more false positives, parameters, FLOPs, and latency.
+corruption-grid raw performance are stronger, and its FROC sensitivity is
+higher at every reported false-positive budget. Although 17.42 FPS is slower
+than YOLO, it still processes images far faster than a human reading workflow
+on the tested GPU. The cost is more parameters, registered operations, and
+latency.
 
 For **resource-constrained point-of-care assistance in which a human reviews
 every image**, YOLO11s is conditionally preferred. Its 9.43 M parameters,
-21.42 GFLOPs, 52.94 FPS, and higher precision make it easier to place on
-constrained hardware and reduce nuisance alerts. Its 0.136 recall nevertheless
-makes it unsuitable as the sole triage gate or a rule-out system. It is
-defensible only as an auxiliary cue after threshold/model redesign and new
-validation.
+21.42 estimated GFLOPs, and 52.94 FPS make this implementation easier to place
+on constrained hardware. This recommendation rests on compute, not on a
+precision-recall frontier advantage: at the validation-selected threshold its
+mean test recall is 0.244, and it has lower sensitivity at every reported FROC
+budget. It is unsuitable as the sole triage gate or a rule-out system and is
+defensible only as an auxiliary cue after model improvement and new external,
+clinically cost-sensitive threshold validation.
 
 For **autonomous diagnosis, disease exclusion, or treatment guidance**, neither
 model is suitable. Accuracy is low, Grad-CAM localization is weak, corruptions
 are synthetic, and the study is retrospective and single-source. The benchmark
 provides no evidence of prospective benefit or safety.
 
-This assignment of paradigms is conditional rather than universal. If
+This assignment of implementations is conditional rather than universal. If
 point-of-care triage requires high sensitivity more than low latency, Faster
 R-CNN remains the better of the measured models despite its compute cost. If a
 retrospective service faces a severe throughput or edge-memory limit, YOLO's
@@ -522,14 +572,18 @@ transfer, viewer integration, calibration, and human response also matter.
 The benchmark uses one historical, single-institution dataset, one foreground
 category, a fixed 5,000-study subset, and only three training seeds. Robustness
 and explainability use one seed-17 checkpoint per detector on a 300-image,
-111-box subset. Repeated exams within the test set mean image-level bootstrap
-units are not fully patient independent. Training precision, learning rate,
-normalization, and scheduler differ where needed for stable YOLO learning; the
-augmentation policy is controlled but may understate YOLO's conventional
-augmentation-rich performance. Common corruptions act on converted PNGs and
-are not scanner or site-shift models. Bounding boxes are coarse lesion
-surrogates, Grad-CAM is layer- and target-dependent, and one Faster R-CNN CAM is
-zero energy. The full consolidated limitations are maintained in
+111-box subset. Batch 13 corrected the identified within-patient independence
+error by resampling and permuting all exams from each patient together; the
+remaining 323/183 patient-group counts and three training seeds still limit
+uncertainty estimation. Training precision, learning rate, normalization, and
+scheduler differ where needed for stable YOLO learning; the augmentation
+policy is controlled but may understate YOLO's conventional augmentation-rich
+performance. Compute measurements compare these two documented
+implementations on one laptop, not detector architectures in general. Common
+corruptions act on converted PNGs and are not scanner or site-shift models.
+Bounding boxes are coarse lesion surrogates, Grad-CAM is layer- and
+target-dependent, and one Faster R-CNN CAM is zero energy. The full
+consolidated limitations are maintained in
 [`docs/LIMITATIONS.md`](../docs/LIMITATIONS.md).
 
 Clinical deployment would require prospective clinical validation, external
@@ -543,21 +597,28 @@ either model is ready to enter such a process.
 ## 12. Conclusions and Future Work
 
 Under the frozen data and evaluation protocol, Faster R-CNN is the stronger
-accuracy- and robustness-oriented detector: it has higher recall and AP with
-multiplicity-corrected evidence, and higher raw mAP across every tested
-corruption condition. YOLO11s is the stronger efficiency-oriented detector: it
-is roughly three times faster, uses about one fifth of the parameters and one
-twenty-first of the estimated FLOPs, and produces higher precision. Neither
-model is reliably lesion-focused under the selected Grad-CAM protocol, and
-neither supports clinical use.
+accuracy-oriented detector: it has the stronger precision-recall frontier,
+higher sensitivity at every reported FROC budget, and higher recall and AP at
+the original operating point with multiplicity-corrected patient-cluster
+evidence. Its raw mAP point estimate is also higher across every tested digital
+corruption condition, while its severe-darkness retention advantage survives
+grid-wide correction. YOLO11s is the stronger efficiency-oriented
+implementation: it is roughly three times faster, uses about one fifth of the
+parameters and one twenty-first of the estimated registered operations. Its
+apparent precision advantage at the original 0.25 threshold is a
+score-scale/selectivity artifact, not a frontier advantage. Neither model is
+reliably lesion-focused under the selected Grad-CAM protocol, and neither
+supports clinical use.
 
 The deployment implication is therefore conditional. Faster R-CNN is the more
 defensible research choice for accuracy-sensitive, GPU-backed screening or
 case prioritization. YOLO11s is attractive for constrained, human-in-the-loop
-assistance where compute and alert burden dominate, but its measured miss rate
-precludes use as an autonomous screen. Future work should evaluate the full
-cohort and external sites, use patient-cluster resampling, run robustness and
-explainability over multiple seeds, calibrate thresholds and probabilities,
+assistance where compute footprint and latency dominate, but its measured miss
+rate precludes use as an autonomous screen. Future work should evaluate the full
+cohort and external sites, extend patient-cluster inference to larger cohorts,
+run robustness and explainability over multiple seeds, evaluate clinically
+cost-sensitive thresholds on validation and external cohorts, assess
+probabilistic calibration,
 test clinically motivated acquisition shifts, compare augmentation-rich and
 matched-control recipes as separate ablations, add saliency sanity checks or a
 detector-specific method such as D-RISE [@petsiuk2021drise], and perform

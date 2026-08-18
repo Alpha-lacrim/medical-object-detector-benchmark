@@ -33,8 +33,8 @@ def test_config_and_frozen_inputs_join_all_three_seeds() -> None:
     assert {(point.detector, point.seed) for point in points} == {
         (detector, seed) for detector in ("faster_rcnn", "yolo11s") for seed in (17, 42, 137)
     }
-    assert {point.recall_threshold for point in points if point.detector == "faster_rcnn"} == {0.63}
-    assert {point.recall_threshold for point in points if point.detector == "yolo11s"} == {0.01}
+    assert {point.recall_threshold for point in points if point.detector == "faster_rcnn"} == {0.69}
+    assert {point.recall_threshold for point in points if point.detector == "yolo11s"} == {0.05}
 
 
 def test_strict_dominance_requires_both_seed_clouds_to_be_ordered() -> None:
