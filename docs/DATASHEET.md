@@ -4,8 +4,9 @@
 
 This project uses the Stage 2 labeled training portion of the RSNA Pneumonia
 Detection Challenge 2018 for a controlled comparison of Faster R-CNN and
-YOLO11s. The benchmark studies localization accuracy, compute, robustness to
-configured digital corruptions, and post-hoc explanation behavior. It is not a
+YOLO11s for lung-opacity detection. The benchmark studies detection coverage,
+localization accuracy, compute, robustness to configured digital corruptions,
+and post-hoc explanation behavior. It is not a
 clinical diagnostic dataset validation, and neither the data nor model outputs
 may be used to guide patient care.
 

@@ -87,11 +87,12 @@ sample, including on many low-confidence miss proxies, but that does not mean
 its attention is cleaner: image-wide hotspots make the single hottest point
 miss almost as often as Faster R-CNN's.
 
-Therefore, neither model is reliably focused on the actual boxed finding. Both
-are often using broader thoracic context and are visibly sensitive to borders,
-markers, devices, and unrelated anatomy. The systematic difference is modest:
-Faster R-CNN is more spatially clustered but not consistently lesion-centered;
-YOLO is more dispersed yet has a small descriptive advantage in energy-in-box.
+Therefore, neither model is reliably focused on the annotated lung-opacity
+region. Both are often using broader thoracic context and are visibly sensitive
+to borders, markers, devices, and unrelated anatomy. The systematic difference
+is modest: Faster R-CNN is more spatially clustered but not consistently
+centered on the annotated opacity; YOLO is more dispersed yet has a small
+descriptive advantage in energy-in-box.
 The false-positive panels are all from the `No Lung Opacity / Not Normal`
 stratum, so visible non-opacity abnormalities may be real. Without annotations
 for those alternative findings, the heatmaps cannot distinguish clinically
@@ -106,12 +107,13 @@ models, and three unique shared false negatives at the 0.2, 0.5, and 0.8
 quantiles of mean proxy IoU. Green is ground truth and cyan is the exact
 candidate whose score is differentiated.
 
-Grad-CAM is a coarse association map, not a causal account or a clinical
-reasoning trace. The ground-truth-guided proxy choice makes the quantitative
-question conditional—"given the candidate most associated with this box, where
-does its class-score gradient concentrate?"—and does not explain why the full
-detector missed the finding. A rectangle is also a loose lesion surrogate and
-makes pointing easier as its area grows. Finally, Torchvision warns that CUDA
+Grad-CAM is a coarse failure-analysis association map, not a causal account or
+a clinical reasoning trace. The ground-truth-guided proxy choice makes the
+quantitative question conditional—"given the candidate most associated with
+this box, where does its class-score gradient concentrate?"—and does not explain
+why the full detector missed the annotated opacity. A rectangle is also a loose
+opacity-region surrogate and makes pointing easier as its area grows. Finally,
+Torchvision warns that CUDA
 ROI Align backward is not bitwise deterministic; the run uses the project's
 seeded deterministic-warn-only policy and records its environment, but Faster
 R-CNN CAM bytes are not guaranteed identical across hardware/library reruns.

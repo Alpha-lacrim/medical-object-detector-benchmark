@@ -33,7 +33,7 @@ groups, not unaddressed image-level clustering.
 
 ## Annotation and preprocessing scope
 
-Bounding boxes are coarse rectangular approximations, not pixel-accurate lesion
+Bounding boxes are coarse rectangular approximations, not pixel-accurate opacity
 masks. Reader disagreement, ambiguous boundaries, and non-uniform annotation
 certainty remain even though the metadata audit found no malformed,
 non-positive-area, off-image, or exact duplicate positive boxes. Coordinate
@@ -42,7 +42,7 @@ correctness or a second expert reading.
 
 DICOM conversion uses deterministic `MONOCHROME1` inversion and per-image
 min-max scaling to 8-bit PNG. It does not reproduce vendor-specific window/VOI
-processing. Later resizing to 640 pixels can remove small-finding detail and
+processing. Later resizing to 640 pixels can remove small-opacity detail and
 can affect detector families differently.
 
 ## Compute and sampling scope
@@ -174,12 +174,13 @@ box regression, or the detector's complete causal decision path.
 
 Operating-point false negatives have no emitted detection to explain. Their
 maps therefore use the ground-truth-associated, low-threshold candidate with
-highest IoU and are explicitly proxy diagnostics. This annotation-guided
-choice is unavailable in deployment, nearby boxes can reuse a candidate, and
+highest IoU and are explicitly proxy failure-analysis maps. This
+annotation-guided choice is unavailable in deployment, nearby boxes can reuse a candidate, and
 the result is not an explanation of an actual detection.
 
-Energy-in-box and pointing-game metrics treat rectangular boxes as lesion masks
-even though boxes contain normal tissue and larger boxes make hits easier. The
+Energy-in-box and pointing-game metrics treat rectangular boxes as pixel-level
+opacity masks even though boxes contain normal tissue and larger boxes make
+hits easier. The
 analysis reports box-area reference values, excludes and reports one zero-energy
 Faster R-CNN map, and does not assign box metrics to the 232 box-negative
 images. The nine heatmap panels are objective examples, not prevalence
@@ -190,8 +191,8 @@ simple confound.
 CUDA ROI Align backward lacks a bitwise-deterministic implementation in the
 pinned Torchvision build. The run is seeded under deterministic warn-only mode
 and records the environment, but Faster R-CNN CAM bytes may vary slightly on a
-different hardware/library rerun. More broadly, a plausible heatmap is an
-association diagnostic and not evidence of clinical reasoning.
+different hardware/library rerun. More broadly, a plausible heatmap is a
+failure-analysis association map and not evidence of clinical reasoning.
 
 ## Statistical scope
 

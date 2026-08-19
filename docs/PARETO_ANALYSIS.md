@@ -69,8 +69,9 @@ GFLOPs/image. The registered-operation gap is about 21.04-fold, but the estimate
 unsupported operations and should be interpreted alongside measured latency rather than as
 a complete runtime model. Neither detector strictly dominates because the higher-recall
 seed cloud is also the more compute-intensive one. Faster R-CNN is preferable where missed
-findings are the tighter constraint and GPU compute is available, whereas YOLO11s is the
-more plausible option under a strict operation budget with mandatory human review.
+opacity annotations are the tighter constraint and GPU compute is available, whereas
+YOLO11s is the more plausible option under a strict operation budget with mandatory human
+review.
 
 ## Reproduction
 

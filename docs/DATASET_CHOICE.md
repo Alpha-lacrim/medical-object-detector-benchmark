@@ -3,7 +3,8 @@
 ## Decision
 
 This project selects the **RSNA Pneumonia Detection Challenge 2018, Stage 2
-training set**. The detector has one foreground class, `Lung Opacity`; normal
+training set**. The lung-opacity detection task has one foreground class,
+`Lung Opacity`; normal
 and abnormal-without-opacity studies are negative images, not additional object
 classes. The full labeled set is reduced to a deterministic, patient-grouped,
 stratified subset of 5,000 studies for the predeclared RTX 4060 Laptop / 16 GB
@@ -25,7 +26,7 @@ documents take precedence over downstream descriptions. The selected RSNA
 annotations and official exam-to-original-image mapping were parsed locally;
 the preparation command records SHA-256 hashes and a machine-readable audit.
 
-| Criterion | RSNA Pneumonia, Stage 2 | pkdarabi Brain Tumor, v5 | ahmedsorour Brain Tumor, v1 |
+| Criterion | RSNA Stage 2 lung-opacity task | pkdarabi Brain Tumor, v5 | ahmedsorour Brain Tumor, v1 |
 |---|---|---|---|
 | Image inventory | 26,684 labeled frontal chest-radiograph studies; 30,227 label rows | Data card advertises 3,903 MRI images and a 70/20/10 split; the region-blocked archive could not be fully inventoried | 5,249 JPG images: 4,737 train and 512 validation; no publisher-provided test split |
 | Declared/verified detection classes | Verified: one, `Lung Opacity`; background is implicit | Kaggle data card advertises four categories—Glioma, Meningioma, Pituitary, and No Tumor—but the archive class map could not be read locally; a paper citing the set is internally inconsistent about inventory and taxonomy | Verified from labels: four YOLO IDs, `Glioma`, `Meningioma`, `No Tumor`, and `Pituitary` |

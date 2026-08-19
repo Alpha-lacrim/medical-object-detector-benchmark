@@ -1,4 +1,4 @@
-# Project plan: medical object detector benchmark
+# Project plan: controlled lung-opacity detector comparison
 
 ## Reconciliation Note
 
@@ -56,14 +56,15 @@ remain frozen to the two selected seed-17 checkpoints and were not rerun.
 ## 1. Aim and research questions
 
 The delivered project compares one Faster R-CNN implementation with one YOLO
-implementation on a patient-grouped subset of the RSNA Pneumonia Detection
-Challenge. The original recommended brain-MRI scope was provisional and is
-superseded by the documented RSNA decision.
+implementation for lung-opacity detection on a patient-grouped subset of the
+RSNA Pneumonia Detection Challenge. The original recommended brain-MRI scope
+was provisional and is superseded by the documented RSNA decision.
 
 Primary research question:
 
 > Under one controlled dataset and evaluation protocol, how do the selected
-> Faster R-CNN and YOLO implementations differ in detection quality, efficiency,
+> Faster R-CNN and YOLO implementations differ in lung-opacity detection
+> quality, efficiency,
 > corruption robustness, explanation localization, and deployment suitability?
 
 Secondary questions addressed by V1:

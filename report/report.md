@@ -1,5 +1,5 @@
 ---
-title: Comparative Analysis of Object Detectors for Medical Imaging
+title: Controlled Comparison of Faster R-CNN and YOLO11s for Lung-Opacity Detection
 bibliography: references.bib
 link-citations: true
 ---
@@ -12,11 +12,12 @@ repository [`README.md`](../README.md).
 
 ## 1. Introduction
 
-Object detectors intended for medical images must be assessed on more than a
-single clean-test accuracy score. A useful system must find clinically relevant
-regions with an acceptable miss rate, remain stable under plausible image
-degradation, operate within its deployment hardware budget, and expose enough
-diagnostic evidence to support failure analysis. These requirements can pull in
+Object detectors intended for lung-opacity detection on chest radiographs must
+be assessed on more than a single clean-test accuracy score. A useful system
+must localize annotated lung-opacity regions with an acceptable miss rate,
+remain stable under plausible image degradation, operate within its deployment
+hardware budget, and expose enough auditable post-hoc evidence to support
+failure analysis. These requirements can pull in
 different directions: a proposal-based detector may spend more computation on
 each candidate, while a dense one-stage detector may favor throughput and model
 compactness.
@@ -25,13 +26,16 @@ This study asks:
 
 > Under identical data, a common evaluation protocol, and a matched training
 > budget, how do a two-stage anchor-based Faster R-CNN and a modern one-stage
-> anchor-free YOLO trade off detection accuracy, robustness to common image
-> corruptions, and interpretability on medical images, and which trade-off is
+> anchor-free YOLO trade off lung-opacity detection coverage and ranking
+> accuracy, robustness to common image corruptions, and interpretability on
+> chest radiographs, and which trade-off is
 > preferable for plausible deployment scenarios such as resource-constrained
 > point-of-care assistance and retrospective batch screening?
 
 The comparison uses `fasterrcnn_resnet50_fpn_v2` and Ultralytics YOLO11s on a
-patient-grouped 5,000-study subset of the RSNA Pneumonia Detection Challenge.
+patient-grouped 5,000-study subset of the RSNA Pneumonia Detection Challenge,
+formulated here strictly as lung-opacity detection rather than pneumonia
+diagnosis.
 Both models consume the same canonical annotations, use 640-pixel inputs, are
 trained under the same seed grid and broadly matched optimization budget, and
 are scored by one evaluator. The study then adds a seven-corruption,
@@ -56,7 +60,7 @@ YOLO began from the contrasting idea of predicting detections in a single
 dense network pass [@redmon2016yolo]. This study uses YOLO11s rather than the
 newer YOLO26 family because YOLO11 retains a conventional anchor-free,
 NMS-based detection pipeline with greater continuity to the existing medical
-detection literature. The implementation is pinned to
+object-detection literature. The implementation is pinned to
 `ultralytics==8.4.110`. Its backbone and neck create stride-8, stride-16, and
 stride-32 features; its decoupled dense head predicts classification scores and
 distributed box offsets without predefined anchor shapes. Distributional box
@@ -68,13 +72,18 @@ the implementation authority [@ultralytics2024yolo11;
 
 Architecture suggests hypotheses rather than a guaranteed ranking. A dense
 one-stage head should reduce latency and model complexity, whereas proposal
-refinement may help with subtle or variably sized findings. Published medical
-detector results cannot resolve this comparison because their datasets,
-preprocessing, augmentations, thresholds, and metric implementations differ.
-Prior work has adapted Faster R-CNN and anchor-free detectors to the RSNA task
-[@yao2021pneumonia; @wu2024pneumonia], but the simultaneous use of custom
-backbones, anchors, losses, or preprocessing prevents attribution to detector
-paradigm alone.
+refinement may help with subtle or variably sized opacity annotations. In the
+medical-detector studies reviewed here, split construction, preprocessing,
+augmentation, thresholds, and metric definitions or aggregation are not held
+common. RSNA work combines detector changes with custom backbones or heads,
+anchors, augmentation, losses, and post-processing [@yao2021pneumonia;
+@wu2024pneumonia], while related MRI work also changes modality, input
+organization, pretraining, and detector variants [@kang2023rcsyolo;
+@kang2025pkyolo]. Because several factors move simultaneously, published point
+estimates cannot isolate detector architecture. This study narrows that gap
+with a patient-disjoint split, common canonical inputs and augmentation policy,
+one evaluator, and compute measured on one machine; it does not claim a
+universal detector-family effect.
 
 ### 2.2 Robustness and explainability
 
@@ -190,8 +199,9 @@ opens the held-out 750-image test set. Both frameworks emit original-image
 - greedy, class-aware, score-ordered matching; and
 - mean IoU and box Dice only over matched true-positive boxes.
 
-Conditional IoU and Dice do not penalize missed findings and must be read with
-recall. Framework-native validation mAP is used only to choose checkpoints.
+Conditional IoU and Dice do not penalize missed opacity annotations and must
+be read with recall. Framework-native validation mAP is used only to choose
+checkpoints.
 The clean headline and compute summaries use all five predeclared seeds unless
 an endpoint is mathematically undefined. Specifically, seed 271 contributes to
 every YOLO11s metric except matched-only IoU and Dice because it produced no
@@ -357,7 +367,7 @@ positions, five ties, and no YOLO11s-higher positions. YOLO's slightly higher
 matched-box IoU and Dice at 0.25 describe only matched true positives and do
 not offset its lower coverage.
 
-The frozen diagnostic in
+The frozen seed-stability analysis in
 [`yolo_seed_stability.csv`](../results/tables/yolo_seed_stability.csv) makes
 seed 271's score-scale instability concrete. Its losses decreased and
 validation mAP converged normally, and its test AP@0.5/AP@0.5:0.95 values were
@@ -468,9 +478,9 @@ consistently centered on the boxed opacity. YOLO11s is more diffuse and
 punctate while attaining a modest energy-in-box advantage. Both frequently
 activate on the mediastinum, shoulders, chest wall, image borders, markers,
 devices, and other anatomy. Neither set of maps supports a claim that the model
-is reasoning clinically or reliably localizing the lesion. In particular,
-false-negative proxy maps answer a conditional diagnostic question about a
-latent candidate; they do not explain an emitted detection.
+is reasoning clinically or reliably localizing the annotated opacity. In
+particular, false-negative proxy maps answer a conditional failure-analysis
+question about a latent candidate; they do not explain an emitted detection.
 
 ## 10. Statistical Analysis
 
@@ -542,7 +552,8 @@ precision, recall, and F1 within the frozen n=3 threshold-analysis scope. Its AP
 original fixed-threshold recall, and fixed-threshold F1 advantages also survive
 the primary patient-cluster paired analysis at n=5.
 YOLO11s' slightly higher conditional IoU and Dice at 0.25 exclude missed
-findings, use four complete seed pairs, and remain statistically inconclusive.
+opacity annotations, use four complete seed pairs, and remain statistically
+inconclusive.
 The seed-271 contrast between ordinary AP and zero fixed-threshold output shows
 that ranking quality can remain plausible while confidence-scale stability
 fails under the disclosed augmentation-disabled recipe.
@@ -557,8 +568,8 @@ higher Faster R-CNN sensitivity at every reported FP/image budget. Absolute
 performance remains modest: at the validation-selected thresholds, mean test
 precision/recall/F1 is 0.354/0.361/0.349 for Faster R-CNN and
 0.310/0.244/0.272 for YOLO11s. Neither frozen system is an acceptable
-autonomous clinical detector. These analyses diagnose score-scale/selectivity;
-they do not assess probabilistic calibration.
+autonomous lung-opacity detector for clinical use. These analyses characterize
+score-scale/selectivity; they do not assess probabilistic calibration.
 
 ### 11.2 Robustness and explanation evidence
 
@@ -628,8 +639,8 @@ augmentation policy is controlled but may understate YOLO's conventional
 augmentation-rich performance. Compute measurements compare these two documented
 implementations on one laptop, not detector architectures in general. Common
 corruptions act on converted PNGs and are not scanner or site-shift models.
-Bounding boxes are coarse lesion surrogates, Grad-CAM is layer- and
-target-dependent, and one Faster R-CNN CAM is zero energy. The full
+Bounding boxes are coarse rectangles around opacity annotations, Grad-CAM is
+layer- and target-dependent, and one Faster R-CNN CAM is zero energy. The full
 consolidated limitations are maintained in
 [`docs/LIMITATIONS.md`](../docs/LIMITATIONS.md).
 
@@ -657,9 +668,8 @@ parameters and one twenty-first of the estimated registered operations. Its
 apparent precision advantage at the original 0.25 threshold is a
 score-scale/selectivity artifact, not a frontier advantage, and seed 271 shows
 that this operating-point behavior can become degenerate even when AP remains
-plausible. Neither model is
-reliably lesion-focused under the selected Grad-CAM protocol, and neither
-supports clinical use.
+plausible. Neither model is reliably focused on annotated lung-opacity regions
+under the selected Grad-CAM protocol, and neither supports clinical use.
 
 The deployment implication is therefore conditional. Faster R-CNN is the more
 defensible research choice for accuracy-sensitive, GPU-backed screening or

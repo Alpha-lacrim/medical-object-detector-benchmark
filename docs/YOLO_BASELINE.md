@@ -114,7 +114,7 @@ the immutable `results.csv`. The summary records the benchmark-approved
 training source identity separately from the corrected reporting-source
 identity.
 
-## Research-track seed expansion and seed-271 diagnosis
+## Research-track seed expansion and seed-271 failure analysis
 
 Batch 16 later repeated the frozen, augmentation-disabled training recipe for seeds 271 and
 314, in addition to the accepted seeds 17, 42, and 137. This produced five completed YOLO11s
@@ -130,7 +130,7 @@ AP@0.5:0.95 0.0556), but their maximum confidence is only 0.0412735. Consequentl
 emits zero test detections at both the fixed score threshold 0.25 and the frozen n=3-selected
 YOLO threshold 0.05.
 
-The retained diagnosis is therefore a seed-specific **confidence-score/output-scale
+The retained failure classification is therefore a seed-specific **confidence-score/output-scale
 degeneracy after otherwise normal convergence**, not the earlier numerical loss/head
 collapse. The clean all-attempt analysis retains seed 271's valid AP and zero
 fixed-threshold precision/recall/F1 outcomes. Matched-only IoU and Dice are undefined for
