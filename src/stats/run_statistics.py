@@ -50,10 +50,52 @@ class InputSettings(StrictModel):
     test_split_manifest: Path
 
 
+class ExpectedUndefinedConditional(StrictModel):
+    detector: DetectorName
+    seed: int = Field(ge=0)
+    metrics: tuple[str, ...]
+    true_positives: Literal[0]
+    prediction_count: Literal[0]
+    reason: Literal["no_detections_at_frozen_score_threshold"]
+
+
+class CleanSeedEligibility(StrictModel):
+    all_attempt_metrics: tuple[str, ...]
+    all_attempt_seeds: tuple[int, ...]
+    paired_complete_case_metrics: tuple[str, ...]
+    paired_complete_case_seeds: tuple[int, ...]
+    expected_undefined: tuple[ExpectedUndefinedConditional, ...]
+
+    @model_validator(mode="after")
+    def validate_contract(self) -> CleanSeedEligibility:
+        all_metrics = set(self.all_attempt_metrics)
+        conditional_metrics = set(self.paired_complete_case_metrics)
+        if all_metrics & conditional_metrics or all_metrics | conditional_metrics != set(METRICS):
+            raise ValueError("clean endpoint groups must partition all statistical metrics")
+        if conditional_metrics != {"iou", "dice"}:
+            raise ValueError("paired complete-case metrics must be exactly IoU and Dice")
+        if len(set(self.all_attempt_seeds)) != len(self.all_attempt_seeds):
+            raise ValueError("all-attempt seed IDs must be unique")
+        if len(set(self.paired_complete_case_seeds)) != len(self.paired_complete_case_seeds):
+            raise ValueError("paired complete-case seed IDs must be unique")
+        if not set(self.paired_complete_case_seeds) < set(self.all_attempt_seeds):
+            raise ValueError("paired complete-case seeds must be a strict all-attempt subset")
+        expected_keys = [(item.detector, item.seed) for item in self.expected_undefined]
+        if len(set(expected_keys)) != len(expected_keys):
+            raise ValueError("expected undefined detector/seed identities must be unique")
+        for item in self.expected_undefined:
+            if set(item.metrics) != conditional_metrics:
+                raise ValueError("expected undefined metrics must match the conditional group")
+            if item.seed not in self.all_attempt_seeds:
+                raise ValueError("expected undefined seed is not an all-attempt seed")
+        return self
+
+
 class AnalysisSettings(StrictModel):
     detector_a: DetectorName
     detector_b: DetectorName
     metrics: tuple[str, ...]
+    clean_seed_eligibility: CleanSeedEligibility
     confidence_level: float = Field(gt=0, lt=1)
     bootstrap_resamples: int = Field(ge=100)
     permutation_resamples: int = Field(ge=100)
@@ -85,10 +127,11 @@ class OutputSettings(StrictModel):
     image_level_summary_archive: Path
     image_level_clean_table_archive: Path
     image_level_robustness_table_archive: Path
+    patient_cluster_clean_n3_archive: Path
 
 
 class StatisticsConfig(StrictModel):
-    schema_version: Literal[2]
+    schema_version: Literal[3]
     experiment_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     seed: int = Field(ge=0, le=2**32 - 1)
     inputs: InputSettings
@@ -115,6 +158,11 @@ TABLE_FIELDS = (
     "image_count",
     "patient_group_count",
     "seed_count",
+    "attempted_seed_count",
+    "paired_seed_ids",
+    "excluded_pair_seed_ids",
+    "seed_eligibility_policy",
+    "seed_eligibility_note",
     "confidence_level",
     "detector_a_estimate",
     "detector_a_ci_low",
@@ -282,10 +330,17 @@ def compare_holm_significance(
     archived_path: Path,
     *,
     alpha: float = 0.05,
+    archived_label: str = "image_level",
+    current_label: str = "patient_cluster",
+    include_scope_in_key: bool = True,
 ) -> dict[str, Any]:
     """Compare Holm decisions between archived image- and patient-level results."""
 
-    key_fields = ("scope", "condition_id", "estimand", "metric")
+    key_fields = (
+        ("scope", "condition_id", "estimand", "metric")
+        if include_scope_in_key
+        else ("condition_id", "estimand", "metric")
+    )
 
     def key(row: Mapping[str, Any]) -> tuple[str, ...]:
         return tuple(str(row[field]) for field in key_fields)
@@ -313,8 +368,8 @@ def compare_holm_significance(
             continue
         change = {
             **dict(zip(key_fields, row_key, strict=True)),
-            "image_level_p_holm": float(archived["p_value_holm"]),
-            "patient_cluster_p_holm": float(current["p_value_holm"]),
+            f"{archived_label}_p_holm": float(archived["p_value_holm"]),
+            f"{current_label}_p_holm": float(current["p_value_holm"]),
             "difference_a_minus_b": float(current["difference_a_minus_b"]),
         }
         (became_non_significant if old_significant else became_significant).append(change)
@@ -322,8 +377,8 @@ def compare_holm_significance(
     return {
         "alpha": alpha,
         "comparison_count": len(current_rows),
-        "image_level_significant_count": sum(significant(row) for row in archived_rows),
-        "patient_cluster_significant_count": sum(significant(row) for row in current_rows),
+        f"{archived_label}_significant_count": sum(significant(row) for row in archived_rows),
+        f"{current_label}_significant_count": sum(significant(row) for row in current_rows),
         "became_non_significant": became_non_significant,
         "became_significant": became_significant,
         "pattern_changed": bool(became_non_significant or became_significant),
@@ -502,6 +557,160 @@ def _phase5_pairs(
     )
 
 
+def _validate_clean_seed_eligibility(
+    pair: EvidencePair,
+    *,
+    seeds: tuple[int, ...],
+    analysis: AnalysisSettings,
+) -> tuple[EvidencePair, dict[str, Any]]:
+    """Fail closed on the predeclared endpoint-specific complete-pair contract."""
+
+    policy = analysis.clean_seed_eligibility
+    if seeds != policy.all_attempt_seeds or pair.seed_count != len(seeds):
+        raise ValueError("Phase 5 paired seeds differ from the clean eligibility contract")
+    expected = {(item.detector, item.seed): item for item in policy.expected_undefined}
+    actual: dict[tuple[str, int], dict[str, int]] = {}
+    detector_evidence = {
+        analysis.detector_a: pair.detector_a,
+        analysis.detector_b: pair.detector_b,
+    }
+    for detector, evidence_items in detector_evidence.items():
+        for seed, evidence in zip(seeds, evidence_items, strict=True):
+            true_positives = int(np.sum(evidence.tp))
+            prediction_count = true_positives + int(np.sum(evidence.fp))
+            if true_positives == 0:
+                actual[(detector, seed)] = {
+                    "true_positives": true_positives,
+                    "prediction_count": prediction_count,
+                }
+    if set(actual) != set(expected):
+        raise ValueError(
+            "observed undefined conditional detector/seeds differ from the declared contract: "
+            f"observed={sorted(actual)}, expected={sorted(expected)}"
+        )
+    for key, counts in actual.items():
+        declared = expected[key]
+        if (
+            counts["true_positives"] != declared.true_positives
+            or counts["prediction_count"] != declared.prediction_count
+        ):
+            raise ValueError(f"undefined conditional counts differ for {key}")
+
+    complete_indices = tuple(
+        index
+        for index, seed in enumerate(seeds)
+        if (analysis.detector_a, seed) not in actual and (analysis.detector_b, seed) not in actual
+    )
+    complete_seeds = tuple(seeds[index] for index in complete_indices)
+    if complete_seeds != policy.paired_complete_case_seeds:
+        raise ValueError(
+            "observed complete conditional seed pairs differ from the declared contract: "
+            f"observed={complete_seeds}, expected={policy.paired_complete_case_seeds}"
+        )
+    conditional_pair = EvidencePair(
+        detector_a=tuple(pair.detector_a[index] for index in complete_indices),
+        detector_b=tuple(pair.detector_b[index] for index in complete_indices),
+    )
+
+    all_indices = [METRICS.index(metric) for metric in policy.all_attempt_metrics]
+    conditional_indices = [METRICS.index(metric) for metric in policy.paired_complete_case_metrics]
+    ones = np.ones(pair.image_count, dtype=np.int64)
+    for index, seed in enumerate(seeds):
+        single = EvidencePair(
+            detector_a=(pair.detector_a[index],),
+            detector_b=(pair.detector_b[index],),
+        )
+        estimates = estimate_pair(single, multiplicities=ones)
+        if not all(np.isfinite(estimate[all_indices]).all() for estimate in estimates):
+            raise ValueError(f"nonconditional clean metric is not finite for seed {seed}")
+    for index, seed in enumerate(complete_seeds):
+        single = EvidencePair(
+            detector_a=(conditional_pair.detector_a[index],),
+            detector_b=(conditional_pair.detector_b[index],),
+        )
+        estimates = estimate_pair(single, multiplicities=ones)
+        if not all(np.isfinite(estimate[conditional_indices]).all() for estimate in estimates):
+            raise ValueError(f"conditional clean metric is not finite for paired seed {seed}")
+
+    excluded_seeds = tuple(seed for seed in seeds if seed not in complete_seeds)
+    exclusion_details = tuple(
+        {
+            "detector": item.detector,
+            "seed": item.seed,
+            "metrics": list(item.metrics),
+            "true_positives": item.true_positives,
+            "prediction_count": item.prediction_count,
+            "reason": item.reason,
+        }
+        for item in policy.expected_undefined
+    )
+    return conditional_pair, {
+        "attempted_seed_ids": list(seeds),
+        "attempted_seed_count": len(seeds),
+        "all_attempt_metrics": list(policy.all_attempt_metrics),
+        "paired_complete_case_metrics": list(policy.paired_complete_case_metrics),
+        "paired_complete_case_seed_ids": list(complete_seeds),
+        "paired_complete_case_seed_count": len(complete_seeds),
+        "excluded_pair_seed_ids": list(excluded_seeds),
+        "expected_undefined": list(exclusion_details),
+        "policy": "endpoint_specific_predeclared_all_attempt_and_paired_complete_case",
+    }
+
+
+def _merge_clean_endpoint_rows(
+    all_attempt_rows: Sequence[Mapping[str, Any]],
+    conditional_rows: Sequence[Mapping[str, Any]],
+    *,
+    eligibility: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Merge endpoint groups while recording the exact paired seed set per row."""
+
+    all_by_metric = {str(row["metric"]): row for row in all_attempt_rows}
+    conditional_by_metric = {str(row["metric"]): row for row in conditional_rows}
+    if set(all_by_metric) != set(METRICS) or set(conditional_by_metric) != set(METRICS):
+        raise ValueError("clean analyses must each return every statistical metric")
+    all_metrics = set(eligibility["all_attempt_metrics"])
+    conditional_metrics = set(eligibility["paired_complete_case_metrics"])
+    attempted_ids = tuple(int(seed) for seed in eligibility["attempted_seed_ids"])
+    conditional_ids = tuple(int(seed) for seed in eligibility["paired_complete_case_seed_ids"])
+    excluded_ids = tuple(int(seed) for seed in eligibility["excluded_pair_seed_ids"])
+    undefined_details = eligibility["expected_undefined"]
+    exclusion_note = "; ".join(
+        f"{item['detector']} seed {item['seed']}: {item['reason']} "
+        f"(TP={item['true_positives']}, predictions={item['prediction_count']})"
+        for item in undefined_details
+    )
+    merged: list[dict[str, Any]] = []
+    for metric in METRICS:
+        if metric in conditional_metrics:
+            source = conditional_by_metric[metric]
+            eligible_ids = conditional_ids
+            policy = "paired_complete_case_conditional_metric"
+            note = exclusion_note
+        elif metric in all_metrics:
+            source = all_by_metric[metric]
+            eligible_ids = attempted_ids
+            policy = "all_predeclared_attempts"
+            note = "All predeclared attempted seeds are retained, including operational failures."
+        else:  # pragma: no cover - guarded by the config model
+            raise ValueError(f"metric is absent from the eligibility partition: {metric}")
+        row = dict(source)
+        row.update(
+            {
+                "seed_count": len(eligible_ids),
+                "attempted_seed_count": len(attempted_ids),
+                "paired_seed_ids": ";".join(str(seed) for seed in eligible_ids),
+                "excluded_pair_seed_ids": ";".join(str(seed) for seed in excluded_ids)
+                if metric in conditional_metrics
+                else "",
+                "seed_eligibility_policy": policy,
+                "seed_eligibility_note": note,
+            }
+        )
+        merged.append(row)
+    return merged
+
+
 def _bundle_hash_map(summary: Mapping[str, Any]) -> dict[tuple[str, str], tuple[Path, str]]:
     result: dict[tuple[str, str], tuple[Path, str]] = {}
     for item in summary["prediction_bundles"]:
@@ -569,7 +778,14 @@ def _decorate_rows(
             "detector_b": config.analysis.detector_b,
             "image_count": image_count,
             "patient_group_count": patient_group_count,
-            "seed_count": seed_count,
+            "seed_count": row.get("seed_count", seed_count),
+            "attempted_seed_count": row.get("attempted_seed_count", seed_count),
+            "paired_seed_ids": row.get("paired_seed_ids", ""),
+            "excluded_pair_seed_ids": row.get("excluded_pair_seed_ids", ""),
+            "seed_eligibility_policy": row.get(
+                "seed_eligibility_policy", "single_seed_or_uniform_seed_set"
+            ),
+            "seed_eligibility_note": row.get("seed_eligibility_note", ""),
             "confidence_level": config.analysis.confidence_level,
             "bootstrap_resamples": config.analysis.bootstrap_resamples,
             "test_name": config.analysis.permutation_method,
@@ -602,7 +818,16 @@ def apply_grid_holm(rows: list[dict[str, Any]]) -> None:
 def apply_clean_holm(rows: list[dict[str, Any]]) -> None:
     """Correct the seven predeclared clean predictive endpoints as one family."""
 
-    indices = [index for index, row in enumerate(rows) if row["status"] == "complete"]
+    if tuple(str(row.get("metric")) for row in rows) != METRICS:
+        raise ValueError("clean Holm family must contain the seven metrics in declared order")
+    if any(
+        row.get("status") != "complete"
+        or row.get("p_value_raw") is None
+        or not np.isfinite(float(row["p_value_raw"]))
+        for row in rows
+    ):
+        raise ValueError("all seven clean endpoints must be estimable before Holm correction")
+    indices = list(range(len(rows)))
     adjusted = holm_adjust([float(rows[index]["p_value_raw"]) for index in indices])
     for index, value in zip(indices, adjusted, strict=True):
         rows[index]["p_value_holm"] = value
@@ -616,7 +841,107 @@ def _artifact_hash(path: Path, root: Path) -> dict[str, str]:
     }
 
 
-def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
+def _write_clean_only_refresh(
+    config: StatisticsConfig,
+    *,
+    clean_pair: EvidencePair,
+    clean_patient_clusters: Any,
+    clean_rows: list[dict[str, Any]],
+    clean_seed_eligibility: Mapping[str, Any],
+    annotation_path: Path,
+    patient_manifest_path: Path,
+) -> dict[str, Any]:
+    """Replace only clean inference while preserving the frozen robustness evidence."""
+
+    summary_path = config.resolve(config.outputs.summary_json)
+    clean_table = config.resolve(config.outputs.clean_table)
+    robustness_table = config.resolve(config.outputs.robustness_table)
+    n3_archive = config.resolve(config.outputs.patient_cluster_clean_n3_archive)
+    if not n3_archive.is_file():
+        raise FileNotFoundError(f"missing corrected n=3 clean archive: {n3_archive}")
+    previous_summary_sha256 = sha256_file(summary_path)
+    previous = _read_json(summary_path)
+    if previous.get("status") != "complete":
+        raise ValueError("clean-only refresh requires a complete prior statistics summary")
+    previous_robustness = previous.get("artifacts", {}).get("robustness_table", {})
+    current_robustness = _artifact_hash(robustness_table, config.project_root)
+    if previous_robustness.get("sha256") != current_robustness["sha256"]:
+        raise ValueError("robustness table differs from the frozen prior summary")
+
+    _atomic_csv(clean_table, clean_rows)
+    source_paths = (
+        config.source_path,
+        config.project_root / "src" / "stats" / "paired.py",
+        config.project_root / "src" / "stats" / "run_statistics.py",
+    )
+    previous.update(
+        {
+            "schema_version": config.schema_version,
+            "status": "complete",
+            "experiment_id": config.experiment_id,
+            "config_path": config.source_path.relative_to(config.project_root).as_posix(),
+            "config_sha256": sha256_file(config.source_path),
+            "source_identity": {
+                path.relative_to(config.project_root).as_posix(): sha256_file(path)
+                for path in source_paths
+            },
+            "analysis": config.analysis.model_dump(mode="json"),
+            "clean": {
+                "image_count": clean_pair.image_count,
+                "patient_group_count": clean_patient_clusters.patient_group_count,
+                "seed_count": clean_pair.seed_count,
+                "endpoint_seed_eligibility": dict(clean_seed_eligibility),
+                "comparison_count": len(clean_rows),
+                "results": clean_rows,
+            },
+        }
+    )
+    previous["upstream"]["phase5_summary"] = _artifact_hash(
+        config.resolve(config.inputs.phase5_summary), config.project_root
+    )
+    previous["upstream"]["test_annotations"] = _artifact_hash(annotation_path, config.project_root)
+    previous["upstream"]["test_split_manifest"] = _artifact_hash(
+        patient_manifest_path, config.project_root
+    )
+    all_attempt_count = int(clean_seed_eligibility["attempted_seed_count"])
+    conditional_count = int(clean_seed_eligibility["paired_complete_case_seed_count"])
+    all_attempt_metrics = ", ".join(clean_seed_eligibility["all_attempt_metrics"])
+    conditional_metrics = ", ".join(clean_seed_eligibility["paired_complete_case_metrics"])
+    previous["inference_unit"]["bootstrap"] = (
+        "Matched NIH patient groups are resampled with replacement; every sampled "
+        "group contributes all of its observed images with one shared multiplicity. "
+        f"The clean analysis resamples {all_attempt_count} paired training seeds for "
+        f"{all_attempt_metrics}, and separately resamples the {conditional_count} predeclared "
+        f"complete pairs for {conditional_metrics}. Patient-cluster construction and resampling "
+        "are identical in both groups."
+    )
+    current_label = (
+        f"n{all_attempt_count}_all_attempt_n{conditional_count}_conditional_patient_cluster"
+    )
+    previous["holm_significance_comparison"]["clean"] = compare_holm_significance(
+        clean_rows,
+        n3_archive,
+        archived_label="n3_patient_cluster",
+        current_label=current_label,
+        include_scope_in_key=False,
+    )
+    previous["artifacts"]["clean_table"] = _artifact_hash(clean_table, config.project_root)
+    previous["artifacts"]["robustness_table"] = current_robustness
+    previous["clean_only_refresh"] = {
+        "scope": "phase5_clean_only",
+        "previous_summary_sha256": previous_summary_sha256,
+        "n3_clean_archive": _artifact_hash(n3_archive, config.project_root),
+        "endpoint_seed_eligibility": dict(clean_seed_eligibility),
+        "robustness_recomputed": False,
+        "robustness_table_preserved_sha256": current_robustness["sha256"],
+    }
+    _atomic_json(summary_path, previous)
+    return previous
+
+
+def run_statistics(
+    config: StatisticsConfig, *, scope: Literal["all", "clean"] = "all"
+) -> dict[str, Any]:
     initialize_reproducibility(config.seed, config.resolve(config.outputs.log_dir))
     phase5, phase6, phase5_summary, phase6_summary = _validate_upstream(config)
     archive_summary, archive_clean, archive_robustness = _ensure_image_level_archives(config)
@@ -633,14 +958,33 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
     clean_patient_clusters = build_patient_clusters(
         clean_pair.detector_a[0].image_ids, patient_group_map
     )
-    clean_results = analyze_pair(
+    conditional_pair, clean_seed_eligibility = _validate_clean_seed_eligibility(
+        clean_pair,
+        seeds=tuple(phase5.seeds),
+        analysis=config.analysis,
+    )
+    all_attempt_results = analyze_pair(
         clean_pair,
         patient_clusters=clean_patient_clusters,
         base_seed=config.seed,
-        comparison_label="phase5-clean-three-seed",
+        comparison_label=f"phase5-clean-all-attempt-n{clean_pair.seed_count}",
         bootstrap_resamples=config.analysis.bootstrap_resamples,
         permutation_resamples=config.analysis.permutation_resamples,
         confidence_level=config.analysis.confidence_level,
+    )
+    conditional_results = analyze_pair(
+        conditional_pair,
+        patient_clusters=clean_patient_clusters,
+        base_seed=config.seed,
+        comparison_label=f"phase5-clean-conditional-n{conditional_pair.seed_count}",
+        bootstrap_resamples=config.analysis.bootstrap_resamples,
+        permutation_resamples=config.analysis.permutation_resamples,
+        confidence_level=config.analysis.confidence_level,
+    )
+    clean_results = _merge_clean_endpoint_rows(
+        all_attempt_results["raw"],
+        conditional_results["raw"],
+        eligibility=clean_seed_eligibility,
     )
     clean_condition = {
         "condition_id": "clean",
@@ -649,15 +993,26 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
         "severity": 0,
     }
     clean_rows = _decorate_rows(
-        clean_results["raw"],
+        clean_results,
         config=config,
-        scope="phase5_clean_three_seed",
+        scope="phase5_clean_multi_seed",
         condition=clean_condition,
         image_count=clean_pair.image_count,
         patient_group_count=clean_patient_clusters.patient_group_count,
         seed_count=clean_pair.seed_count,
     )
     apply_clean_holm(clean_rows)
+
+    if scope == "clean":
+        return _write_clean_only_refresh(
+            config,
+            clean_pair=clean_pair,
+            clean_patient_clusters=clean_patient_clusters,
+            clean_rows=clean_rows,
+            clean_seed_eligibility=clean_seed_eligibility,
+            annotation_path=annotation_path,
+            patient_manifest_path=patient_manifest_path,
+        )
 
     bundle_map = _bundle_hash_map(phase6_summary)
     conditions = expand_conditions(phase6.corruption_config)
@@ -821,6 +1176,7 @@ def run_statistics(config: StatisticsConfig) -> dict[str, Any]:
             "image_count": clean_pair.image_count,
             "patient_group_count": clean_patient_clusters.patient_group_count,
             "seed_count": clean_pair.seed_count,
+            "endpoint_seed_eligibility": clean_seed_eligibility,
             "comparison_count": len(clean_rows),
             "results": clean_rows,
         },
@@ -896,13 +1252,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=Path("configs/statistics.yaml"))
     parser.add_argument("--mode", choices=("preflight", "run"), default="preflight")
+    parser.add_argument("--scope", choices=("all", "clean"), default="all")
     return parser
 
 
 def main() -> None:
     args = build_parser().parse_args()
     config = load_statistics_config(args.config)
-    result = preflight(config) if args.mode == "preflight" else run_statistics(config)
+    result = (
+        preflight(config) if args.mode == "preflight" else run_statistics(config, scope=args.scope)
+    )
     if args.mode == "preflight":
         print(json.dumps(result, indent=2, sort_keys=True))
     else:

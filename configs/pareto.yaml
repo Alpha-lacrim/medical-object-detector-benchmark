@@ -2,8 +2,8 @@ schema_version: 1
 analysis_id: rsna-phase11-pareto-frontier
 
 inputs:
-  comparison_summary: results/tables/detector_comparison.csv
-  comparison_per_seed: results/tables/detector_comparison_per_seed.csv
+  comparison_summary: results/tables/detector_comparison_n3_archive.csv
+  comparison_per_seed: results/tables/detector_comparison_per_seed_n3_archive.csv
   selected_operating_points: results/tables/selected_operating_points.csv
   selected_operating_points_per_seed: results/tables/selected_operating_points_per_seed.csv
   compute_tables:

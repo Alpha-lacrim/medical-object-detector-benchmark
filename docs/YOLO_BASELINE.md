@@ -44,6 +44,9 @@ them. The valid mixed-precision policy therefore uses bfloat16 autocast for the
 model forward/backward (supported natively by the RTX 4060) and computes target
 assignment and detector losses in float32. Ordinary seeded shuffle is retained.
 These failed attempts are not used for timing or performance results.
+Their defining signature was optimizer/head failure--non-finite or all-zero losses with
+near-zero output scores--and should not be conflated with the later seed-271 outcome
+described below.
 Ultralytics' bundled AMP equivalence probe is specific to its default float16
 autocast and rejects bfloat16 on its output-tolerance comparison. The custom
 trainer replaces that probe with an explicit CUDA bfloat16 capability/dtype
@@ -110,3 +113,28 @@ bounded batches, verifies all 750 filenames, and derives the best epoch from
 the immutable `results.csv`. The summary records the benchmark-approved
 training source identity separately from the corrected reporting-source
 identity.
+
+## Research-track seed expansion and seed-271 diagnosis
+
+Batch 16 later repeated the frozen, augmentation-disabled training recipe for seeds 271 and
+314, in addition to the accepted seeds 17, 42, and 137. This produced five completed YOLO11s
+checkpoints for the clean all-attempt comparison; it did not change the Batch 3 seed-17
+protocol or retroactively alter the historical diagnostics above.
+
+Seed 271 did **not** reproduce the historical all-zero-loss/head collapse. Its train
+box/classification/DFL losses decreased from 1.5827/4.8243/1.6195 to
+0.9683/1.0934/0.9996, validation mAP@0.5:0.95 was nonzero and peaked at 0.08958 at epoch 7,
+and the run completed 12 epochs through normal validation-map early stopping. Its low-score
+test predictions retain plausible ranking and localization (AP@0.5 0.1587 and
+AP@0.5:0.95 0.0556), but their maximum confidence is only 0.0412735. Consequently seed 271
+emits zero test detections at both the fixed score threshold 0.25 and the frozen n=3-selected
+YOLO threshold 0.05.
+
+The retained diagnosis is therefore a seed-specific **confidence-score/output-scale
+degeneracy after otherwise normal convergence**, not the earlier numerical loss/head
+collapse. The clean all-attempt analysis retains seed 271's valid AP and zero
+fixed-threshold precision/recall/F1 outcomes. Matched-only IoU and Dice are undefined for
+that seed because it has no fixed-threshold true positive; their descriptive YOLO summary
+uses the four defined seeds and their paired inference uses the four complete detector seed
+pairs. The frozen threshold-selection, FROC, and Pareto artifacts remain n=3 and are not
+regenerated with this checkpoint.

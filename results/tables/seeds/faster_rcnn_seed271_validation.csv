@@ -1,0 +1,2 @@
+run_id,seed,best_epoch,split,operating_point_score_threshold,operating_point_match_iou_threshold,coco_minimum_score,max_detections,image_count,target_count,operating_point_prediction_count,coco_prediction_count,true_positives,false_positives,false_negatives,precision,recall,f1,map_50,map_50_95
+faster_rcnn_rsna_seed271_full,271,9,validation,0.25,0.5,0.0,100,750,277,646,75000,160,486,117,0.2476780185758514,0.5776173285198556,0.3466955579631636,0.35892676770573695,0.14031092414636387

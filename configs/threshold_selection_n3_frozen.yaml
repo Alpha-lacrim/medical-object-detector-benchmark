@@ -1,0 +1,26 @@
+schema_version: 1
+analysis_id: rsna-phase14-validation-threshold-selection
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  validation_split: val
+  validation_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_val.json
+  test_threshold_config: configs/threshold_sweep.yaml
+
+selection:
+  start: 0.01
+  stop: 0.99
+  steps: 99
+  rule: maximum_mean_f1
+  tie_breaker: highest_threshold
+
+outputs:
+  log_dir: results/logs/phase14_threshold_selection
+  validation_bundles_dir: results/logs/phase14_threshold_selection/validation_predictions
+  validation_manifest: results/logs/phase14_threshold_selection/validation_prediction_manifest.json
+  validation_threshold_table: results/tables/validation_threshold_sweep.csv
+  validation_threshold_per_seed_table: results/tables/validation_threshold_sweep_per_seed.csv
+  selected_operating_points_table: results/tables/selected_operating_points.csv
+  selected_operating_points_per_seed_table: results/tables/selected_operating_points_per_seed.csv
+  summary_json: results/logs/phase14_threshold_selection/summary.json

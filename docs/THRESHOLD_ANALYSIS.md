@@ -1,5 +1,17 @@
 # Confidence-Threshold and Precision-Recall Analysis
 
+## Frozen three-seed scope
+
+Every number and figure in this document is a frozen **n=3** analysis of seeds
+17, 42, and 137. It was not regenerated after the clean comparison expanded to
+five training seeds. `configs/threshold_sweep.yaml` and
+`configs/threshold_selection.yaml` deliberately route their Phase 5 identity
+checks through `configs/evaluation_n3_archive.yaml` and
+`results/logs/phase5_evaluation/summary_n3_archive.json`; the archived Phase 5
+comparison inputs are the corresponding `*_n3_archive.csv` tables. Output files
+whose historical names do not contain `n3` remain three-seed artifacts and
+must not be cited as five-seed results.
+
 ## Plain finding
 
 The fixed confidence threshold of 0.25 exaggerated YOLO11s's low-recall appearance, but it
@@ -28,9 +40,9 @@ scored 0.8 are correct approximately 80% of the time.
 
 The analysis reads the six frozen clean prediction bundles for Faster R-CNN and YOLO11s at
 seeds 17, 42, and 137. Their SHA-256 hashes, test-annotation hash, detector/seed identities,
-and evaluator settings are checked against the completed Phase 5 summary before any metric
-is accepted. It performs no training, checkpoint loading, model inference, NMS, or other
-prediction processing.
+and evaluator settings are checked against the archived n=3 Phase 5 config and summary
+before any metric is accepted. It performs no training, checkpoint loading, model
+inference, NMS, or other prediction processing.
 
 For each seed, 99 confidence thresholds from 0.01 through 0.99 in increments of 0.01 are
 passed to the same `evaluate_operating_point` function used by `src/evaluate.py`. That
@@ -114,11 +126,24 @@ not feed back into selection.
 | Faster R-CNN | 0.4164 +/- 0.0769 / 0.4404 +/- 0.0663 / 0.4202 +/- 0.0078 | 0.69 | 0.3543 +/- 0.0746 / 0.3607 +/- 0.0608 / 0.3492 +/- 0.0135 |
 | YOLO11s | 0.4076 +/- 0.0107 / 0.3213 +/- 0.0315 / 0.3588 +/- 0.0209 | 0.05 | 0.3096 +/- 0.0134 / 0.2438 +/- 0.0302 / 0.2718 +/- 0.0181 |
 
-These are the authoritative single-threshold operating-point results for later analyses.
-The original 0.25 comparison and the complete test sweep remain useful, explicitly labeled
-protocol sensitivity analyses; neither supplies the final threshold choice.
+These are the authoritative single-threshold operating-point results for the frozen n=3
+threshold-selection, FROC, and Pareto analyses. The YOLO11s threshold 0.05 was selected from
+only the three validation seeds 17, 42, and 137. It was not reselected at n=5: the later
+seed-271 checkpoint has a maximum test confidence of only 0.0412735 and therefore produces
+zero detections even at 0.05. That later observation is evidence of seed-specific confidence-
+score instability, not a reason to revise this historical selection with test feedback.
+The original 0.25 comparison and complete test sweep remain explicitly labeled protocol
+sensitivity analyses; neither supplies a five-seed threshold result.
 
 ## Artifacts and reproduction
+
+The immutable Phase 5 sources for every artifact below are
+`configs/evaluation_n3_archive.yaml` and
+`results/logs/phase5_evaluation/summary_n3_archive.json`. The archived comparison CSVs are
+`results/tables/detector_comparison_n3_archive.csv` and
+`results/tables/detector_comparison_per_seed_n3_archive.csv` (with the corresponding
+mean/SD archive). The threshold output filenames below predate the seed expansion, but their
+contents remain n=3.
 
 - `results/tables/threshold_sweep.csv`: detector-level mean and sample SD at all 99
   thresholds.
@@ -154,6 +179,8 @@ From the repository root in the pinned Python 3.11 environment:
 & $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode run
 ```
 
-The Batch 10 run and the final selection run take only frozen JSON prediction records as
-model evidence. The separate materialization command performs validation inference because
-raw validation scores were not archived during training; it cannot train or update weights.
+The Batch 10 run and the final selection run take only frozen n=3 JSON prediction records as
+model evidence. With the current configs, these commands reproduce the archived three-seed
+analysis only; they do not regenerate a five-seed threshold study. The separate
+materialization command performs validation inference because raw validation scores were
+not archived during training; it cannot train or update weights.

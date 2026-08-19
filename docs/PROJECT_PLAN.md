@@ -26,11 +26,15 @@ Research-track updates after the V1 freeze supersede two methodological parts
 of the historical record below: Batch 13 replaces image-level inference with
 patient-cluster bootstrap/permutation inference, and Batch 14 adds
 validation-selected detector thresholds, FROC curves, and corrected Pareto
-recall panels. Where a later statement below is explicitly labeled "V1," it
+recall panels. Batch 16 expands the clean comparison to five completed seeds
+per detector (10 checkpoints) while retaining endpoint-specific sample sizes:
+n=5 for AP and fixed-threshold precision/recall/F1, but four complete pairs for
+matched-only IoU/Dice inference because YOLO11s seed 271 has no fixed-threshold
+true positive. Where a later statement below is explicitly labeled "V1," it
 describes the frozen course submission rather than the current primary method.
 
 Document status: **reconciled V1 implementation record with research-track
-updates through Batch 15 (2026-08-19)**
+updates through Batch 16 (2026-08-19)**
 
 Original protocol prepared: **2026-07-28 (draft v0.3)**
 
@@ -42,6 +46,12 @@ implementations, three-seed training and clean evaluation, compute profiling,
 robustness, explainability, paired statistics, the 12-section report, tests, and
 reproduction documentation are present. Track B and the additional analyses
 identified below as not attempted are outside the V1 evidence base.
+
+Research-track checkpoint (2026-08-19): **the clean seed expansion completed.**
+Seeds 271 and 314 were trained under each detector's unchanged recipe, producing
+five checkpoints per detector. Clean aggregation and patient-cluster inference
+use the endpoint-specific n=5/n=4 contract above. Robustness and explainability
+remain frozen to the two selected seed-17 checkpoints and were not rerun.
 
 ## 1. Aim and research questions
 
@@ -66,6 +76,11 @@ Secondary questions addressed by V1:
    true-positive, false-positive, and false-negative cases?
 4. How should the measured accuracy, robustness, latency, memory, model size,
    and explanation evidence constrain deployment recommendations?
+
+The current research-track clean comparison extends question 1 to five
+attempted seed pairs for AP and fixed-threshold operating metrics. Conditional
+IoU/Dice use four complete pairs, while robustness and explainability retain
+their original seed-17 scope.
 
 V1 does not study brain tumors, corrupted-input Grad-CAM changes, clinical
 outcomes, or universal one-stage-versus-two-stage superiority. Those boundaries
@@ -99,6 +114,12 @@ a completed deviation matrix, corrupted-input Grad-CAM, and additional sanity
 checks. Those items were not part of delivered V1 and are not silently counted
 as complete.
 
+For the current clean extension, success additionally means 10 traceable clean
+checkpoints; all five attempted seeds retained for AP and fixed-threshold
+precision/recall/F1; prominent n=5/n=4 disclosure for conditional localization;
+and no five-seed claim for the frozen n=3 threshold-selection, FROC, or Pareto
+artifacts.
+
 ### Outcome-first decision framework
 
 The original priority order remains appropriate: safety, ethics, law, privacy,
@@ -122,7 +143,7 @@ original logging requirement was met.
 | Faster R-CNN transfer learning | `configs/faster_rcnn*.yaml`, `src/models/faster_rcnn_*`, training logs, checkpoints, curves, and [FASTER_RCNN_BASELINE.md](FASTER_RCNN_BASELINE.md) |
 | YOLOv8 or newer | `configs/yolo*.yaml`, `src/models/yolo_*`, training logs, checkpoints, curves, and [YOLO_BASELINE.md](YOLO_BASELINE.md) |
 | Controlled conditions | Resolved configs and matched-training contracts in `results/logs/`; the remaining architecture-specific differences are disclosed in the report |
-| Detection metrics | `src/meddet_benchmark/evaluation.py`, `src/meddet_benchmark/coco_evaluation.py`, `configs/evaluation.yaml`, and `results/tables/detector_comparison*` |
+| Detection metrics | `src/meddet_benchmark/evaluation.py`, `src/meddet_benchmark/coco_evaluation.py`, the current `configs/evaluation.yaml`, frozen `configs/evaluation_n3_archive.yaml`, and `results/tables/detector_comparison*` |
 | Compute metrics | Per-seed compute tables, benchmark estimates, and [QUANTITATIVE_COMPARISON.md](QUANTITATIVE_COMPARISON.md) |
 | Robustness | `configs/corruptions.yaml`, `results/logs/phase6_robustness/`, robustness tables/figures, and [ROBUSTNESS.md](ROBUSTNESS.md) |
 | Grad-CAM | `configs/explainability.yaml`, `results/logs/phase7_explainability/`, Grad-CAM tables/figures, and [EXPLAINABILITY.md](EXPLAINABILITY.md) |
@@ -238,6 +259,11 @@ Track B results. Both detector arms share:
 - the shared canonical prediction schema, evaluator, score/matching thresholds,
   hardware, and batch-1 AMP profiling protocol.
 
+That list records the delivered V1 comparison. Batch 16 subsequently repeated
+the same frozen recipes for seeds 271 and 314, producing the current five-seed
+set `17/42/137/271/314` for each detector--10 clean checkpoints in total. It did
+not introduce tuning, augmentation, or recipe changes.
+
 Architecture/runtime-specific fields are disclosed rather than presented as
 identical: Faster R-CNN uses physical batch 2 with two-step gradient
 accumulation, float16 AMP, learning rate 0.005, frozen batch-normalization
@@ -267,9 +293,11 @@ including YOLO HSV, geometric, mosaic, mixup, cutmix, copy-paste,
 auto-augmentation, erasing, and multi-scale options. Robustness corruptions are
 test-time stressors only and were never used to fine-tune the models.
 
-Both adapters completed smoke/preflight checks and three final training seeds.
-The original AdamW/cosine, fixed 100-epoch, equal-effective-batch proposal is
-superseded by the frozen SGD-based configs summarized above.
+Both adapters completed smoke/preflight checks and three final V1 training
+seeds. The later clean extension completed two additional seeds per detector
+under the same recipes. The original AdamW/cosine, fixed 100-epoch,
+equal-effective-batch proposal is superseded by the frozen SGD-based configs
+summarized above.
 
 ## 7. Shared evaluation protocol
 
@@ -299,12 +327,25 @@ class. The fixed threshold and conditional-metric limitations are stated in
 [LIMITATIONS.md](LIMITATIONS.md). Raw prediction bundles are preserved for all
 three clean-evaluation seeds.
 
-Batch 14 supersedes the threshold-selection part of that V1 statement for the
-current research-track result. Maximum arithmetic mean validation F1 on the
-predeclared 0.01--0.99 grid selects 0.69 for Faster R-CNN and 0.05 for YOLO11s;
-each is applied once to the frozen test bundles. The complete test sweep remains
-descriptive, and the original score-0.25 table remains a protocol-sensitivity
-record rather than the final threshold choice. See
+Batch 16 adds the two seed-271/314 bundles per detector, so the current clean
+grid contains 10 checkpoint/bundle identities. AP and fixed-threshold
+precision/recall/F1 use all five seeds. YOLO11s seed 271 has no prediction above
+0.25 and hence no matched true positive: its valid zeros remain in the
+fixed-threshold operating metrics, while its matched-only IoU/Dice are
+undefined. Descriptive conditional localization therefore uses Faster R-CNN
+n=5 and YOLO11s n=4; paired conditional inference uses the four complete pairs
+`17/42/137/314`.
+
+Batch 14 supersedes the threshold-selection part of that V1 statement for its
+frozen n=3 research-track analysis. Maximum arithmetic mean validation F1 over
+seeds 17, 42, and 137 on the predeclared 0.01--0.99 grid selects 0.69 for Faster
+R-CNN and 0.05 for YOLO11s; each is applied once to those three frozen test
+bundles. These threshold-selection, FROC, and Pareto results are routed through
+`configs/evaluation_n3_archive.yaml` and the archived n=3 summary/tables and
+were not regenerated at n=5. Seed 271's maximum test score is 0.0412735, so it
+would emit zero detections even at the selected YOLO threshold 0.05. The
+complete test sweep remains descriptive, and the original score-0.25 table
+remains a protocol-sensitivity record rather than an n=5 threshold choice. See
 [THRESHOLD_ANALYSIS.md](THRESHOLD_ANALYSIS.md) and
 [FROC_ANALYSIS.md](FROC_ANALYSIS.md).
 
@@ -345,8 +386,9 @@ severities (35 corrupted conditions per detector):
 For each condition V1 preserves all seven predictive metrics, absolute clean
 change, clean-relative retention, type/severity curves, and four-family
 summaries. The same checkpoints, thresholds, NMS, and evaluator are used
-throughout; no corrupted test image is used for training. Robustness is not
-averaged across the three training seeds, and the 300-image/111-box scope limits
+throughout; no corrupted test image is used for training. Robustness was not
+expanded with the clean five-seed grid: it remains conditional on the selected
+seed-17 checkpoint for each detector. The 300-image/111-box scope limits
 generality, as documented in [ROBUSTNESS.md](ROBUSTNESS.md).
 
 ## 10. Explainability plan as delivered
@@ -381,12 +423,15 @@ see [EXPLAINABILITY.md](EXPLAINABILITY.md).
 
 ## 11. Statistical analysis
 
-The clean analysis covers all 750 test images and paired training seeds 17, 42,
-and 137. For each of the seven predictive metrics, the detector difference is
-computed within seed and then averaged across paired seeds. Inference uses:
+The current clean analysis covers all 750 test images and the five attempted
+training seeds `17/42/137/271/314`. AP, precision, recall, and F1 use all five
+paired seeds, including seed 271's observed zero fixed-threshold
+precision/recall/F1. Conditional matched-only IoU and Dice use the four complete
+pairs `17/42/137/314`; descriptive localization retains Faster R-CNN n=5 but
+YOLO11s n=4. Inference uses:
 
 - 2,000 paired hierarchical percentile bootstrap draws over NIH patient groups
-  and paired seed indices;
+  and the applicable n=5 or n=4 paired seed set;
 - 5,000 two-sided paired patient-group detector-label permutation draws;
 - pointwise 95% bootstrap intervals;
 - the paired raw aggregate difference with its patient-cluster interval as the
@@ -396,7 +441,8 @@ computed within seed and then averaged across paired seeds. Inference uses:
 Dataset-level AP is recomputed from complete prediction bundles in every draw;
 the analysis does not average a fictional per-image AP. Precision, recall, F1,
 and conditional localization metrics are rebuilt from their sufficient
-per-image contributions.
+per-image contributions. All seven endpoints remain in one Holm family despite
+their prominently disclosed endpoint-specific seed counts.
 
 The corruption analysis uses the paired seed-17 predictions on the fixed
 300-image sample. It evaluates both raw detector differences and differences in
@@ -406,10 +452,14 @@ each metric-and-estimand family.
 Batch 13 corrected the V1 image-level independence error: every observed exam
 from one patient is resampled and permuted together in the current primary
 analysis. The exact V1 image-level outputs and former jackknife Cohen's d remain
-under explicit archive paths for audit only. The draft's at-least-10,000-draw
-target, formal Track A primary/Track B secondary split, McNemar test, and
-Wilcoxon signed-rank tests were not implemented. Three seeds still give only a
-coarse estimate of training variation. The exact estimands and results are in
+under explicit archive paths for audit only; the corrected n=3 patient-cluster
+clean table is also archived before the Batch 16 expansion. Batch 16 changes
+only cross-seed endpoint eligibility and does not change patient identities,
+cluster bootstrap construction, or patient-level label swaps. The draft's
+at-least-10,000-draw target, formal Track A primary/Track B secondary split,
+McNemar test, and Wilcoxon signed-rank tests were not implemented. Five attempted
+seeds remain a modest sample, and conditional localization has only four
+complete pairs. The exact estimands and results are in
 [STATISTICAL_ANALYSIS.md](STATISTICAL_ANALYSIS.md).
 
 ## 12. Implementation sequence and completion status
@@ -425,7 +475,7 @@ named draft-only requirement did not occur.
 | 2 - Dataset pipeline | Source inventory, annotation audit, patient-grouped split, conversion, hashes, and visual checks reconcile or disclose discrepancies | **Met** |
 | 3 - Shared evaluator first | Both adapters yield identical metrics for identical canonical toy predictions, including official COCO AP checks | **Met** |
 | 4 - Detector adapters and preflight | Both adapters produce canonical predictions and pass data, evaluation, profiling, checkpoint, and Grad-CAM preflight; the delivered single-comparison paths passed, but the proposed two-track preflight was not attempted | **Partially met** |
-| 5 - Controlled and optimized training | Both detectors complete three traceable seeds and both proposed tracks are complete; three full seeds per detector exist, but no separate Track B search/results exist | **Partially met** |
+| 5 - Controlled and optimized training | The V1 criterion required three traceable seeds and both proposed tracks; V1 completed three seeds, Batch 16 expanded this to five per detector (10 checkpoints), but no separate Track B search/results exist | **Partially met** |
 | 6 - Full benchmark | Clean evaluation, compute, corruption matrix, Grad-CAM outputs, and paired statistics exist with provenance for the delivered V1 scope | **Met** |
 | 7 - Report and reproduction | Generated evidence feeds the 12-section report and a documented reproduction chain, with citations, links, limitations, and consistency checked; no Track A/Track B compliance matrix or recorded full fresh-GPU rerun is claimed | **Partially met** |
 
@@ -448,9 +498,9 @@ files are condensed with descriptive names, but directory names are exact.
 |-- uv.lock
 |-- configs/
 |   |-- dataset.yaml
-|   |-- faster_rcnn.yaml (+ seed42/seed137 variants)
-|   |-- yolo.yaml (+ seed42/seed137 variants)
-|   |-- evaluation.yaml
+|   |-- faster_rcnn.yaml (+ seed42/seed137/seed271/seed314 variants)
+|   |-- yolo.yaml (+ seed42/seed137/seed271/seed314 variants)
+|   |-- evaluation.yaml (+ frozen evaluation_n3_archive.yaml)
 |   |-- corruptions.yaml
 |   |-- explainability.yaml
 |   |-- statistics.yaml
@@ -540,7 +590,7 @@ methodology disclosure provide the accurate scope record.
 | Framework defaults obscure fairness | Stochastic/native augmentation is disabled, resolved configs are retained, and architecture/training differences are disclosed; no generated two-track config-difference report is claimed |
 | Test-set tuning | In the V1 course freeze, checkpoints were selected by validation mAP@0.5:0.95 and the operating threshold was fixed at 0.25; the later research-track correction selects thresholds on validation and uses the test sweep only descriptively, without claiming probabilistic calibration |
 | Different metric implementations | One model-independent evaluator and official pycocotools AP are used for both detectors |
-| Single-seed winner | Clean results use three full training seeds; robustness and explainability remain primary-seed-only and are labeled accordingly |
+| Single-seed winner | The clean all-attempt comparison uses five seeds for AP and fixed-threshold precision/recall/F1; conditional IoU/Dice use four complete pairs because YOLO seed 271 is undefined. Robustness and explainability remain explicitly seed-17-only |
 | Decorative or overclaimed Grad-CAM | Detection-specific targets, matched layers, paired cases, energy-in-box, pointing game, and a random area baseline are retained; corruption and parameter-randomization sanity tests were not run |
 | Timing bias | Same device, AMP, batch size, warm-up count, synchronization, and repeated timing summaries are used; wrapper-level resize asymmetry remains disclosed |
 | Multiple statistical tests | A declared seven-metric clean family and per-metric/per-estimand corruption families use Holm correction |

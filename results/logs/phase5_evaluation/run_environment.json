@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-08-10T02:47:00.824176+00:00",
+  "captured_at_utc": "2026-08-19T18:48:37.795645+00:00",
   "determinism_notes": [
     "PYTHONHASHSEED affects hashing only in subsequently started interpreters.",
     "Unsupported deterministic PyTorch operations emit warnings and must be recorded with the affected run."

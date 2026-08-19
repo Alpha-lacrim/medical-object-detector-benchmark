@@ -1,0 +1,106 @@
+schema_version: 1
+experiment_id: faster-rcnn-rsna-phase5-seed314
+seed: 314
+
+data:
+  dataset_config: configs/dataset.yaml
+  images_dir: data/processed/rsna-pneumonia-5000/images
+  train_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_train.json
+  val_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_val.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+  grayscale_to_rgb: replicate
+  train_augmentation: none
+
+model:
+  architecture: fasterrcnn_resnet50_fpn_v2
+  weights: DEFAULT
+  trainable_backbone_layers: 3
+  min_size: 640
+  max_size: 640
+  image_mean: [0.485, 0.456, 0.406]
+  image_std: [0.229, 0.224, 0.225]
+  box_detections_per_image: 100
+  box_score_threshold: 0.0
+  box_nms_threshold: 0.5
+  batch_norm_policy: freeze_statistics
+
+runtime:
+  device: cuda
+  amp: true
+  amp_dtype: float16
+  batch_size: 2
+  gradient_accumulation_steps: 2
+  num_workers: 6
+  pin_memory: true
+  persistent_workers: false
+  validation_persistent_workers: false
+  deterministic: true
+  deterministic_warn_only: true
+  allow_tf32: false
+
+training:
+  max_epochs: 30
+  optimizer:
+    name: sgd
+    learning_rate: 0.005
+    momentum: 0.9
+    weight_decay: 0.0005
+    gradient_clip_norm: 10.0
+    nesterov: false
+  scheduler:
+    name: reduce_on_plateau
+    mode: max
+    factor: 0.1
+    patience: 2
+    threshold: 0.001
+    min_learning_rate: 0.000001
+  early_stopping:
+    metric: val_map_50_95
+    mode: max
+    patience: 5
+    min_delta: 0.001
+    min_epochs: 8
+  log_every_batches: 100
+
+evaluation:
+  coco_minimum_score: 0.0
+  score_threshold: 0.25
+  match_iou_threshold: 0.5
+  max_detections: 100
+
+benchmark:
+  epochs: 3
+  require_complete_dataset: true
+
+smoke:
+  max_train_batches: 2
+  max_val_batches: 2
+  use_pretrained_weights: false
+
+profiling:
+  batch_size: 1
+  num_workers: 0
+  persistent_workers: false
+  warmup_batches: 10
+  timed_batches: 100
+  profile_flops: true
+
+outputs:
+  logs_dir: results/logs
+  checkpoints_dir: results/checkpoints
+  tables_dir: results/tables
+  figures_dir: results/figures
+  smoke_run_name: faster_rcnn_rsna_seed314_smoke
+  benchmark_run_name: faster_rcnn_rsna_seed314_benchmark
+  train_run_name: faster_rcnn_rsna_seed314_full
+  resolved_config_path: resolved_config.json
+  epoch_csv_path: epochs.csv
+  epoch_jsonl_path: epochs.jsonl
+  summary_path: summary.json
+  benchmark_estimate_path: benchmark_estimate.json
+  best_checkpoint_path: results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt
+  last_checkpoint_path: results/checkpoints/faster_rcnn_rsna_seed314_full/last_state.pt
+  benchmark_timing_checkpoints_dir: results/checkpoints/faster_rcnn_rsna_seed314_benchmark_timing
+  validation_table_path: results/tables/seeds/faster_rcnn_seed314_validation.csv
+  compute_table_path: results/tables/seeds/faster_rcnn_seed314_compute.csv
+  training_curves_path: results/figures/seeds/faster_rcnn_seed314_training_curves.png

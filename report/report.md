@@ -180,7 +180,7 @@ architecture-only interpretation.
 ### 4.2 Unified evaluation
 
 Training and checkpoint selection use only train and validation data. Once all
-six validation-selected checkpoints are frozen, one adapter-to-metric harness
+ten validation-selected checkpoints are frozen, one adapter-to-metric harness
 opens the held-out 750-image test set. Both frameworks emit original-image
 `xyxy` boxes, canonical category IDs, and scores. The common evaluator applies:
 
@@ -192,18 +192,25 @@ opens the held-out 750-image test set. Both frameworks emit original-image
 
 Conditional IoU and Dice do not penalize missed findings and must be read with
 recall. Framework-native validation mAP is used only to choose checkpoints.
-All reported summary values are arithmetic mean ± sample standard deviation
-over three seeds unless stated otherwise.
+The clean headline and compute summaries use all five predeclared seeds unless
+an endpoint is mathematically undefined. Specifically, seed 271 contributes to
+every YOLO11s metric except matched-only IoU and Dice because it produced no
+fixed-threshold true positive; those two descriptive YOLO11s summaries use the
+four defined seeds. The validation-threshold, precision-recall, FROC, and Pareto
+artifacts remain explicitly scoped to the original three seeds, while
+robustness and explainability remain scoped to seed 17.
 
 The fixed 0.25 operating point is retained as the original Phase 5 protocol
-sensitivity result, not as the final deployment-threshold choice. For the
-authoritative single-threshold precision, recall, and F1 comparison, the same
-0.01--0.99 grid is applied to validation predictions and maximum mean
-validation F1 selects 0.69 for Faster R-CNN and 0.05 for YOLO11s; each frozen
-threshold is then applied once to the test bundles. The complete test sweep is
-descriptive only. Official COCO precision-recall curves and a free-response ROC
-(FROC) reparameterization describe the held-out frontier without choosing a
-deployment threshold from test results.
+sensitivity result, not as a deployment-threshold choice. Within the frozen
+three-seed Batch 14 analysis, the validation-selected single-threshold
+comparison applies the same 0.01--0.99 grid to validation predictions and
+maximum mean validation F1 selects 0.69 for Faster R-CNN and 0.05 for YOLO11s;
+each frozen threshold is then applied once to the original three test bundles.
+This was not reselected or reevaluated as an n=5 threshold analysis: seed 271's
+maximum test score of 0.0412735 yields zero detections even at 0.05. The
+complete test sweep is descriptive only. Official COCO precision-recall curves
+and a free-response ROC (FROC) reparameterization describe the frozen n=3
+held-out frontier without choosing a deployment threshold from test results.
 
 ### 4.3 Compute, robustness, explainability, and inference
 
@@ -239,6 +246,10 @@ difference as the effect. Holm correction is applied across the seven clean
 endpoints and, for corruption, separately within each metric/estimand family
 across conditions. The former image-level intervals, p-values, and jackknife
 Cohen's d are superseded and retained only in explicitly named audit archives.
+The five complete detector pairs are used for precision, recall, F1, and AP.
+Conditional IoU and Dice use the four complete pairs with seed IDs 17, 42, 137,
+and 314; this endpoint-specific eligibility changes only cross-seed reduction,
+not patient grouping, bootstrap cluster draws, or cluster-level label swaps.
 
 ## 5. Baseline Faster R-CNN Implementation
 
@@ -305,53 +316,73 @@ final validation evaluator.
 ## 7. Quantitative Performance Comparison
 
 The common evaluator processed 750 held-out images and 268 boxes for each of
-the six frozen checkpoints. Tables 4a and 4b are rounded presentations of
+the ten frozen checkpoints. Tables 4a and 4b are rounded presentations of
 [`detector_comparison.csv`](../results/tables/detector_comparison.csv); the
-six run-level records remain in
+ten run-level records remain in
 [`detector_comparison_per_seed.csv`](../results/tables/detector_comparison_per_seed.csv).
 
-**Table 4a. Original score-0.25 held-out predictive metrics, mean ± sample SD over three seeds.**
+**Table 4a. Original score-0.25 held-out predictive metrics, mean ± sample SD with endpoint-specific seed counts.**
 
-| Predictive metric | Faster R-CNN | YOLO11s |
+| Predictive metric | Faster R-CNN | n | YOLO11s | n |
+|---|---:|---:|---:|---:|
+| Precision | 0.1959 ± 0.0552 | 5 | **0.2983 ± 0.1691** | 5 |
+| Recall | **0.5799 ± 0.0911** | 5 | 0.0955 ± 0.0607 | 5 |
+| F1 | **0.2845 ± 0.0528** | 5 | 0.1427 ± 0.0868 | 5 |
+| Conditional matched-box IoU | 0.6749 ± 0.0065 | 5 | **0.6985 ± 0.0157** | **4** |
+| Conditional matched-box Dice | 0.8010 ± 0.0049 | 5 | **0.8181 ± 0.0111** | **4** |
+| mAP@0.5 | **0.3042 ± 0.0189** | 5 | 0.1626 ± 0.0162 | 5 |
+| mAP@0.5:0.95 | **0.0995 ± 0.0067** | 5 | 0.0542 ± 0.0060 | 5 |
+
+The asymmetric n is substantive, not a footnote: YOLO11s seed 271 is retained
+in every all-attempt metric but has undefined matched-only IoU and Dice because
+it produced no true positives at the frozen operating point.
+
+**Table 4b. Compute metrics, mean ± sample SD over all five seeds (n=5 per detector).**
+
+| Compute metric | Faster R-CNN (n=5) | YOLO11s (n=5) |
 |---|---:|---:|
-| Precision | 0.1626 ± 0.0439 | **0.3730 ± 0.0395** |
-| Recall | **0.6381 ± 0.0526** | 0.1356 ± 0.0094 |
-| F1 | **0.2558 ± 0.0493** | 0.1981 ± 0.0048 |
-| Conditional matched-box IoU | 0.6732 ± 0.0084 | **0.6971 ± 0.0189** |
-| Conditional matched-box Dice | 0.7997 ± 0.0065 | **0.8172 ± 0.0134** |
-| mAP@0.5 | **0.3084 ± 0.0123** | 0.1643 ± 0.0226 |
-| mAP@0.5:0.95 | **0.1023 ± 0.0036** | 0.0549 ± 0.0080 |
-
-**Table 4b. Compute metrics, mean ± sample SD over three seeds.**
-
-| Compute metric | Faster R-CNN | YOLO11s |
-|---|---:|---:|
-| FPS, batch 1 | 17.42 ± 5.69 | **52.94 ± 10.65** |
-| Mean inference time | 62.72 ± 24.58 ms | **19.36 ± 3.49 ms** |
+| FPS, batch 1 | 20.28 ± 5.62 | **60.29 ± 12.62** |
+| Mean inference time | 53.93 ± 21.15 ms | **17.23 ± 3.83 ms** |
 | Total parameters | 43.26 M | **9.43 M** |
 | Estimated GFLOPs/image | 450.76 | **21.42** |
-| Peak training memory | 1,556.92 ± 0.27 MiB | **1,148.16 ± 0.00 MiB** |
-| Training time | 6,211.41 ± 2,566.64 s | **1,833.21 ± 214.60 s** |
+| Peak training memory | 1,556.89 ± 0.26 MiB | **1,148.16 ± 0.00 MiB** |
+| Training time | 6,661.01 ± 2,127.72 s | **1,544.75 ± 425.40 s** |
 
 Table 4a retains the original fixed-threshold comparison. Faster R-CNN has
-about 1.86 times YOLO11s' mean mAP@0.5:0.95 and, at score 0.25, a 0.5025
-absolute recall advantage. YOLO11s' 0.2105 higher precision at that same
-nominal threshold is not a general precision-recall advantage. The official
-AP@0.5 curve gives Faster R-CNN higher mean precision at 96 of 101 recall
+about 1.84 times YOLO11s' mean mAP@0.5:0.95 and, at score 0.25, a 0.4843
+absolute recall advantage. YOLO11s' 0.1024 higher precision at that same
+nominal threshold is not a general precision-recall advantage. The frozen n=3
+official AP@0.5 curve gives Faster R-CNN higher mean precision at 96 of 101 recall
 positions, five ties, and no YOLO11s-higher positions. YOLO's slightly higher
 matched-box IoU and Dice at 0.25 describe only matched true positives and do
 not offset its lower coverage.
 
-**Table 4c. Validation-selected thresholds and one-shot test operating points.**
+The frozen diagnostic in
+[`yolo_seed_stability.csv`](../results/tables/yolo_seed_stability.csv) makes
+seed 271's score-scale instability concrete. Its losses decreased and
+validation mAP converged normally, and its test AP@0.5/AP@0.5:0.95 values were
+0.1587217/0.0555799, within the sibling-seed range. Nevertheless, its maximum
+test confidence was only 0.0412735, so it emitted zero detections at score 0.25
+and contributed observed precision/recall/F1 values of zero. This is a legitimate
+all-attempt outcome and a seed-specific confidence/output-score degeneracy, not
+a numerically failed run. Replacing it after observing the outcome would hide
+recipe-level instability; coercing its undefined conditional localization to
+zero would instead change the matched-only estimand.
+
+**Table 4c. Frozen n=3 validation-selected thresholds and one-shot test operating points.**
 
 | Detector | Frozen threshold | Test precision | Test recall | Test F1 |
 |---|---:|---:|---:|---:|
 | Faster R-CNN | 0.69 | **0.3543 ± 0.0746** | **0.3607 ± 0.0608** | **0.3492 ± 0.0135** |
 | YOLO11s | 0.05 | 0.3096 ± 0.0134 | 0.2438 ± 0.0302 | 0.2718 ± 0.0181 |
 
-Table 4c contains the authoritative single-threshold precision, recall, and F1
-results. The defensible cross-system trade-off is therefore detection quality
-versus computational cost: YOLO11s provides roughly three times the measured
+Table 4c contains the validation-selected single-threshold precision, recall,
+and F1 results for its original three-seed scope; threshold selection, FROC,
+and Pareto analysis were not rerun at five seeds. Seed 271 would contribute
+zero detections even at the historical YOLO threshold 0.05, so Table 4c must
+not be generalized to all five attempts. The defensible cross-system
+trade-off is therefore detection quality versus computational cost: YOLO11s
+provides roughly three times the measured
 throughput, 78% fewer parameters, and about 21 times fewer estimated registered
 operations, while Faster R-CNN has the stronger precision-recall frontier. The
 accuracy-efficiency [`Pareto frontier`](../results/figures/pareto_frontier.png)
@@ -443,29 +474,38 @@ latent candidate; they do not explain an emitted detection.
 
 ## 10. Statistical Analysis
 
-Table 7 reports the clean three-seed paired analysis from
+Table 7 reports the clean all-attempt paired analysis from
 [`statistical_clean_comparison.csv`](../results/tables/statistical_clean_comparison.csv).
 Differences are Faster R-CNN minus YOLO11s. Intervals are pointwise 95%
 bootstrap CIs; family-wise claims use the Holm-adjusted p-value.
 
-**Table 7. Primary patient-cluster clean paired statistical comparison.**
+**Table 7. Primary patient-cluster clean paired statistical comparison, with endpoint-specific n shown explicitly.**
 
-| Metric | Faster R-CNN | YOLO11s | Difference/effect [95% CI] | Holm p |
-|---|---:|---:|---:|---:|
-| Precision | 0.1626 | 0.3730 | -0.2105 [-0.3027, -0.1047] | 0.0014 |
-| Recall | 0.6381 | 0.1356 | 0.5025 [0.4311, 0.5712] | 0.0014 |
-| F1 | 0.2558 | 0.1981 | 0.0577 [-0.0116, 0.1448] | 0.0972 |
-| Conditional IoU | 0.6732 | 0.6971 | -0.0239 [-0.0560, 0.0038] | 0.0972 |
-| Conditional Dice | 0.7997 | 0.8172 | -0.0174 [-0.0408, 0.0024] | 0.0972 |
-| mAP@0.5 | 0.3084 | 0.1643 | 0.1441 [0.0947, 0.1914] | 0.0170 |
-| mAP@0.5:0.95 | 0.1023 | 0.0549 | 0.0474 [0.0300, 0.0649] | 0.0328 |
+| Metric | Paired seed n | Faster R-CNN | YOLO11s | Difference/effect [95% CI] | Holm p |
+|---|---:|---:|---:|---:|---:|
+| Precision | **5** | 0.1959 | 0.2983 | -0.1024 [-0.2529, 0.0802] | **0.0019996001** |
+| Recall | **5** | 0.5799 | 0.0955 | 0.4843 [0.4065, 0.5555] | **0.0013997201** |
+| F1 | **5** | 0.2845 | 0.1427 | 0.1419 [0.0338, 0.2526] | **0.0013997201** |
+| Conditional IoU | **4** | 0.6746 | 0.6985 | -0.0239 [-0.0567, 0.0074] | 0.1063787243 |
+| Conditional Dice | **4** | 0.8007 | 0.8181 | -0.0173 [-0.0410, 0.0050] | 0.1063787243 |
+| mAP@0.5 | **5** | 0.3042 | 0.1626 | 0.1416 [0.0997, 0.1856] | **0.0207958408** |
+| mAP@0.5:0.95 | **5** | 0.0995 | 0.0542 | 0.0453 [0.0325, 0.0595] | **0.0341931614** |
 
-After correction, the data retain evidence for Faster R-CNN's recall and both
-AP advantages, and for YOLO11s' precision advantage. F1 and conditional
-localization do not cross the 0.05 Holm threshold. Precision, recall, and F1 in
-this table retain the original score-0.25 definition; the significant YOLO11s
-precision difference is therefore a fixed-threshold score-scale/selectivity
-effect, not evidence of a superior precision-recall frontier. The reported
+Five of seven endpoints cross the 0.05 Holm threshold: precision
+(`p_Holm=0.0019996001`), recall and F1 (both `0.0013997201`), mAP@0.5
+(`0.0207958408`), and mAP@0.5:0.95 (`0.0341931614`). Conditional IoU and Dice
+do not (`0.1063787243` each). Thus the corrected patient-cluster pattern
+changed from the archived n=3 result of four significant endpoints to five of
+seven because F1 became significant. Precision, recall, and F1 retain the original score-0.25
+definition; the significant YOLO11s precision difference is therefore a
+fixed-threshold score-scale/selectivity result that includes seed 271's
+observed zero output, not evidence of a superior precision-recall frontier.
+
+The ordinary endpoints use all five paired seeds 17, 42, 137, 271, and 314.
+Conditional localization uses the four complete pairs 17, 42, 137, and 314;
+seed 271 is excluded only from those two endpoints because YOLO11s had no true
+positive from which matched-box IoU or Dice could be defined. Patient IDs,
+cluster resampling, and patient-level label swaps are unchanged. The reported
 effect is the paired raw aggregate difference with its patient-cluster
 bootstrap interval; the former image-level jackknife Cohen's d is audit-only.
 
@@ -490,23 +530,28 @@ remain nested within images.
 
 ### 11.1 Accuracy and operating-point behavior
 
-Faster R-CNN has the stronger precision-recall frontier, not merely a different
-operating regime. Its mean precision is higher at 96 of 101 official AP@0.5
-recall positions, with five ties and no YOLO11s-higher positions. YOLO11s'
+The frozen n=3 analysis gives Faster R-CNN the stronger precision-recall
+frontier, not merely a different operating regime. Its mean precision is higher
+at 96 of 101 official AP@0.5 recall positions, with five ties and no
+YOLO11s-higher positions. YOLO11s'
 apparent precision advantage at the original shared threshold of 0.25 is a
 score-scale/selectivity artifact: the same nominal cutoff retains very
 different fractions of the two score distributions. At thresholds selected by
 maximum mean validation F1 and applied once to test, Faster R-CNN is higher in
-precision, recall, and F1. Its AP advantages and its original fixed-threshold
-recall advantage also survive the primary patient-cluster paired analysis.
+precision, recall, and F1 within the frozen n=3 threshold-analysis scope. Its AP,
+original fixed-threshold recall, and fixed-threshold F1 advantages also survive
+the primary patient-cluster paired analysis at n=5.
 YOLO11s' slightly higher conditional IoU and Dice at 0.25 exclude missed
-findings, and their patient-cluster comparisons are inconclusive.
+findings, use four complete seed pairs, and remain statistically inconclusive.
+The seed-271 contrast between ordinary AP and zero fixed-threshold output shows
+that ranking quality can remain plausible while confidence-scale stability
+fails under the disclosed augmentation-disabled recipe.
 
 The defensible trade-off is detection quality versus implementation-specific
 computational cost. The [`Pareto frontier`](../results/figures/pareto_frontier.png)
 shows higher Faster R-CNN AP and validation-selected recall opposed by higher
 YOLO11s throughput and lower latency, parameter count, and registered-operation
-estimate; neither three-seed cloud strictly dominates when both axes matter.
+estimate; neither frozen n=3 seed cloud strictly dominates when both axes matter.
 The [`FROC curves`](../results/figures/froc_curves.png) independently show
 higher Faster R-CNN sensitivity at every reported FP/image budget. Absolute
 performance remains modest: at the validation-selected thresholds, mean test
@@ -538,14 +583,14 @@ preference on interpretability grounds.
 For **high-sensitivity retrospective screening or server-side case
 prioritization**, Faster R-CNN is preferred. Its measured recall, AP, and
 corruption-grid raw performance are stronger, and its FROC sensitivity is
-higher at every reported false-positive budget. Although 17.42 FPS is slower
+higher at every reported false-positive budget. Although 20.28 FPS is slower
 than YOLO, it still processes images far faster than a human reading workflow
 on the tested GPU. The cost is more parameters, registered operations, and
 latency.
 
 For **resource-constrained point-of-care assistance in which a human reviews
 every image**, YOLO11s is conditionally preferred. Its 9.43 M parameters,
-21.42 estimated GFLOPs, and 52.94 FPS make this implementation easier to place
+21.42 estimated GFLOPs, and 60.29 FPS make this implementation easier to place
 on constrained hardware. This recommendation rests on compute, not on a
 precision-recall frontier advantage: at the validation-selected threshold its
 mean test recall is 0.244, and it has lower sensitivity at every reported FROC
@@ -570,15 +615,17 @@ transfer, viewer integration, calibration, and human response also matter.
 ### 11.4 Limitations and scope of claims
 
 The benchmark uses one historical, single-institution dataset, one foreground
-category, a fixed 5,000-study subset, and only three training seeds. Robustness
+category, a fixed 5,000-study subset, and only five training seeds. Robustness
 and explainability use one seed-17 checkpoint per detector on a 300-image,
 111-box subset. Batch 13 corrected the identified within-patient independence
 error by resampling and permuting all exams from each patient together; the
-remaining 323/183 patient-group counts and three training seeds still limit
-uncertainty estimation. Training precision, learning rate, normalization, and
-scheduler differ where needed for stable YOLO learning; the augmentation
-policy is controlled but may understate YOLO's conventional augmentation-rich
-performance. Compute measurements compare these two documented
+remaining 323/183 patient-group counts, five ordinary-endpoint seeds, and four
+complete conditional-localization pairs still limit uncertainty estimation.
+YOLO11s seed 271 further exposes confidence/output-score instability despite
+normal loss and validation-AP convergence. Training precision, learning rate,
+normalization, and scheduler differ where needed for stable YOLO learning; the
+augmentation policy is controlled but may understate YOLO's conventional
+augmentation-rich performance. Compute measurements compare these two documented
 implementations on one laptop, not detector architectures in general. Common
 corruptions act on converted PNGs and are not scanner or site-shift models.
 Bounding boxes are coarse lesion surrogates, Grad-CAM is layer- and
@@ -597,16 +644,20 @@ either model is ready to enter such a process.
 ## 12. Conclusions and Future Work
 
 Under the frozen data and evaluation protocol, Faster R-CNN is the stronger
-accuracy-oriented detector: it has the stronger precision-recall frontier,
-higher sensitivity at every reported FROC budget, and higher recall and AP at
+accuracy-oriented detector: it has the stronger precision-recall frontier and
+higher sensitivity at every reported FROC budget within the frozen n=3
+research-track analyses, and higher recall and AP at
 the original operating point with multiplicity-corrected patient-cluster
-evidence. Its raw mAP point estimate is also higher across every tested digital
+evidence; fixed-threshold F1 also becomes significant in the n=5 analysis. Its
+raw mAP point estimate is also higher across every tested digital
 corruption condition, while its severe-darkness retention advantage survives
 grid-wide correction. YOLO11s is the stronger efficiency-oriented
 implementation: it is roughly three times faster, uses about one fifth of the
 parameters and one twenty-first of the estimated registered operations. Its
 apparent precision advantage at the original 0.25 threshold is a
-score-scale/selectivity artifact, not a frontier advantage. Neither model is
+score-scale/selectivity artifact, not a frontier advantage, and seed 271 shows
+that this operating-point behavior can become degenerate even when AP remains
+plausible. Neither model is
 reliably lesion-focused under the selected Grad-CAM protocol, and neither
 supports clinical use.
 

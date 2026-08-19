@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 experiment_id: rsna-phase8-paired-statistical-analysis
 seed: 20260811
 
@@ -14,6 +14,18 @@ analysis:
   detector_a: faster_rcnn
   detector_b: yolo11s
   metrics: [precision, recall, f1, iou, dice, map_50, map_50_95]
+  clean_seed_eligibility:
+    all_attempt_metrics: [precision, recall, f1, map_50, map_50_95]
+    all_attempt_seeds: [17, 42, 137, 271, 314]
+    paired_complete_case_metrics: [iou, dice]
+    paired_complete_case_seeds: [17, 42, 137, 314]
+    expected_undefined:
+      - detector: yolo11s
+        seed: 271
+        metrics: [iou, dice]
+        true_positives: 0
+        prediction_count: 0
+        reason: no_detections_at_frozen_score_threshold
   confidence_level: 0.95
   bootstrap_resamples: 2000
   permutation_resamples: 5000
@@ -36,3 +48,4 @@ outputs:
   image_level_summary_archive: results/logs/phase8_statistics/summary_image_level_archive.json
   image_level_clean_table_archive: results/tables/statistical_clean_comparison_image_level_archive.csv
   image_level_robustness_table_archive: results/tables/statistical_robustness_comparison_image_level_archive.csv
+  patient_cluster_clean_n3_archive: results/tables/statistical_clean_comparison_n3_archive.csv

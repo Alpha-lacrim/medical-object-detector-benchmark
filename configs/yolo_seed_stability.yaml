@@ -1,0 +1,15 @@
+schema_version: 1
+analysis_id: rsna-yolo11s-five-seed-stability-diagnostic
+detector: yolo11s
+expected_seeds: [17, 42, 137, 271, 314]
+expected_confidence_degeneracy_seeds: [271]
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+  threshold_selection_summary: results/logs/phase14_threshold_selection/summary.json
+
+outputs:
+  table: results/tables/yolo_seed_stability.csv
+  summary_json: results/logs/phase16_yolo_seed_stability/summary.json

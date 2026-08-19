@@ -13,21 +13,36 @@ clinical device or diagnostic system.
 
 ## Headline result
 
-Across seeds 17, 42, and 137, Faster R-CNN achieves mAP@0.5:0.95 of
-0.1023 ± 0.0036 versus 0.0549 ± 0.0080 for YOLO11s. At thresholds selected
-by maximum mean validation F1, final test precision/recall/F1 is
+Across seeds 17, 42, 137, 271, and 314, Faster R-CNN achieves
+mAP@0.5:0.95 of 0.0995 ± 0.0067 versus 0.0542 ± 0.0060 for YOLO11s.
+At thresholds selected by maximum mean validation F1 in the frozen original
+n=3 analysis, final test precision/recall/F1 is
 0.3543/0.3607/0.3492 versus 0.3096/0.2438/0.2718. Faster R-CNN has higher
 precision at 96 of 101 official AP@0.5 recall positions; YOLO11s' apparent
 precision advantage at the original shared score threshold of 0.25 is a
 score-scale/selectivity artifact, not a frontier advantage. The primary
-patient-cluster analysis retains Holm-corrected evidence for Faster R-CNN's
-original fixed-threshold recall and both AP advantages.
+patient-cluster analysis finds five of seven Holm-significant endpoints:
+precision, recall, F1, mAP@0.5, and mAP@0.5:0.95. This changes the corrected
+n=3 pattern from four of seven because F1 becomes significant at n=5.
+Their Holm p-values are 0.0019996001, 0.0013997201, 0.0013997201,
+0.0207958408, and 0.0341931614, respectively; conditional IoU and Dice remain
+non-significant at 0.1063787243 each.
+
+YOLO11s seed 271 is retained as a legitimate all-attempt result. Training
+converged normally and test AP@0.5/AP@0.5:0.95 was 0.1587217/0.0555799, but its
+maximum test confidence was only 0.0412735, so it emitted no detection at the
+frozen score threshold 0.25 and contributed precision/recall/F1 of zero.
+Matched-only IoU and Dice are therefore undefined for that run, not zero:
+descriptive localization uses Faster R-CNN n=5 versus YOLO11s n=4, and paired
+localization inference uses the four complete seed pairs 17, 42, 137, and 314.
+All other clean endpoints retain all five attempted seeds.
 
 The defensible trade-off is detection quality versus implementation-specific
-computational cost. YOLO11s delivers 52.94 ± 10.65 FPS versus
-17.42 ± 5.69, with 9.43 M parameters versus 43.26 M, while Faster R-CNN has
-higher sensitivity at every reported FROC false-positive budget. Neither
-detector strictly dominates the accuracy-efficiency Pareto panels.
+computational cost. Across all five seeds, YOLO11s delivers
+60.29 ± 12.62 FPS versus 20.28 ± 5.62, with 9.43 M parameters versus
+43.26 M. The frozen n=3 FROC analysis gives Faster R-CNN higher sensitivity at
+every reported false-positive budget, and neither detector strictly dominates
+the frozen n=3 accuracy-efficiency Pareto panels.
 
 On the seed-17 300-image common-corruption sample, mean mAP@0.5:0.95 retention
 is 0.7638 for Faster R-CNN and 0.7091 for YOLO11s. Both detectors have weak
@@ -166,38 +181,66 @@ If reporting was interrupted after training, use:
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode finalize
 ```
 
-## 5. Train the additional seeds and run the unified test evaluator
+## 5. Train the additional seeds and run the five-seed unified test evaluator
 
 The additional configs change only seed and artifact identity. First derive
 seed-specific timing approvals from the accepted seed-17 Faster R-CNN gate,
-then train seeds 42 and 137 for both detectors:
+then train seeds 42, 137, 271, and 314 for both detectors. These are the exact
+commands for every non-primary run:
 
 ```powershell
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode seed-gates
 
 & $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed42.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed42_benchmark/benchmark_estimate.json
 & $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed137.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed137_benchmark/benchmark_estimate.json
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed271.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed271_benchmark/benchmark_estimate.json
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed314.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed314_benchmark/benchmark_estimate.json
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed42.yaml --mode train
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed137.yaml --mode train
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed271.yaml --mode train
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed314.yaml --mode train
 
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode preflight
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode evaluate
 ```
 
-Only the final two commands open the held-out test annotation. Both detector
+Only the final `evaluate` command opens the held-out test annotation. Both detector
 adapters feed one pycocotools/operating-point evaluator; framework-native mAP is
 not used in the comparison. The evaluate command regenerates:
 
 - `results/tables/detector_comparison.csv` (report Tables 4a and 4b);
 - `results/tables/detector_comparison_mean_std.csv`;
 - `results/tables/detector_comparison_per_seed.csv`; and
-- `results/logs/phase5_evaluation/summary.json` plus the six frozen prediction
+- `results/logs/phase5_evaluation/summary.json` plus the ten frozen prediction
   bundles used by statistics.
+
+The n=5 evaluator retains null matched-only IoU/Dice only when a run has zero
+true positives. It reports the affected seed and metric-specific n in every
+comparison table and in the summary; it never coerces undefined localization
+to zero. Regenerate the seed-271 convergence and score-scale diagnostic from
+the frozen evidence with:
+
+```powershell
+& $benchmarkPython -m src.analyze_yolo_seed_stability --config configs/yolo_seed_stability.yaml
+```
+
+This writes `results/tables/yolo_seed_stability.csv` and
+`results/logs/phase16_yolo_seed_stability/summary.json`. The superseded clean
+n=3 evidence remains available at:
+
+- `results/tables/detector_comparison_n3_archive.csv`;
+- `results/tables/detector_comparison_mean_std_n3_archive.csv`;
+- `results/tables/detector_comparison_per_seed_n3_archive.csv`;
+- `results/tables/statistical_clean_comparison_n3_archive.csv`; and
+- `results/logs/phase5_evaluation/summary_n3_archive.json`.
 
 ### 5a. Reprocess the frozen bundles across confidence thresholds
 
-The research-track threshold analysis is CPU-only and reads the six completed
-Phase 5 bundles. It does not load a checkpoint, train a model, or run inference.
+The research-track threshold analysis is CPU-only and remains frozen to the six
+original n=3 Phase 5 bundles for seeds 17, 42, and 137. Its config reads
+`configs/evaluation_n3_archive.yaml` and the archived n=3 Phase 5 summary; it is
+not an n=5 analysis. It does not load a checkpoint, train a model, or run
+inference.
 Preflight verifies every bundle and annotation hash before the run exposes the
 official pycocotools precision-recall tensors and evaluates 99 common confidence
 thresholds through the same unified matcher:
@@ -218,9 +261,10 @@ The run regenerates `results/tables/threshold_sweep*.csv`,
 ### 5b. Select final operating thresholds on validation
 
 The original training runs retained validation aggregates but not the raw scored
-detections needed for a threshold sweep. Materialize those records once from the
-six immutable best checkpoints on the 750-image validation split, then perform
-selection and the final test application offline:
+detections needed for a threshold sweep. The frozen n=3 workflow materializes
+those records from the six immutable best checkpoints for seeds 17, 42, and 137
+on the 750-image validation split, then performs selection and the final test
+application offline:
 
 ```powershell
 & $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode preflight
@@ -241,24 +285,27 @@ the frozen test bundles. It regenerates `validation_threshold_sweep*.csv`,
 This CPU-only step reads the unchanged Batch 10 per-seed table and describes the
 full test sweep as sensitivity versus false positives per image. It does not
 select a deployment threshold or perform training, checkpoint loading, or
-inference:
+inference. Its inputs and outputs remain n=3-only:
 
 ```powershell
-& $benchmarkPython -m src.plot_froc_curves --config configs/froc.yaml --mode preflight
-& $benchmarkPython -m src.plot_froc_curves --config configs/froc.yaml --mode run
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc_n3_archive.yaml --mode preflight
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc_n3_archive.yaml --mode run
 ```
 
-The run regenerates `results/figures/froc_curves.png`,
-`results/tables/froc_operating_points.csv`, and the provenance summary under
-`results/logs/phase14_froc/`. Definitions and interpretation are in
-`docs/FROC_ANALYSIS.md`.
+The archive-safe run writes
+`results/figures/froc_curves_n3_archive_reproduction.png`,
+`results/tables/froc_operating_points_n3_archive_reproduction.csv`, and a
+summary under `results/logs/phase14_froc_n3_archive_reproduction/`; it does not
+overwrite the frozen primary FROC artifacts. Definitions and interpretation
+are in `docs/FROC_ANALYSIS.md`.
 
 ### 5d. Regenerate the accuracy-efficiency Pareto figure
 
-This CPU-only step joins the frozen Phase 5 accuracy rows, all six seed-specific
-compute tables, and the validation-selected, test-evaluated operating points. It
-performs no training or inference. The recall panels use the thresholds selected
-in section 5b, while the mAP panels remain threshold-independent:
+This CPU-only step joins the archived n=3 Phase 5 accuracy rows, all six original
+seed-specific compute tables, and the validation-selected, test-evaluated
+operating points. It performs no training or inference. The recall panels use
+the thresholds selected in section 5b, while the mAP panels remain
+threshold-independent. It must not be interpreted as a five-seed Pareto result:
 
 ```powershell
 & $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto.yaml --mode preflight
@@ -293,7 +340,9 @@ This regenerates the report Section 8 evidence:
 
 Preflight binds the analysis to the completed robustness sample and primary
 checkpoint hashes. The smoke pass is bounded to two positive images per model;
-the full run covers all 111 boxes and the predeclared qualitative cases.
+the full run covers all 111 boxes and the predeclared qualitative cases. This
+analysis remains explicitly scoped to the seed-17 checkpoints and was not
+extended to five seeds.
 
 ```powershell
 & $benchmarkPython -m src.explainability.run_explainability --config configs/explainability.yaml --mode preflight
@@ -314,30 +363,47 @@ This regenerates the report Section 9 evidence:
 
 ## 8. Run the paired statistical analysis
 
-This CPU phase reads the six frozen clean bundles, all 72 robustness bundles,
-and the committed Batch 1 image-to-patient mapping. It does not rerun model
-inference.
+The current clean-only CPU refresh reads the ten frozen clean bundles and the
+committed Batch 1 image-to-patient mapping. It does not rerun model inference,
+robustness, or explainability. The pre-existing 72 robustness bundles and
+seed-17 robustness table remain frozen and are verified by hash rather than
+recomputed.
 
 ```powershell
 & $benchmarkPython -m src.stats.run_statistics --config configs/statistics.yaml --mode preflight
-& $benchmarkPython -m src.stats.run_statistics --config configs/statistics.yaml --mode run
+& $benchmarkPython -m src.stats.run_statistics --config configs/statistics.yaml --mode run --scope clean
 ```
 
 This regenerates:
 
 - `results/tables/statistical_clean_comparison.csv` (report Table 7);
-- `results/tables/statistical_robustness_comparison.csv` (the report Section 10
-  corruption results); and
 - `results/logs/phase8_statistics/summary.json`.
+
+It preserves `results/tables/statistical_robustness_comparison.csv` and the
+seed-17 corruption inference already recorded in the summary. A deliberate
+full from-scratch reproduction after Section 6 can instead run the same command
+without `--scope clean`; that was not done for the five-seed clean refresh.
 
 The configuration fixes 2,000 paired patient-cluster bootstrap draws, 5,000
 paired patient-cluster detector-label permutations, 95% pointwise percentile
 intervals, raw paired-difference effects, and Holm correction. Every sampled or
 swapped NIH patient group carries all of its observed images together.
 Aggregate AP is reconstructed at every draw rather than approximated as a mean
-of per-image AP. The first corrected run also preserves the superseded
+of per-image AP. Precision, recall, F1, and both AP endpoints use all five
+paired seeds. Conditional IoU and Dice use the four complete pairs 17, 42, 137,
+and 314 because YOLO11s seed 271 has no fixed-threshold true positive; the
+patient-cluster bootstrap and label-swap machinery itself is unchanged. The
+first corrected run also preserves the superseded
 image-level CSVs and summary under `*_image_level_archive.*` paths for audit;
-reruns never replace those archives.
+reruns never replace those archives. The clean-only refresh also preserves the
+corrected n=3 clean table at
+`results/tables/statistical_clean_comparison_n3_archive.csv`.
+
+Any derivative paper draft must carry forward both the endpoint-specific n and
+the seed-271 stability result prominently: n=5 for ordinary clean endpoints,
+n=4 complete pairs for conditional IoU/Dice inference, and no substitution of
+a replacement seed. Threshold selection, FROC, and Pareto remain n=3-only;
+robustness and explainability remain seed-17-only.
 
 ## Report artifact-to-command index
 
@@ -350,13 +416,15 @@ artifacts; the report assembly step does not recompute values.
 | Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
 | Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
 | Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
-| Research-track PR/F1 figures | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
-| Validation-selected operating points | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
-| Research-track FROC figure | `froc_operating_points.csv`; `froc_curves.png` | offline `src.plot_froc_curves --mode run` in §5c |
-| Research-track Pareto figure | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
+| YOLO seed-stability diagnostic | `yolo_seed_stability.csv` | `src.analyze_yolo_seed_stability` in §5 |
+| Research-track PR/F1 figures (frozen n=3) | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
+| Validation-selected operating points (frozen n=3) | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
+| Research-track FROC figure (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
+| Research-track Pareto figure (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
-| Table 7 and corruption inference | `statistical_*.csv` | statistics `--mode run` in §8 |
+| Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
+| Frozen seed-17 corruption inference | `statistical_robustness_comparison.csv` | prior full-scope statistics `--mode run` after §6; not rerun for n=5 |
 
 ## Definition of Done audit
 
@@ -387,9 +455,11 @@ Every item in the benchmark's Definition of Done is satisfied:
   retrospective screening, constrained point-of-care assistance, and
   autonomous use.
 - [x] **Honest consolidated limitations.** `docs/LIMITATIONS.md` covers the
-  single dataset, three-seed headline scope, primary-seed 300-image/111-box
-  robustness and explainability scope, augmentation choice, detector
-  asymmetries, and RTX 4060 8 GB / 16 GB RAM constraints.
+  single dataset, five-seed clean headline scope with four complete conditional
+  localization pairs, seed-271 confidence/output-score instability,
+  primary-seed 300-image/111-box robustness and explainability scope,
+  augmentation choice, detector asymmetries, and RTX 4060 8 GB / 16 GB RAM
+  constraints.
 - [x] **Clean-checkout reproduction commands.** Sections 1–8 above provide the
   exact ordered commands and the artifact index maps every report table and
   figure to its generating command.

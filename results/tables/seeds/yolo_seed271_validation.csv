@@ -1,0 +1,2 @@
+run_id,seed,best_epoch,split,operating_point_score_threshold,operating_point_match_iou_threshold,coco_minimum_score,max_detections,image_count,target_count,operating_point_prediction_count,coco_prediction_count,true_positives,false_positives,false_negatives,precision,recall,f1,map_50,map_50_95
+yolo11s_rsna_seed271_full,271,7,validation,0.25,0.5,0.001,100,750,277,0,1090,0,0,277,0.0,0.0,0.0,0.2328602539259128,0.08905784987991953

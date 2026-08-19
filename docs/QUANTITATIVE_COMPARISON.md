@@ -4,11 +4,11 @@
 
 Phase 5 compares the selected validation-best checkpoint from each training seed
 on the untouched 750-image RSNA test split. The seed grid was fixed before the
-additional runs as 17, 42, and 137. Seeds 42 and 137 change only RNG state and
-artifact identity; detector-specific hyperparameters remain equal to the
-accepted Batch 2 and Batch 3 configs. Training and early stopping continue to
-use only train and validation data. `src/evaluate.py` is the first model entry
-point authorized to open `instances_test.json`.
+additional runs as 17, 42, 137, 271, and 314. The additional configs change
+only RNG state and artifact identity; detector-specific hyperparameters remain
+equal to the accepted Batch 2 and Batch 3 configs. Training and early stopping
+continue to use only train and validation data. `src/evaluate.py` is the first
+model entry point authorized to open `instances_test.json`.
 
 ## One prediction-to-metric path
 
@@ -132,77 +132,108 @@ separately measured latency/FPS gap—not that every paper using the label
 ## Across-seed summary
 
 All requested metrics are retained per seed. The publication table reports the
-arithmetic mean and sample standard deviation (`ddof=1`, `n=3`) across seeds.
-This describes training-seed variation; it is not a confidence interval and is
-not a substitute for Phase 8's paired patient-cluster resampling and testing.
+arithmetic mean and sample standard deviation (`ddof=1`) across the five
+predeclared attempts. AP, precision, recall, F1, and compute metrics use all
+five seeds for both detectors. Conditional matched-box IoU and Dice use every
+seed for which the metric is defined: Faster R-CNN `n=5`, YOLO11s `n=4`.
+YOLO11s seed 271 is retained in the per-seed table, but its conditional values
+are null because it emitted no score-0.25 detection; they are not coerced to
+zero. These summaries describe training-seed variation, not confidence
+intervals, and do not replace Phase 8's paired patient-cluster inference.
 
 ## Held-out results
 
 The common evaluator processed all 750 test images and 268 reference boxes for
-each of the six frozen checkpoints. Values below are mean ± sample standard
-deviation over seeds 17, 42, and 137.
+each of the ten frozen checkpoints. Values below are mean ± sample standard
+deviation over seeds 17, 42, 137, 271, and 314, except for the explicitly
+conditional YOLO11s localization cells.
 
-| Predictive metric | Faster R-CNN | YOLO11s |
+| Predictive metric | Faster R-CNN mean ± SD (n) | YOLO11s mean ± SD (n) |
 |---|---:|---:|
-| Precision | 0.1626 ± 0.0439 | **0.3730 ± 0.0395** |
-| Recall | **0.6381 ± 0.0526** | 0.1356 ± 0.0094 |
-| F1 | **0.2558 ± 0.0493** | 0.1981 ± 0.0048 |
-| Matched-box IoU | 0.6732 ± 0.0084 | **0.6971 ± 0.0189** |
-| Matched-box Dice | 0.7997 ± 0.0065 | **0.8172 ± 0.0134** |
-| mAP@0.5 | **0.3084 ± 0.0123** | 0.1643 ± 0.0226 |
-| mAP@0.5:0.95 | **0.1023 ± 0.0036** | 0.0549 ± 0.0080 |
+| Precision | 0.1959 ± 0.0552 (n=5) | **0.2983 ± 0.1691 (n=5)** |
+| Recall | **0.5799 ± 0.0911 (n=5)** | 0.0955 ± 0.0607 (n=5) |
+| F1 | **0.2845 ± 0.0528 (n=5)** | 0.1427 ± 0.0868 (n=5) |
+| Matched-box IoU | 0.6749 ± 0.0065 (**n=5**) | **0.6985 ± 0.0157 (n=4)** |
+| Matched-box Dice | 0.8010 ± 0.0049 (**n=5**) | **0.8181 ± 0.0111 (n=4)** |
+| mAP@0.5 | **0.3042 ± 0.0189 (n=5)** | 0.1626 ± 0.0162 (n=5) |
+| mAP@0.5:0.95 | **0.0995 ± 0.0067 (n=5)** | 0.0542 ± 0.0060 (n=5) |
 
-| Compute metric | Faster R-CNN | YOLO11s |
+**The `n=5` versus `n=4` localization asymmetry is substantive, not a
+formatting footnote.** Faster R-CNN has defined IoU/Dice for all five seeds;
+YOLO11s seed 271 has no matched true positive at score 0.25, so its IoU/Dice
+are undefined and excluded only from those conditional summaries.
+
+| Compute metric | Faster R-CNN mean ± SD (n=5) | YOLO11s mean ± SD (n=5) |
 |---|---:|---:|
-| FPS, batch 1 | 17.42 ± 5.69 | **52.94 ± 10.65** |
-| Mean inference time (ms/image) | 62.72 ± 24.58 | **19.36 ± 3.49** |
+| FPS, batch 1 | 20.28 ± 5.62 | **60.29 ± 12.62** |
+| Mean inference time (ms/image) | 53.93 ± 21.15 | **17.23 ± 3.83** |
 | Total parameters | 43,256,153 ± 0 | **9,428,179 ± 0** |
 | Trainable parameters | 43,030,809 ± 0 | **9,428,163 ± 0** |
 | Estimated GFLOPs/image | 450.764 ± 0 | **21.420 ± 0** |
-| Peak training GPU memory (MiB) | 1,556.92 ± 0.27 | **1,148.16 ± 0** |
-| Training time (seconds) | 6,211.41 ± 2,566.64 | **1,833.21 ± 214.60** |
+| Peak training GPU memory (MiB) | 1,556.89 ± 0.26 | **1,148.16 ± 0.00** |
+| Training time (seconds) | 6,661.01 ± 2,127.72 | **1,544.75 ± 425.40** |
 
-This table retains the original score-0.25 operating point. Faster R-CNN has
-about 1.86 times YOLO11s' mAP@0.5:0.95, substantially higher recall, and higher
-F1 there. YOLO11s' higher precision at the same nominal cutoff is a
-score-scale/selectivity artifact, not a genuine precision-recall frontier
-advantage: Faster R-CNN has higher mean precision at 96 of the 101 official
-AP@0.5 recall positions, with five ties and no YOLO11s-higher positions. At the
-validation-selected thresholds of 0.69 and 0.05, respectively, final test
-precision/recall/F1 is 0.3543/0.3607/0.3492 for Faster R-CNN versus
-0.3096/0.2438/0.2718 for YOLO11s.
+This table retains the original score-0.25 operating point. Across all five
+attempts, Faster R-CNN has about 1.84 times YOLO11s' mAP@0.5:0.95 and much
+higher recall and F1. YOLO11s' higher mean precision at the same nominal cutoff
+is an operating-point score-scale effect, not evidence of a generally superior
+precision-recall frontier. The earlier finding that Faster R-CNN has higher
+mean precision at 96 of 101 official AP@0.5 recall positions is a frozen
+three-seed Batch 10 analysis; neither that curve nor the Batch 14 threshold
+selection was rerun in Batch 16. The validation-selected 0.69/0.05 test values
+therefore remain historical three-seed results, not five-seed summaries.
+
+### Operational confidence-score instability
+
+YOLO11s seed 271 is not a failed or non-converged training process. Its losses
+decreased normally and validation mAP@0.5:0.95 peaked at `0.08958`, yet its
+maximum held-out prediction score was only `0.0412735`. It produced zero
+detections at score 0.25, yielding valid precision/recall/F1 values of
+`0/0/0`, while AP@0.5 was `0.1587217` and AP@0.5:0.95 was `0.0555799` because
+COCO AP retains ranked predictions down to 0.001. Low-score predictions also
+localize targets, so this was not an unlucky zero-IoU-match event. It is a
+seed-specific **operational confidence-score degeneracy despite normal
+convergence**. The run remains in every unconditional all-attempt endpoint;
+only its mathematically undefined matched-only IoU/Dice are omitted.
 
 The defensible trade-off is detection quality versus computational cost.
 YOLO11s has about 3.0 times the measured throughput, 78% fewer parameters, and
 about 21 times fewer estimated registered operations, while Faster R-CNN has
 the stronger precision-recall frontier and higher sensitivity at every
 reported FROC budget. The accuracy-efficiency Pareto analysis therefore finds
-no strict cross-objective dominance. Phase 8's primary patient-cluster tests
-retain Holm-corrected evidence for recall and both AP differences and for the
-original fixed-threshold precision difference; the latter does not establish a
-frontier advantage. See `THRESHOLD_ANALYSIS.md`, `PARETO_ANALYSIS.md`,
-`FROC_ANALYSIS.md`, and `STATISTICAL_ANALYSIS.md`.
+no strict cross-objective dominance. Phase 8's five-attempt patient-cluster
+tests retain Holm-corrected evidence for precision, recall, F1, and both AP
+differences. Conditional IoU/Dice remain non-significant and use four complete
+seed pairs. The fixed-threshold precision result does not establish a frontier
+advantage. See `THRESHOLD_ANALYSIS.md`, `PARETO_ANALYSIS.md`,
+`FROC_ANALYSIS.md`, and `STATISTICAL_ANALYSIS.md`; the first three remain
+explicitly three-seed analyses.
 
 ## Reproduction
 
-The accepted seed-17 timing measurements are reused for seeds 42 and 137 because
-the model, data, optimizer, AMP, batch, resolution, software, and GPU contracts
-are unchanged. `seed-gates` writes a new, non-fabricated approval artifact that
-retains the original timing values and hashes while explicitly recording the
-source run, source hash, target seed, current implementation identity, and the
-reason for reuse. Actual training time and memory are measured independently in
-every full run.
+The accepted seed-17 timing measurements are reused for seeds 42, 137, 271, and
+314 because the model, data, optimizer, AMP, batch, resolution, software, and
+GPU contracts are unchanged. `seed-gates` writes a new, non-fabricated
+approval artifact that retains the original timing values and hashes while
+explicitly recording the source run, source hash, target seed, current
+implementation identity, and the reason for reuse. Actual training time and
+memory are measured independently in every full run.
 
 ```powershell
-$benchmarkPython = 'C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe'
+# Activate the locked CUDA-capable environment documented in README.md first.
+$benchmarkPython = (Get-Command python).Source
 
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode seed-gates
 
 & $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed42.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed42_benchmark/benchmark_estimate.json
 & $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed137.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed137_benchmark/benchmark_estimate.json
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed271.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed271_benchmark/benchmark_estimate.json
+& $benchmarkPython -m src.models.train_faster_rcnn --config configs/faster_rcnn_seed314.yaml --mode train --approved-benchmark results/logs/faster_rcnn_rsna_seed314_benchmark/benchmark_estimate.json
 
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed42.yaml --mode train
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed137.yaml --mode train
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed271.yaml --mode train
+& $benchmarkPython -m src.models.train_yolo --config configs/yolo_seed314.yaml --mode train
 
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode preflight
 & $benchmarkPython -m src.evaluate --config configs/evaluation.yaml --mode evaluate
@@ -210,9 +241,14 @@ $benchmarkPython = 'C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe'
 
 The final artifacts are:
 
-- `results/tables/detector_comparison_per_seed.csv` — the six run-level rows;
+- `results/tables/detector_comparison_per_seed.csv` — the ten run-level rows,
+  including seed 271's explicit null conditional-localization fields;
 - `results/tables/detector_comparison_mean_std.csv` — detector/metric long form;
 - `results/tables/detector_comparison.csv` — side-by-side mean ± standard
-  deviation; and
+  deviation with detector-specific valid and attempted `n`; and
 - `results/logs/phase5_evaluation/summary.json` plus `predictions/*.json.gz` —
   full provenance and prediction evidence.
+
+The former n=3 comparison, long-form, and per-seed tables remain frozen under
+their explicit `*_n3_archive.csv` names; they are audit evidence, not the
+current headline result.

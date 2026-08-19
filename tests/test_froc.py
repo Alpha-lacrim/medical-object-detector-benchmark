@@ -8,8 +8,8 @@ from src.plot_froc_curves import (
 )
 
 
-def test_froc_config_and_frozen_source_grid() -> None:
-    config = load_froc_config("configs/froc.yaml")
+def test_froc_archive_config_and_frozen_source_grid() -> None:
+    config = load_froc_config("configs/froc_n3_archive.yaml")
     rows, image_count, _summary = load_froc_rows(config)
 
     assert config.analysis.fp_per_image_budgets == (0.125, 0.25, 0.5, 1.0, 2.0)

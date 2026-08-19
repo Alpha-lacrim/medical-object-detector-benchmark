@@ -1,4 +1,4 @@
-"""Unified held-out evaluation and three-seed detector comparison harness."""
+"""Unified held-out evaluation and multi-seed detector comparison harness."""
 
 from __future__ import annotations
 
@@ -93,16 +93,34 @@ class TimingSources(StrictModel):
     yolo11s: Path
 
 
+class TimingReuseReview(StrictModel):
+    """Exact reviewed source drift between a historical timing and the current tree."""
+
+    timing_source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    current_source_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    reviewed_changes: tuple[Path, ...]
+    reviewed_additions: tuple[Path, ...]
+    rationale: str = Field(min_length=1)
+
+
+class TimingReuseReviews(StrictModel):
+    """Detector-specific audits authorizing exact, hash-bound timing reuse."""
+
+    faster_rcnn: TimingReuseReview
+    yolo11s: TimingReuseReview
+
+
 class Phase5Config(StrictModel):
     """Strict top-level Phase 5 experiment contract."""
 
     schema_version: Literal[1]
     experiment_id: str
-    seeds: tuple[int, int, int]
+    seeds: tuple[int, ...]
     split: Literal["test"]
     evaluation: EvaluationSettings
     runtime: RuntimeSettings
     timing_sources: TimingSources
+    timing_reuse_reviews: TimingReuseReviews | None = None
     runs: tuple[RunSpec, ...]
     outputs: OutputSettings
     project_root: Path = Field(exclude=True)
@@ -110,8 +128,10 @@ class Phase5Config(StrictModel):
 
     @model_validator(mode="after")
     def complete_factorial_run_grid(self) -> Phase5Config:
+        if len(self.seeds) < 2:
+            raise ValueError("seeds must contain at least two values")
         if len(set(self.seeds)) != len(self.seeds):
-            raise ValueError("seeds must contain three unique values")
+            raise ValueError("seeds must contain unique values")
         expected = {
             (detector, seed) for detector in ("faster_rcnn", "yolo11s") for seed in self.seeds
         }
@@ -140,6 +160,7 @@ PER_SEED_FIELDS = (
     "false_negatives",
     "operating_point_prediction_count",
     "coco_prediction_count",
+    "maximum_prediction_score",
     "score_threshold",
     "match_iou_threshold",
     "coco_minimum_score",
@@ -149,6 +170,8 @@ PER_SEED_FIELDS = (
     "f1",
     "iou",
     "dice",
+    "conditional_localization_defined",
+    "conditional_localization_undefined_reason",
     "map_50",
     "map_50_95",
     "evaluation_inference_seconds",
@@ -183,6 +206,8 @@ METRICS = (
     ("peak_gpu_memory_mib", "MiB"),
     ("training_time_seconds", "seconds"),
 )
+
+CONDITIONAL_METRICS = frozenset({"iou", "dice"})
 
 
 def load_phase5_config(path: str | Path) -> Phase5Config:
@@ -491,6 +516,19 @@ def _collect_faster_rcnn_predictions(
     return predictions, elapsed_seconds
 
 
+def _recorded_training_config_sha256(run: RunSpec, config: Phase5Config) -> str:
+    """Return the immutable config hash recorded by a completed training run."""
+
+    summary_path = config.resolve(run.training_summary)
+    summary = _json_payload(summary_path)
+    if summary.get("status") != "complete" or summary.get("seed") != run.seed:
+        raise ValueError(f"invalid Faster R-CNN training summary for seed {run.seed}")
+    digest = summary.get("config_sha256")
+    if not isinstance(digest, str) or len(digest) != 64:
+        raise ValueError(f"missing Faster R-CNN config hash for seed {run.seed}")
+    return digest
+
+
 def _collect_yolo_predictions(
     run: RunSpec,
     phase_config: Phase5Config,
@@ -608,6 +646,7 @@ def _artifact_row(
     metrics: dict[str, Any],
     inference_seconds: float,
     bundle_path: Path,
+    maximum_prediction_score: float | None,
 ) -> dict[str, Any]:
     summary_path = config.resolve(run.training_summary)
     compute_path = config.resolve(run.compute_table)
@@ -628,6 +667,14 @@ def _artifact_row(
         raise ValueError(f"compute/checkpoint hash mismatch for {checkpoint_path}")
     operating = metrics["operating_point"]["overall"]
     coco = metrics["coco"]
+    conditional_defined = int(operating["tp"]) > 0
+    conditional_reason = ""
+    if not conditional_defined:
+        conditional_reason = (
+            "no_detections_at_frozen_score_threshold"
+            if int(operating["prediction_count"]) == 0
+            else "no_iou_qualified_true_positive"
+        )
     training_seconds = (
         summary.get("total_training_seconds")
         if run.detector == "faster_rcnn"
@@ -652,6 +699,7 @@ def _artifact_row(
         "false_negatives": operating["fn"],
         "operating_point_prediction_count": operating["prediction_count"],
         "coco_prediction_count": coco["prediction_count"],
+        "maximum_prediction_score": maximum_prediction_score,
         "score_threshold": config.evaluation.score_threshold,
         "match_iou_threshold": config.evaluation.match_iou_threshold,
         "coco_minimum_score": config.evaluation.coco_minimum_score,
@@ -661,6 +709,8 @@ def _artifact_row(
         "f1": operating["f1"],
         "iou": operating["matched_mean_iou"],
         "dice": operating["matched_mean_box_dice"],
+        "conditional_localization_defined": conditional_defined,
+        "conditional_localization_undefined_reason": conditional_reason,
         "map_50": coco["ap50"],
         "map_50_95": coco["ap50_95"],
         "evaluation_inference_seconds": inference_seconds,
@@ -691,18 +741,91 @@ def aggregate_rows(
     long_rows: list[dict[str, Any]] = []
     by_key: dict[tuple[str, str], dict[str, Any]] = {}
     for detector in detectors:
-        detector_rows = [row for row in rows if row["detector"] == detector]
+        detector_rows = sorted(
+            (row for row in rows if row["detector"] == detector),
+            key=lambda row: int(row["seed"]),
+        )
+        if len({int(row["seed"]) for row in detector_rows}) != len(detector_rows):
+            raise ValueError(f"duplicate {detector} seed in aggregation rows")
+        for row in detector_rows:
+            true_positives = row.get("true_positives")
+            if (
+                isinstance(true_positives, bool)
+                or not isinstance(true_positives, (int, np.integer))
+                or int(true_positives) < 0
+            ):
+                raise ValueError(f"invalid true-positive count for {detector} seed {row['seed']}")
+            undefined = [metric for metric in CONDITIONAL_METRICS if row.get(metric) is None]
+            if undefined and set(undefined) != CONDITIONAL_METRICS:
+                raise ValueError(
+                    f"conditional IoU/Dice must be jointly defined for {detector} seed "
+                    f"{row['seed']}"
+                )
+            if int(true_positives) == 0 and set(undefined) != CONDITIONAL_METRICS:
+                raise ValueError(
+                    f"conditional IoU/Dice must be undefined with zero true positives for "
+                    f"{detector} seed {row['seed']}"
+                )
+            if int(true_positives) > 0 and undefined:
+                raise ValueError(
+                    f"conditional IoU/Dice cannot be undefined with true positives for "
+                    f"{detector} seed {row['seed']}"
+                )
+            declared_reason = str(row.get("conditional_localization_undefined_reason") or "")
+            if int(true_positives) == 0:
+                prediction_count = row.get("operating_point_prediction_count")
+                if (
+                    isinstance(prediction_count, bool)
+                    or not isinstance(prediction_count, (int, np.integer))
+                    or int(prediction_count) < 0
+                ):
+                    raise ValueError(f"invalid prediction count for {detector} seed {row['seed']}")
+                expected_reason = (
+                    "no_detections_at_frozen_score_threshold"
+                    if int(prediction_count) == 0
+                    else "no_iou_qualified_true_positive"
+                )
+                if declared_reason != expected_reason:
+                    raise ValueError(
+                        f"conditional undefined reason differs from counts for {detector} "
+                        f"seed {row['seed']}"
+                    )
+            elif declared_reason:
+                raise ValueError(
+                    f"defined conditional metrics cannot carry an undefined reason for "
+                    f"{detector} seed {row['seed']}"
+                )
         for metric, unit in METRICS:
-            values = np.asarray([float(row[metric]) for row in detector_rows], dtype=np.float64)
+            undefined_rows = [row for row in detector_rows if row.get(metric) is None]
+            if undefined_rows and metric not in CONDITIONAL_METRICS:
+                raise ValueError(f"nonconditional metric is undefined: {detector} {metric}")
+            defined_rows = [row for row in detector_rows if row.get(metric) is not None]
+            try:
+                values = np.asarray([float(row[metric]) for row in defined_rows], dtype=np.float64)
+            except (TypeError, ValueError) as error:
+                raise ValueError(f"cannot aggregate {detector} {metric}") from error
             if len(values) <= ddof or not np.isfinite(values).all():
                 raise ValueError(f"cannot aggregate {detector} {metric}")
             mean = float(np.mean(values))
             std = 0.0 if np.all(values == values[0]) else float(np.std(values, ddof=ddof))
+            undefined_seeds = ";".join(str(int(row["seed"])) for row in undefined_rows)
+            undefined_reasons = sorted(
+                {
+                    str(row.get("conditional_localization_undefined_reason") or "")
+                    for row in undefined_rows
+                }
+            )
+            if undefined_rows and any(not reason for reason in undefined_reasons):
+                raise ValueError(f"undefined conditional metric lacks reason: {detector} {metric}")
             entry = {
                 "detector": detector,
                 "metric": metric,
                 "unit": unit,
                 "n": len(values),
+                "attempted_n": len(detector_rows),
+                "undefined_n": len(undefined_rows),
+                "undefined_seeds": undefined_seeds,
+                "undefined_reason": ";".join(undefined_reasons),
                 "mean": mean,
                 "std": std,
                 "mean_plus_minus_std": f"{mean:.6g} ± {std:.6g}",
@@ -720,9 +843,23 @@ def aggregate_rows(
                 "faster_rcnn_mean": faster["mean"],
                 "faster_rcnn_std": faster["std"],
                 "faster_rcnn_mean_plus_minus_std": faster["mean_plus_minus_std"],
+                "faster_rcnn_n": faster["n"],
+                "faster_rcnn_attempted_n": faster["attempted_n"],
+                "faster_rcnn_undefined_seeds": faster["undefined_seeds"],
+                "faster_rcnn_undefined_reason": faster["undefined_reason"],
                 "yolo11s_mean": yolo["mean"],
                 "yolo11s_std": yolo["std"],
                 "yolo11s_mean_plus_minus_std": yolo["mean_plus_minus_std"],
+                "yolo11s_n": yolo["n"],
+                "yolo11s_attempted_n": yolo["attempted_n"],
+                "yolo11s_undefined_seeds": yolo["undefined_seeds"],
+                "yolo11s_undefined_reason": yolo["undefined_reason"],
+                "sample_size_note": (
+                    "Conditional matched-box metric; detector-specific n excludes only "
+                    "seeds with no fixed-threshold true positive."
+                    if metric in CONDITIONAL_METRICS
+                    else "All predeclared attempted seeds are included."
+                ),
             }
         )
     return long_rows, comparison
@@ -757,6 +894,8 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
     from src.models.train_yolo import _implementation_identity as yolo_identity
     from src.models.yolo_config import yolo_config_sha256
 
+    if config.timing_reuse_reviews is None:
+        raise ValueError("seed timing reuse requires detector-specific reviewed source drift")
     training_configs = load_and_validate_training_configs(config)
     source_paths = {
         "faster_rcnn": config.resolve(config.timing_sources.faster_rcnn),
@@ -798,54 +937,24 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
             reporting_identity = baseline_summary.get("reporting_implementation_identity")
             if not isinstance(reporting_identity, dict):
                 raise ValueError("YOLO summary lacks its post-training reporting identity")
-            reporting_files = {
-                item["path"]: item["sha256"] for item in reporting_identity["source_files"]
-            }
-            current_reporting_files = {
-                item["path"]: item["sha256"] for item in current_identity["source_files"]
-            }
-            reporting_drift = {
-                path
-                for path, digest in reporting_files.items()
-                if path != "src/models/__init__.py" and current_reporting_files.get(path) != digest
-            }
-            if reporting_drift:
-                raise ValueError(
-                    "YOLO source drifted after its recorded reporting recovery: "
-                    + ", ".join(sorted(reporting_drift))
-                )
         source_files = {item["path"]: item["sha256"] for item in source_identity["source_files"]}
         current_files = {item["path"]: item["sha256"] for item in current_identity["source_files"]}
         changed_existing = {
             path for path, digest in source_files.items() if current_files.get(path) != digest
         }
         additions = set(current_files) - set(source_files)
-        allowed_faster_additions = {
-            "src/models/train_yolo.py",
-            "src/models/yolo_config.py",
-            "src/models/yolo_data.py",
-            "src/models/yolo_reporting.py",
-            "src/models/yolo_training.py",
-        }
-        allowed_faster_changes = {"src/models/__init__.py"}
-        # These hashes changed only in Batch 3's recorded post-training
-        # finalization recovery; the accepted summary stores training and
-        # reporting identities separately and states that weights were not resumed.
-        allowed_yolo_reporting_changes = {
-            "src/models/__init__.py",
-            "src/models/train_yolo.py",
-            "src/models/yolo_reporting.py",
-        }
-        allowed_changes = (
-            allowed_faster_changes if detector == "faster_rcnn" else allowed_yolo_reporting_changes
-        )
-        disallowed_changes = changed_existing - (allowed_changes)
-        if disallowed_changes or (
-            additions and not (detector == "faster_rcnn" and additions <= allowed_faster_additions)
-        ):
+        review = getattr(config.timing_reuse_reviews, detector)
+        reviewed_changes = {path.as_posix() for path in review.reviewed_changes}
+        reviewed_additions = {path.as_posix() for path in review.reviewed_additions}
+        current_manifest = current_identity.get("source_manifest_sha256")
+        if source_sha256 != review.timing_source_sha256:
+            raise ValueError(f"{detector} timing source changed after its reuse review")
+        if current_manifest != review.current_source_manifest_sha256:
+            raise ValueError(f"{detector} current source changed after its reuse review")
+        if changed_existing != reviewed_changes or additions != reviewed_additions:
             raise ValueError(
-                f"{detector} timing source has training-relevant source changes: "
-                f"changed={sorted(disallowed_changes)}, added={sorted(additions)}"
+                f"{detector} timing source drift differs from its reviewed set: "
+                f"changed={sorted(changed_existing)}, added={sorted(additions)}"
             )
 
         for seed in config.seeds[1:]:
@@ -880,6 +989,7 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
                     "timing_source_implementation_identity": source_identity,
                     "timing_identity_compatible_additions": sorted(additions),
                     "timing_identity_compatible_changes": sorted(changed_existing),
+                    "timing_reuse_review": review.model_dump(mode="json"),
                     "timing_reuse_reason": (
                         "Only the RNG seed and artifact identity change; model, data, "
                         "optimizer, AMP, batch, resolution, software, and GPU contracts "
@@ -888,17 +998,31 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
                 }
             )
             encoded = json.dumps(derived, indent=2, sort_keys=True, allow_nan=False) + "\n"
+            gate_status = "created"
             if target_path.exists():
                 existing = _json_payload(target_path)
-                replaceable = (
+                target_run = next(
+                    run for run in config.runs if run.detector == detector and run.seed == seed
+                )
+                summary_path = config.resolve(target_run.training_summary)
+                completed_summary = _json_payload(summary_path) if summary_path.is_file() else {}
+                historical_config_match = completed_summary.get(
+                    "status"
+                ) == "complete" and existing.get("config_sha256") == completed_summary.get(
+                    "config_sha256"
+                )
+                reusable_existing = (
                     existing.get("phase5_seed_only_timing_reuse") is True
                     and existing.get("timing_source_sha256") == source_sha256
                     and existing.get("target_training_seed") == seed
+                    and (existing.get("config_sha256") == target_hash or historical_config_match)
                 )
-                if target_path.read_text(encoding="utf-8") != encoded and not replaceable:
+                if target_path.read_text(encoding="utf-8") == encoded:
+                    gate_status = "unchanged"
+                elif reusable_existing:
+                    gate_status = "preserved_historical"
+                else:
                     raise FileExistsError(f"refusing to overwrite timing gate: {target_path}")
-                if replaceable:
-                    _atomic_bytes(target_path, encoded.encode("utf-8"))
             else:
                 _atomic_bytes(target_path, encoded.encode("utf-8"))
             written.append(
@@ -907,6 +1031,7 @@ def materialize_seed_timing_gates(config: Phase5Config) -> dict[str, Any]:
                     "seed": seed,
                     "path": target_path.as_posix(),
                     "sha256": sha256_file(target_path),
+                    "status": gate_status,
                     "timing_source_sha256": source_sha256,
                 }
             )
@@ -940,7 +1065,11 @@ def run_evaluation(config: Phase5Config) -> dict[str, Any]:
         model_config = training_configs[(run.detector, run.seed)]
         if run.detector == "faster_rcnn":
             predictions, inference_seconds = _collect_faster_rcnn_predictions(
-                run, config, model_config, dataset
+                run,
+                config,
+                model_config,
+                dataset,
+                expected_config_sha256=_recorded_training_config_sha256(run, config),
             )
         else:
             predictions, inference_seconds = _collect_yolo_predictions(
@@ -965,7 +1094,18 @@ def run_evaluation(config: Phase5Config) -> dict[str, Any]:
             metrics=metrics,
             settings=config.evaluation,
         )
-        row = _artifact_row(run, config, metrics, inference_seconds, bundle_path)
+        maximum_prediction_score = max(
+            (float(np.max(item.scores)) for item in predictions if len(item.scores)),
+            default=None,
+        )
+        row = _artifact_row(
+            run,
+            config,
+            metrics,
+            inference_seconds,
+            bundle_path,
+            maximum_prediction_score,
+        )
         rows.append(row)
         run_summaries.append(
             {
@@ -989,6 +1129,10 @@ def run_evaluation(config: Phase5Config) -> dict[str, Any]:
         "metric",
         "unit",
         "n",
+        "attempted_n",
+        "undefined_n",
+        "undefined_seeds",
+        "undefined_reason",
         "mean",
         "std",
         "mean_plus_minus_std",
@@ -1002,9 +1146,18 @@ def run_evaluation(config: Phase5Config) -> dict[str, Any]:
         "faster_rcnn_mean",
         "faster_rcnn_std",
         "faster_rcnn_mean_plus_minus_std",
+        "faster_rcnn_n",
+        "faster_rcnn_attempted_n",
+        "faster_rcnn_undefined_seeds",
+        "faster_rcnn_undefined_reason",
         "yolo11s_mean",
         "yolo11s_std",
         "yolo11s_mean_plus_minus_std",
+        "yolo11s_n",
+        "yolo11s_attempted_n",
+        "yolo11s_undefined_seeds",
+        "yolo11s_undefined_reason",
+        "sample_size_note",
     )
     publication_path = _atomic_csv(
         config.resolve(config.outputs.publication_table), publication_fields, comparison
@@ -1024,8 +1177,27 @@ def run_evaluation(config: Phase5Config) -> dict[str, Any]:
         "statistics": {
             "seeds": list(config.seeds),
             "n": len(config.seeds),
+            "n_definition": "predeclared attempted training seeds",
             "standard_deviation": "sample",
             "ddof": config.runtime.statistics_ddof,
+            "metric_sample_sizes": [
+                {
+                    "detector": row["detector"],
+                    "metric": row["metric"],
+                    "defined_n": row["n"],
+                    "attempted_n": row["attempted_n"],
+                    "undefined_seeds": row["undefined_seeds"],
+                    "undefined_reason": row["undefined_reason"],
+                }
+                for row in long_rows
+            ],
+            "conditional_metric_policy": {
+                "metrics": sorted(CONDITIONAL_METRICS),
+                "definition": "mean localization over fixed-threshold true-positive matches",
+                "undefined_when": "a seed has zero fixed-threshold true positives",
+                "aggregation": "mean and sample SD over defined seed values only",
+                "nulls_are_never_coerced_to_zero": True,
+            },
         },
         "runs": run_summaries,
         "mean_std": long_rows,

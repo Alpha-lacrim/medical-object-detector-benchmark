@@ -1,0 +1,353 @@
+{
+  "completed_epochs": 3,
+  "config_sha256": "1374056522f088d22609d5ea0da490de880f48e0e4841ace0f0a6ee6861fbaa7",
+  "dataset_identity": {
+    "categories": {
+      "1": "Lung Opacity"
+    },
+    "category_id_to_model_label": {
+      "1": 1
+    },
+    "test_split_accessed": false,
+    "train": {
+      "annotation_file": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/data/processed/rsna-pneumonia-5000/annotations/instances_train.json",
+      "annotation_sha256": "f9263e36b44082a23de68c2d54d1867ffd34e691c9322fa07eb821e1df7ea335",
+      "annotations": 1267,
+      "available_image_bytes": 1340800005,
+      "available_image_manifest_sha256": "0cdcb3845223a89ef3b45b25190b02da50dfaba18df1adcc1205cdc6dff450cd",
+      "available_images": 3500,
+      "expected_images": 3500,
+      "missing_file_paths": [],
+      "missing_images": 0
+    },
+    "validation": {
+      "annotation_file": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/data/processed/rsna-pneumonia-5000/annotations/instances_val.json",
+      "annotation_sha256": "cf0592a36f96d2f7989695156ce3b9ef4701a36a4d70641bfe4292c91ae07f94",
+      "annotations": 277,
+      "available_image_bytes": 287752993,
+      "available_image_manifest_sha256": "061ee8a3d9906d26a5ba22c25505f9c8c4d7108035edc6e34d5990876b7eb227",
+      "available_images": 750,
+      "expected_images": 750,
+      "missing_file_paths": [],
+      "missing_images": 0
+    }
+  },
+  "early_stopping_caveat": "The stopping epoch is unknown after the timing benchmark; the maximum-epoch estimate is the sign-off upper bound.",
+  "estimated_maximum_range_seconds": [
+    14486.054823299992,
+    16763.590201599993
+  ],
+  "estimated_maximum_seconds": 15624.822512449991,
+  "estimated_minimum_seconds": 4355.845046549998,
+  "execution_identity": {
+    "amp": true,
+    "amp_dtype": "float16",
+    "batch_norm_policy": "freeze_statistics",
+    "cuda_runtime_version": "12.4",
+    "cudnn_version": 90100,
+    "device": "cuda",
+    "effective_batch_size": 4,
+    "gpu_compute_capability": [
+      8,
+      9
+    ],
+    "gpu_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "gpu_total_memory_bytes": 8585216000,
+    "gradient_accumulation_steps": 2,
+    "input_max_size": 640,
+    "input_min_size": 640,
+    "microbatch_size": 2,
+    "nvidia_driver_version": "610.47",
+    "package_versions": {
+      "Pillow": "12.3.0",
+      "PyYAML": "6.0.3",
+      "matplotlib": "3.11.1",
+      "numpy": "2.4.4",
+      "pycocotools": "2.0.11",
+      "pydantic": "2.13.4"
+    },
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python_version": "3.11.15",
+    "torch_version": "2.6.0+cu124",
+    "torchvision_version": "0.21.0+cu124"
+  },
+  "implementation_identity": {
+    "git_commit": "802cf75995680284ce5f34c2430155a84e6d0d7c",
+    "source_files": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "8290756a972522e83b0d2474fe9bc640084a3afef092083e3fc51b49d2709348"
+      },
+      {
+        "path": "requirements.txt",
+        "sha256": "9e68b75fb10eef8840d9e32821714779b0d0721cbf06abd17b33a24b1caade6e"
+      },
+      {
+        "path": "src/data/prepare.py",
+        "sha256": "dcad077d021a73edcbd29cf95da69c3f0839bb68862092b529d5c8ac7caa017f"
+      },
+      {
+        "path": "src/meddet_benchmark/__init__.py",
+        "sha256": "c07a1b92f6945d6f2c00040ce2db551f1d98c005218bbcb2f4f675e30fa15594"
+      },
+      {
+        "path": "src/meddet_benchmark/__main__.py",
+        "sha256": "2b234e3e475c42c8b460d3171a55e6606a1a14d58ae98f62852b49c53bf1f522"
+      },
+      {
+        "path": "src/meddet_benchmark/coco_evaluation.py",
+        "sha256": "05070ebb84df6f6f35ab1c711bc35dcfe0d9e478ceb8c94ecafca911811a8dd7"
+      },
+      {
+        "path": "src/meddet_benchmark/config.py",
+        "sha256": "fa6c20a7b006f373f181ee42b0cdd0a4b1e17f22bafbe2720f15c0f514268d15"
+      },
+      {
+        "path": "src/meddet_benchmark/corruptions.py",
+        "sha256": "fb97afbb5f843e5c1a6d25a1f23d485e79d8f9ca278971c761b9bf7f6a223090"
+      },
+      {
+        "path": "src/meddet_benchmark/data_audit.py",
+        "sha256": "66e49f342f58eba5684d97659d08911fb6805b4fa7a48ed094c8b758d4b35908"
+      },
+      {
+        "path": "src/meddet_benchmark/evaluation.py",
+        "sha256": "be7bca53c50d9e1de45a686709fb303c9e389491196406978988dc2033eb933f"
+      },
+      {
+        "path": "src/meddet_benchmark/reproducibility.py",
+        "sha256": "65288824c9e5f8da6039f63def2a458d083b0bbc77c27ba8904a9f4cb0cbddd2"
+      },
+      {
+        "path": "src/models/__init__.py",
+        "sha256": "f385f39cdb11e622ac8f6668fdf44cef5a7379290c587cd5a477fd590f7a4e9b"
+      },
+      {
+        "path": "src/models/faster_rcnn_config.py",
+        "sha256": "47bb5e4ecdb99b259c66e3c8538bd18079dd66bbd2b8b8342e22b2c03ff4588f"
+      },
+      {
+        "path": "src/models/faster_rcnn_data.py",
+        "sha256": "29be9d6bcbb88ffc325627be8277a1e58c4e682cab25cbc653b155e2b6284ce2"
+      },
+      {
+        "path": "src/models/faster_rcnn_evaluation.py",
+        "sha256": "702343d528e1a2a5160b48314a1ff3f42f4d6732be4de26f5b9a21d76d1358f4"
+      },
+      {
+        "path": "src/models/faster_rcnn_model.py",
+        "sha256": "72f5b784175cf37ba94d6bc76a66797f95f8a8f577685085abc152942fa465b0"
+      },
+      {
+        "path": "src/models/faster_rcnn_reporting.py",
+        "sha256": "208b996e7ec81d672d7f457af24670276848be69eaf7d0018aa43dd3b065d53b"
+      },
+      {
+        "path": "src/models/faster_rcnn_training.py",
+        "sha256": "0291d29934aa1de96d0c4a14ba6820ecb433a056bbc0897063eee3db4b1cdc8c"
+      },
+      {
+        "path": "src/models/train_faster_rcnn.py",
+        "sha256": "c52cb9b9b34b6756ba44e922f5ef1acf1e0b4de9155925e2728e44fcbc46be54"
+      },
+      {
+        "path": "src/models/train_yolo.py",
+        "sha256": "3bdacb132ee6a4411679b5a55c5c053162f81689e33d6cfcff4d2dd01ea5e4e8"
+      },
+      {
+        "path": "src/models/yolo_config.py",
+        "sha256": "e3dd32b0905421d24465a4b2f2bdf44fffab603d830adb40732feef2fc752b81"
+      },
+      {
+        "path": "src/models/yolo_data.py",
+        "sha256": "84820f1ad12d7545a4cf9b706a8d8f6e61f2e075cc115fb99301bf3260e3a4d7"
+      },
+      {
+        "path": "src/models/yolo_reporting.py",
+        "sha256": "ae55037edd443980ba9f804984b500c1beec7761aad6e600fca91b825585acb3"
+      },
+      {
+        "path": "src/models/yolo_training.py",
+        "sha256": "09f63106fc2c3a1319932e451c90a0d446286d7c626ecb58d114256ae6a7deb5"
+      },
+      {
+        "path": "src/utils/__init__.py",
+        "sha256": "79b434d3401de2fc39330b8e7395bc0be074e3c44cc4a126eeb3bcba16d9346d"
+      },
+      {
+        "path": "src/utils/seed.py",
+        "sha256": "f77faf601a861570b55993717485b2c8db93b985d65ae5695753f50b2b27dfea"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "2b4214d0e64a90546f8a0fac4a6c54964c341f16c81f8bd87469831ee07f5535"
+      }
+    ],
+    "source_manifest_sha256": "118775aba048fae32ff5e2ce2e0001c1388e2815bed1f9b60f78516eb338df4e"
+  },
+  "includes_full_training_and_validation_epochs": true,
+  "maximum_epochs": 30,
+  "method": "first_epoch_plus_median_remaining_epochs",
+  "minimum_epochs": 8,
+  "observed_epoch_seconds": [
+    770.2613074000001,
+    551.4940997999997,
+    472.95839709999973
+  ],
+  "phase5_seed_only_timing_reuse": true,
+  "restart_full_run_from_coco_weights": true,
+  "run_id": "faster_rcnn_rsna_seed271_benchmark",
+  "scenario_estimated_seconds": {
+    "30": 15624.822512449991
+  },
+  "steady_state_range_seconds_per_epoch": [
+    472.95839709999973,
+    551.4940997999997
+  ],
+  "steady_state_seconds_per_epoch": 512.2262484499997,
+  "target_training_seed": 271,
+  "timing_excludes_epoch_metric_log_write": true,
+  "timing_identity_compatible_additions": [
+    "src/models/train_yolo.py",
+    "src/models/yolo_config.py",
+    "src/models/yolo_data.py",
+    "src/models/yolo_reporting.py",
+    "src/models/yolo_training.py"
+  ],
+  "timing_identity_compatible_changes": [
+    "src/data/prepare.py",
+    "src/meddet_benchmark/coco_evaluation.py",
+    "src/meddet_benchmark/corruptions.py",
+    "src/models/__init__.py",
+    "src/models/faster_rcnn_config.py",
+    "src/models/faster_rcnn_data.py",
+    "src/models/faster_rcnn_model.py",
+    "src/models/faster_rcnn_reporting.py",
+    "src/models/faster_rcnn_training.py",
+    "src/models/train_faster_rcnn.py"
+  ],
+  "timing_includes_equivalent_best_and_last_checkpoint_io": true,
+  "timing_reuse_reason": "Only the RNG seed and artifact identity change; model, data, optimizer, AMP, batch, resolution, software, and GPU contracts match the accepted timing run.",
+  "timing_reuse_review": {
+    "current_source_manifest_sha256": "118775aba048fae32ff5e2ce2e0001c1388e2815bed1f9b60f78516eb338df4e",
+    "rationale": "The current tree differs from the accepted timing identity only through later detector-arm additions, Ruff-only rewrites, optional evaluation and robustness helpers outside the timed training path, and the validated cross-platform rejection of unsafe COCO paths; valid benchmark inputs and the timed model, data, optimizer, AMP, batch, and resolution contract are unchanged.",
+    "reviewed_additions": [
+      "src\\models\\train_yolo.py",
+      "src\\models\\yolo_config.py",
+      "src\\models\\yolo_data.py",
+      "src\\models\\yolo_reporting.py",
+      "src\\models\\yolo_training.py"
+    ],
+    "reviewed_changes": [
+      "src\\data\\prepare.py",
+      "src\\meddet_benchmark\\coco_evaluation.py",
+      "src\\meddet_benchmark\\corruptions.py",
+      "src\\models\\__init__.py",
+      "src\\models\\faster_rcnn_config.py",
+      "src\\models\\faster_rcnn_data.py",
+      "src\\models\\faster_rcnn_model.py",
+      "src\\models\\faster_rcnn_reporting.py",
+      "src\\models\\faster_rcnn_training.py",
+      "src\\models\\train_faster_rcnn.py"
+    ],
+    "timing_source_sha256": "232460ae09827dfb780b0f5c6506bf9f545bbdc0e1483082c2c440035e8e8e8b"
+  },
+  "timing_source_implementation_identity": {
+    "git_commit": "8dad0232ae9b60193e8f2da1003915140e30abd2",
+    "source_files": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "8290756a972522e83b0d2474fe9bc640084a3afef092083e3fc51b49d2709348"
+      },
+      {
+        "path": "requirements.txt",
+        "sha256": "9e68b75fb10eef8840d9e32821714779b0d0721cbf06abd17b33a24b1caade6e"
+      },
+      {
+        "path": "src/data/prepare.py",
+        "sha256": "6072580623cfa149156167021bd12644749e55f802e3adde86c486df099f65af"
+      },
+      {
+        "path": "src/meddet_benchmark/__init__.py",
+        "sha256": "c07a1b92f6945d6f2c00040ce2db551f1d98c005218bbcb2f4f675e30fa15594"
+      },
+      {
+        "path": "src/meddet_benchmark/__main__.py",
+        "sha256": "2b234e3e475c42c8b460d3171a55e6606a1a14d58ae98f62852b49c53bf1f522"
+      },
+      {
+        "path": "src/meddet_benchmark/coco_evaluation.py",
+        "sha256": "b131f923d5e452db2a7d98751ec0e0909b7f43aaded0a4f9287d1565f8162fb3"
+      },
+      {
+        "path": "src/meddet_benchmark/config.py",
+        "sha256": "fa6c20a7b006f373f181ee42b0cdd0a4b1e17f22bafbe2720f15c0f514268d15"
+      },
+      {
+        "path": "src/meddet_benchmark/corruptions.py",
+        "sha256": "eaa238f07029c32daf14cac529e7d37371feca34402c575b11a6ee5d3ca1bcf2"
+      },
+      {
+        "path": "src/meddet_benchmark/data_audit.py",
+        "sha256": "66e49f342f58eba5684d97659d08911fb6805b4fa7a48ed094c8b758d4b35908"
+      },
+      {
+        "path": "src/meddet_benchmark/evaluation.py",
+        "sha256": "be7bca53c50d9e1de45a686709fb303c9e389491196406978988dc2033eb933f"
+      },
+      {
+        "path": "src/meddet_benchmark/reproducibility.py",
+        "sha256": "65288824c9e5f8da6039f63def2a458d083b0bbc77c27ba8904a9f4cb0cbddd2"
+      },
+      {
+        "path": "src/models/__init__.py",
+        "sha256": "658ee3335ae4f2b791040467ef7f9190964707441b7ee7882e1474b65d17d9a3"
+      },
+      {
+        "path": "src/models/faster_rcnn_config.py",
+        "sha256": "7dc5f06d6250ca6f7fc139c36e219e1e4ff487f6af625200502509f1276f58ed"
+      },
+      {
+        "path": "src/models/faster_rcnn_data.py",
+        "sha256": "83594dcce67703f5bb768f02deb8cb91487595e4aec92254e47184213fc3517a"
+      },
+      {
+        "path": "src/models/faster_rcnn_evaluation.py",
+        "sha256": "702343d528e1a2a5160b48314a1ff3f42f4d6732be4de26f5b9a21d76d1358f4"
+      },
+      {
+        "path": "src/models/faster_rcnn_model.py",
+        "sha256": "9924fad69ca98cb019b6ba5ecab1e861cc9f23de2e1273516b55afd9352e0177"
+      },
+      {
+        "path": "src/models/faster_rcnn_reporting.py",
+        "sha256": "fb20f4c08f3335c89bba24b0c6f579224ee269537da41aea004e3b7e3d33db11"
+      },
+      {
+        "path": "src/models/faster_rcnn_training.py",
+        "sha256": "acd28860877448b8d2acdc8c03237a1b8442ce3f8c85e2acc0be982f7f497a5c"
+      },
+      {
+        "path": "src/models/train_faster_rcnn.py",
+        "sha256": "d19d8e0222b7494ee49f793a576cb24f0ce884a7e63e89b819b2f946598eb925"
+      },
+      {
+        "path": "src/utils/__init__.py",
+        "sha256": "79b434d3401de2fc39330b8e7395bc0be074e3c44cc4a126eeb3bcba16d9346d"
+      },
+      {
+        "path": "src/utils/seed.py",
+        "sha256": "f77faf601a861570b55993717485b2c8db93b985d65ae5695753f50b2b27dfea"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "2b4214d0e64a90546f8a0fac4a6c54964c341f16c81f8bd87469831ee07f5535"
+      }
+    ],
+    "source_manifest_sha256": "82ddee34f7fe41b37c5577d0d0186aab9eb7a3e91e2d686da2a88093cf6524ab"
+  },
+  "timing_source_path": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json",
+  "timing_source_run_id": "faster_rcnn_rsna_seed17_benchmark",
+  "timing_source_seed": 17,
+  "timing_source_sha256": "232460ae09827dfb780b0f5c6506bf9f545bbdc0e1483082c2c440035e8e8e8b"
+}

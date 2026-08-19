@@ -1,7 +1,7 @@
 schema_version: 1
-experiment_id: rsna-phase5-three-seed-comparison
+experiment_id: rsna-phase5-five-seed-comparison
 
-seeds: [17, 42, 137]
+seeds: [17, 42, 137, 271, 314]
 split: test
 
 evaluation:
@@ -22,6 +22,61 @@ timing_sources:
   faster_rcnn: results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json
   yolo11s: results/logs/yolo11s_rsna_seed17_benchmark/benchmark_estimate.json
 
+timing_reuse_reviews:
+  faster_rcnn:
+    timing_source_sha256: 232460ae09827dfb780b0f5c6506bf9f545bbdc0e1483082c2c440035e8e8e8b
+    current_source_manifest_sha256: 118775aba048fae32ff5e2ce2e0001c1388e2815bed1f9b60f78516eb338df4e
+    reviewed_changes:
+      - src/data/prepare.py
+      - src/meddet_benchmark/coco_evaluation.py
+      - src/meddet_benchmark/corruptions.py
+      - src/models/__init__.py
+      - src/models/faster_rcnn_config.py
+      - src/models/faster_rcnn_data.py
+      - src/models/faster_rcnn_model.py
+      - src/models/faster_rcnn_reporting.py
+      - src/models/faster_rcnn_training.py
+      - src/models/train_faster_rcnn.py
+    reviewed_additions:
+      - src/models/train_yolo.py
+      - src/models/yolo_config.py
+      - src/models/yolo_data.py
+      - src/models/yolo_reporting.py
+      - src/models/yolo_training.py
+    rationale: >-
+      The current tree differs from the accepted timing identity only through
+      later detector-arm additions, Ruff-only rewrites, optional evaluation and
+      robustness helpers outside the timed training path, and the validated
+      cross-platform rejection of unsafe COCO paths; valid benchmark inputs and
+      the timed model, data, optimizer, AMP, batch, and resolution contract are
+      unchanged.
+  yolo11s:
+    timing_source_sha256: c339db91c05b1c8a1398dbbdcc7470ef1fd1932ddf1c374a87529faca45e1587
+    current_source_manifest_sha256: 118775aba048fae32ff5e2ce2e0001c1388e2815bed1f9b60f78516eb338df4e
+    reviewed_changes:
+      - src/data/prepare.py
+      - src/meddet_benchmark/coco_evaluation.py
+      - src/meddet_benchmark/corruptions.py
+      - src/models/__init__.py
+      - src/models/faster_rcnn_config.py
+      - src/models/faster_rcnn_data.py
+      - src/models/faster_rcnn_model.py
+      - src/models/faster_rcnn_reporting.py
+      - src/models/faster_rcnn_training.py
+      - src/models/train_faster_rcnn.py
+      - src/models/train_yolo.py
+      - src/models/yolo_data.py
+      - src/models/yolo_reporting.py
+      - src/models/yolo_training.py
+    reviewed_additions: []
+    rationale: >-
+      The current tree differs from the accepted timing identity only through
+      Ruff-only rewrites, post-training reporting recovery already recorded in
+      the seed-17 summary, optional evaluation and robustness helpers outside
+      the timed training path, and Faster R-CNN files included by the broad
+      historical manifest; the timed YOLO model, data, optimizer, AMP, batch,
+      augmentation, and resolution contract are unchanged.
+
 runs:
   - detector: faster_rcnn
     seed: 17
@@ -41,6 +96,18 @@ runs:
     checkpoint: results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt
     training_summary: results/logs/faster_rcnn_rsna_seed137_full/summary.json
     compute_table: results/tables/seeds/faster_rcnn_seed137_compute.csv
+  - detector: faster_rcnn
+    seed: 271
+    training_config: configs/faster_rcnn_seed271.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed271_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed271_compute.csv
+  - detector: faster_rcnn
+    seed: 314
+    training_config: configs/faster_rcnn_seed314.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed314_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed314_compute.csv
   - detector: yolo11s
     seed: 17
     training_config: configs/yolo.yaml
@@ -59,6 +126,18 @@ runs:
     checkpoint: results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt
     training_summary: results/logs/yolo11s_rsna_seed137_full/summary.json
     compute_table: results/tables/seeds/yolo_seed137_compute.csv
+  - detector: yolo11s
+    seed: 271
+    training_config: configs/yolo_seed271.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed271_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed271_compute.csv
+  - detector: yolo11s
+    seed: 314
+    training_config: configs/yolo_seed314.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed314_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed314_compute.csv
 
 outputs:
   log_dir: results/logs/phase5_evaluation

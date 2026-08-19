@@ -1,5 +1,16 @@
 # Free-Response ROC Analysis
 
+## Frozen three-seed scope
+
+This FROC analysis is frozen at **n=3** (seeds 17, 42, and 137) and was not
+regenerated after the clean comparison expanded to five seeds.
+`configs/froc.yaml` consumes the archived Batch 10 threshold outputs;
+`configs/threshold_sweep.yaml` in turn binds those outputs to
+`configs/evaluation_n3_archive.yaml` and
+`results/logs/phase5_evaluation/summary_n3_archive.json`. The Phase 5 source
+tables are the `*_n3_archive.csv` comparison files. Historical FROC and
+threshold filenames without an `n3` suffix remain three-seed artifacts.
+
 ## Plain finding
 
 Faster R-CNN has higher mean test sensitivity than YOLO11s at every reported false-positive
@@ -33,6 +44,12 @@ summary and checks every sensitivity against TP / (TP + FN). It performs no trai
 checkpoint loading, inference, NMS, rematching, interpolation, or extrapolation. The plotted
 line uses the mean FP/image and mean sensitivity at each common threshold; the shaded band is
 the sample SD of sensitivity across three seeds.
+
+YOLO11s seed 271 is not part of these curves. Its training converged normally, but its
+maximum test confidence is 0.0412735 and it produces zero detections even at the frozen
+n=3-selected threshold 0.05. Because the archived FROC grid extends to 0.01 but contains no
+seed-271 row, this document makes no claim about an n=5 FROC curve or the seed's behavior
+below 0.05.
 
 For budget summaries, each seed independently contributes the highest observed sensitivity
 whose FP/image is at or below the requested budget. Exact sensitivity ties prefer fewer
@@ -72,6 +89,11 @@ FP/image for the 0.5, 1, and 2 budgets because threshold 0.01 is the available b
 From the repository root in the pinned Python 3.11 environment:
 
 ```powershell
-& $benchmarkPython -m src.plot_froc_curves --config configs/froc.yaml --mode preflight
-& $benchmarkPython -m src.plot_froc_curves --config configs/froc.yaml --mode run
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc_n3_archive.yaml --mode preflight
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc_n3_archive.yaml --mode run
 ```
+
+The archive config validates the exact historical Batch 10 config hash through
+`configs/threshold_sweep_n3_frozen.yaml` and writes to separate
+`*_n3_archive_reproduction` paths, so it cannot overwrite the frozen primary artifacts.
+It reproduces only the three-seed FROC values; it does not create an n=5 FROC analysis.

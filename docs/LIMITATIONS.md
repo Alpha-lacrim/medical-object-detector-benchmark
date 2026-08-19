@@ -55,10 +55,13 @@ make the study reproducible on the stated laptop but increase sampling
 uncertainty and narrow generalization to the full challenge cohort.
 
 The primary development pipeline uses seed 17. The held-out headline comparison
-adds seeds 42 and 137 for three full trainings per detector, but three runs only
-coarsely estimate training-seed variation. The seed-42/137 timing approvals
-reuse the accepted seed-17 measurements because only RNG and artifact identity
-change; every full run still records its own training time and peak memory.
+adds seeds 42, 137, 271, and 314 for five predeclared full trainings per
+detector. All five attempted seeds are retained for AP and fixed-threshold
+precision, recall, and F1, including YOLO11s seed 271's observed zeros. Five
+runs remain a coarse estimate of training-seed variation. The additional-seed
+timing approvals reuse the accepted seed-17 measurements because only RNG and
+artifact identity change; every full run still records its own training time
+and peak memory.
 
 Robustness and explainability remain scoped to the selected seed-17 checkpoint
 of each detector and the same fixed 300-image sample. That sample was drawn by
@@ -93,6 +96,18 @@ diagnostics reproducibly collapsed the one-class head. Consequently, the
 comparison is between two working, disclosed pipelines under a shared budget,
 not a causal estimate of architecture alone.
 
+Those safeguards prevented the previously observed non-finite/all-zero-loss
+head collapse, but they did not make confidence scale stable across seeds.
+YOLO11s seed 271 converged normally, with decreasing losses and nonzero
+validation AP, yet its maximum held-out score was only `0.0412735`. It emitted
+no detection at the frozen score-0.25 operating point, so its precision,
+recall, and F1 are valid zeros even though AP@0.5 (`0.1587217`) and
+AP@0.5:0.95 (`0.0555799`) remain in the range of the other YOLO seeds. This is
+an **operational confidence-score degeneracy**, not the classic head/loss
+collapse and not a case in which thresholded detections merely missed the IoU
+matching criterion. Replacing the seed after observing this outcome would hide
+recipe-level instability, so it remains part of the all-attempt analysis.
+
 The Faster R-CNN physical microbatch remains two even with accumulation;
 accumulation does not create batch-four BatchNorm statistics. Windows memory
 constraints also require non-persistent Faster R-CNN train/validation worker
@@ -105,14 +120,24 @@ The original Phase 5 precision, recall, and F1 table uses one shared score
 threshold of 0.25 and matching IoU of 0.50. Batch 14 separately selects
 detector-specific thresholds on validation by maximum mean F1 (0.69 for Faster
 R-CNN and 0.05 for YOLO11s) and applies them once to test; these are the primary
-single-threshold operating points. Equal-weight F1 is transparent but does not
-encode clinical false-negative and false-positive costs, and only three
-validation seeds inform the selection. The complete held-out threshold sweep
-is descriptive rather than a source of deployment settings. Conditional IoU
-and Dice average only matched true positives; they describe box quality after a
-successful detection and must not be read without recall. They are undefined
-when a condition has no true positive, as occurs for YOLO11s under the darkest
-corruption at the original score-0.25 operating point.
+single-threshold operating points for the historical three-seed Batch 14
+analysis. Equal-weight F1 is transparent but does not encode clinical
+false-negative and false-positive costs, and only three validation seeds
+informed that frozen selection. It was not reselected after the additional
+seeds, and seed 271 also emits nothing at the selected YOLO threshold of 0.05.
+The complete held-out threshold sweep is descriptive rather than a source of
+deployment settings.
+
+**The clean localization summaries have an intentionally asymmetric sample
+size.** Conditional IoU and Dice average only matched true positives; they
+describe box quality after a successful detection and must not be read without
+recall. Faster R-CNN has defined clean localization for all five seeds
+(`n=5`), whereas YOLO11s has it for four (`n=4`) because seed 271 has no
+score-0.25 true positive. The descriptive table therefore reports detector-
+specific `n=5` versus `n=4`; paired inference uses the four complete seed pairs
+17, 42, 137, and 314. The undefined seed is not coerced to zero. Conditional
+localization is also undefined for the seed-17 YOLO checkpoint under the
+darkest corruption, which is a separate, corruption-specific event.
 
 Registered-operation GFLOPs omit unsupported operations and are estimates, not
 direct hardware timings. Synchronized batch-1 speed profiles include each
@@ -174,18 +199,25 @@ Batch 13 identified and corrected the original image-level clustering error.
 The primary bootstrap now resamples all exams from each NIH patient together,
 and the paired permutation swaps detector labels once per patient group. The
 superseded image-level tables and summary remain explicitly archived for audit
-but are not primary evidence. The clean hierarchical bootstrap still resamples
-only three paired training seeds, while corruption inference remains
-conditional on the primary checkpoints.
+but are not primary evidence. For precision, recall, F1, and both AP endpoints,
+the clean hierarchical bootstrap resamples all five paired training seeds. For
+conditional IoU and Dice it resamples the four complete pairs 17, 42, 137, and
+314; seed 271 is ineligible only because that matched-only estimand is
+undefined. Patient identifiers, patient-cluster construction, cluster
+bootstrap expansion, and patient-level detector-label-swap algorithms are
+unchanged. The two endpoint groups use separate deterministic random streams,
+so their realized draw masks are not claimed to be identical. Corruption
+inference remains conditional on the primary checkpoints.
 
 Permutation p-values condition on the observed checkpoints, whereas clean
-confidence intervals also resample the three seed pairs. These answer related
-but different uncertainty questions. The 95% percentile intervals are
-pointwise rather than simultaneous; Holm-adjusted p-values govern family-wise
-claims. Patient clustering handles the observed within-patient dependence, but
-neither it nor Holm correction makes severity conditions independent,
-calibrates their clinical likelihood, guarantees transportability, or
-establishes external-site robustness.
+confidence intervals also resample the eligible seed pairs for each endpoint.
+These answer related but different uncertainty questions. All seven clean
+endpoints remain in one Holm family despite the endpoint-specific seed count;
+the 95% percentile intervals are pointwise rather than simultaneous, and
+Holm-adjusted p-values govern family-wise claims. Patient clustering handles
+the observed within-patient dependence, but neither it nor Holm correction
+makes severity conditions independent, calibrates their clinical likelihood,
+guarantees transportability, or establishes external-site robustness.
 
 McNemar's test is omitted because the benchmark does not produce one
 independent binary outcome per image. Reducing multiple targets and

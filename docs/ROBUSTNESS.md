@@ -4,11 +4,12 @@
 
 Phase 6 evaluates the primary seed-17 Faster R-CNN and YOLO11s checkpoints on
 one fixed subset of the held-out test split. It does not average robustness over
-the three training seeds. The clean reference predictions are filtered from the
-frozen Phase 5 seed-17 prediction bundles because the checkpoint, images,
-thresholds, NMS, and unified evaluator are identical. Every corrupted condition
-is inferred afresh and scored through the same operating-point matcher and
-pycocotools path used in Phase 5.
+the five clean-comparison seeds. Batch 16 did not rerun or expand this grid;
+all results in this document remain seed-17-only. The clean reference
+predictions are filtered from the frozen Phase 5 seed-17 prediction bundles
+because the checkpoint, images, thresholds, NMS, and unified evaluator are
+identical. Every corrupted condition is inferred afresh and scored through the
+same operating-point matcher and pycocotools path used in Phase 5.
 
 The main robustness measure is mAP@0.5:0.95. For every reported metric,
 `relative performance = corrupted performance / clean performance`; the table
@@ -85,6 +86,13 @@ undefined there; COCO mAP remains defined because it uses predictions retained
 down to the shared 0.001 minimum. Mild darkening raises Faster R-CNN mAP by
 about 1.5--1.7%, illustrating why the measured curves are reported rather than
 forced to be monotone.
+
+This corruption-specific seed-17 event is separate from the Batch 16 clean
+finding for YOLO11s seed 271. Seed 271 converged normally but emitted no clean
+test detection at score 0.25 because its maximum score was `0.0412735`; that is
+reported as operational confidence-score degeneracy, not classic head/loss
+collapse or an IoU-matching accident. It does not alter any robustness result,
+because neither seed 271 nor seed 314 was run through the corruption grid.
 
 Review artifacts:
 
