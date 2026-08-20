@@ -477,3 +477,20 @@ git diff --check
 See `docs/REPRODUCIBILITY.md` for the seed/environment contract and the
 phase-specific documents under `docs/` for complete metric, corruption,
 Grad-CAM, and inference definitions.
+
+## License
+
+Copyright (C) 2026 Pouyan Delivandani.
+
+Except where otherwise noted, repository-authored software and documentation
+are licensed under the [GNU Affero General Public License, version 3.0
+only](LICENSE) (`AGPL-3.0-only`). This choice is compatible with the
+[upstream licensing requirements for Ultralytics
+YOLO](https://docs.ultralytics.com/#yolo-licenses-how-is-ultralytics-yolo-licensed).
+
+The repository license does not replace third-party terms. In particular, the
+RSNA/NIH dataset and dataset-derived image content remain governed by the
+[RSNA challenge terms](https://www.rsna.org/-/media/files/rsna/education/ai-resources-and-training/ai-image-challenge/pneumonia-detection-challenge-terms-of-use-and-attribution.pdf);
+pretrained model weights and external dependencies remain governed by their
+respective licenses. Raw datasets and trained weights are not distributed in
+this repository.

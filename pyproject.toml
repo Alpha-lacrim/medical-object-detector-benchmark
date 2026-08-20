@@ -7,6 +7,8 @@ name = "meddet-benchmark"
 version = "0.1.0"
 description = "Reproducible Faster R-CNN and YOLO benchmark for medical images"
 readme = "README.md"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
 requires-python = ">=3.11,<3.12"
 dependencies = [
   "numpy==2.4.4",
