@@ -104,3 +104,40 @@ methodology, CI) are still outstanding and higher priority.
 - The paper's contribution stays framed around the controlled comparison, the
   multi-axis trade-off characterization, and the threshold/score-scale
   mismatch finding—not an architecture-family claim.
+
+## D-004 — Keep cost-weighted threshold calibration as a separate sensitivity analysis
+
+- **Date:** 2026-08-25
+- **Status:** Accepted; stands alongside and does not supersede the Batch 14
+  validation-selected operating points
+
+### Context
+
+Batch 14 selected one operating threshold per detector by maximizing arithmetic
+mean, equal-weight F1 across the three frozen validation seeds. The new threshold-
+calibration analysis instead varies the assumed false-negative/false-positive cost
+ratio through $\beta = \sqrt{C_{FN}/C_{FP}}$ and selects the threshold that maximizes
+the patient-cluster-bootstrap lower 95% confidence bound of $F1_\beta$. Allowing both
+selection documents to appear without an explicit precedence rule would make the
+downstream operating-point claims contradictory.
+
+### Decision
+
+The Batch 14 thresholds remain the project's authoritative primary single-threshold
+operating points and the source for the existing downstream threshold, FROC, and
+Pareto results. This batch's full $\beta \in \{1, 3, 5, 10\}$ sweep is a distinct
+cost-sensitivity extension and will be reported separately, including in any later
+paper draft. It does not select one clinically definitive $\beta$ and does not replace
+the Batch 14 thresholds. Even the $\beta=1$ result is not a replacement because its
+lower-confidence-bound objective differs from Batch 14's mean-F1 point objective.
+
+### Consequences
+
+- `docs/THRESHOLD_ANALYSIS.md` and its selected operating-point tables remain the
+  authoritative source for the primary validation-selected operating points.
+- `docs/THRESHOLD_CALIBRATION.md` and its outputs must be labeled as a sensitivity
+  analysis conditional on assumed costs, the available frozen validation predictions,
+  and the patient-cluster bootstrap protocol.
+- A later paper may compare the threshold shifts across the four assumed cost ratios,
+  but must not present any one setting as a measured clinical utility or silently feed
+  it into existing FROC, Pareto, or other downstream artifacts.

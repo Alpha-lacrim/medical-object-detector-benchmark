@@ -2,17 +2,25 @@
 
 ## Status and interpretation
 
-These hypotheses were recorded in Batch 17 after the experimental artifacts had been frozen. They are therefore **retrospective, result-linked hypotheses**, not a preregistration. Their purpose is to make every research claim falsifiable against a named existing table or figure and to prevent the paper narrative from selecting unsupported conclusions. No estimate is recomputed here.
+H1--H5 were recorded in Batch 17 after the original experimental artifacts had been frozen;
+H6 was added in Batch 18 for the subsequent frozen-bundle calibration analysis. They are
+therefore **retrospective, result-linked hypotheses**, not a preregistration. Their purpose is
+to make every research claim falsifiable against a named table or figure and to prevent the
+paper narrative from selecting unsupported conclusions. Batch 18 computes a new calibration
+summary but performs no training, checkpoint loading, inference, or prediction replacement.
 
-The evidence has three distinct scopes that must not be merged:
+The evidence has four distinct scopes that must not be merged:
 
 - The clean unified comparison uses all five predeclared attempts for precision, recall, F1, AP@0.5, and AP@0.5:0.95. Conditional IoU and Dice use four complete seed pairs (`n=4`) for inference because YOLO11s seed 271 has no fixed-threshold true positive.
 - Precision-recall, validation-threshold, FROC, and Pareto artifacts are frozen three-seed analyses.
 - Robustness and Grad-CAM artifacts use only the primary seed-17 checkpoints on the fixed 300-image sample.
+- Detection calibration uses all five seeds per detector and every frozen post-NMS test
+  prediction retained at the 0.001 bundle floor. It is distinct from the frozen three-seed
+  threshold analyses.
 
 ## Primary research question
 
-> Under one patient-safe (patient-disjoint) split, shared canonical preprocessing and augmentation policy, a common training-budget framework, and one model-independent evaluator, how do Faster R-CNN and YOLO11s trade off lung-opacity detection coverage and ranking accuracy, detector-specific operating regimes, computational efficiency, corruption-specific robustness, and Grad-CAM-observed failure patterns on chest radiographs?
+> Under one patient-safe (patient-disjoint) split, shared canonical preprocessing and augmentation policy, a common training-budget framework, and one model-independent evaluator, how do Faster R-CNN and YOLO11s trade off lung-opacity detection coverage and ranking accuracy, detector-specific operating regimes and confidence calibration, computational efficiency, corruption-specific robustness, and Grad-CAM-observed failure patterns on chest radiographs?
 
 This question concerns two disclosed implementations under one controlled protocol. It does not identify a universal causal effect of detector family and does not ask whether either system can diagnose pneumonia or support clinical use.
 
@@ -65,3 +73,33 @@ This question concerns two disclosed implementations under one controlled protoc
 **Existing evidence.** Check [`gradcam_localization_summary.csv`](../results/tables/gradcam_localization_summary.csv), [the shared true-positive panels](../results/figures/gradcam_good_predictions.png), [the shared false-positive panels](../results/figures/gradcam_bad_predictions.png), and [the false-negative proxy panels](../results/figures/gradcam_failure_cases.png). The frozen artifacts support H5 descriptively: energy-in-box exceeds the box-area reference only modestly, pointing accuracy is low for both detectors, and the qualitative panels show frequent activation on anatomy, borders, markers, and devices outside the annotated opacity.
 
 **Boundary.** The analysis is seed-17-only and target- and layer-dependent. It contains no causal intervention or clinical-reasoning ground truth; false-negative maps use annotation-guided proxy candidates and do not explain an emitted detection.
+
+## H6 - Detection confidence calibration
+
+**Hypothesis.** Faster R-CNN will have lower full multivariate Detection Expected
+Calibration Error (D-ECE) than YOLO11s across the five frozen test seeds, and YOLO11s seed
+271 will be the detector's worst-calibrated seed because its abnormally compressed scores
+substantially understate the empirical fraction of matched true-positive detections.
+
+**Operational check.** For every detector and seed, retain all predictions at the frozen
+0.001 bundle floor, apply the canonical score-ordered same-class matcher at IoU 0.50, and
+compute the Küppers et al. five-dimensional D-ECE over confidence, relative box center, and
+relative box width/height. H6 is supported only if Faster R-CNN has the lower across-seed
+mean D-ECE and seed 271 has the highest YOLO11s D-ECE without imputation or exclusion. Its
+mean confidence, matched-detection fraction, absolute global gap, and D-ECE must all remain
+explicit.
+
+**Existing evidence.** Check [`calibration_summary.csv`](../results/tables/calibration_summary.csv)
+and [the reliability diagrams](../results/figures/reliability_diagrams.png). The five-seed
+artifacts support H6 descriptively: mean D-ECE is `0.0320 +/- 0.0058` for Faster R-CNN and
+`0.0990 +/- 0.0232` for YOLO11s. Seed 271 is the largest YOLO11s D-ECE at `0.1313`; its
+mean score is `0.00538` while `0.15073` of its 962 retained detections are matched true
+positives.
+
+**Boundary.** D-ECE measures precision calibration conditional on the emitted prediction
+population; missed targets have no confidence and therefore do not enter this black-box
+calibration estimand. The result is descriptive test-set evaluation of raw confidences, not a
+fitted recalibration map, external validation, or evidence of calibrated clinical risk. It is
+also separate from H2's score-scale/selectivity mismatch: H2 compares operating regimes as a
+threshold moves, whereas H6 asks whether stated probabilities agree with empirical detection
+correctness within confidence/location/scale bins.

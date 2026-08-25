@@ -157,6 +157,41 @@ def expand_patient_group_choices(
     return patient_group_choices[patient_clusters.image_to_group]
 
 
+def draw_hierarchical_bootstrap_multiplicities(
+    rng: np.random.Generator,
+    patient_clusters: PatientClusters,
+    *,
+    seed_count: int,
+) -> tuple[IntArray, IntArray]:
+    """Draw one existing patient-cluster/seed hierarchical bootstrap sample.
+
+    Patient groups are sampled with replacement and expanded so every image
+    from the same patient receives the same multiplicity. Training seeds are
+    sampled independently with replacement. Keeping this draw in one shared
+    helper prevents downstream analyses from subtly changing the established
+    Phase 8 resampling unit.
+    """
+
+    if isinstance(seed_count, bool) or not isinstance(seed_count, int) or seed_count < 1:
+        raise ValueError("seed_count must be a positive integer")
+    patient_group_count = patient_clusters.patient_group_count
+    patient_probabilities = np.full(patient_group_count, 1 / patient_group_count, dtype=np.float64)
+    patient_group_counts = rng.multinomial(patient_group_count, patient_probabilities).astype(
+        np.int64, copy=False
+    )
+    image_multiplicities = expand_patient_group_multiplicities(
+        patient_group_counts, patient_clusters
+    )
+    if seed_count == 1:
+        seed_multiplicities = np.ones(1, dtype=np.int64)
+    else:
+        seed_probabilities = np.full(seed_count, 1 / seed_count, dtype=np.float64)
+        seed_multiplicities = rng.multinomial(seed_count, seed_probabilities).astype(
+            np.int64, copy=False
+        )
+    return image_multiplicities, seed_multiplicities
+
+
 @dataclass(frozen=True)
 class HybridEvidence:
     """One detector pair with a globally score-sorted union for fast swaps."""
@@ -643,20 +678,11 @@ def analyze_pair(
         for name in estimands
     }
     rng = np.random.default_rng(stable_rng_seed(base_seed, comparison_label))
-    patient_group_probabilities = np.full(
-        patient_group_count, 1 / patient_group_count, dtype=np.float64
-    )
-    seed_probabilities = np.full(seed_count, 1 / seed_count, dtype=np.float64)
-
     for resample in range(bootstrap_resamples):
-        patient_group_counts = rng.multinomial(
-            patient_group_count, patient_group_probabilities
-        ).astype(np.int64, copy=False)
-        counts = expand_patient_group_multiplicities(patient_group_counts, patient_clusters)
-        seed_counts = (
-            rng.multinomial(seed_count, seed_probabilities).astype(np.int64, copy=False)
-            if seed_count > 1
-            else seed_ones
+        counts, seed_counts = draw_hierarchical_bootstrap_multiplicities(
+            rng,
+            patient_clusters,
+            seed_count=seed_count,
         )
         current = estimate_pair(
             pair,

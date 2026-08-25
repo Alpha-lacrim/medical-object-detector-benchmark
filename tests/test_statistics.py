@@ -14,6 +14,7 @@ from src.stats.paired import (
     analyze_pair,
     build_evidence,
     build_patient_clusters,
+    draw_hierarchical_bootstrap_multiplicities,
     expand_patient_group_choices,
     expand_patient_group_multiplicities,
     holm_adjust,
@@ -194,6 +195,14 @@ def test_patient_group_draws_and_swaps_move_complete_clusters() -> None:
     assert clusters.patient_group_ids == ("p1", "p2", "p3")
     assert multiplicities.tolist() == [2, 2, 0, 1]
     assert choices.tolist() == [True, True, False, True]
+
+    image_draw, seed_draw = draw_hierarchical_bootstrap_multiplicities(
+        np.random.default_rng(123), clusters, seed_count=3
+    )
+    assert image_draw[0] == image_draw[1]
+    assert image_draw.shape == (4,)
+    assert seed_draw.shape == (3,)
+    assert int(np.sum(seed_draw)) == 3
 
 
 def test_grid_holm_excludes_explicitly_non_estimable_hypotheses() -> None:

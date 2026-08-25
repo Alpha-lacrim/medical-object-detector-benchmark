@@ -128,6 +128,18 @@ seeds, and seed 271 also emits nothing at the selected YOLO threshold of 0.05.
 The complete held-out threshold sweep is descriptive rather than a source of
 deployment settings.
 
+Batch 19 adds a separate validation-only cost-sensitivity analysis; D-004
+explicitly prevents it from replacing the Batch 14 primary thresholds. It
+assumes false-negative/false-positive cost ratios of 1, 9, 25, and 100 rather
+than estimating clinical utility from outcomes. Its 2,000-draw hierarchical
+bootstrap resamples 321 validation-patient groups and the three frozen seeds,
+so seed uncertainty remains coarse. The confidence intervals are pointwise,
+not simultaneous over the 99 candidate thresholds, and selecting the maximum
+lower bound is not a 95% guarantee about that selected maximum. YOLO11s reaches
+the 0.01 lower sweep boundary for beta 3, 5, and 10; those thresholds are best
+observed within the grid rather than claimed global optima. None of the
+cost-sensitive thresholds is applied to test or adopted as a deployment rule.
+
 **The clean localization summaries have an intentionally asymmetric sample
 size.** Conditional IoU and Dice average only matched true positives; they
 describe box quality after a successful detection and must not be read without
@@ -138,6 +150,16 @@ specific `n=5` versus `n=4`; paired inference uses the four complete seed pairs
 17, 42, 137, and 314. The undefined seed is not coerced to zero. Conditional
 localization is also undefined for the seed-17 YOLO checkpoint under the
 darkest corruption, which is a separate, corruption-specific event.
+
+Batch 18 separately measures raw-score calibration with the full five-dimensional D-ECE
+over confidence and relative box center/scale. It uses all five frozen seeds and every
+post-NMS prediction retained at the 0.001 bundle floor, including YOLO11s seed 271. This is
+test-set evaluation rather than validation-fitted recalibration: no calibrated mapping is
+learned or evaluated on an independent second holdout. The estimand is conditional on emitted
+detections, so missed targets without a score do not enter it. Absolute D-ECE also depends on
+the fixed IoU-0.50 correctness rule, five-bin feature partition, and eight-sample cell
+minimum; it is not directly comparable to D-ECE under a different protocol and does not
+establish calibrated clinical risk.
 
 Registered-operation GFLOPs omit unsupported operations and are estimates, not
 direct hardware timings. Synchronized batch-1 speed profiles include each

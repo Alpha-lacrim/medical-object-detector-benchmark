@@ -1,0 +1,24 @@
+schema_version: 1
+experiment_id: rsna-phase18-detection-calibration
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+
+calibration:
+  prediction_score_floor: 0.001
+  match_iou_threshold: 0.5
+  max_detections_per_image: 100
+  bins_per_dimension: [5, 5, 5, 5, 5]
+  minimum_samples_per_bin: 8
+  reliability_bins: 10
+
+plots:
+  dpi: 200
+
+outputs:
+  log_dir: results/logs/phase18_calibration
+  summary_json: results/logs/phase18_calibration/summary.json
+  summary_table: results/tables/calibration_summary.csv
+  reliability_figure: results/figures/reliability_diagrams.png

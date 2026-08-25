@@ -315,6 +315,45 @@ threshold-independent. It must not be interpreted as a five-seed Pareto result:
 The run regenerates `results/figures/pareto_frontier.png`; definitions and the
 scenario-conditional interpretation are in `docs/PARETO_ANALYSIS.md`.
 
+### 5e. Measure five-seed detection calibration
+
+This CPU-only analysis reads all ten frozen Phase 5 prediction bundles. It
+matches every detection retained at the 0.001 bundle floor through the canonical
+IoU-0.50 matcher and computes the full box-sensitive Detection Expected
+Calibration Error over confidence, relative center, width, and height. It does
+not fit a calibrator, load checkpoints, run inference, or train a model:
+
+```powershell
+& $benchmarkPython -m src.stats.calibration --config configs/calibration.yaml --mode preflight
+& $benchmarkPython -m src.stats.calibration --config configs/calibration.yaml --mode run
+```
+
+The run regenerates `results/tables/calibration_summary.csv`,
+`results/figures/reliability_diagrams.png`, and the exact provenance record at
+`results/logs/phase18_calibration/summary.json`. Definitions, the five-seed
+finding, and the distinction from threshold selectivity are in
+`docs/CALIBRATION_ANALYSIS.md`.
+
+### 5f. Run patient-cluster-aware cost-sensitive threshold calibration
+
+This CPU-only sensitivity analysis reuses the six frozen Batch 14 validation
+prediction bundles. It evaluates beta values 1, 3, 5, and 10 over the same
+0.01–0.99 threshold grid, computes hierarchical patient-cluster/seed bootstrap
+intervals, and selects the threshold with the largest lower 95% confidence
+bound. It performs no training, inference, checkpoint loading, or test access:
+
+```powershell
+& $benchmarkPython -m src.stats.threshold_calibration --config configs/threshold_calibration.yaml --mode preflight
+& $benchmarkPython -m src.stats.threshold_calibration --config configs/threshold_calibration.yaml --mode run
+```
+
+The run regenerates `results/tables/threshold_calibration_summary.csv`,
+`results/figures/threshold_calibration_sensitivity.png`, and the provenance
+record at `results/logs/phase19_threshold_calibration/summary.json`. Per D-004,
+these are a separately reported cost-sensitivity extension; they do not replace
+Batch 14's primary operating points. Definitions and findings are in
+`docs/THRESHOLD_CALIBRATION.md`.
+
 ## 6. Run the common-corruption benchmark
 
 The run command deterministically draws or verifies the 300-image sample,
@@ -421,6 +460,8 @@ artifacts; the report assembly step does not recompute values.
 | Validation-selected operating points (frozen n=3) | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
 | Research-track FROC figure (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
 | Research-track Pareto figure (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
+| Five-seed detection calibration | `calibration_summary.csv`; `reliability_diagrams.png` | offline `src.stats.calibration --mode run` in §5e |
+| Cost-sensitive threshold calibration (frozen n=3 validation) | `threshold_calibration_summary.csv`; `threshold_calibration_sensitivity.png` | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
 | Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
