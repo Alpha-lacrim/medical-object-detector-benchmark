@@ -1,0 +1,93 @@
+schema_version: 1
+experiment_id: rsna-phase22-acquisition-shifts
+seed: 17
+
+inputs:
+  phase6_config: configs/corruptions.yaml
+  dataset_config: configs/dataset.yaml
+  subset_manifest: data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv
+  expected_subset_manifest_sha256: 63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e
+  processed_id_column: processed_file
+  raw_file_column: source_file
+
+metadata_contract:
+  allowed_modalities: [CR]
+  allowed_photometric_interpretations: [MONOCHROME1, MONOCHROME2]
+  bits_allocated: 8
+  bits_stored: 8
+  pixel_representation: 0
+  require_native_voi_absent: true
+  require_modality_transform_absent: true
+
+runtime:
+  smoke_images: 2
+
+# These are controlled sensitivity settings, not recovered scanner presets or
+# calibrated dose/kernel measurements. The DICOM LINEAR conditions use the
+# per-image full-input-range identity window defined in PS3.3 C.11.2.1.2.1 as
+# their baseline, then perturb its center or width.
+shifts:
+  - id: voi_center_lower
+    family: voi_window
+    kind: dicom_linear_window
+    center_offset_fraction: -0.15
+    width_multiplier: 1.0
+  - id: voi_center_higher
+    family: voi_window
+    kind: dicom_linear_window
+    center_offset_fraction: 0.15
+    width_multiplier: 1.0
+  - id: voi_width_narrow
+    family: voi_window
+    kind: dicom_linear_window
+    center_offset_fraction: 0.0
+    width_multiplier: 0.75
+  - id: voi_width_wide
+    family: voi_window
+    kind: dicom_linear_window
+    center_offset_fraction: 0.0
+    width_multiplier: 1.25
+
+  # The expected full-scale counts are synthetic quanta used to create
+  # signal-dependent variance. They are not measurements of patient exposure.
+  - id: poisson_dose_50pct
+    family: dose_noise
+    kind: poisson_dose
+    reference_full_scale_counts: 4096.0
+    dose_fraction: 0.50
+  - id: poisson_dose_25pct
+    family: dose_noise
+    kind: poisson_dose
+    reference_full_scale_counts: 4096.0
+    dose_fraction: 0.25
+  - id: poisson_dose_12p5pct
+    family: dose_noise
+    kind: poisson_dose
+    reference_full_scale_counts: 4096.0
+    dose_fraction: 0.125
+
+  - id: gaussian_kernel_3
+    family: detector_blur
+    kind: gaussian_blur
+    gaussian_kernel_size: 3
+    gaussian_sigma_pixels: 0.5
+  - id: gaussian_kernel_5
+    family: detector_blur
+    kind: gaussian_blur
+    gaussian_kernel_size: 5
+    gaussian_sigma_pixels: 1.0
+  - id: gaussian_kernel_9
+    family: detector_blur
+    kind: gaussian_blur
+    gaussian_kernel_size: 9
+    gaussian_sigma_pixels: 2.0
+
+outputs:
+  log_dir: results/logs/phase22_acquisition_shifts
+  prediction_bundles_dir: results/logs/phase22_acquisition_shifts/predictions
+  smoke_log_dir: results/logs/phase22_acquisition_shifts/smoke
+  smoke_prediction_bundles_dir: results/logs/phase22_acquisition_shifts/smoke/predictions
+  smoke_summary_json: results/logs/phase22_acquisition_shifts/smoke/summary.json
+  smoke_results_table: results/logs/phase22_acquisition_shifts/smoke/results.csv
+  summary_json: results/logs/phase22_acquisition_shifts/summary.json
+  results_table: results/tables/acquisition_shift_results.csv

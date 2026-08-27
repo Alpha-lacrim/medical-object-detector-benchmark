@@ -960,6 +960,39 @@ def write_split_manifest(
             )
 
 
+def scale_radiograph_to_uint8(
+    pixels: Any,
+    *,
+    photometric_interpretation: str,
+    invert_monochrome1: bool,
+) -> Any:
+    """Apply the canonical per-image min-max scaling to one radiograph array.
+
+    This is the shared implementation used by the original DICOM-to-PNG
+    conversion and by raw-array sensitivity analyses.  Keeping the transform in
+    one function prevents those paths from drifting numerically.
+    """
+
+    try:
+        import numpy as np
+    except ModuleNotFoundError as exc:
+        raise RuntimeError("Radiograph scaling requires numpy") from exc
+
+    array = np.asarray(pixels, dtype=np.float32).squeeze()
+    if array.ndim != 2:
+        raise ValueError(f"Expected a 2-D radiograph, found shape {array.shape}")
+    finite = np.isfinite(array)
+    if not finite.any():
+        raise ValueError("Radiograph array contains no finite values")
+    low = float(array[finite].min())
+    high = float(array[finite].max())
+    array = np.nan_to_num(array, nan=low, posinf=high, neginf=low)
+    if invert_monochrome1 and photometric_interpretation.upper() == "MONOCHROME1":
+        array = high + low - array
+    array = (array - low) * (255.0 / (high - low)) if high > low else np.zeros_like(array)
+    return np.clip(np.rint(array), 0, 255).astype(np.uint8)
+
+
 def _convert_one_dicom(
     source: Path,
     destination: Path,
@@ -976,29 +1009,17 @@ def _convert_one_dicom(
         raise ValueError("Only 8-bit processed PNG output is currently supported")
 
     try:
-        import numpy as np
         import pydicom
         from PIL import Image
     except ModuleNotFoundError as exc:
         raise RuntimeError("DICOM conversion requires pydicom, numpy, and Pillow") from exc
 
     dataset = pydicom.dcmread(source)
-    pixels = np.asarray(dataset.pixel_array, dtype=np.float32).squeeze()
-    if pixels.ndim != 2:
-        raise ValueError(f"Expected a 2-D DICOM image, found shape {pixels.shape}")
-    finite = np.isfinite(pixels)
-    if not finite.any():
-        raise ValueError("DICOM pixel array contains no finite values")
-    low = float(pixels[finite].min())
-    high = float(pixels[finite].max())
-    pixels = np.nan_to_num(pixels, nan=low, posinf=high, neginf=low)
-    if (
-        invert_monochrome1
-        and str(getattr(dataset, "PhotometricInterpretation", "")).upper() == "MONOCHROME1"
-    ):
-        pixels = high + low - pixels
-    pixels = (pixels - low) * (255.0 / (high - low)) if high > low else np.zeros_like(pixels)
-    output = np.clip(np.rint(pixels), 0, 255).astype(np.uint8)
+    output = scale_radiograph_to_uint8(
+        dataset.pixel_array,
+        photometric_interpretation=str(getattr(dataset, "PhotometricInterpretation", "")),
+        invert_monochrome1=invert_monochrome1,
+    )
     destination.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(output).save(destination)
     return int(output.shape[1]), int(output.shape[0])

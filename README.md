@@ -395,6 +395,35 @@ This regenerates the report Section 8 evidence:
 - `results/figures/robustness_map_50_95_relative.png` (report Figure 6); and
 - `results/logs/phase6_robustness/summary.json` plus 72 prediction bundles.
 
+## 6a. Run the raw-radiography acquisition-shift analysis
+
+This checkpoint-only extension reuses the frozen 300-image robustness sample
+and both seed-17 checkpoints. Preflight directly verifies all ignored raw DICOM
+files, their metadata contract, and exact pixel equivalence between clean raw
+reconversion and the canonical PNGs before any GPU work. The full run applies
+standard DICOM `LINEAR` VOI Window Center/Width alternatives,
+signal-dependent Poisson count noise, and finite Gaussian detector/processing
+blur kernels before the shared per-image min-max scaler.
+
+```powershell
+& $benchmarkPython -m pytest tests/test_radiography_shifts.py tests/test_prepare.py -q
+& $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode preflight
+& $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode smoke
+& $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode run
+```
+
+This generates:
+
+- `results/tables/acquisition_shift_results.csv`, including clean and shifted
+  performance plus `DSI = 1 - shifted / clean` for all seven unified metrics;
+- `results/logs/phase22_acquisition_shifts/summary.json`; and
+- 20 resumable, hash-bound prediction bundles.
+
+The method, findings, metadata constraints, and explicit distinction from the
+post-conversion digital corruption grid are documented in
+[`docs/ACQUISITION_SHIFTS.md`](docs/ACQUISITION_SHIFTS.md). Both analyses remain
+internal synthetic sensitivity studies, not clinical-robustness evidence.
+
 ## 7. Run the Grad-CAM analysis
 
 Preflight binds the analysis to the completed robustness sample and primary

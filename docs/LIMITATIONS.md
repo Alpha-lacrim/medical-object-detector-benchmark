@@ -187,6 +187,21 @@ The grid measures digital robustness under the specified transformations, not
 clinical robustness or safety. It repeatedly transforms the same 300 images,
 so corruption conditions are not independent deployment cohorts.
 
+Batch 22 separately applies acquisition-physics-motivated shifts to the raw
+DICOM stored arrays before the canonical 8-bit conversion. The sampled files
+are 8-bit unsigned CR radiographs with no native Window Center/Width, VOI LUT,
+Modality LUT, Rescale Slope/Intercept, or calibrated exposure metadata.
+Consequently, the exact DICOM `LINEAR` windows are controlled sensitivity
+settings rather than recovered vendor presets; the Poisson count budgets are
+synthetic dose-reduction proxies rather than patient-dose measurements; and the
+Gaussian kernels are ordered detector/processing-blur proxies rather than
+measured scanner transfer functions. Per-image min-max scaling can also cancel
+non-clipping affine changes. This raw-stage analysis is distinct from and more
+acquisition-motivated than the post-conversion digital corruption grid, but it
+still reuses the same 300 images and one checkpoint per detector. It does not
+establish clinical robustness, external-site transportability, scanner safety,
+or performance under a prospectively changed acquisition protocol.
+
 ## Explainability scope
 
 Grad-CAM uses matched stride-16, 40 by 40 backbone maps interpolated to the
