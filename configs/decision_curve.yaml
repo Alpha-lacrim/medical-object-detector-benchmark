@@ -1,0 +1,44 @@
+schema_version: 1
+analysis_id: rsna-phase20-patient-cluster-decision-curve
+seed: 20260827
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+  test_split_manifest: data/splits/rsna-pneumonia-5000/test.csv
+
+analysis:
+  detectors: [faster_rcnn, yolo11s]
+  threshold_start: 0.01
+  threshold_stop: 0.99
+  threshold_steps: 99
+  confidence_level: 0.95
+  bootstrap_resamples: 2000
+  bootstrap_method: paired_hierarchical_patient_cluster_percentile
+  seed_aggregation: arithmetic_mean_across_frozen_test_seeds
+  decision_unit: exam_image
+  decision_score: maximum_emitted_box_confidence
+  outcome_definition: at_least_one_lung_opacity_annotation
+  score_interpretation: raw_detector_score_used_as_nominal_threshold_probability
+  population_label: full held-out RSNA test split
+  expected_image_count: 750
+  manifest_split_column: split
+  expected_split: test
+  manifest_image_column: processed_file
+  patient_group_column: nih_patient_id
+  positive_column: is_positive
+  positive_value: "1"
+
+plot:
+  width_inches: 11.5
+  height_inches: 6.4
+  dpi: 180
+  y_min: -0.22
+  y_max: 0.29
+
+outputs:
+  summary_table: results/tables/dca_summary.csv
+  decision_curve_figure: results/figures/dca_curves.png
+  log_dir: results/logs/phase20_decision_curve
+  summary_json: results/logs/phase20_decision_curve/summary.json

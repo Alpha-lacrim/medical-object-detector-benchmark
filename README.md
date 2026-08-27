@@ -354,6 +354,26 @@ these are a separately reported cost-sensitivity extension; they do not replace
 Batch 14's primary operating points. Definitions and findings are in
 `docs/THRESHOLD_CALIBRATION.md`.
 
+### 5g. Run full-test decision curve analysis
+
+This CPU-only analysis reduces each detector to an exam-level flag based on the maximum
+emitted box confidence, then computes net benefit over thresholds 0.01--0.99 from all ten
+frozen Phase 5 test bundles. The prevalence input is derived from the complete 750-image
+test manifest (169 positive images; 22.533%), not from the 300-image robustness sample. The
+2,000 common draws reuse the patient-cluster/seed bootstrap machinery. No checkpoint,
+inference, or training is involved:
+
+```powershell
+& $benchmarkPython -m src.clinical.decision_curve --config configs/decision_curve.yaml --mode preflight
+& $benchmarkPython -m src.clinical.decision_curve --config configs/decision_curve.yaml --mode run
+```
+
+The run regenerates `results/tables/dca_summary.csv`,
+`results/figures/dca_curves.png`, and the provenance record at
+`results/logs/phase20_decision_curve/summary.json`. The exam-level decision rule,
+patient-cluster uncertainty, prevalence scope, findings, and clinical-interpretation limits
+are in `docs/DCA_ANALYSIS.md`.
+
 ## 6. Run the common-corruption benchmark
 
 The run command deterministically draws or verifies the 300-image sample,
@@ -462,6 +482,7 @@ artifacts; the report assembly step does not recompute values.
 | Research-track Pareto figure (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Five-seed detection calibration | `calibration_summary.csv`; `reliability_diagrams.png` | offline `src.stats.calibration --mode run` in §5e |
 | Cost-sensitive threshold calibration (frozen n=3 validation) | `threshold_calibration_summary.csv`; `threshold_calibration_sensitivity.png` | offline `src.stats.threshold_calibration --mode run` in §5f |
+| Full-test decision curve analysis | `dca_summary.csv`; `dca_curves.png` | offline `src.clinical.decision_curve --mode run` in §5g |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
 | Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
