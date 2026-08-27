@@ -216,6 +216,17 @@ and records the environment, but Faster R-CNN CAM bytes may vary slightly on a
 different hardware/library rerun. More broadly, a plausible heatmap is a
 failure-analysis association map and not evidence of clinical reasoning.
 
+Batch 21 adds parameter- and data-randomization sanity checks on a nested
+50-image/41-patient subset of the same robustness pool. Near-zero correlations
+show sensitivity to learned weights and spatial input structure, but this is a
+necessary methodological check rather than evidence of causal or clinically
+appropriate attention. The sanity analysis uses a fixed trained reference
+region and pre-activation foreground score rather than Phase 7's ground-truth-
+associated post-activation target. It also excludes seven Faster R-CNN
+shuffled-input maps and four YOLO11s randomized-weight maps that become zero or
+constant; the one random initialization, severe out-of-distribution pixel
+permutation, and coarse interpolated maps limit generalization.
+
 ## Statistical scope
 
 Batch 13 identified and corrected the original image-level clustering error.

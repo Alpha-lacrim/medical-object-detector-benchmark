@@ -420,6 +420,30 @@ This regenerates the report Section 9 evidence:
 - `results/figures/gradcam_failure_cases.png` (report Figure 9); and
 - `results/logs/phase7_explainability/summary.json`.
 
+## 7a. Run the Grad-CAM sanity checks
+
+This checkpoint-only extension selects 50 images from the already-frozen
+robustness manifest, then compares trained maps with maps after Xavier weight
+randomization and deterministic within-image pixel shuffling. It performs no
+training. Preflight validates the Phase 6/7 provenance and materializes the
+nested 50-image manifest before CUDA is initialized.
+
+```powershell
+& $benchmarkPython -m pytest tests/test_xai_sanity.py tests/test_gradcam.py tests/test_explainability.py -q
+& $benchmarkPython -m src.explainability.sanity_checks --config configs/xai_sanity.yaml --mode preflight
+& $benchmarkPython -m src.explainability.sanity_checks --config configs/xai_sanity.yaml --mode run
+```
+
+This generates:
+
+- `results/tables/gradcam_sanity_summary.csv`;
+- `results/tables/gradcam_sanity_per_image.csv`;
+- `results/figures/gradcam_sanity_panel.png`; and
+- `results/logs/phase21_xai_sanity/summary.json` plus the nested-subset manifest.
+
+The method, denominators, zero-map failures, and interpretation are documented
+in [`docs/XAI_SANITY.md`](docs/XAI_SANITY.md).
+
 ## 8. Run the paired statistical analysis
 
 The current clean-only CPU refresh reads the ten frozen clean bundles and the
@@ -485,6 +509,7 @@ artifacts; the report assembly step does not recompute values.
 | Full-test decision curve analysis | `dca_summary.csv`; `dca_curves.png` | offline `src.clinical.decision_curve --mode run` in §5g |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
+| Grad-CAM parameter/data sanity checks | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png` | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
 | Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
 | Frozen seed-17 corruption inference | `statistical_robustness_comparison.csv` | prior full-scope statistics `--mode run` after §6; not rerun for n=5 |
 

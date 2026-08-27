@@ -1,0 +1,67 @@
+schema_version: 1
+experiment_id: rsna-phase21-gradcam-sanity
+seed: 17
+
+phase7_config: configs/explainability.yaml
+phase7_summary: results/logs/phase7_explainability/summary.json
+
+sampling:
+  source_pool_manifest: data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv
+  output_manifest: results/logs/phase21_xai_sanity/subset_manifest.csv
+  size: 50
+  id_column: processed_file
+  patient_column: nih_patient_id
+  stratum_column: study_stratum
+  allocation: proportional_largest_remainder
+  selection: seeded_without_replacement_within_frozen_pool
+  selection_seed: 17
+
+target:
+  reference_selection: trained_highest_score_retained_candidate
+  map_target: pre_activation_foreground_score_at_trained_reference_region
+  faster_rcnn_region_scoring: fixed_roi_classifier
+  yolo11s_region_scoring: closest_raw_anchor_center
+
+parameter_randomization:
+  copy_method: deep_copy_trained_model
+  weight_initialization: xavier_normal
+  one_dimensional_weight_view: row_vector
+  bias_initialization: zeros
+  preserve_non_weight_non_bias_buffers: true
+  autocast: disabled_for_randomized_weight_numerical_validity
+  gain: 1.0
+  seed: 17
+
+data_randomization:
+  method: spatial_pixel_vector_permutation_without_replacement
+  seed_derivation: sha256_global_seed_and_image_id
+  seed: 31017
+
+correlation:
+  method: pearson
+  population: valid_nonconstant_paired_maps
+  zero_energy_policy: exclude_and_report
+  sanity_failure_threshold: 0.5
+  epsilon: 1.0e-12
+
+runtime:
+  device: cuda
+  progress_every_images: 10
+
+panel:
+  cases_per_stratum: 1
+  selection: lexicographically_first_nested_subset_image
+  overlay_alpha: 0.48
+  colormap: inferno
+  candidate_color: cyan
+  line_width: 1.5
+  width_inches: 17.5
+  row_height_inches: 3.1
+  dpi: 180
+
+outputs:
+  log_dir: results/logs/phase21_xai_sanity
+  summary_json: results/logs/phase21_xai_sanity/summary.json
+  detail_table: results/tables/gradcam_sanity_per_image.csv
+  summary_table: results/tables/gradcam_sanity_summary.csv
+  panel_figure: results/figures/gradcam_sanity_panel.png

@@ -118,6 +118,12 @@ ROI Align backward is not bitwise deterministic; the run uses the project's
 seeded deterministic-warn-only policy and records its environment, but Faster
 R-CNN CAM bytes are not guaranteed identical across hardware/library reruns.
 
+The checkpoint-only [Grad-CAM sanity extension](XAI_SANITY.md) subsequently
+found near-zero trained-versus-randomized map correlations for both detectors
+under parameter and pixel randomization. That supports parameter/input
+sensitivity but does not alter the weak-localization result or turn any map
+into evidence of clinical reasoning.
+
 ## Reproduction
 
 ```powershell
