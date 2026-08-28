@@ -16,6 +16,8 @@ dependencies = [
   "scipy==1.17.1",
   "Pillow==12.3.0",
   "matplotlib==3.11.1",
+  "pandas==3.0.3",
+  "seaborn==0.13.2",
   "pycocotools==2.0.11",
   "pydantic==2.13.4",
   "PyYAML==6.0.3",

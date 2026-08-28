@@ -1,0 +1,53 @@
+schema_version: 1
+analysis_id: rsna-phase23-raincloud-metrics
+seed: 20260828
+
+inputs:
+  summary_table: results/tables/detector_comparison.csv
+  per_seed_table: results/tables/detector_comparison_per_seed.csv
+
+detectors:
+  - key: faster_rcnn
+    summary_prefix: faster_rcnn
+    label: Faster R-CNN
+    color: "#2f6b9a"
+  - key: yolo11s
+    summary_prefix: yolo11s
+    label: YOLO11s
+    color: "#d47a2c"
+
+metrics:
+  - {key: precision, label: Precision, group: predictive, panel_index: 0, display_unit: ratio, scale: 1.0}
+  - {key: recall, label: Recall, group: predictive, panel_index: 1, display_unit: ratio, scale: 1.0}
+  - {key: f1, label: F1, group: predictive, panel_index: 2, display_unit: ratio, scale: 1.0}
+  - {key: iou, label: Conditional IoU, group: predictive, panel_index: 3, display_unit: ratio, scale: 1.0}
+  - {key: dice, label: Conditional Dice, group: predictive, panel_index: 4, display_unit: ratio, scale: 1.0}
+  - {key: map_50, label: mAP@0.5, group: predictive, panel_index: 5, display_unit: ratio, scale: 1.0}
+  - {key: map_50_95, label: mAP@0.5:0.95, group: predictive, panel_index: 6, display_unit: ratio, scale: 1.0}
+  - {key: profile_fps, label: Throughput, group: compute, panel_index: 8, display_unit: images/s, scale: 1.0}
+  - {key: inference_time_ms, label: Mean inference latency, group: compute, panel_index: 9, display_unit: ms/image, scale: 1.0}
+  - {key: total_parameters, label: Total parameters, group: compute, panel_index: 10, display_unit: million, scale: 0.000001}
+  - {key: trainable_parameters, label: Trainable parameters, group: compute, panel_index: 11, display_unit: million, scale: 0.000001}
+  - {key: gflops, label: Estimated operations, group: compute, panel_index: 12, display_unit: GFLOPs/image, scale: 1.0}
+  - {key: peak_gpu_memory_mib, label: Peak training GPU memory, group: compute, panel_index: 13, display_unit: MiB, scale: 1.0}
+  - {key: training_time_seconds, label: Training time, group: compute, panel_index: 14, display_unit: hours, scale: 0.0002777777777777778}
+
+plot:
+  rows: 4
+  columns: 4
+  width_inches: 17.0
+  height_inches: 15.5
+  dpi: 180
+  violin_bandwidth_adjust: 0.65
+  violin_width: 0.82
+  box_width: 0.22
+  point_size: 4.5
+  point_jitter: 0.08
+  panel_title_size: 10.5
+  axis_label_size: 9.0
+  tick_label_size: 8.0
+  sample_label_size: 7.5
+
+outputs:
+  figure: results/figures/raincloud_metrics.png
+  summary_json: results/logs/phase23_reporting/raincloud_metrics_summary.json

@@ -9,6 +9,8 @@ pytest==9.1.1
 ruff==0.16.0
 Pillow==12.3.0
 matplotlib==3.11.1
+pandas==3.0.3
+seaborn==0.13.2
 PyYAML==6.0.3
 pydantic==2.13.4
 pydicom==3.0.2

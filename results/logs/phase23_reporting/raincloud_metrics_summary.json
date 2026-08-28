@@ -1,0 +1,294 @@
+{
+  "analysis_id": "rsna-phase23-raincloud-metrics",
+  "figure": "results/figures/raincloud_metrics.png",
+  "figure_sha256": "0ffdfcf0667c752dfe43bac413caf0202991b5466bc7c322b9e6d33f1128ea4c",
+  "inputs": {
+    "per_seed_table": "results/tables/detector_comparison_per_seed.csv",
+    "per_seed_table_sha256": "5d2bd5c1f2e2a6f666efbde49c9d6c30d047cb25e8326f5f90052233c14374e4",
+    "summary_table": "results/tables/detector_comparison.csv",
+    "summary_table_sha256": "c5f3181845d1fd3ea84ce39c1b8329080a8108217e5eee13281ae75f129818a1"
+  },
+  "metrics": [
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "precision",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "recall",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "f1",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 4
+      },
+      "metric": "iou",
+      "sample_size_note": "Conditional matched-box metric; detector-specific n excludes only seeds with no fixed-threshold true positive.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": "no_detections_at_frozen_score_threshold"
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": "271"
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 4
+      },
+      "metric": "dice",
+      "sample_size_note": "Conditional matched-box metric; detector-specific n excludes only seeds with no fixed-threshold true positive.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": "no_detections_at_frozen_score_threshold"
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": "271"
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "map_50",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "map_50_95",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "profile_fps",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "inference_time_ms",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "total_parameters",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "trainable_parameters",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "gflops",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "peak_gpu_memory_mib",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    },
+    {
+      "attempted_counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "counts": {
+        "faster_rcnn": 5,
+        "yolo11s": 5
+      },
+      "metric": "training_time_seconds",
+      "sample_size_note": "All predeclared attempted seeds are included.",
+      "undefined_reasons": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      },
+      "undefined_seeds": {
+        "faster_rcnn": "",
+        "yolo11s": ""
+      }
+    }
+  ],
+  "schema_version": 1
+}

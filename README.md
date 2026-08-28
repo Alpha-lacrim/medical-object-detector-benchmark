@@ -374,6 +374,26 @@ The run regenerates `results/tables/dca_summary.csv`,
 patient-cluster uncertainty, prevalence scope, findings, and clinical-interpretation limits
 are in `docs/DCA_ANALYSIS.md`.
 
+### 5h. Regenerate the seed-level raincloud comparison
+
+This CPU-only reporting step reads the five-seed publication table and its ten
+run-level records. Before plotting, it recomputes every configured mean, sample
+standard deviation, finite seed count, and attempted seed count from the
+per-seed table and rejects any mismatch. No checkpoint, prediction bundle,
+inference, resampling, or training is involved:
+
+```powershell
+& $benchmarkPython -m src.plot_raincloud_metrics --config configs/raincloud_metrics.yaml --mode preflight
+& $benchmarkPython -m src.plot_raincloud_metrics --config configs/raincloud_metrics.yaml --mode run
+```
+
+The run regenerates `results/figures/raincloud_metrics.png` and the input,
+figure-hash, and panel-count record at
+`results/logs/phase23_reporting/raincloud_metrics_summary.json`. All 14 panels
+state their actual finite seed count; conditional IoU and Dice explicitly show
+Faster R-CNN `n=5` versus YOLO11s `n=4`, while the other panels use `n=5` per
+detector.
+
 ## 6. Run the common-corruption benchmark
 
 The run command deterministically draws or verifies the 300-image sample,
@@ -536,6 +556,7 @@ artifacts; the report assembly step does not recompute values.
 | Five-seed detection calibration | `calibration_summary.csv`; `reliability_diagrams.png` | offline `src.stats.calibration --mode run` in §5e |
 | Cost-sensitive threshold calibration (frozen n=3 validation) | `threshold_calibration_summary.csv`; `threshold_calibration_sensitivity.png` | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Full-test decision curve analysis | `dca_summary.csv`; `dca_curves.png` | offline `src.clinical.decision_curve --mode run` in §5g |
+| Seed-level predictive/compute rainclouds | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png` | audited `src.plot_raincloud_metrics --mode run` in §5h |
 | Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
 | Grad-CAM parameter/data sanity checks | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png` | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
