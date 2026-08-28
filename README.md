@@ -539,28 +539,31 @@ robustness and explainability remain seed-17-only.
 
 ## Report artifact-to-command index
 
-Report tables are rounded Markdown views of generated machine-readable
-artifacts; the report assembly step does not recompute values.
+Report and paper-draft values are rounded views of committed machine-readable
+artifacts; manuscript assembly does not recompute them. The index explicitly
+includes every executable analysis module added in Batches 18--23.
 
-| Report item | Generated source | Regenerating command |
+| Report or paper item | Generated source | Regenerating command |
 |---|---|---|
-| Table 1; Figures 1–2 | audit/split manifests; `rsna_*.png` | `src.data.prepare`, then `src.data.visualize` in §2 |
+| Paper §3.1; report Table 1 and Figures 1–2 | audit/split manifests; `rsna_*.png`; `rsna_eda_summary.json` | `src.data.prepare`, then `src.data.visualize` in §2 |
+| Paper §§3.2–3.3 protocol parameters | run-level `resolved_config.json` / `resolved_experiment.json`; Phase 5 summary | detector train/finalize in §§3–4, then `src.evaluate --mode evaluate` in §5 |
 | Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
 | Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
-| Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
+| Paper §§4.1 and 4.5; report Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
 | YOLO seed-stability diagnostic | `yolo_seed_stability.csv` | `src.analyze_yolo_seed_stability` in §5 |
-| Research-track PR/F1 figures (frozen n=3) | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
-| Validation-selected operating points (frozen n=3) | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
-| Research-track FROC figure (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
-| Research-track Pareto figure (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
-| Five-seed detection calibration | `calibration_summary.csv`; `reliability_diagrams.png` | offline `src.stats.calibration --mode run` in §5e |
-| Cost-sensitive threshold calibration (frozen n=3 validation) | `threshold_calibration_summary.csv`; `threshold_calibration_sensitivity.png` | offline `src.stats.threshold_calibration --mode run` in §5f |
-| Full-test decision curve analysis | `dca_summary.csv`; `dca_curves.png` | offline `src.clinical.decision_curve --mode run` in §5g |
-| Seed-level predictive/compute rainclouds | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png` | audited `src.plot_raincloud_metrics --mode run` in §5h |
-| Table 5; Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
+| Paper §4.2 PR/F1 evidence (frozen n=3) | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
+| Paper §4.2 validation-selected operating points (frozen n=3) | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
+| Paper §4.2 FROC evidence (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
+| Paper §4.5 Pareto evidence (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
+| Paper §4.4 five-seed detection calibration (Batch 18) | `calibration_summary.csv`; `reliability_diagrams.png`; Phase 18 summary | offline `src.stats.calibration --mode run` in §5e |
+| Paper §4.3 cost-sensitive threshold calibration (Batch 19; frozen n=3 validation) | `threshold_calibration_summary.csv`; `threshold_calibration_sensitivity.png`; Phase 19 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
+| Paper §4.6 full-test decision curves (Batch 20) | `dca_summary.csv`; `dca_curves.png`; Phase 20 summary | offline `src.clinical.decision_curve --mode run` in §5g |
+| Paper Figure 1 seed-level predictive/compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
+| Paper §4.7; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
+| Paper §4.8 acquisition-shift sensitivity (Batch 22) | `acquisition_shift_results.csv`; 20 prediction bundles; Phase 22 summary | checkpoint-only `src.robustness.radiography_shifts --mode run` in §6a |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
-| Grad-CAM parameter/data sanity checks | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png` | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
-| Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
+| Paper §4.9 Grad-CAM parameter/data sanity checks (Batch 21) | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png`; Phase 21 summary | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
+| Paper §4.10; report Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
 | Frozen seed-17 corruption inference | `statistical_robustness_comparison.csv` | prior full-scope statistics `--mode run` after §6; not rerun for n=5 |
 
 ## Definition of Done audit

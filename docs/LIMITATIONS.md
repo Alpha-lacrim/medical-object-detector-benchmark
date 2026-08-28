@@ -161,6 +161,19 @@ the fixed IoU-0.50 correctness rule, five-bin feature partition, and eight-sampl
 minimum; it is not directly comparable to D-ECE under a different protocol and does not
 establish calibrated clinical risk.
 
+Batch 20's decision-curve analysis is another internal redescription of the
+same frozen held-out evidence, not a clinical-utility validation. Its 22.533%
+prevalence is the empirical image-level prevalence of the deliberately
+stratified 750-image test subset (169 positive and 581 negative images), not a
+natural clinical or patient-level prevalence. The same test set supplies both
+that prevalence and the evaluated curves. The action rule collapses maximum
+box confidence to an exam flag and ignores whether the flag localizes an
+opacity; raw detector scores are treated as nominal threshold probabilities
+without a fitted clinical-risk calibration map. Patient/seed intervals are
+pointwise rather than simultaneous, and detector superiority at a threshold
+can coexist with negative net benefit relative to treat-none. None of the
+reported ranges is a deployment threshold or evidence of prospective benefit.
+
 Registered-operation GFLOPs omit unsupported operations and are estimates, not
 direct hardware timings. Synchronized batch-1 speed profiles include each
 framework's native detector forward and postprocessing, but Faster R-CNN
@@ -282,3 +295,10 @@ validation, human-factors and safety engineering, monitoring, and the applicable
 medical-device regulatory process, such as FDA clearance or CE marking. Those
 activities are beyond this project; mentioning them defines the boundary of the
 claims and is not an implementation deliverable.
+
+The Batch 23 CLAIM, TRIPOD+AI, and STARD-AI crosswalk is a repository-evidence
+audit, not certification of compliance. The evidence base still lacks source
+accrual dates, a local ethics/consent determination, registration,
+funding/conflict disclosures, patient/public involvement, a participant-flow
+diagram, demographic subgroup/fairness evaluation, and external evaluation.
+Narrative reporting cannot repair those gaps without new traceable evidence.
