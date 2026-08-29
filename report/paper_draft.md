@@ -31,10 +31,9 @@ YOLO11s. Conditional matched-box IoU and Dice were inconclusive.
 Digital and raw-array acquisition-motivated stress tests showed substantial,
 condition-specific degradation in both pipelines. Grad-CAM maps passed basic
 parameter and input randomization checks but localized annotated opacities only
-weakly. Decision curves suggested different nominal net-benefit regimes, but
-used uncalibrated raw scores and an enriched internal test prevalence. These
-results establish a multi-axis trade-off between two disclosed pipelines, not a
-universal detector-family ranking or evidence of clinical readiness.
+weakly. These results establish a multi-axis trade-off between two disclosed
+pipelines, not a universal detector-family ranking or evidence of clinical
+readiness.
 
 ## 1. Introduction
 
@@ -85,8 +84,8 @@ exploratory threshold sweep, official precision-recall curves,
 validation-selected operating points, free-response ROC (FROC), and a separate
 recall-weighted F-beta validation sensitivity analysis. Third, it broadens the evidence
 base beyond clean mAP through detection-specific calibration, patient-cluster
-inference, accuracy-efficiency Pareto analysis, decision-curve analysis (DCA),
-digital and acquisition-motivated robustness, and Grad-CAM localization plus
+inference, accuracy-efficiency Pareto analysis, digital and
+acquisition-motivated robustness, and Grad-CAM localization plus
 randomization sanity checks.
 
 The hypotheses were recorded retrospectively after most experimental artifacts
@@ -278,9 +277,8 @@ The evidence has deliberately different scopes:
   five-seed result was known.
 - Digital-corruption, raw-array acquisition-shift, and primary Grad-CAM analyses
   use the seed-17 checkpoint from each detector on one fixed 300-image sample.
-- Detection calibration and DCA use all five frozen clean-test bundles. The
-  XAI sanity extension uses a nested 50-image subset and the seed-17
-  checkpoints.
+- Detection calibration uses all five frozen clean-test bundles. The XAI
+  sanity extension uses a nested 50-image subset and the seed-17 checkpoints.
 
 These sample-size labels travel with every result. Exhaustive seed rows and
 explicit n=3 archives are linked in [Supplementary Sections S2 and
@@ -340,7 +338,8 @@ $r\in\{1,9,25,100\}$, with $N$ the validation-image count. These are linear
 box-error penalties, not measured patient harms or deployment utilities.
 Decision D-006 keeps both analyses separate from the primary maximum-mean-F1
 thresholds. Selection and diagnostics used validation only; no sensitivity
-threshold was selected from or applied to test, FROC, Pareto, or DCA.
+threshold was selected from or applied to test, FROC, Pareto, or any
+downstream outcome analysis.
 
 ### 3.6 Detection-specific confidence calibration
 
@@ -409,30 +408,7 @@ using mAP@0.5:0.95. These settings are acquisition-physics-motivated internal
 stress tests, not recovered vendor presets, calibrated dose response, measured
 scanner transfer functions, or clinical robustness.
 
-### 3.9 Decision-curve analysis
-
-DCA [@vickers2006decisioncurve] collapsed each frozen detector/seed output to
-an exam-level action: flag an image if its maximum emitted box confidence was
-at least $\tau$. Outcome
-positivity meant at least one opacity annotation, irrespective of whether the
-flag localized it. The full test set contained 169 positive and 581 negative
-images, giving empirical image-level prevalence $169/750=0.225333$. For 99
-nominal thresholds,
-
-$$
-\operatorname{NB}(\tau)=\frac{TP(\tau)}{N}
--\frac{FP(\tau)}{N}\frac{\tau}{1-\tau}.
-$$
-
-Treat-none had zero net benefit; treat-all used the empirical test prevalence.
-The point curve averaged five seed-specific values. Two thousand common
-patient/seed bootstrap draws yielded pointwise intervals for both detectors and
-their paired difference. Raw detector scores were treated as nominal threshold
-probabilities even though no clinical-risk calibration map had been fitted.
-Accordingly, the DCA is an internal retrospective redescription, not a clinical
-utility or threshold-validation study.
-
-### 3.10 Grad-CAM localization and sanity checks
+### 3.9 Grad-CAM localization and sanity checks
 
 The primary explanation analysis used ordinary ReLU Grad-CAM at matched
 stride-16, 40x40 pre-neck backbone tensors: ResNet-50
@@ -456,7 +432,7 @@ trained and randomized maps was $C_{sanity}$; correlations at least 0.50 were
 predeclared descriptive failures. Zero, constant, non-finite, or failed maps
 were excluded and counted, not imputed.
 
-### 3.11 Inferential targets and patient-cluster protocol
+### 3.10 Inferential targets and patient-cluster protocol
 
 The primary **training-procedure estimand** included held-out patient sampling
 and stochastic retraining variability. Clean pointwise 95% intervals used
@@ -630,33 +606,7 @@ universal property of model families.
 
 ![Figure 5. Frozen three-seed accuracy-efficiency Pareto panels. Recall uses validation-selected thresholds; no panel is a five-seed frontier.](../results/figures/pareto_frontier.png)
 
-### 4.6 Decision-curve net benefit
-
-The DCA used all five test bundles and the full 750-image test split. Treat-all
-had the largest point estimate from nominal thresholds 0.01--0.03. Faster
-R-CNN was the largest point-estimate strategy from 0.04--0.41; at 0.04 its net
-benefit was 0.1949 (95% CI 0.1450--0.2484), compared with 0.0891
-(0.0389--0.1435) for YOLO11s and 0.1931 for treat-all. At 0.20 the respective
-detector values were 0.1185 (0.0603--0.1786) and 0.0481
-(0.0183--0.0859), while treat-all was 0.0317.
-
-YOLO11s was the largest point-estimate strategy from 0.42--0.62. Treat-none
-was largest from 0.63--0.84. Paired pointwise intervals favored Faster R-CNN
-from 0.01--0.27 and YOLO11s at 0.60--0.62 and 0.64--0.88. The latter range did
-not imply positive utility: across 0.64--0.84 both detectors had negative net
-benefit and YOLO11s was only less harmful than Faster R-CNN, while treat-none
-was preferable. Sparse higher-threshold reversals had zero lower bounds or zero
-net benefit.
-
-![Figure 6. Internal exam-level decision curves using empirical test prevalence and raw detector scores as nominal threshold probabilities.](../results/figures/dca_curves.png)
-
-The result gives scenario-linked internal descriptions, not clinically
-actionable thresholds. The same deliberately stratified test set supplied the
-22.533% prevalence and evaluated the curves; localization was ignored by the
-exam-flag estimand; and Batch 18 demonstrated material raw-score calibration
-error.
-
-### 4.7 Digital common-corruption robustness
+### 4.6 Digital common-corruption robustness
 
 On the 300-image clean robustness sample, mAP@0.5:0.95 was 0.147802 for Faster
 R-CNN and 0.076295 for YOLO11s. Averaged equally across all 35 corrupted
@@ -684,9 +634,9 @@ was 0.1156 (0.0609--0.1689) but did not survive the 35-condition Holm family
 (p=0.0770). Pointwise separation and multiplicity-controlled evidence therefore
 led to different conclusions.
 
-![Figure 7. Seed-17 clean-relative mAP@0.5:0.95 under seven post-conversion digital corruptions and five severities.](../results/figures/robustness_map_50_95_relative.png)
+![Figure 6. Seed-17 clean-relative mAP@0.5:0.95 under seven post-conversion digital corruptions and five severities.](../results/figures/robustness_map_50_95_relative.png)
 
-### 4.8 Raw-array acquisition-shift sensitivity
+### 4.7 Raw-array acquisition-shift sensitivity
 
 Acquisition-motivated shifts produced ordered mAP degradation within the
 Poisson and Gaussian series. Under the strongest Poisson condition (12.5% of
@@ -703,7 +653,7 @@ scaling can cancel non-clipping affine changes. No VOI result establishes
 scanner-setting invariance. The full seven-metric, 20-row table remains in
 [Supplementary Section S5](../docs/SUPPLEMENTARY.md#s5-complete-digital-corruption-and-acquisition-shift-grids).
 
-### 4.9 Explainability and XAI sanity findings
+### 4.8 Explainability and XAI sanity findings
 
 Grad-CAM localization was weak for both detectors. Faster R-CNN had 110 valid
 maps from 111 boxes, mean energy-in-box 0.0869 versus a 0.0713 box-area
@@ -725,11 +675,11 @@ and -0.0034. No valid map crossed the predeclared correlation threshold of
 randomized-weight maps were zero or constant and excluded rather than imputed.
 The result reduces concern that the maps are invariant architecture templates,
 but does not change the weak-localization finding or validate clinical
-reasoning (Figure 8).
+reasoning (Figure 7).
 
-![Figure 8. Nested 50-image Grad-CAM parameter- and data-randomization sanity panel.](../results/figures/gradcam_sanity_panel.png)
+![Figure 7. Nested 50-image Grad-CAM parameter- and data-randomization sanity panel.](../results/figures/gradcam_sanity_panel.png)
 
-### 4.10 Estimand-separated statistical synthesis
+### 4.9 Estimand-separated statistical synthesis
 
 The table reports the primary training-procedure differences and separately the
 secondary checkpoint-conditional p-values. Differences are Faster R-CNN minus
@@ -833,17 +783,6 @@ assumed preferences or penalties, they are sensitivity evidence only. D-006
 appropriately preserves the equal-weight validation-F1 thresholds as the
 primary historical operating points.
 
-The DCA similarly described scenario-dependent nominal ranges, not deployment
-utility. In the low-to-middle range, Faster R-CNN produced the larger internal
-net benefit and aligned with an accuracy-sensitive retrospective screening
-scenario. YOLO11s became the larger detector strategy over a narrower positive
-range, consistent with a compute-constrained human-reviewed scenario. At high
-thresholds, its paired advantage frequently meant only that it was less harmful
-than Faster R-CNN while treat-none remained preferable. The analysis collapsed
-localization to an exam flag, used enriched same-test prevalence, and treated
-uncalibrated raw detector confidences as nominal probabilities. Those features
-prevent a clinical-utility interpretation.
-
 ### 5.4 Robustness is condition-specific and remains internal
 
 The two robustness studies answer different questions. Digital corruptions
@@ -880,8 +819,8 @@ clinically validated reasoning.
 For GPU-backed retrospective screening or server-side case prioritization in
 which detection coverage is the binding criterion, Faster R-CNN is the more
 defensible of these two measured pipelines. It has stronger AP, FROC
-sensitivity, internal low-to-middle-threshold net benefit, and raw digital-
-corruption performance. Its mean throughput of 20.28 FPS is slower but remains
+sensitivity, and raw digital-corruption performance. Its mean throughput of
+20.28 FPS is slower but remains
 well above the rate of a human radiograph-reading workflow on the tested GPU.
 
 For resource-constrained point-of-care assistance in which every image still
@@ -916,9 +855,9 @@ real patients, or guide care.
 **Dataset, population, and target.** The experiment uses one non-specific
 `Lung Opacity` category from one historical, single-institution, adult-heavy
 RSNA/NIH source. The 5,000-study subset is stratified and enriched rather than
-prevalence representative. Precision, false-positive behavior, and DCA
-prevalence are therefore benchmark characteristics, not deployment predictive
-values. Results may not transport to pediatric patients, portable-care
+prevalence representative. Precision and false-positive behavior are therefore
+benchmark characteristics, not deployment predictive values. Results may not
+transport to pediatric patients, portable-care
 settings, contemporary equipment, other institutions, modalities, or
 multi-class tasks. No external test set or demographic subgroup/fairness
 analysis was available. Source accrual dates, full acquisition-device and
@@ -966,13 +905,20 @@ bundles, conditions only on emitted predictions at the 0.001 floor, depends on
 the chosen IoU/binning/cell protocol, and neither fits a calibrator nor measures
 missed-target or clinical-risk calibration.
 
-**Decision analysis.** DCA uses raw detector scores as nominal threshold
-probabilities despite measured calibration error. It collapses box predictions
-to an exam flag, ignores localization, uses the same stratified test set for
-both empirical prevalence and curve evaluation, and reports pointwise rather
-than simultaneous intervals. High-threshold paired superiority can coexist
-with negative net benefit relative to treat-none. No range in this study is a
-deployment threshold or evidence of prospective clinical utility.
+**Decision analysis.** The historical exploratory calculation defined action
+by maximum detector confidence `>= tau` and reused the same raw `tau` in the
+`tau/(1-tau)` false-positive weight. A raw detector score is not automatically
+the threshold probability required by conventional DCA
+[@vickers2006decisioncurve; @vickers2008decisioncurveextensions]. Batch 30
+therefore classified the calculation as non-standard, removed it from the main
+Results, and retained its exact arithmetic only as a relabeled supplementary
+raw-score utility/sensitivity artifact. Probability-based salvage was not
+forced because frozen validation predictions were available for only six of
+ten retained runs; no calibrator was selected or fitted. The enriched internal
+test subset (169/750 positives; 323 patient groups) is not a deployment-
+prevalence sample. The preserved calculation supplies no conventional
+net-benefit, clinical-utility, beneficial-range, or deployment-readiness
+evidence.
 
 **Robustness.** The digital severity indices are not physically calibrated or
 comparable across corruption types. Repeated transformations of the same 300
@@ -1046,8 +992,9 @@ YOLO11s was the more attractive compute-oriented pipeline only where mandatory
 human review and a lower resource footprint outweighed its coverage and score
 limitations. Both were vulnerable to digital and acquisition-motivated shifts,
 and both produced weakly localized Grad-CAM maps despite passing basic sanity
-checks. The DCA and threshold-sensitivity analyses clarified conditional regimes but
-did not validate clinical utility.
+checks. Threshold-sensitivity analyses clarified conditional regimes but did
+not validate clinical utility; the historical raw-score utility calculation
+was excluded from the evidentiary synthesis because it was not standard DCA.
 
 The contribution is therefore a controlled, multi-axis characterization of two
 disclosed pipelines and an empirical demonstration that threshold and score

@@ -1,1 +1,1 @@
-"""Clinical-utility analyses over frozen benchmark evidence."""
+"""Decision-analysis helpers with strict predictor-scale separation."""

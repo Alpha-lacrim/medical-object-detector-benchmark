@@ -1,134 +1,128 @@
-# Decision Curve Analysis
+# Exploratory Raw-Score Threshold Utility/Sensitivity (Non-Standard DCA)
 
-## Question and frozen scope
+## Status and corrective decision
 
-This analysis asks whether acting on an exam-level detector flag has greater net benefit
-than the treat-all and treat-none references over nominal threshold probabilities
-$\tau=0.01,0.02,\ldots,0.99$. It reads all ten hash-bound Phase 5 test prediction bundles
-(Faster R-CNN and YOLO11s, seeds 17, 42, 137, 271, and 314). It performs no training,
-checkpoint loading, model inference, threshold fitting, or use of the 300-image robustness
-subsample.
+**The Batch 20 calculation is non-standard and cannot be interpreted as
+conventional decision-curve analysis (DCA).** The implementation defined action as
+`maximum emitted detector confidence >= tau` and simultaneously used
+`tau / (1 - tau)` as the false-positive weight. Although detector confidence is bounded
+between zero and one, it is not automatically a predicted exam-level outcome probability
+or an elicited decision threshold.
 
-The generated evidence is
-[`dca_summary.csv`](../results/tables/dca_summary.csv),
-[`dca_curves.png`](../results/figures/dca_curves.png), and the exact provenance record in
-`results/logs/phase20_decision_curve/summary.json`.
+Conventional DCA defines threshold probability as the decision-maker's harm/benefit
+trade-off [@vickers2006decisioncurve]. For a continuous diagnostic test or marker, the
+marker should first be converted to predicted outcome probability and the same probability
+threshold should then define action and false-positive weighting
+[@vickers2008decisioncurveextensions]. The original analysis did not perform that mapping.
 
-## Population and empirical prevalence
+Batch 30 therefore removed the raw-score curves from the main manuscript Results and
+retained the calculation only as an exploratory raw-score threshold utility/sensitivity
+artifact. It provides no standard net-benefit, clinical-utility, beneficial-range,
+deployment-readiness, or threshold-recommendation evidence.
 
-The population is the **full held-out RSNA test split: 750 radiographs from 323 NIH patient
-groups**. The committed split manifest contains 169 `Lung Opacity`-positive images and 581
-negative images (331 `No Lung Opacity / Not Normal` and 250 `Normal`). The same 169 images
-have at least one annotation in the frozen test COCO file, providing an independent
-cross-check of the manifest outcome. The empirical exam-level disease prevalence used by
-the treat-all calculation is therefore
+## Verified historical construction
 
-$$
-\hat{\pi}=\frac{169}{750}=0.225333\quad (22.533\%).
-$$
-
-This is not a literature prevalence, a patient-level prevalence, or the prevalence of the
-separate 300-image/183-patient robustness sample. It describes only the constructed,
-stratified held-out test population and should not be transported to another clinical
-population.
-
-## Method
-
-Decision-curve analysis requires a binary outcome and a binary action. The unit here is one
-radiograph. An image is outcome-positive when it contains at least one lung-opacity
-annotation. For each frozen detector/seed bundle, the image is flagged when its maximum
-emitted box confidence is at least $\tau$; an image with no emitted box has score zero. Thus
-TP and FP below are counts of positive and negative **images flagged**, not matched boxes:
+The historical calculation read ten frozen Phase 5 test bundles: Faster R-CNN and YOLO11s
+at seeds 17, 42, 137, 271, and 314. For each exam and run, its marker was exactly the maximum
+emitted post-NMS detection score; an exam with no emitted detection received score zero. At
+each raw threshold $\tau=0.01,0.02,\ldots,0.99$, the exploratory action was marker
+$\geq\tau$. It then calculated
 
 $$
-\operatorname{NB}(\tau)
-=\frac{\operatorname{TP}(\tau)}{N}
--\frac{\operatorname{FP}(\tau)}{N}\frac{\tau}{1-\tau}.
+U_{\mathrm{raw}}(\tau)
+=\frac{\mathrm{TP}(\tau)}{N}
+-\frac{\mathrm{FP}(\tau)}{N}\frac{\tau}{1-\tau}.
 $$
 
-The point curve is the arithmetic mean of the five seed-specific net benefits. Treat-none
-has net benefit zero. Treat-all uses the empirical full-test prevalence:
+Here $U_{\mathrm{raw}}$ is only an arbitrary-scale sensitivity index. Its weighting reuses a
+detector-score cutoff; it does not encode an elicited harm/benefit trade-off. TP and FP are
+positive and negative **exam images flagged**, not matched boxes. Localization does not
+enter this calculation.
 
-$$
-\operatorname{NB}_{\mathrm{all}}(\tau)
-=\hat{\pi}-(1-\hat{\pi})\frac{\tau}{1-\tau}.
-$$
+The point curve averages five seed-specific values. The preserved uncertainty calculation
+uses 2,000 common hierarchical draws that resample 323 NIH patient groups and five seeds;
+its percentile limits are pointwise, not simultaneous across 99 raw-score cutoffs. Better
+or worse values at a raw cutoff are not conventional DCA evidence, and the two detectors'
+raw cutoffs do not represent a common probability scale.
 
-The uncertainty analysis reuses the established Phase 8/19 hierarchical resampling helper.
-Each of 2,000 common draws samples all 323 NIH patient groups with replacement, moves every
-exam from a sampled patient together, and resamples the five frozen training seeds. The
-same patient/seed multiplicities are used for both detectors at every threshold. Ribbons
-and CSV limits are pointwise two-sided 95% percentile intervals. The CSV also reports the
-paired detector difference and its pointwise interval; these are not simultaneous bands
-over the 99-threshold grid.
+## Why probability-based salvage was not performed
 
-Collapsing detections to an exam flag is appropriate for the retrospective screening and
-human-reviewed assistance framing already used in the report. It does not measure whether
-the emitted box correctly localizes an opacity, and it is not a utility analysis for
-box-guided intervention.
+The required salvage route would define an exam-level marker separately for every
+detector/run, fit and freeze a probability mapping on validation data only, apply that
+mapping once to test, and threshold the calibrated predicted outcome probability using the
+same $p_t$ used in the DCA harm weight. Calibrator family and hyperparameters could not be
+selected from test behavior.
 
-## Results
+That route is incomplete for the retained experiment:
 
-At the lowest thresholds, treating every exam is competitive because the test prevalence is
-22.53%. Treat-all has the largest point estimate from $\tau=0.01$ to 0.03. At 0.04,
-Faster R-CNN becomes the largest point-estimate strategy: net benefit is 0.1949 (95% CI
-0.1450 to 0.2484), versus 0.0891 (0.0389 to 0.1435) for YOLO11s and 0.1931 for treat-all.
-At 0.20 the corresponding values are 0.1185 (0.0603 to 0.1786), 0.0481 (0.0183 to
-0.0859), and 0.0317.
+| Coverage check | Available |
+|---|---:|
+| Retained detector/test runs | 10 |
+| Runs with frozen validation predictions | 6 |
+| Runs missing frozen validation predictions | 4 |
 
-The grid-level ranges need two distinct readings:
+Frozen validation predictions exist for both detectors at seeds 17, 42, and 137. They do
+not exist for Faster R-CNN or YOLO11s at seeds 271 and 314. Therefore four retained test
+runs cannot receive the required separate, validation-frozen probability mapping. No
+calibrator family or hyperparameters were selected, no calibrator was fitted, and test
+outcomes were not used to choose one. A partial three-seed salvage was not substituted for
+the stated five-seed analysis.
 
-- **Detector versus detector, by point estimate:** Faster R-CNN is higher from 0.01--0.41;
-  YOLO11s is higher from 0.42--0.96; Faster R-CNN is higher only at the isolated 0.97
-  point; and both are zero at 0.98--0.99.
-- **Paired detector difference:** the 95% interval excludes zero in favor of Faster R-CNN
-  from 0.01--0.27. It excludes zero in favor of YOLO11s at 0.60--0.62 and 0.64--0.88.
-  The other thresholds do not distinguish the detectors at the pointwise 95% level.
-- **Against both reference strategies, by point estimate:** treat-all is largest at
-  0.01--0.03, Faster R-CNN at 0.04--0.41, and YOLO11s at 0.42--0.62. Treat-none is largest
-  at 0.63--0.84. YOLO11s is nominally largest again at 0.85--0.87, but its net benefit is
-  only 0.00053 to 0.00027 and both lower confidence limits equal zero. YOLO11s and
-  treat-none tie at zero from 0.88--0.96. Faster R-CNN's isolated 0.97 estimate is 0.0016
-  with a lower limit of zero; all non-treat-all strategies are zero at 0.98--0.99.
+`src/clinical/decision_curve.py` now makes the conventional-DCA input contract explicit.
+Its standard path accepts only a typed, validation-frozen outcome-probability object and a
+separately typed, elicited decision-threshold probability. It rejects raw detector
+confidence or an untyped numeric vector as the predictor and rejects a raw confidence
+cutoff or plain scalar passed directly as $p_t$. Regression tests enforce both boundaries.
 
-The high-threshold paired advantage for YOLO11s must therefore not be reported as uniformly
-positive clinical utility. Across 0.64--0.84, YOLO11s is statistically less harmful than
-Faster R-CNN in the paired comparison while still having negative net benefit; treat-none
-is the better strategy.
+## Population and prevalence boundary
 
-## Clinical-relevance interpretation
+The historical population is the full held-out RSNA test subset: **750 radiographs from
+323 NIH patient groups**, including 169 positive and 581 negative images. Its image-level
+prevalence is $169/750=0.225333$ (22.533%). This subset was deliberately stratified and
+enriched; it is not a deployment-prevalence sample, a natural patient-level prevalence, or
+an external cohort. Even a future probability-valid analysis on this test set would remain
+internal to this study population and could not establish external clinical utility or
+deployment readiness.
 
-For the report's **high-sensitivity retrospective screening or server-side case
-prioritization** scenario, the decision curves support the existing preference for Faster
-R-CNN over the practically informative low-to-middle threshold region. Its point net
-benefit is the best strategy from 0.04--0.41, and its paired advantage over YOLO11s is
-supported through 0.27. At extremely low thresholds (0.01--0.03), however, this constructed
-test population favors treating or reviewing every exam rather than using either detector.
+## Preserved and relabeled artifacts
 
-For **resource-constrained point-of-care assistance in which a human reviews every image**,
-YOLO11s has the larger detector net benefit from 0.42--0.96, but the defensible positive
-range is narrower: it is the best point-estimate strategy from 0.42--0.62, while the paired
-difference becomes distinguishable only at 0.60--0.62 in that positive-benefit band. This
-does not turn YOLO11s into a sole triage gate or rule-out system. It remains the conditional
-compute-driven option already described in the report, and only when every image receives
-human review.
+The exact pre-correction arithmetic and files remain hash-audited historical archives:
 
-These threshold values are **raw detector confidences used as nominal threshold
-probabilities**, not validated clinical-risk probabilities. Batch 18 found material
-detection-calibration error and a marked YOLO11s seed-271 score-scale pathology; no
-validation-fitted risk calibration map was learned here. The same held-out test data provide
-the prevalence and evaluate the curves, and the test subset was deliberately stratified.
-Consequently, this DCA is a retrospective, internal decision-analytic description of the
-frozen benchmark, not evidence of prospective benefit, safety, transportability, or a
-clinically recommended threshold.
+- `src/clinical/archive/decision_curve_pre_batch30_nonstandard.py`
+- `configs/decision_curve_pre_batch30_nonstandard_archive.yaml`
+- `results/tables/dca_summary_pre_batch30_nonstandard_archive.csv`
+- `results/figures/dca_curves_pre_batch30_nonstandard_archive.png`
+- `results/logs/phase20_decision_curve/archive/summary_pre_batch30_nonstandard.json`
+
+The original table has 198 rows (99 cutoffs for each detector). Batch 30 regenerates the
+same numerical arithmetic and verifies every historical field before emitting clearly
+relabeled artifacts:
+
+- `results/tables/raw_score_threshold_utility_summary.csv`
+- `results/figures/raw_score_threshold_utility_sensitivity.png`
+- `results/logs/phase30_raw_score_utility/summary.json`
+
+The new table, figure, captions, and provenance explicitly identify the calculation as
+non-standard. The original source, config, table, figure, and provenance hashes are
+recorded in `configs/raw_score_utility.yaml` and rechecked before generation.
 
 ## Reproduction
 
 ```powershell
-& $benchmarkPython -m src.clinical.decision_curve --config configs/decision_curve.yaml --mode preflight
-& $benchmarkPython -m src.clinical.decision_curve --config configs/decision_curve.yaml --mode run
+& $benchmarkPython -m src.clinical.raw_score_utility --config configs/raw_score_utility.yaml --mode preflight
+& $benchmarkPython -m src.clinical.raw_score_utility --config configs/raw_score_utility.yaml --mode run
 ```
 
-Preflight verifies the complete full-test image/patient grid, manifest-versus-COCO outcome
-agreement, all ten Phase 5 bundle identities and hashes, the five-seed factorial grid, and
-the frozen 0.001 score floor before any result artifact is written.
+Preflight verifies all five archives, the complete 750-image/323-patient test grid, all ten
+test prediction bundles, and the incomplete six-of-ten validation-prediction coverage. The
+run performs no training, checkpoint inference, probability calibration, or standard DCA.
+
+## Method references
+
+- Vickers AJ, Elkin EB. *Decision Curve Analysis: A Novel Method for Evaluating Prediction
+  Models.* Medical Decision Making. 2006;26(6):565--574.
+  https://doi.org/10.1177/0272989X06295361
+- Vickers AJ, Cronin AM, Elkin EB, Gonen M. *Extensions to Decision Curve Analysis, a Novel
+  Method for Evaluating Diagnostic Tests, Prediction Models and Molecular Markers.* BMC
+  Medical Informatics and Decision Making. 2008;8:53.
+  https://doi.org/10.1186/1472-6947-8-53

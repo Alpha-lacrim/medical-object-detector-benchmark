@@ -1,0 +1,42 @@
+schema_version: 1
+analysis_id: rsna-phase30-nonstandard-raw-score-utility
+
+inputs:
+  historical_config: configs/decision_curve_pre_batch30_nonstandard_archive.yaml
+  validation_prediction_manifest: results/logs/phase14_threshold_selection/validation_prediction_manifest.json
+
+analysis:
+  classification: NON_STANDARD_RAW_SCORE_THRESHOLD_UTILITY
+  conventional_dca_interpretation_valid: false
+  required_calibration_scope: separate_validation_frozen_mapping_for_every_detector_test_run
+  expected_salvage_outcome: incomplete_run_specific_validation_predictions
+  invalid_standard_dca_reason: raw_detector_confidence_is_not_a_validated_exam_outcome_probability
+
+plot:
+  width_inches: 11.5
+  height_inches: 6.4
+  dpi: 180
+  y_min: -0.22
+  y_max: 0.29
+
+outputs:
+  summary_table: results/tables/raw_score_threshold_utility_summary.csv
+  utility_figure: results/figures/raw_score_threshold_utility_sensitivity.png
+  summary_json: results/logs/phase30_raw_score_utility/summary.json
+
+historical_archives:
+  - role: original_batch20_source
+    path: src/clinical/archive/decision_curve_pre_batch30_nonstandard.py
+    sha256: b8f55d03a011ce4ace6d78514522c7ca95f96f0dabbb1afe44e17147cc58ea7c
+  - role: original_batch20_config
+    path: configs/decision_curve_pre_batch30_nonstandard_archive.yaml
+    sha256: f3067d7cd369474891535f192b621d9ece3df4d5bdd07116ee989288917265f3
+  - role: original_batch20_table
+    path: results/tables/dca_summary_pre_batch30_nonstandard_archive.csv
+    sha256: 35440f20ffdfa603c2d0fff8ee21c62fc19b31aec2c81d6cb745dd6323f44269
+  - role: original_batch20_figure
+    path: results/figures/dca_curves_pre_batch30_nonstandard_archive.png
+    sha256: 2d8566f0519122f74b8fe3a4be0b25bad83db51acfe296e2da1139ace3f6034c
+  - role: original_batch20_provenance
+    path: results/logs/phase20_decision_curve/archive/summary_pre_batch30_nonstandard.json
+    sha256: 3126351eca317c91bb929368d9d0725a63a7e6ac62ab14e1160ab4b0c561f1d2

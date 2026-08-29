@@ -362,25 +362,27 @@ remain separate from Batch 14's primary operating points and are never selected
 from or applied to test outcomes. Definitions and findings are in
 `docs/THRESHOLD_CALIBRATION.md`.
 
-### 5g. Run full-test decision curve analysis
+### 5g. Audit the non-standard raw-score threshold utility calculation
 
-This CPU-only analysis reduces each detector to an exam-level flag based on the maximum
-emitted box confidence, then computes net benefit over thresholds 0.01--0.99 from all ten
-frozen Phase 5 test bundles. The prevalence input is derived from the complete 750-image
-test manifest (169 positive images; 22.533%), not from the 300-image robustness sample. The
-2,000 common draws reuse the patient-cluster/seed bootstrap machinery. No checkpoint,
-inference, or training is involved:
+Batch 30 classified the historical Batch 20 calculation as non-standard for
+conventional decision-curve interpretation: it used maximum detector confidence both to
+define action and to supply the `tau/(1-tau)` false-positive weight. The CPU-only audit
+recomputes that exact arithmetic from all ten frozen Phase 5 test bundles, verifies it
+against immutable historical archives, and emits explicitly relabeled exploratory
+raw-score utility/sensitivity artifacts. It performs no checkpoint inference, training,
+probability calibration, or standard DCA:
 
 ```powershell
-& $benchmarkPython -m src.clinical.decision_curve --config configs/decision_curve.yaml --mode preflight
-& $benchmarkPython -m src.clinical.decision_curve --config configs/decision_curve.yaml --mode run
+& $benchmarkPython -m src.clinical.raw_score_utility --config configs/raw_score_utility.yaml --mode preflight
+& $benchmarkPython -m src.clinical.raw_score_utility --config configs/raw_score_utility.yaml --mode run
 ```
 
-The run regenerates `results/tables/dca_summary.csv`,
-`results/figures/dca_curves.png`, and the provenance record at
-`results/logs/phase20_decision_curve/summary.json`. The exam-level decision rule,
-patient-cluster uncertainty, prevalence scope, findings, and clinical-interpretation limits
-are in `docs/DCA_ANALYSIS.md`.
+The run regenerates `results/tables/raw_score_threshold_utility_summary.csv`,
+`results/figures/raw_score_threshold_utility_sensitivity.png`, and
+`results/logs/phase30_raw_score_utility/summary.json`. The original code, config, table,
+figure, and provenance remain under explicit `pre_batch30_nonstandard` archive names.
+`docs/DCA_ANALYSIS.md` records the classification, six-of-ten validation-prediction
+coverage that prevented probability-based salvage, prevalence boundary, and hashes.
 
 ### 5h. Regenerate the seed-level raincloud comparison
 
@@ -573,13 +575,13 @@ includes every executable analysis module added in Batches 18--23.
 | Paper §4.5 Pareto evidence (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Paper §4.4 five-seed detection calibration (Batch 18) | `calibration_summary.csv`; `reliability_diagrams.png`; Phase 18 summary | offline `src.stats.calibration --mode run` in §5e |
 | Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
-| Paper §4.6 full-test decision curves (Batch 20) | `dca_summary.csv`; `dca_curves.png`; Phase 20 summary | offline `src.clinical.decision_curve --mode run` in §5g |
+| Supplementary non-standard raw-score utility audit (Batch 30) | `raw_score_threshold_utility_summary.csv`; `raw_score_threshold_utility_sensitivity.png`; Phase 30 summary; exact pre-Batch-30 archives | offline `src.clinical.raw_score_utility --mode run` in §5g |
 | Paper Figure 1 seed-level predictive/compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
-| Paper §4.7; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
-| Paper §4.8 acquisition-shift sensitivity (Batch 22) | `acquisition_shift_results.csv`; 20 prediction bundles; Phase 22 summary | checkpoint-only `src.robustness.radiography_shifts --mode run` in §6a |
+| Paper §4.6; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
+| Paper §4.7 acquisition-shift sensitivity (Batch 22) | `acquisition_shift_results.csv`; 20 prediction bundles; Phase 22 summary | checkpoint-only `src.robustness.radiography_shifts --mode run` in §6a |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
-| Paper §4.9 Grad-CAM parameter/data sanity checks (Batch 21) | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png`; Phase 21 summary | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
-| Paper §4.10; report Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
+| Paper §4.8 Grad-CAM parameter/data sanity checks (Batch 21) | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png`; Phase 21 summary | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
+| Paper §4.9; report Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
 | Frozen seed-17 corruption inference | `statistical_robustness_comparison.csv` | prior full-scope statistics `--mode run` after §6; not rerun for n=5 |
 
 ## Definition of Done audit

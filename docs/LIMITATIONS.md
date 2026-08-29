@@ -169,18 +169,23 @@ the fixed IoU-0.50 correctness rule, five-bin feature partition, and eight-sampl
 minimum; it is not directly comparable to D-ECE under a different protocol and does not
 establish calibrated clinical risk.
 
-Batch 20's decision-curve analysis is another internal redescription of the
-same frozen held-out evidence, not a clinical-utility validation. Its 22.533%
-prevalence is the empirical image-level prevalence of the deliberately
-stratified 750-image test subset (169 positive and 581 negative images), not a
-natural clinical or patient-level prevalence. The same test set supplies both
-that prevalence and the evaluated curves. The action rule collapses maximum
-box confidence to an exam flag and ignores whether the flag localizes an
-opacity; raw detector scores are treated as nominal threshold probabilities
-without a fitted clinical-risk calibration map. Patient/seed intervals are
-pointwise rather than simultaneous, and detector superiority at a threshold
-can coexist with negative net benefit relative to treat-none. None of the
-reported ranges is a deployment threshold or evidence of prospective benefit.
+Batch 30 classified the historical Batch 20 calculation as **non-standard for
+conventional DCA interpretation**. It used maximum emitted detector confidence
+both to define an exam action and, through `tau/(1-tau)`, to weight false
+positives. A bounded raw score is not automatically a predicted exam-outcome
+probability or a decision-maker's harm/benefit threshold. The arithmetic is
+preserved and relabeled as an exploratory raw-score threshold
+utility/sensitivity curve, but it was removed from the main manuscript Results
+and supplies no standard net-benefit, clinical-utility, beneficial-range, or
+deployment evidence. Probability-based salvage was not attempted: only six of
+the ten retained detector/runs have frozen validation predictions, leaving
+both detectors' seeds 271 and 314 without the run-specific validation data
+needed to fit and freeze mappings before test evaluation. No calibrator was
+chosen or fitted. The historical population was also a deliberately
+stratified, enriched 750-image internal test subset (169 positive, 581
+negative, 323 patient groups; 22.533% image-level prevalence), not a deployment
+prevalence sample. Full classification and archive provenance are in
+[`DCA_ANALYSIS.md`](DCA_ANALYSIS.md).
 
 Registered-operation GFLOPs omit unsupported operations and are estimates, not
 direct hardware timings. Synchronized batch-1 speed profiles include each

@@ -59,17 +59,23 @@ part of the evidence and must travel with any reused number.
   [Pareto figure](../results/figures/pareto_frontier.png) retain their explicit
   frozen `n=3` scope.
 
-## S4. Calibration and decision analysis
+## S4. Calibration and exploratory raw-score utility
 
 - [Five-seed D-ECE table](../results/tables/calibration_summary.csv) and
   [reliability diagrams](../results/figures/reliability_diagrams.png) describe
   calibration of emitted detections at the 0.001 bundle floor; they do not fit
   a calibrator or estimate missed-target or clinical-risk calibration.
-- [Decision-curve table](../results/tables/dca_summary.csv) and
-  [figure](../results/figures/dca_curves.png) use the complete 750-image test
-  split, empirical image-level prevalence, five seeds, and an exam flag based
-  on maximum emitted box confidence. Raw detector scores remain nominal rather
-  than validated clinical-risk probabilities.
+- The historical Batch 20 calculation is retained only as an explicitly
+  **non-standard raw-score threshold utility/sensitivity** analysis. The
+  [relabeled table](../results/tables/raw_score_threshold_utility_summary.csv),
+  [relabeled figure](../results/figures/raw_score_threshold_utility_sensitivity.png),
+  and [classification/provenance record](../results/logs/phase30_raw_score_utility/summary.json)
+  use the complete 750-image internal test subset and five seeds. Maximum
+  emitted confidence defines the exam flag, but that score is not a validated
+  outcome probability; the results are not conventional DCA, clinical
+  net-benefit evidence, or a deployment-threshold analysis. The exact original
+  table, figure, code, config, and Phase 20 summary remain in explicitly named
+  pre-Batch-30 archives listed in [the corrective analysis note](DCA_ANALYSIS.md).
 
 ## S5. Complete digital-corruption and acquisition-shift grids
 

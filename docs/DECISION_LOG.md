@@ -261,3 +261,55 @@ primary thresholds.
 - The full threshold-selection path verifies the model-development validation
   role, upstream validation split, manifest test-isolation flag, and exact
   agreement between annotation and validation-manifest image identities.
+
+## D-007 — Remove raw detector-score curves from conventional DCA interpretation
+
+- **Date:** 2026-08-29
+- **Status:** Accepted; supersedes the Batch 20 interpretation while preserving
+  its exact arithmetic and provenance as historical exploratory evidence
+
+### Context
+
+The Batch 20 implementation defined an exam action as maximum emitted detector
+confidence `>= tau` and simultaneously used `tau/(1-tau)` as the false-positive
+weight. Conventional DCA instead treats threshold probability as the
+decision-maker's harm/benefit trade-off. Extensions for continuous diagnostic
+tests and markers require conversion to predicted outcome probability before
+the same probability threshold defines action and weighting. A bounded raw
+detector score is not automatically that probability.
+
+### Decision
+
+The Batch 20 calculation is classified as
+`NON_STANDARD_RAW_SCORE_THRESHOLD_UTILITY`. It is removed from the main
+manuscript Results and retained only in the Supplementary/Limitations as an
+exploratory raw-score threshold utility/sensitivity calculation. No detector
+comparison, cutoff range, or reference-strategy comparison from it may be
+described as standard net benefit, clinical utility, a beneficial decision
+range, deployment readiness, or a clinical threshold.
+
+Probability-based salvage is not performed. The retained test grid contains
+ten detector/runs, whereas frozen validation predictions exist for only six:
+both detectors at seeds 17, 42, and 137. Faster R-CNN and YOLO11s seeds 271 and
+314 lack the run-specific validation predictions needed to fit and freeze a
+separate exam-outcome probability mapping before test evaluation. No
+calibrator family or hyperparameters are selected and test behavior is not
+used for calibration decisions.
+
+### Consequences
+
+- The exact original code, config, 198-row table, figure, and provenance are
+  retained under explicit `pre_batch30_nonstandard` archive names and their
+  SHA-256 hashes are verified before regeneration.
+- New canonical supplementary artifacts reproduce the same arithmetic under
+  raw-score utility/sensitivity terminology and record the non-standard
+  classification in every table row, the figure, and provenance summary.
+- The public conventional-DCA helper accepts only a typed outcome-probability
+  vector carrying a validation-frozen mapping identifier and a separately
+  typed, elicited decision-threshold probability. Raw detector scores, raw
+  detector-confidence cutoffs passed as `p_t`, and untyped numeric values are
+  rejected, with regression tests guarding both boundaries.
+- The 750-image test subset (169 positive, 581 negative; 323 patient groups;
+  22.533% image-level prevalence) is enriched and internal, not a deployment-
+  prevalence sample. Even a future probability-valid DCA on this population
+  would not establish external clinical utility or deployment readiness.

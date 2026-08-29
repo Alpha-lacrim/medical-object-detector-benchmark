@@ -1,0 +1,378 @@
+{
+  "analysis_classification": "NON_STANDARD_RAW_SCORE_THRESHOLD_UTILITY",
+  "analysis_id": "rsna-phase30-nonstandard-raw-score-utility",
+  "artifacts": {
+    "raw_score_utility_figure": {
+      "path": "results/figures/raw_score_threshold_utility_sensitivity.png",
+      "sha256": "8d91b2ed144ca8a2a055926f1fbe98546d997999cb7907ad7152e5f2220f1de2",
+      "size_bytes": 217839
+    },
+    "summary_table": {
+      "path": "results/tables/raw_score_threshold_utility_summary.csv",
+      "sha256": "0bad365d7dd105bb72ee90a385ceb255b0c4b44c29e2249db290d77b7308a70d",
+      "size_bytes": 152276
+    }
+  },
+  "conventional_dca_interpretation_valid": false,
+  "fits_probability_calibrator": false,
+  "historical_archives": [
+    {
+      "path": "src/clinical/archive/decision_curve_pre_batch30_nonstandard.py",
+      "role": "original_batch20_source",
+      "sha256": "b8f55d03a011ce4ace6d78514522c7ca95f96f0dabbb1afe44e17147cc58ea7c",
+      "size_bytes": 40357
+    },
+    {
+      "path": "configs/decision_curve_pre_batch30_nonstandard_archive.yaml",
+      "role": "original_batch20_config",
+      "sha256": "f3067d7cd369474891535f192b621d9ece3df4d5bdd07116ee989288917265f3",
+      "size_bytes": 1446
+    },
+    {
+      "path": "results/tables/dca_summary_pre_batch30_nonstandard_archive.csv",
+      "role": "original_batch20_table",
+      "sha256": "35440f20ffdfa603c2d0fff8ee21c62fc19b31aec2c81d6cb745dd6323f44269",
+      "size_bytes": 124140
+    },
+    {
+      "path": "results/figures/dca_curves_pre_batch30_nonstandard_archive.png",
+      "role": "original_batch20_figure",
+      "sha256": "2d8566f0519122f74b8fe3a4be0b25bad83db51acfe296e2da1139ace3f6034c",
+      "size_bytes": 203652
+    },
+    {
+      "path": "results/logs/phase20_decision_curve/archive/summary_pre_batch30_nonstandard.json",
+      "role": "original_batch20_provenance",
+      "sha256": "3126351eca317c91bb929368d9d0725a63a7e6ac62ab14e1160ab4b0c561f1d2",
+      "size_bytes": 8362
+    }
+  ],
+  "historical_arithmetic_audit": {
+    "categorical_fields_identical": true,
+    "fields_compared": 39,
+    "maximum_absolute_numeric_difference": 0.0,
+    "rows_compared": 198
+  },
+  "invalid_standard_dca_reason": "raw_detector_confidence_is_not_a_validated_exam_outcome_probability",
+  "method": {
+    "bootstrap_method": "paired_hierarchical_patient_cluster_percentile",
+    "bootstrap_resamples": 2000,
+    "confidence_interval": "pointwise two-sided percentile interval",
+    "decision_rule": "maximum emitted box confidence >= raw score threshold",
+    "localization_used_in_action": false,
+    "score_interpretation": "raw detector confidence; not a validated exam outcome probability",
+    "utility_index_formula": "TP/N - (FP/N) * raw_tau/(1-raw_tau)",
+    "utility_weight_formula": "raw_score_threshold/(1-raw_score_threshold)",
+    "why_nonstandard": "The action threshold and harm weight reuse the same raw detector score, although conventional DCA requires a threshold probability representing the decision-maker's harm/benefit trade-off."
+  },
+  "paper_path": "removed_from_main_results_and_demoted_to_supplementary_limitations",
+  "performs_inference": false,
+  "performs_standard_dca": false,
+  "performs_training": false,
+  "population": {
+    "deployment_prevalence_sample": false,
+    "enriched_internal_test_subset": true,
+    "external_clinical_utility_inference_valid": false,
+    "image_count": 750,
+    "label": "full held-out RSNA test split",
+    "negative_image_count": 581,
+    "patient_group_count": 323,
+    "positive_image_count": 169,
+    "study_prevalence": 0.22533333333333333,
+    "unit": "exam_image"
+  },
+  "raw_score_best_strategy_ranges": [
+    {
+      "start": 0.01,
+      "stop": 0.03,
+      "value": "all_action_reference"
+    },
+    {
+      "start": 0.04,
+      "stop": 0.41,
+      "value": "faster_rcnn"
+    },
+    {
+      "start": 0.42,
+      "stop": 0.62,
+      "value": "yolo11s"
+    },
+    {
+      "start": 0.63,
+      "stop": 0.84,
+      "value": "no_action_reference"
+    },
+    {
+      "start": 0.85,
+      "stop": 0.87,
+      "value": "yolo11s"
+    },
+    {
+      "start": 0.88,
+      "stop": 0.96,
+      "value": "yolo11s|no_action_reference"
+    },
+    {
+      "start": 0.97,
+      "stop": 0.97,
+      "value": "faster_rcnn"
+    },
+    {
+      "start": 0.98,
+      "stop": 0.99,
+      "value": "faster_rcnn|yolo11s|no_action_reference"
+    }
+  ],
+  "raw_score_paired_difference_ranges": [
+    {
+      "start": 0.01,
+      "stop": 0.27,
+      "value": "faster_rcnn"
+    },
+    {
+      "start": 0.28,
+      "stop": 0.59,
+      "value": "not_distinguished"
+    },
+    {
+      "start": 0.6,
+      "stop": 0.62,
+      "value": "yolo11s"
+    },
+    {
+      "start": 0.63,
+      "stop": 0.63,
+      "value": "not_distinguished"
+    },
+    {
+      "start": 0.64,
+      "stop": 0.88,
+      "value": "yolo11s"
+    },
+    {
+      "start": 0.89,
+      "stop": 0.99,
+      "value": "not_distinguished"
+    }
+  ],
+  "raw_score_point_estimate_preference_ranges": [
+    {
+      "start": 0.01,
+      "stop": 0.41,
+      "value": "faster_rcnn"
+    },
+    {
+      "start": 0.42,
+      "stop": 0.96,
+      "value": "yolo11s"
+    },
+    {
+      "start": 0.97,
+      "stop": 0.97,
+      "value": "faster_rcnn"
+    },
+    {
+      "start": 0.98,
+      "stop": 0.99,
+      "value": "tie"
+    }
+  ],
+  "salvage_assessment": {
+    "calibrator_family_or_hyperparameters_selected": false,
+    "frozen_validation_run_count": 6,
+    "frozen_validation_run_grid": [
+      {
+        "detector": "faster_rcnn",
+        "seed": 17
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 42
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 137
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 17
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 42
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 137
+      }
+    ],
+    "path_taken": "preferred_removal_and_supplementary_demotion",
+    "probability_calibration_salvage_valid_for_all_retained_runs": false,
+    "reason": "Four retained detector/test runs lack frozen run-specific validation predictions, so the required validation-only probability mappings cannot be fitted and frozen for the complete five-seed analysis.",
+    "required_scope": "separate_validation_frozen_mapping_for_every_detector_test_run",
+    "test_dca_used_for_calibrator_selection": false,
+    "test_run_count": 10,
+    "test_run_grid": [
+      {
+        "detector": "faster_rcnn",
+        "seed": 17
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 42
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 137
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 271
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 314
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 17
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 42
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 137
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 271
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 314
+      }
+    ],
+    "test_runs_without_frozen_validation_predictions": [
+      {
+        "detector": "faster_rcnn",
+        "seed": 271
+      },
+      {
+        "detector": "faster_rcnn",
+        "seed": 314
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 271
+      },
+      {
+        "detector": "yolo11s",
+        "seed": 314
+      }
+    ],
+    "validation_prediction_manifest": {
+      "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+      "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+      "size_bytes": 8271
+    },
+    "validation_runs_without_test_predictions": []
+  },
+  "schema_version": 1,
+  "source": {
+    "analysis_source": {
+      "path": "src/clinical/raw_score_utility.py",
+      "sha256": "0f600660be3a2920c1a7a2abceaadad37a18938e559cfd7684496856b3f78ad9",
+      "size_bytes": 27238
+    },
+    "config": {
+      "path": "configs/raw_score_utility.yaml",
+      "sha256": "fab640324be6fbae19babaa592e757844883583e64dc0bd4717d8492c1ab1517",
+      "size_bytes": 1936
+    },
+    "historical_analysis_source": {
+      "path": "src/clinical/archive/decision_curve_pre_batch30_nonstandard.py",
+      "sha256": "b8f55d03a011ce4ace6d78514522c7ca95f96f0dabbb1afe44e17147cc58ea7c",
+      "size_bytes": 40357
+    },
+    "historical_config": {
+      "path": "configs/decision_curve_pre_batch30_nonstandard_archive.yaml",
+      "sha256": "f3067d7cd369474891535f192b621d9ece3df4d5bdd07116ee989288917265f3",
+      "size_bytes": 1446
+    },
+    "prediction_bundles": [
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+        "seed": 271,
+        "sha256": "0f8c5d2e615f65d337b74126c0226f2bd3f5fd069660b47756d2461d22e04a44"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+        "seed": 314,
+        "sha256": "b0d11508dd7319ea3524f0c05658df95bdf81c28d169592a22eeb98ea964e316"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "seed": 271,
+        "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+        "seed": 314,
+        "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4"
+      }
+    ],
+    "test_annotations": {
+      "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+      "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+      "size_bytes": 272428
+    },
+    "test_split_manifest": {
+      "path": "data/splits/rsna-pneumonia-5000/test.csv",
+      "sha256": "9c9b1a71fb1340b96b7ae8f93bfa8e281ddb7ab2b9f5edcd4d1cdbd314646a6f",
+      "size_bytes": 124653
+    }
+  },
+  "status": "complete"
+}
