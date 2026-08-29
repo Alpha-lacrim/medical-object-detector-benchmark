@@ -23,8 +23,11 @@ fewer parameters, and about 21-fold fewer registered operations. One YOLO11s
 seed retained plausible average precision but compressed all test scores below
 0.042, exposing recipe-level score instability. Detection-specific calibration
 was also poorer for YOLO11s (mean D-ECE 0.0990 versus 0.0320). Patient-cluster
-inference supported five of seven clean endpoint differences after Holm
-correction, while conditional matched-box IoU and Dice were inconclusive.
+and independent-run bootstrap intervals remained positive for Faster R-CNN
+recall, F1, and both AP endpoints. The fixed-threshold precision interval
+crossed zero under this primary training-procedure estimand, although a
+secondary permutation test conditional on the observed checkpoints favored
+YOLO11s. Conditional matched-box IoU and Dice were inconclusive.
 Digital and raw-array acquisition-motivated stress tests showed substantial,
 condition-specific degradation in both pipelines. Grad-CAM maps passed basic
 parameter and input randomization checks but localized annotated opacities only
@@ -437,21 +440,26 @@ trained and randomized maps was $C_{sanity}$; correlations at least 0.50 were
 predeclared descriptive failures. Zero, constant, non-finite, or failed maps
 were excluded and counted, not imputed.
 
-### 3.11 Patient-cluster statistical protocol
+### 3.11 Inferential targets and patient-cluster protocol
 
-All primary inference preserved repeated examinations from the same NIH patient
-as one cluster. Clean pointwise 95% intervals used 2,000 paired two-stage
-bootstrap draws: patient groups were sampled with replacement, every observed
-exam from a selected patient moved together, and eligible paired training seeds
-were also resampled. Precision, recall, F1, and AP used five seed pairs;
-conditional IoU and Dice used complete pairs 17, 42, 137, and 314. Dataset-level
-AP was reconstructed from score-ordered matches rather than averaged as an
-ill-defined per-image statistic.
+The primary **training-procedure estimand** included held-out patient sampling
+and stochastic retraining variability. Clean pointwise 95% intervals used
+2,000 two-stage draws: patient groups were sampled with replacement, every exam
+from a selected patient moved together, and trained runs were sampled
+independently within detector. Same-number seeds were not treated as matched
+blocks because the PyTorch and Ultralytics loaders, batch structures,
+initialization paths, RNG-consumption sequences, and stopping trajectories were
+not coupled. Precision, recall, F1, and AP used five runs per detector;
+conditional IoU and Dice used five defined Faster R-CNN runs and four defined
+YOLO11s runs. Dataset-level AP and all other nonlinear metrics were
+reconstructed from the sampled predictions in every draw.
 
-Two-sided paired permutation tests used 5,000 patient-group detector-label
-swaps with a plus-one correction. The unstandardized paired aggregate
-difference, Faster R-CNN minus YOLO11s, was the effect estimate. Holm correction
-was applied across the seven clean endpoints. For the 35 corruption
+The secondary **checkpoint-conditional estimand** held the observed checkpoints
+fixed. Two-sided permutation tests used 5,000 patient-group detector-label
+swaps with a plus-one correction; their p-values were Holm-adjusted across the
+seven clean endpoints and are labeled conditional on observed checkpoints.
+The unstandardized training-procedure difference, Faster R-CNN minus YOLO11s,
+was the effect estimate. No seed-aware p-value was introduced. For the 35 corruption
 conditions, raw performance and clean-relative retention were tested
 separately, with Holm correction within each metric/estimand family. The same
 patient draw was applied jointly to clean and corrupted evidence before a
@@ -688,30 +696,39 @@ reasoning (Figure 8).
 
 ![Figure 8. Nested 50-image Grad-CAM parameter- and data-randomization sanity panel.](../results/figures/gradcam_sanity_panel.png)
 
-### 4.10 Patient-cluster statistical synthesis
+### 4.10 Estimand-separated statistical synthesis
 
-The primary clean paired analysis is summarized below. Differences are Faster
-R-CNN minus YOLO11s; confidence intervals are pointwise patient-cluster
-bootstrap intervals. Five of seven endpoints remained significant after Holm
-correction.
+The table reports the primary training-procedure differences and separately the
+secondary checkpoint-conditional p-values. Differences are Faster R-CNN minus
+YOLO11s; every row contains 750 images from 323 patient clusters. `Runs A/B`
+gives the eligible Faster R-CNN/YOLO11s trained-run counts.
 
-| Endpoint | Paired seed n | Difference (95% CI) | Holm p | Interpretation |
-|---|---:|---:|---:|---|
-| Precision at 0.25 | 5 | -0.1024 (-0.2529, 0.0802) | **0.0020** | YOLO11s higher at the shared threshold; score-scale/selectivity result |
-| Recall at 0.25 | 5 | 0.4843 (0.4065, 0.5555) | **0.0014** | Faster R-CNN higher |
-| F1 at 0.25 | 5 | 0.1419 (0.0338, 0.2526) | **0.0014** | Faster R-CNN higher |
-| Conditional IoU | 4 | -0.0239 (-0.0567, 0.0074) | 0.1064 | Inconclusive among matched true positives |
-| Conditional Dice | 4 | -0.0173 (-0.0410, 0.0050) | 0.1064 | Inconclusive among matched true positives |
-| mAP@0.5 | 5 | 0.1416 (0.0997, 0.1856) | **0.0208** | Faster R-CNN higher |
-| mAP@0.5:0.95 | 5 | 0.0453 (0.0325, 0.0595) | **0.0342** | Faster R-CNN higher |
+| Endpoint | Runs A/B | Conditioning | Difference (95% training-procedure CI) | Seed 271 | Holm p, conditional on observed checkpoints |
+|---|---:|---|---:|---|---:|
+| Precision at 0.25 | 5/5 | Unconditional | -0.1024 (-0.2423, 0.0553) | Both runs; YOLO contributes zero | **0.0020** |
+| Recall at 0.25 | 5/5 | Unconditional | 0.4843 (0.3830, 0.5830) | Both runs; YOLO contributes zero | **0.0014** |
+| F1 at 0.25 | 5/5 | Unconditional | 0.1419 (0.0559, 0.2290) | Both runs; YOLO contributes zero | **0.0014** |
+| Conditional IoU | 5/4 | Conditional on a matched detection | -0.0236 (-0.0585, 0.0089) | Faster defined; YOLO undefined | 0.1064 |
+| Conditional Dice | 5/4 | Conditional on a matched detection | -0.0171 (-0.0420, 0.0066) | Faster defined; YOLO undefined | 0.1064 |
+| mAP@0.5 | 5/5 | Unconditional | 0.1416 (0.1013, 0.1845) | Both ranked bundles contribute | **0.0208** |
+| mAP@0.5:0.95 | 5/5 | Unconditional | 0.0453 (0.0313, 0.0599) | Both ranked bundles contribute | **0.0342** |
 
-The significant fixed-threshold precision result did not contradict the
-precision-recall frontier: it tested the behavior of a common numerical cutoff
-and included seed 271's observed zero output. Conditional localization did not
-offset lower coverage because it excluded missed annotations and was
-statistically inconclusive. Expanding the clean comparison from three to five
-seeds changed F1 from non-significant to significant; precision, recall, and AP
-conclusions remained, while IoU and Dice remained non-significant.
+Under the primary estimand, the recall, F1, and both AP intervals remained
+wholly above zero. Fixed-threshold precision did not: its interval crossed
+zero, so it was not robust evidence of a training-procedure difference. The
+small checkpoint-conditional precision p-value instead says that the observed
+checkpoints favored YOLO11s at the common numerical cutoff across patient
+clusters. The CI and p-value differ because the former also resamples trained
+runs; neither arithmetic result is wrong, and they do not test the same target.
+Conditional localization excluded missed annotations and remained
+inconclusive.
+
+Independent detector-run resampling changed interval endpoints but did not
+change zero exclusion for any endpoint relative to the historical paired-seed
+sensitivity. Seed-label deletion was descriptive only: omitting label 271
+changed the precision difference from -0.1024 to -0.1892, F1 from 0.1419 to
+0.0938, and mAP@0.5:0.95 from 0.04533 to 0.04504. Seed 271 was not excluded
+from the corrected analysis wherever its endpoint was defined.
 
 The six retrospective hypotheses were supported under their stated operational
 checks: higher Faster R-CNN coverage/AP; a shared-threshold operating mismatch;
@@ -749,8 +766,8 @@ on one shared threshold.
 ### 5.2 Accuracy and efficiency remain opposed
 
 Faster R-CNN provided the stronger coverage and ranking evidence. Its recall,
-F1, and both AP advantages survived patient-cluster inference, and its FROC
-sensitivity was higher across the measured budgets. YOLO11s provided the
+F1, and both AP training-procedure intervals remained wholly above zero, and
+its FROC sensitivity was higher across the measured budgets. YOLO11s provided the
 stronger implementation-efficiency evidence: approximately three times the
 throughput, about one fifth the parameters, one twenty-first the estimated
 registered operations, lower training memory, and shorter training time. The
@@ -759,9 +776,10 @@ accuracy endpoint and a compute endpoint were optimized together.
 
 Conditional matched-box IoU and Dice do not create a third conclusion in favor
 of YOLO11s. They describe localization only after a true-positive match,
-exclude the much larger missed-target burden, use four complete seed pairs, and
-were statistically inconclusive. They are useful diagnostics, but should not be
-compared directly with unconditional coverage or AP.
+exclude the much larger missed-target burden, use five defined Faster R-CNN
+runs and four defined YOLO11s runs for the primary interval, and were
+inconclusive. They are useful diagnostics, but should not be compared directly
+with unconditional coverage or AP.
 
 ### 5.3 Threshold costs and decision curves do not establish clinical utility
 
@@ -933,11 +951,13 @@ basic parameter/input sensitivity, not medical validity or causal attention.
 
 **Statistical uncertainty.** Patient-cluster resampling and label swaps correct
 the identified within-patient independence error for observed exams, but do not
-create a representative population. Clean intervals resample only five paired
-seeds, or four for conditional localization; corruption inference is
-single-checkpoint. Bootstrap intervals are pointwise, permutation tests
-condition on the observed checkpoints, and Holm correction does not make
-corruption conditions independent cohorts or guarantee transportability.
+create a representative population. Primary clean intervals resample five
+trained runs independently within detector; conditional localization has five
+defined Faster R-CNN runs and four defined YOLO11s runs. This is still coarse
+training-variability evidence. Bootstrap intervals are pointwise; secondary
+permutation tests condition on the observed checkpoints; corruption inference
+is single-checkpoint; and Holm correction does not make corruption conditions
+independent cohorts or guarantee transportability.
 
 **Compute and reproducibility.** Timing and registered-operation estimates
 describe one RTX 4060 Laptop GPU, pinned environment, and implementation path.
@@ -970,8 +990,8 @@ Faster R-CNN and YOLO11s occupied different operating and resource regimes.
 The shared score threshold did not align selectivity: YOLO11s appeared more
 precise at 0.25 while retaining far fewer detections, whereas the frozen
 precision-recall and FROC frontiers favored Faster R-CNN. The five-seed clean
-analysis and patient-cluster inference supported higher Faster R-CNN recall,
-F1, and average precision. YOLO11s was substantially smaller and faster, but
+analysis gave wholly positive primary training-procedure intervals for Faster
+R-CNN recall, F1, and average precision. YOLO11s was substantially smaller and faster, but
 one retained seed exposed severe score compression and the detector had higher
 detection-specific calibration error.
 

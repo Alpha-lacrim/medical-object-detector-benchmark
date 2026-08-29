@@ -1,0 +1,71 @@
+detector,seed,metric,endpoint_conditioning,estimate,defined,image_count,patient_group_count,seed_271_role
+faster_rcnn,17,precision,unconditional,0.13165905631659056,True,750,323,Ordinary retained trained run.
+faster_rcnn,17,recall,unconditional,0.6455223880597015,True,750,323,Ordinary retained trained run.
+faster_rcnn,17,f1,unconditional,0.21871049304677623,True,750,323,Ordinary retained trained run.
+faster_rcnn,17,iou,conditional_on_matched_detection,0.6727877542452775,True,750,323,Ordinary retained trained run.
+faster_rcnn,17,dice,conditional_on_matched_detection,0.7996961105685069,True,750,323,Ordinary retained trained run.
+faster_rcnn,17,map_50,unconditional,0.2955726614421415,True,750,323,Ordinary retained trained run.
+faster_rcnn,17,map_50_95,unconditional,0.09835622019400879,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,precision,unconditional,0.21282401091405184,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,recall,unconditional,0.582089552238806,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,f1,unconditional,0.3116883116883117,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,iou,conditional_on_matched_detection,0.6817770297555672,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,dice,conditional_on_matched_detection,0.8062480833465773,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,map_50,unconditional,0.30954831060054333,True,750,323,Ordinary retained trained run.
+faster_rcnn,42,map_50_95,unconditional,0.10538413110006557,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,precision,unconditional,0.1431906614785992,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,recall,unconditional,0.6865671641791045,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,f1,unconditional,0.23696072118480363,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,iou,conditional_on_matched_detection,0.6650209043770866,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,dice,conditional_on_matched_detection,0.7932969496231345,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,map_50,unconditional,0.3200806628353708,True,750,323,Ordinary retained trained run.
+faster_rcnn,137,map_50_95,unconditional,0.10322380247901727,True,750,323,Ordinary retained trained run.
+faster_rcnn,271,precision,unconditional,0.24479166666666666,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,271,recall,unconditional,0.5261194029850746,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,271,f1,unconditional,0.3341232227488152,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,271,iou,conditional_on_matched_detection,0.6762095750623173,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,271,dice,conditional_on_matched_detection,0.8021205048231905,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,271,map_50,unconditional,0.32026447410162884,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,271,map_50_95,unconditional,0.10209005760852219,True,750,323,Retained as an observed trained run for this endpoint.
+faster_rcnn,314,precision,unconditional,0.2469879518072289,True,750,323,Ordinary retained trained run.
+faster_rcnn,314,recall,unconditional,0.458955223880597,True,750,323,Ordinary retained trained run.
+faster_rcnn,314,f1,unconditional,0.32114882506527415,True,750,323,Ordinary retained trained run.
+faster_rcnn,314,iou,conditional_on_matched_detection,0.6788383675151863,True,750,323,Ordinary retained trained run.
+faster_rcnn,314,dice,conditional_on_matched_detection,0.8036635643737128,True,750,323,Ordinary retained trained run.
+faster_rcnn,314,map_50,unconditional,0.2756529265385327,True,750,323,Ordinary retained trained run.
+faster_rcnn,314,map_50_95,unconditional,0.08845364273590539,True,750,323,Ordinary retained trained run.
+yolo11s,17,precision,unconditional,0.391304347826087,True,750,323,Ordinary retained trained run.
+yolo11s,17,recall,unconditional,0.13432835820895522,True,750,323,Ordinary retained trained run.
+yolo11s,17,f1,unconditional,0.2,True,750,323,Ordinary retained trained run.
+yolo11s,17,iou,conditional_on_matched_detection,0.6947503501631446,True,750,323,Ordinary retained trained run.
+yolo11s,17,dice,conditional_on_matched_detection,0.8162901260402725,True,750,323,Ordinary retained trained run.
+yolo11s,17,map_50,unconditional,0.184171740556827,True,750,323,Ordinary retained trained run.
+yolo11s,17,map_50_95,unconditional,0.0606930966637053,True,750,323,Ordinary retained trained run.
+yolo11s,42,precision,unconditional,0.4,True,750,323,Ordinary retained trained run.
+yolo11s,42,recall,unconditional,0.12686567164179105,True,750,323,Ordinary retained trained run.
+yolo11s,42,f1,unconditional,0.19263456090651557,True,750,323,Ordinary retained trained run.
+yolo11s,42,iou,conditional_on_matched_detection,0.7170195854706174,True,750,323,Ordinary retained trained run.
+yolo11s,42,dice,conditional_on_matched_detection,0.8309782208263977,True,750,323,Ordinary retained trained run.
+yolo11s,42,map_50,unconditional,0.16893425232205408,True,750,323,Ordinary retained trained run.
+yolo11s,42,map_50_95,unconditional,0.05832218986182619,True,750,323,Ordinary retained trained run.
+yolo11s,137,precision,unconditional,0.3277310924369748,True,750,323,Ordinary retained trained run.
+yolo11s,137,recall,unconditional,0.1455223880597015,True,750,323,Ordinary retained trained run.
+yolo11s,137,f1,unconditional,0.20155038759689922,True,750,323,Ordinary retained trained run.
+yolo11s,137,iou,conditional_on_matched_detection,0.6795333611112088,True,750,323,Ordinary retained trained run.
+yolo11s,137,dice,conditional_on_matched_detection,0.8042150386966622,True,750,323,Ordinary retained trained run.
+yolo11s,137,map_50,unconditional,0.13969236100218999,True,750,323,Ordinary retained trained run.
+yolo11s,137,map_50_95,unconditional,0.04582610835802683,True,750,323,Ordinary retained trained run.
+yolo11s,271,precision,unconditional,0.0,True,750,323,Retained as an observed trained run for this endpoint.
+yolo11s,271,recall,unconditional,0.0,True,750,323,Retained as an observed trained run for this endpoint.
+yolo11s,271,f1,unconditional,0.0,True,750,323,Retained as an observed trained run for this endpoint.
+yolo11s,271,iou,conditional_on_matched_detection,,False,750,323,Undefined for this matched-detection endpoint and excluded only from its eligible run pool.
+yolo11s,271,dice,conditional_on_matched_detection,,False,750,323,Undefined for this matched-detection endpoint and excluded only from its eligible run pool.
+yolo11s,271,map_50,unconditional,0.15872173755300575,True,750,323,Retained as an observed trained run for this endpoint.
+yolo11s,271,map_50_95,unconditional,0.05557988828743392,True,750,323,Retained as an observed trained run for this endpoint.
+yolo11s,314,precision,unconditional,0.37254901960784315,True,750,323,Ordinary retained trained run.
+yolo11s,314,recall,unconditional,0.0708955223880597,True,750,323,Ordinary retained trained run.
+yolo11s,314,f1,unconditional,0.11912225705329153,True,750,323,Ordinary retained trained run.
+yolo11s,314,iou,conditional_on_matched_detection,0.7028092366629776,True,750,323,Ordinary retained trained run.
+yolo11s,314,dice,conditional_on_matched_detection,0.8207731864644722,True,750,323,Ordinary retained trained run.
+yolo11s,314,map_50,unconditional,0.16153960949518734,True,750,323,Ordinary retained trained run.
+yolo11s,314,map_50_95,unconditional,0.050420483981894734,True,750,323,Ordinary retained trained run.

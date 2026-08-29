@@ -10,11 +10,15 @@ from src.meddet_benchmark.evaluation import ImagePrediction, ImageTarget
 from src.stats.paired import (
     METRICS,
     EvidencePair,
+    IndependentEvidenceRuns,
     aggregate_hybrid,
     analyze_pair,
+    analyze_training_procedure,
     build_evidence,
     build_patient_clusters,
     draw_hierarchical_bootstrap_multiplicities,
+    draw_independent_run_bootstrap_multiplicities,
+    draw_patient_cluster_bootstrap_multiplicities,
     expand_patient_group_choices,
     expand_patient_group_multiplicities,
     holm_adjust,
@@ -205,6 +209,91 @@ def test_patient_group_draws_and_swaps_move_complete_clusters() -> None:
     assert int(np.sum(seed_draw)) == 3
 
 
+def test_primary_patient_bootstrap_never_resamples_images_within_a_patient() -> None:
+    clusters = build_patient_clusters(
+        ("a.png", "b.png", "c.png", "d.png"),
+        {"a.png": "p1", "b.png": "p1", "c.png": "p2", "d.png": "p3"},
+    )
+    rng = np.random.default_rng(20260829)
+
+    for _ in range(50):
+        image_multiplicities = draw_patient_cluster_bootstrap_multiplicities(rng, clusters)
+        assert image_multiplicities[0] == image_multiplicities[1]
+        assert int(np.sum(image_multiplicities[[0, 2, 3]])) == 3
+
+
+def test_independent_run_resampling_makes_two_detector_draws() -> None:
+    class StubRng:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def multinomial(self, count, probabilities):
+            assert count == 5
+            assert probabilities.tolist() == pytest.approx([0.2] * 5)
+            self.calls += 1
+            return np.asarray(
+                [5, 0, 0, 0, 0] if self.calls == 1 else [0, 0, 0, 0, 5],
+                dtype=np.int64,
+            )
+
+    rng = StubRng()
+    detector_a, detector_b = draw_independent_run_bootstrap_multiplicities(
+        rng, detector_a_run_count=5, detector_b_run_count=5
+    )
+
+    assert rng.calls == 2
+    assert detector_a.tolist() == [5, 0, 0, 0, 0]
+    assert detector_b.tolist() == [0, 0, 0, 0, 5]
+
+
+def test_patient_replicates_keep_unique_ap_and_matching_identity() -> None:
+    targets, detector_a, _detector_b = _records()
+    evidence = _evidence(detector_a, targets)
+    clusters = build_patient_clusters(
+        evidence.image_ids,
+        {"a.png": "p1", "b.png": "p1", "c.png": "p2", "d.png": "p3"},
+    )
+    patient_counts = np.asarray([2, 0, 1], dtype=np.int64)
+    image_counts = expand_patient_group_multiplicities(patient_counts, clusters)
+    weighted = aggregate_hybrid(
+        evidence,
+        evidence,
+        multiplicities=image_counts,
+        choose_b=np.zeros(len(targets), dtype=np.bool_),
+    )
+
+    target_by_id = {item.image_id: item for item in targets}
+    prediction_by_id = {item.image_id: item for item in detector_a}
+    expanded_targets: list[ImageTarget] = []
+    expanded_predictions: list[ImagePrediction] = []
+    for image_index, image_id in enumerate(evidence.image_ids):
+        for copy_index in range(int(image_counts[image_index])):
+            unique_id = f"patient-copy-{copy_index}__{image_id}"
+            target = target_by_id[image_id]
+            prediction = prediction_by_id[image_id]
+            expanded_targets.append(
+                ImageTarget(unique_id, target.image_size, target.boxes_xyxy, target.labels)
+            )
+            expanded_predictions.append(
+                ImagePrediction(
+                    unique_id,
+                    prediction.image_size,
+                    prediction.boxes_xyxy,
+                    prediction.labels,
+                    prediction.scores,
+                )
+            )
+    explicit = evaluate_prediction_records(
+        expanded_predictions,
+        expanded_targets,
+        category_names={1: "opacity"},
+        settings=SETTINGS,
+    )
+
+    assert len({item.image_id for item in expanded_targets}) == len(expanded_targets)
+    assert weighted == pytest.approx(_metric_vector(explicit), abs=1e-12)
+
+
 def test_grid_holm_excludes_explicitly_non_estimable_hypotheses() -> None:
     rows = [
         {
@@ -296,15 +385,58 @@ def test_paired_analysis_is_seeded_and_reports_every_metric() -> None:
     )
 
 
+def test_training_procedure_analysis_is_seeded_and_run_count_explicit() -> None:
+    targets, detector_a, detector_b = _records()
+    evidence_a, evidence_b = _evidence(detector_a, targets), _evidence(detector_b, targets)
+    runs = IndependentEvidenceRuns(
+        detector_a=(evidence_a, evidence_b),
+        detector_b=(evidence_b,),
+    )
+    patient_clusters = build_patient_clusters(
+        evidence_a.image_ids,
+        {"a.png": "p1", "b.png": "p1", "c.png": "p2", "d.png": "p3"},
+    )
+
+    first = analyze_training_procedure(
+        runs,
+        patient_clusters=patient_clusters,
+        base_seed=123,
+        comparison_label="independent-unit-test",
+        bootstrap_resamples=100,
+        confidence_level=0.95,
+    )
+    second = analyze_training_procedure(
+        runs,
+        patient_clusters=patient_clusters,
+        base_seed=123,
+        comparison_label="independent-unit-test",
+        bootstrap_resamples=100,
+        confidence_level=0.95,
+    )
+
+    assert first == second
+    assert tuple(row["metric"] for row in first) == METRICS
+    assert all(row["estimand"] == "training_procedure" for row in first)
+    assert all(row["detector_a_run_count"] == 2 for row in first)
+    assert all(row["detector_b_run_count"] == 1 for row in first)
+
+
 def test_statistics_config_covers_five_seed_and_corruption_inputs() -> None:
     config = load_statistics_config("configs/statistics.yaml")
 
     assert config.analysis.metrics == METRICS
     assert config.analysis.bootstrap_resamples == 2000
     assert config.analysis.permutation_resamples == 5000
-    assert config.analysis.bootstrap_method == "paired_hierarchical_patient_cluster_percentile"
-    assert config.analysis.permutation_method == "paired_patient_cluster_label_swap"
-    assert config.analysis.effect_size == "paired_raw_difference_with_cluster_bootstrap_ci"
+    assert (
+        config.analysis.bootstrap_method
+        == "independent_detector_run_hierarchical_patient_cluster_percentile"
+    )
+    assert config.analysis.run_resampling == "independent_within_detector"
+    assert (
+        config.analysis.permutation_method
+        == "checkpoint_conditional_paired_patient_cluster_label_swap"
+    )
+    assert config.analysis.primary_estimand == "training_procedure"
     assert config.analysis.multiple_comparison_correction == "holm"
     assert config.analysis.clean_correction_scope == "across_7_predictive_metrics"
     assert config.resolve(config.inputs.phase5_summary).is_file()
@@ -315,6 +447,10 @@ def test_statistics_config_covers_five_seed_and_corruption_inputs() -> None:
     assert eligibility.all_attempt_seeds == (17, 42, 137, 271, 314)
     assert eligibility.paired_complete_case_seeds == (17, 42, 137, 314)
     assert eligibility.paired_complete_case_metrics == ("iou", "dice")
+    assert eligibility.training_procedure_conditional_seeds_by_detector == {
+        "faster_rcnn": (17, 42, 137, 271, 314),
+        "yolo11s": (17, 42, 137, 314),
+    }
 
 
 def test_endpoint_groups_keep_zero_attempts_and_use_complete_conditional_pairs() -> None:
@@ -338,13 +474,15 @@ def test_endpoint_groups_keep_zero_attempts_and_use_complete_conditional_pairs()
         detector_b=(evidence_b, evidence_b, evidence_b, zero_operating_point_b, evidence_b),
     )
 
-    conditional_pair, eligibility = _validate_clean_seed_eligibility(
+    conditional_pair, conditional_runs, eligibility = _validate_clean_seed_eligibility(
         pair,
         seeds=(17, 42, 137, 271, 314),
         analysis=config.analysis,
     )
 
     assert conditional_pair.seed_count == 4
+    assert conditional_runs.detector_a_run_count == 5
+    assert conditional_runs.detector_b_run_count == 4
     assert eligibility["paired_complete_case_seed_ids"] == [17, 42, 137, 314]
     assert eligibility["excluded_pair_seed_ids"] == [271]
     assert eligibility["expected_undefined"][0]["prediction_count"] == 0
@@ -354,6 +492,8 @@ def test_endpoint_groups_keep_zero_attempts_and_use_complete_conditional_pairs()
             "metric": metric,
             "status": "complete",
             "p_value_raw": 0.5,
+            "permutation_valid": 100,
+            "difference_a_minus_b": float(index) / 10,
             "detector_a_estimate": float(index),
         }
         for index, metric in enumerate(METRICS)
@@ -361,15 +501,31 @@ def test_endpoint_groups_keep_zero_attempts_and_use_complete_conditional_pairs()
     conditional = [
         dict(row, detector_a_estimate=float(index + 100)) for index, row in enumerate(template)
     ]
-    merged = _merge_clean_endpoint_rows(template, conditional, eligibility=eligibility)
+    merged = _merge_clean_endpoint_rows(
+        template,
+        conditional,
+        template,
+        conditional,
+        eligibility=eligibility,
+        detector_a=config.analysis.detector_a,
+        detector_b=config.analysis.detector_b,
+    )
 
     assert tuple(row["metric"] for row in merged) == METRICS
     assert [row["seed_count"] for row in merged] == [5, 5, 5, 4, 4, 5, 5]
+    assert merged[0]["detector_a_run_ids"] == "17;42;137;271;314"
+    assert merged[0]["detector_b_run_ids"] == "17;42;137;271;314"
+    assert "Both detector runs labeled 271 contribute" in merged[0]["seed_271_contribution"]
     assert merged[0]["detector_a_estimate"] == 0.0
     assert merged[3]["detector_a_estimate"] == 103.0
+    assert merged[3]["detector_a_run_count"] == 5
+    assert merged[3]["detector_b_run_count"] == 4
+    assert merged[3]["detector_a_run_ids"] == "17;42;137;271;314"
+    assert merged[3]["detector_b_run_ids"] == "17;42;137;314"
     assert merged[3]["paired_seed_ids"] == "17;42;137;314"
     assert merged[3]["excluded_pair_seed_ids"] == "271"
     assert "yolo11s seed 271" in merged[3]["seed_eligibility_note"]
+    assert "Faster R-CNN run 271 contributes" in merged[3]["seed_271_contribution"]
 
 
 def test_clean_eligibility_rejects_an_unexpected_zero_tp_seed() -> None:
@@ -428,3 +584,26 @@ def test_holm_comparison_supports_n3_to_n5_labels(tmp_path) -> None:
     assert result["n5_patient_cluster_significant_count"] == 0
     assert result["became_non_significant"][0]["n3_patient_cluster_p_holm"] == 0.01
     assert result["became_non_significant"][0]["n5_patient_cluster_p_holm"] == 0.2
+
+
+def test_generated_clean_table_keeps_seed271_and_names_both_estimands() -> None:
+    with open(
+        "results/tables/statistical_clean_comparison.csv",
+        newline="",
+        encoding="utf-8",
+    ) as handle:
+        rows = {row["metric"]: row for row in csv.DictReader(handle)}
+
+    assert set(rows) == set(METRICS)
+    assert all(row["primary_inferential_target"] == "training_procedure" for row in rows.values())
+    assert all(
+        row["checkpoint_conditional_test_name"]
+        == "paired_patient_cluster_label_swap_conditional_on_observed_checkpoints"
+        for row in rows.values()
+    )
+    assert "271" in rows["precision"]["detector_a_run_ids"].split(";")
+    assert "271" in rows["precision"]["detector_b_run_ids"].split(";")
+    assert "271" in rows["iou"]["detector_a_run_ids"].split(";")
+    assert "271" not in rows["iou"]["detector_b_run_ids"].split(";")
+    assert rows["iou"]["detector_a_run_count"] == "5"
+    assert rows["iou"]["detector_b_run_count"] == "4"

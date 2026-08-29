@@ -21,12 +21,12 @@ n=3 analysis, final test precision/recall/F1 is
 precision at 96 of 101 official AP@0.5 recall positions; YOLO11s' apparent
 precision advantage at the original shared score threshold of 0.25 is a
 score-scale/selectivity artifact, not a frontier advantage. The primary
-patient-cluster analysis finds five of seven Holm-significant endpoints:
-precision, recall, F1, mAP@0.5, and mAP@0.5:0.95. This changes the corrected
-n=3 pattern from four of seven because F1 becomes significant at n=5.
-Their Holm p-values are 0.0019996001, 0.0013997201, 0.0013997201,
-0.0207958408, and 0.0341931614, respectively; conditional IoU and Dice remain
-non-significant at 0.1063787243 each.
+training-procedure bootstrap gives wholly positive Faster-R-CNN-minus-YOLO11s
+intervals for recall, F1, mAP@0.5, and mAP@0.5:0.95. Fixed-threshold precision
+is different: its primary interval crosses zero (`-0.2423` to `0.0553`), while
+the separate Holm p-value conditional on the observed checkpoints is `0.0020`
+in favor of YOLO11s. These target different randomness and are not
+interchangeable significance claims. Conditional IoU and Dice also cross zero.
 
 YOLO11s seed 271 is retained as a legitimate all-attempt result. Training
 converged normally and test AP@0.5/AP@0.5:0.95 was 0.1587217/0.0555799, but its
@@ -493,7 +493,7 @@ This generates:
 The method, denominators, zero-map failures, and interpretation are documented
 in [`docs/XAI_SANITY.md`](docs/XAI_SANITY.md).
 
-## 8. Run the paired statistical analysis
+## 8. Run the estimand-separated statistical analysis
 
 The current clean-only CPU refresh reads the ten frozen clean bundles and the
 committed Batch 1 image-to-patient mapping. It does not rerun model inference,
@@ -509,6 +509,9 @@ recomputed.
 This regenerates:
 
 - `results/tables/statistical_clean_comparison.csv` (report Table 7);
+- `results/tables/statistical_clean_per_run_metrics.csv`;
+- `results/tables/statistical_clean_leave_one_run_out.csv`;
+- `results/tables/statistical_clean_leave_one_seed_label_out.csv`;
 - `results/logs/phase8_statistics/summary.json`.
 
 It preserves `results/tables/statistical_robustness_comparison.csv` and the
@@ -516,25 +519,30 @@ seed-17 corruption inference already recorded in the summary. A deliberate
 full from-scratch reproduction after Section 6 can instead run the same command
 without `--scope clean`; that was not done for the five-seed clean refresh.
 
-The configuration fixes 2,000 paired patient-cluster bootstrap draws, 5,000
-paired patient-cluster detector-label permutations, 95% pointwise percentile
-intervals, raw paired-difference effects, and Holm correction. Every sampled or
-swapped NIH patient group carries all of its observed images together.
-Aggregate AP is reconstructed at every draw rather than approximated as a mean
-of per-image AP. Precision, recall, F1, and both AP endpoints use all five
-paired seeds. Conditional IoU and Dice use the four complete pairs 17, 42, 137,
-and 314 because YOLO11s seed 271 has no fixed-threshold true positive; the
-patient-cluster bootstrap and label-swap machinery itself is unchanged. The
-first corrected run also preserves the superseded
+The primary training-procedure estimand uses 2,000 shared patient-cluster draws
+and independent within-detector trained-run draws. Every sampled patient carries
+all observed images together, and every nonlinear metric—including aggregate
+AP—is reconstructed from the sampled predictions. Unconditional endpoints use
+five runs per detector. Conditional IoU and Dice use five defined Faster R-CNN
+runs and four defined YOLO11s runs because seed 271 has no YOLO11s
+fixed-threshold match.
+
+The separate 5,000-draw patient-cluster permutation p-values condition on the
+observed checkpoints and receive Holm correction across seven clean endpoints;
+they are secondary sensitivity results, not seed-aware p-values. The old
+common-seed-index bootstrap remains at
+`statistical_clean_comparison_paired_seed_sensitivity_archive.csv` with its
+provenance summary. The first patient-cluster correction also preserves the superseded
 image-level CSVs and summary under `*_image_level_archive.*` paths for audit;
 reruns never replace those archives. The clean-only refresh also preserves the
 corrected n=3 clean table at
 `results/tables/statistical_clean_comparison_n3_archive.csv`.
 
-Any derivative paper draft must carry forward both the endpoint-specific n and
-the seed-271 stability result prominently: n=5 for ordinary clean endpoints,
-n=4 complete pairs for conditional IoU/Dice inference, and no substitution of
-a replacement seed. Threshold selection, FROC, and Pareto remain n=3-only;
+Any derivative paper must name the inferential target. For broad pipeline
+claims, the training-procedure intervals are primary. It must carry the
+detector-specific run counts and seed-271 role: 5/5 for unconditional clean
+endpoints and 5/4 for conditional IoU/Dice, with no replacement seed.
+Threshold selection, FROC, and Pareto remain n=3-only;
 robustness and explainability remain seed-17-only.
 
 ## Report artifact-to-command index
@@ -587,9 +595,11 @@ Every item in the benchmark's Definition of Done is satisfied:
   boxes receive energy-in-box and pointing-game analysis, with one explicit
   zero-energy map.
 - [x] **Statistical inference.** The frozen clean and corruption predictions
-  have patient-cluster bootstrap CIs, patient-cluster permutation p-values,
-  paired raw-difference effects, and Holm correction. Non-estimable rows and
-  the reason McNemar is inapplicable are explicit.
+  have patient-cluster inference. Clean pipeline claims use primary
+  patient-cluster/independent-run bootstrap CIs; separately labeled
+  permutation p-values condition on the observed checkpoints. Raw-difference
+  effects, Holm correction, non-estimable rows, and the reason McNemar is
+  inapplicable are explicit.
 - [x] **Scenario-grounded discussion.** Report Section 11 weighs measured
   accuracy, robustness, interpretability, and compute for high-sensitivity
   retrospective screening, constrained point-of-care assistance, and

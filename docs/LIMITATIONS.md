@@ -28,8 +28,9 @@ device, or acquisition relationship. The held-out sets also contain repeated
 exams within a split. The resulting within-patient dependence was identified
 and corrected in Batch 13: primary confidence intervals resample NIH patient
 groups, and permutation swaps move every observed exam from one patient
-together. The remaining limitation is the finite number of observed patient
-groups, not unaddressed image-level clustering.
+together. Batch 28 further separates primary training-procedure intervals from
+secondary checkpoint-conditional p-values. The remaining limitation is the
+finite number of observed patient groups, not unaddressed image-level clustering.
 
 ## Annotation and preprocessing scope
 
@@ -258,25 +259,25 @@ permutation, and coarse interpolated maps limit generalization.
 ## Statistical scope
 
 Batch 13 identified and corrected the original image-level clustering error.
-The primary bootstrap now resamples all exams from each NIH patient together,
-and the paired permutation swaps detector labels once per patient group. The
-superseded image-level tables and summary remain explicitly archived for audit
-but are not primary evidence. For precision, recall, F1, and both AP endpoints,
-the clean hierarchical bootstrap resamples all five paired training seeds. For
-conditional IoU and Dice it resamples the four complete pairs 17, 42, 137, and
-314; seed 271 is ineligible only because that matched-only estimand is
-undefined. Patient identifiers, patient-cluster construction, cluster
-bootstrap expansion, and patient-level detector-label-swap algorithms are
-unchanged. The two endpoint groups use separate deterministic random streams,
-so their realized draw masks are not claimed to be identical. Corruption
-inference remains conditional on the primary checkpoints.
+The primary training-procedure bootstrap resamples all exams from each NIH
+patient together and samples trained runs independently within each detector.
+Same-number seeds are not matched stochastic blocks: the PyTorch and
+Ultralytics loaders, batch structures, initialization/RNG paths, and stopping
+trajectories are not coupled. Unconditional endpoints use five runs per
+detector. Conditional IoU and Dice use five defined Faster R-CNN runs and four
+defined YOLO11s runs; seed 271 remains included wherever its endpoint is
+defined. Five runs are still a coarse empirical representation of retraining
+variability.
 
-Permutation p-values condition on the observed checkpoints, whereas clean
-confidence intervals also resample the eligible seed pairs for each endpoint.
-These answer related but different uncertainty questions. All seven clean
-endpoints remain in one Holm family despite the endpoint-specific seed count;
-the 95% percentile intervals are pointwise rather than simultaneous, and
-Holm-adjusted p-values govern family-wise claims. Patient clustering handles
+The secondary permutation analysis swaps detector labels once per patient
+group and conditions on the observed checkpoints. Its Holm-adjusted p-values
+do not test training-procedure variability. In particular, fixed-threshold
+precision has a primary interval crossing zero despite a small
+checkpoint-conditional p-value; the latter cannot be used as robust evidence
+of a training-procedure difference. The historical paired-seed and superseded
+image-level outputs remain explicit sensitivity/audit archives. All seven
+checkpoint-conditional clean p-values remain in one Holm family; the primary
+95% intervals are pointwise rather than simultaneous. Patient clustering handles
 the observed within-patient dependence, but neither it nor Holm correction
 makes severity conditions independent, calibrates their clinical likelihood,
 guarantees transportability, or establishes external-site robustness.

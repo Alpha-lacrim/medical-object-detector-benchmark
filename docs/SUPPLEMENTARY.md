@@ -100,9 +100,15 @@ part of the evidence and must travel with any reused number.
 ## S7. Statistical evidence and archives
 
 - [Primary clean patient-cluster comparison](../results/tables/statistical_clean_comparison.csv)
-  reports seven endpoints with metric-specific paired seed counts, pointwise
-  patient-cluster bootstrap intervals, paired cluster-label permutation
-  p-values, raw paired-difference effects, and Holm adjustment.
+  reports seven primary training-procedure intervals with detector-specific run
+  counts and separately labeled Holm p-values conditional on the observed
+  checkpoints.
+- Seed influence is explicit in the [per-run metrics](../results/tables/statistical_clean_per_run_metrics.csv),
+  [leave-one-training-run-out](../results/tables/statistical_clean_leave_one_run_out.csv),
+  and [descriptive leave-one-seed-label-out](../results/tables/statistical_clean_leave_one_seed_label_out.csv)
+  tables. Seed 271 is not outcome-selected away.
+- The [paired-seed sensitivity archive](../results/tables/statistical_clean_comparison_paired_seed_sensitivity_archive.csv)
+  preserves the former common-index bootstrap as a nonprimary historical result.
 - The [three-seed patient-cluster archive](../results/tables/statistical_clean_comparison_n3_archive.csv)
   and [superseded image-level archive](../results/tables/statistical_clean_comparison_image_level_archive.csv)
   remain available for audit and are not current inferential results.

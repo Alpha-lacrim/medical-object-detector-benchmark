@@ -80,6 +80,33 @@ class EvidencePair:
 
 
 @dataclass(frozen=True)
+class IndependentEvidenceRuns:
+    """Detector run evidence without an assumed cross-detector run pairing."""
+
+    detector_a: tuple[DetectionEvidence, ...]
+    detector_b: tuple[DetectionEvidence, ...]
+
+    def __post_init__(self) -> None:
+        if not self.detector_a or not self.detector_b:
+            raise ValueError("each detector must contribute at least one trained run")
+        reference = self.detector_a[0].image_ids
+        if any(item.image_ids != reference for item in (*self.detector_a, *self.detector_b)):
+            raise ValueError("all detector runs must use the same ordered image IDs")
+
+    @property
+    def image_count(self) -> int:
+        return self.detector_a[0].image_count
+
+    @property
+    def detector_a_run_count(self) -> int:
+        return len(self.detector_a)
+
+    @property
+    def detector_b_run_count(self) -> int:
+        return len(self.detector_b)
+
+
+@dataclass(frozen=True)
 class PatientClusters:
     """Patient-group membership aligned to an evidence pair's image order."""
 
@@ -190,6 +217,46 @@ def draw_hierarchical_bootstrap_multiplicities(
             np.int64, copy=False
         )
     return image_multiplicities, seed_multiplicities
+
+
+def draw_patient_cluster_bootstrap_multiplicities(
+    rng: np.random.Generator,
+    patient_clusters: PatientClusters,
+) -> IntArray:
+    """Draw patients with replacement and expand one count to every patient image."""
+
+    patient_group_count = patient_clusters.patient_group_count
+    probabilities = np.full(patient_group_count, 1 / patient_group_count, dtype=np.float64)
+    patient_counts = rng.multinomial(patient_group_count, probabilities).astype(
+        np.int64, copy=False
+    )
+    return expand_patient_group_multiplicities(patient_counts, patient_clusters)
+
+
+def draw_independent_run_bootstrap_multiplicities(
+    rng: np.random.Generator,
+    *,
+    detector_a_run_count: int,
+    detector_b_run_count: int,
+) -> tuple[IntArray, IntArray]:
+    """Draw trained runs independently within each detector.
+
+    Same-number seed labels do not couple the draws. Each returned multinomial
+    vector has its detector's eligible run count as both its length and total.
+    """
+
+    for name, count in (
+        ("detector_a_run_count", detector_a_run_count),
+        ("detector_b_run_count", detector_b_run_count),
+    ):
+        if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+            raise ValueError(f"{name} must be a positive integer")
+
+    def draw(count: int) -> IntArray:
+        probabilities = np.full(count, 1 / count, dtype=np.float64)
+        return rng.multinomial(count, probabilities).astype(np.int64, copy=False)
+
+    return draw(detector_a_run_count), draw(detector_b_run_count)
 
 
 @dataclass(frozen=True)
@@ -570,6 +637,45 @@ def estimate_pair(
     return estimate_a / total_seed_weight, estimate_b / total_seed_weight
 
 
+def estimate_independent_runs(
+    runs: IndependentEvidenceRuns,
+    *,
+    multiplicities: IntArray,
+    detector_a_run_multiplicities: IntArray | None = None,
+    detector_b_run_multiplicities: IntArray | None = None,
+) -> tuple[FloatArray, FloatArray]:
+    """Estimate each detector over its independently weighted trained runs."""
+
+    if multiplicities.shape != (runs.image_count,):
+        raise ValueError("image multiplicities must match detector evidence")
+    if detector_a_run_multiplicities is None:
+        detector_a_run_multiplicities = np.ones(runs.detector_a_run_count, dtype=np.int64)
+    if detector_b_run_multiplicities is None:
+        detector_b_run_multiplicities = np.ones(runs.detector_b_run_count, dtype=np.int64)
+
+    def estimate(
+        evidence_runs: tuple[DetectionEvidence, ...], run_multiplicities: IntArray
+    ) -> FloatArray:
+        if run_multiplicities.shape != (len(evidence_runs),):
+            raise ValueError("run multiplicities must match eligible detector runs")
+        if not np.issubdtype(run_multiplicities.dtype, np.integer) or np.any(
+            run_multiplicities < 0
+        ):
+            raise ValueError("run multiplicities must be non-negative integers")
+        total_weight = int(np.sum(run_multiplicities))
+        if total_weight < 1:
+            raise ValueError("run multiplicities must select at least one trained run")
+        result = np.zeros(len(METRICS), dtype=np.float64)
+        for evidence, weight in zip(evidence_runs, run_multiplicities, strict=True):
+            if weight:
+                result += int(weight) * _aggregate_single(evidence, multiplicities)
+        return result / total_weight
+
+    return estimate(runs.detector_a, detector_a_run_multiplicities), estimate(
+        runs.detector_b, detector_b_run_multiplicities
+    )
+
+
 def stable_rng_seed(base_seed: int, label: str) -> int:
     """Derive an order-independent uint32 seed from a comparison label."""
 
@@ -792,6 +898,104 @@ def analyze_pair(
             )
         output[name] = rows
     return output
+
+
+def analyze_training_procedure(
+    runs: IndependentEvidenceRuns,
+    *,
+    patient_clusters: PatientClusters,
+    base_seed: int,
+    comparison_label: str,
+    bootstrap_resamples: int,
+    confidence_level: float,
+) -> list[dict[str, Any]]:
+    """Estimate training-procedure uncertainty from patients and independent runs.
+
+    The held-out patient draw is shared across detectors because both pipelines
+    were evaluated on the same test cohort. Trained runs are resampled in two
+    separate multinomial draws because the detector training programs did not
+    implement a common-random-number design.
+    """
+
+    if bootstrap_resamples < 100:
+        raise ValueError("at least 100 bootstrap resamples are required")
+    if not 0 < confidence_level < 1:
+        raise ValueError("confidence_level must lie in (0, 1)")
+    if patient_clusters.image_ids != runs.detector_a[0].image_ids:
+        raise ValueError("patient clusters must match the evidence image order")
+
+    ones = np.ones(runs.image_count, dtype=np.int64)
+    point_a, point_b = estimate_independent_runs(runs, multiplicities=ones)
+    bootstrap = np.full((bootstrap_resamples, 2, len(METRICS)), np.nan, dtype=np.float64)
+    rng = np.random.default_rng(stable_rng_seed(base_seed, comparison_label))
+    for resample in range(bootstrap_resamples):
+        patient_multiplicities = draw_patient_cluster_bootstrap_multiplicities(
+            rng, patient_clusters
+        )
+        run_multiplicities_a, run_multiplicities_b = draw_independent_run_bootstrap_multiplicities(
+            rng,
+            detector_a_run_count=runs.detector_a_run_count,
+            detector_b_run_count=runs.detector_b_run_count,
+        )
+        bootstrap[resample] = estimate_independent_runs(
+            runs,
+            multiplicities=patient_multiplicities,
+            detector_a_run_multiplicities=run_multiplicities_a,
+            detector_b_run_multiplicities=run_multiplicities_b,
+        )
+
+    rows: list[dict[str, Any]] = []
+    observed = point_a - point_b
+    for metric_index, metric in enumerate(METRICS):
+        a_low, a_high, a_valid = _percentile_interval(
+            bootstrap[:, 0, metric_index], confidence_level
+        )
+        b_low, b_high, b_valid = _percentile_interval(
+            bootstrap[:, 1, metric_index], confidence_level
+        )
+        differences = bootstrap[:, 0, metric_index] - bootstrap[:, 1, metric_index]
+        difference_low, difference_high, difference_valid = _percentile_interval(
+            differences, confidence_level
+        )
+        values = (
+            point_a[metric_index],
+            point_b[metric_index],
+            observed[metric_index],
+            difference_low,
+            difference_high,
+        )
+        estimable = all(np.isfinite(value) for value in values)
+        rows.append(
+            {
+                "metric": metric,
+                "unit": METRIC_UNITS[metric],
+                "estimand": "training_procedure",
+                "detector_a_estimate": float(point_a[metric_index]),
+                "detector_a_ci_low": a_low,
+                "detector_a_ci_high": a_high,
+                "detector_b_estimate": float(point_b[metric_index]),
+                "detector_b_ci_low": b_low,
+                "detector_b_ci_high": b_high,
+                "difference_a_minus_b": float(observed[metric_index]),
+                "difference_ci_low": difference_low,
+                "difference_ci_high": difference_high,
+                "bootstrap_valid_a": a_valid,
+                "bootstrap_valid_b": b_valid,
+                "bootstrap_valid_difference": difference_valid,
+                "effect_size_name": "training_procedure_raw_difference",
+                "effect_size": float(observed[metric_index]),
+                "effect_size_n": patient_clusters.patient_group_count,
+                "detector_a_run_count": runs.detector_a_run_count,
+                "detector_b_run_count": runs.detector_b_run_count,
+                "status": "complete" if estimable else "not_estimable",
+                "reason": (
+                    ""
+                    if estimable
+                    else "The conditional metric is undefined for every eligible run."
+                ),
+            }
+        )
+    return rows
 
 
 def json_number(value: Any) -> Any:

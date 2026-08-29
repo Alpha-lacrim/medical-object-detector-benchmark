@@ -425,25 +425,28 @@ see [EXPLAINABILITY.md](EXPLAINABILITY.md).
 ## 11. Statistical analysis
 
 The current clean analysis covers all 750 test images and the five attempted
-training seeds `17/42/137/271/314`. AP, precision, recall, and F1 use all five
-paired seeds, including seed 271's observed zero fixed-threshold
-precision/recall/F1. Conditional matched-only IoU and Dice use the four complete
-pairs `17/42/137/314`; descriptive localization retains Faster R-CNN n=5 but
-YOLO11s n=4. Inference uses:
+training runs labeled `17/42/137/271/314`. The primary training-procedure
+estimand uses all five runs per detector for AP, precision, recall, and F1.
+Conditional matched-only IoU and Dice use five defined Faster R-CNN runs and
+four defined YOLO11s runs. Seed 271 remains included wherever its endpoint is
+defined. Inference uses:
 
-- 2,000 paired hierarchical percentile bootstrap draws over NIH patient groups
-  and the applicable n=5 or n=4 paired seed set;
-- 5,000 two-sided paired patient-group detector-label permutation draws;
+- 2,000 hierarchical percentile bootstrap draws over NIH patient groups and
+  independently resampled trained runs within each detector;
+- 5,000 two-sided patient-group detector-label permutation draws conditional
+  on the observed checkpoints as a secondary sensitivity analysis;
 - pointwise 95% bootstrap intervals;
-- the paired raw aggregate difference with its patient-cluster interval as the
-  effect; and
+- the raw training-procedure aggregate difference with its hierarchical
+  interval as the effect; and
 - Holm correction across the seven clean endpoints.
 
 Dataset-level AP is recomputed from complete prediction bundles in every draw;
 the analysis does not average a fictional per-image AP. Precision, recall, F1,
 and conditional localization metrics are rebuilt from their sufficient
 per-image contributions. All seven endpoints remain in one Holm family despite
-their prominently disclosed endpoint-specific seed counts.
+their prominently disclosed endpoint-specific run counts. Same-number seed
+labels are not treated as matched stochastic blocks: framework, data-order,
+initialization, RNG-consumption, and stopping paths were not coupled.
 
 The corruption analysis uses the paired seed-17 predictions on the fixed
 300-image sample. It evaluates both raw detector differences and differences in
@@ -456,11 +459,14 @@ analysis. The exact V1 image-level outputs and former jackknife Cohen's d remain
 under explicit archive paths for audit only; the corrected n=3 patient-cluster
 clean table is also archived before the Batch 16 expansion. Batch 16 changes
 only cross-seed endpoint eligibility and does not change patient identities,
-cluster bootstrap construction, or patient-level label swaps. The draft's
+cluster bootstrap construction, or patient-level label swaps. Batch 28 changes
+the run-resampling layer from paired labels to independent within-detector
+draws, while preserving the former paired-seed output as a sensitivity archive.
+The draft's
 at-least-10,000-draw target, formal Track A primary/Track B secondary split,
 McNemar test, and Wilcoxon signed-rank tests were not implemented. Five attempted
-seeds remain a modest sample, and conditional localization has only four
-complete pairs. The exact estimands and results are in
+trained runs remain a modest sample, and conditional localization has only four
+defined YOLO11s runs. The exact estimands and results are in
 [STATISTICAL_ANALYSIS.md](STATISTICAL_ANALYSIS.md).
 
 ## 12. Implementation sequence and completion status

@@ -141,3 +141,63 @@ lower-confidence-bound objective differs from Batch 14's mean-F1 point objective
 - A later paper may compare the threshold shifts across the four assumed cost ratios,
   but must not present any one setting as a measured clinical utility or silently feed
   it into existing FROC, Pareto, or other downstream artifacts.
+
+## D-005 — Separate inferential targets and resample detector runs independently
+
+- **Date:** 2026-08-29
+- **Status:** Accepted; supersedes the paired-seed bootstrap interpretation of
+  the clean confidence intervals but preserves that calculation as a
+  historical sensitivity artifact
+
+### Context
+
+The clean table combined confidence intervals that resampled patient groups
+and same-number training seeds with permutation p-values that held the trained
+checkpoints fixed. Those procedures answer different questions. In addition,
+the shared seed integers 17, 42, 137, 271, and 314 were treated as matched
+cross-detector blocks without a common-random-number design.
+
+### Decision
+
+The paper distinguishes two estimands:
+
+- **Checkpoint-conditional estimand.** This conditions on the already-trained
+  checkpoints and represents uncertainty from held-out NIH patient sampling.
+  The patient-cluster detector-label permutation p-values belong to this
+  estimand and are a **secondary sensitivity analysis conditional on the
+  observed checkpoints**.
+- **Training-procedure estimand.** This represents both held-out patient
+  uncertainty and stochastic retraining/run variability. Its intervals use
+  shared patient-cluster draws and separate within-detector trained-run draws.
+  This is the **primary estimand** for broad claims about the two disclosed
+  pipelines.
+
+The same-number detector seeds are not scientifically meaningful matched
+stochastic blocks. Both programs disable stochastic augmentation, so there is
+no augmentation draw to couple. Faster R-CNN uses the project PyTorch loader
+with batch size 2 and a seeded generator; YOLO11s uses Ultralytics' loader with
+batch size 4. Their dataset abstractions, initialization shapes and calls,
+training frameworks, RNG-consumption paths, and early-stopping trajectories
+differ. A numeric seed is reproducibility metadata within each program, not a
+shared random variate across programs. The five detector runs are therefore
+treated as independent realizations within each detector.
+
+### Consequences
+
+- The primary bootstrap resamples 323 patient clusters and trained runs
+  independently within detector, reconstructing TP/FP/FN ratios, matched-box
+  localization, and COCO AP from the resampled predictions in every draw.
+- Unconditional endpoints use five runs per detector. Conditional IoU and
+  Dice use all five defined Faster R-CNN runs and the four defined YOLO11s
+  runs; YOLO11s seed 271 remains undefined for those endpoints rather than
+  being converted to zero. No model is retrained and the frozen test set and
+  ten prediction bundles are unchanged.
+- The former paired-seed table and provenance summary are retained at explicit
+  `*_paired_seed_sensitivity_archive.*` paths. They are not a second proof of
+  the training-procedure claim.
+- No seed-aware p-value is introduced. Holm-adjusted patient-cluster
+  permutation p-values remain checkpoint-conditional and are labeled as such
+  wherever they accompany the primary intervals.
+- Per-run, leave-one-training-run-out, and leave-one-seed-label-out artifacts
+  are descriptive influence diagnostics. In particular, deleting seed 271 is
+  not a corrected analysis and does not replace the all-attempt result.

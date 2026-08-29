@@ -1,0 +1,71 @@
+detector,omitted_seed,metric,endpoint_conditioning,full_run_mean,leave_one_run_out_mean,change_from_full,contributing_run_count,contributing_run_ids,seed_271_influence_note
+faster_rcnn,17,precision,unconditional,0.19589066943662742,0.21194857271663664,0.016057903280009223,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,17,recall,unconditional,0.5798507462686567,0.5634328358208955,-0.016417910447761197,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,17,f1,unconditional,0.2845263147467961,0.3009802701718011,0.016453955425004996,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,17,iou,conditional_on_matched_detection,0.674926726191087,0.6754614691775394,0.0005347429864523967,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,17,dice,conditional_on_matched_detection,0.8010050425470243,0.8013322755416538,0.000327232994629445,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,17,map_50,unconditional,0.3042238071036434,0.3063865935190189,0.0021627864153755394,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,17,map_50_95,unconditional,0.09950157082350383,0.09978790848087761,0.00028633765737377803,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,precision,unconditional,0.19589066943662742,0.1916573340672713,-0.004233335369356106,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,recall,unconditional,0.5798507462686567,0.5792910447761195,-0.0005597014925372568,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,f1,unconditional,0.2845263147467961,0.2777358155114173,-0.006790499235378833,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,iou,conditional_on_matched_detection,0.674926726191087,0.6732141502999669,-0.0017125758911200606,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,dice,conditional_on_matched_detection,0.8010050425470243,0.7996942823471361,-0.0013107601998881835,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,map_50,unconditional,0.3042238071036434,0.3028926812294185,-0.0013311258742249032,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,42,map_50_95,unconditional,0.09950157082350383,0.09803093075436341,-0.0014706400691404248,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,precision,unconditional,0.19589066943662742,0.20906567142613447,0.013175001989507051,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,recall,unconditional,0.5798507462686567,0.5531716417910448,-0.026679104477611904,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,f1,unconditional,0.2845263147467961,0.2964177131372943,0.011891398390498187,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,iou,conditional_on_matched_detection,0.674926726191087,0.6774031816445871,0.0024764554535001704,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,dice,conditional_on_matched_detection,0.8010050425470243,0.8029320657779969,0.001927023230972602,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,map_50,unconditional,0.3042238071036434,0.3002595931707116,-0.003964213932931782,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,137,map_50_95,unconditional,0.09950157082350383,0.09857101290962549,-0.0009305579138783465,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,271,precision,unconditional,0.19589066943662742,0.18366542012911763,-0.012225249307509789,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,271,recall,unconditional,0.5798507462686567,0.5932835820895522,0.013432835820895495,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,271,f1,unconditional,0.2845263147467961,0.2721270877462914,-0.01239922700050472,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,271,iou,conditional_on_matched_detection,0.674926726191087,0.6746060139732795,-0.00032071221780749504,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,271,dice,conditional_on_matched_detection,0.8010050425470243,0.8007261769779829,-0.0002788655690414421,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,271,map_50,unconditional,0.3042238071036434,0.3002136403541471,-0.00401016674949628,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,271,map_50_95,unconditional,0.09950157082350383,0.09885444912724925,-0.0006471216962545823,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+faster_rcnn,314,precision,unconditional,0.19589066943662742,0.18311634884397707,-0.012774320592650351,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,314,recall,unconditional,0.5798507462686567,0.6100746268656716,0.030223880597014863,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,314,f1,unconditional,0.2845263147467961,0.27537068716717666,-0.009155627579619463,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,314,iou,conditional_on_matched_detection,0.674926726191087,0.6739488158600622,-0.0009779103310247894,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,314,dice,conditional_on_matched_detection,0.8010050425470243,0.8003404120903523,-0.0006646304566719774,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,314,map_50,unconditional,0.3042238071036434,0.3113665272449211,0.007142720141277703,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+faster_rcnn,314,map_50_95,unconditional,0.09950157082350383,0.10226355284540345,0.002761982021899617,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,precision,unconditional,0.298316891974181,0.2750700280112045,-0.023246863962976483,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,recall,unconditional,0.0955223880597015,0.08582089552238806,-0.009701492537313436,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,f1,unconditional,0.14266144111134127,0.12832680138917657,-0.0143346397221647,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,iou,conditional_on_matched_detection,0.698528133351987,0.6997873944149345,0.001259261062947492,3,42;137;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,dice,conditional_on_matched_detection,0.8180641430069512,0.8186554819958441,0.0005913389888929643,3,42;137;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,map_50,unconditional,0.16261194018585284,0.15722199009310928,-0.005389950092743567,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,17,map_50_95,unconditional,0.054168353430577396,0.05253716762229542,-0.0016311858082819763,4,42;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,precision,unconditional,0.298316891974181,0.27289611496772626,-0.02542077700645473,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,recall,unconditional,0.0955223880597015,0.0876865671641791,-0.0078358208955224,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,f1,unconditional,0.14266144111134127,0.13016816116254767,-0.012493279948793595,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,iou,conditional_on_matched_detection,0.698528133351987,0.6923643159791103,-0.006163817372876745,3,17;137;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,dice,conditional_on_matched_detection,0.8180641430069512,0.813759450400469,-0.004304692606482141,3,17;137;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,map_50,unconditional,0.16261194018585284,0.16103136215180253,-0.0015805780340503173,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,42,map_50_95,unconditional,0.054168353430577396,0.0531298943227652,-0.0010384591078121952,4,17;137;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,precision,unconditional,0.298316891974181,0.29096334185848255,-0.007353550115698437,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,recall,unconditional,0.0955223880597015,0.08302238805970148,-0.012500000000000011,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,f1,unconditional,0.14266144111134127,0.12793920448995177,-0.014722236621389495,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,iou,conditional_on_matched_detection,0.698528133351987,0.7048597240989132,0.00633159074692613,3,17;42;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,dice,conditional_on_matched_detection,0.8180641430069512,0.8226805111103808,0.00461636810342958,3,17;42;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,map_50,unconditional,0.16261194018585284,0.16834183498176855,0.005729894795915708,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,137,map_50_95,unconditional,0.054168353430577396,0.05625391469871503,0.0020855612681376368,4,17;42;271;314,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,271,precision,unconditional,0.298316891974181,0.37289611496772623,0.07457922299354525,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,271,recall,unconditional,0.0955223880597015,0.11940298507462686,0.02388059701492537,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,271,f1,unconditional,0.14266144111134127,0.1783268013891766,0.03566536027783532,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,271,iou,conditional_on_matched_detection,0.698528133351987,0.698528133351987,0.0,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,271,dice,conditional_on_matched_detection,0.8180641430069512,0.8180641430069512,0.0,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,271,map_50,unconditional,0.16261194018585284,0.1635844908440646,0.0009725506582117516,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,271,map_50_95,unconditional,0.054168353430577396,0.053815469716363265,-0.00035288371421413056,4,17;42;137;314,Descriptive deletion of seed 271; not a corrected result.
+yolo11s,314,precision,unconditional,0.298316891974181,0.27975886006576545,-0.01855803190841554,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,314,recall,unconditional,0.0955223880597015,0.10167910447761194,0.006156716417910449,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,314,f1,unconditional,0.14266144111134127,0.14854623712585371,0.0058847960145124445,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,314,iou,conditional_on_matched_detection,0.698528133351987,0.6971010989149903,-0.0014270344369967658,3,17;42;137,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,314,dice,conditional_on_matched_detection,0.8180641430069512,0.8171611285211108,-0.0009030144858404032,3,17;42;137,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,314,map_50,unconditional,0.16261194018585284,0.1628800228585192,0.00026808267266636987,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.
+yolo11s,314,map_50_95,unconditional,0.054168353430577396,0.05510532079274806,0.0009369673621706653,4,17;42;137;271,Seed 271 remains subject to endpoint-specific definedness.

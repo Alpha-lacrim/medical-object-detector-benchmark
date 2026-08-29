@@ -28,11 +28,11 @@ This question concerns two disclosed implementations under one controlled protoc
 
 **Hypothesis.** Under the unified held-out evaluator, Faster R-CNN will achieve higher recall, F1, AP@0.5, and AP@0.5:0.95 than YOLO11s.
 
-**Operational check.** The hypothesis is supported only if Faster R-CNN has the higher all-attempt point estimate for all four endpoints and each paired Faster-R-CNN-minus-YOLO11s difference remains positive with a Holm-adjusted `p < 0.05` in the patient-cluster analysis.
+**Operational check.** The hypothesis is supported only if Faster R-CNN has the higher all-attempt point estimate for all four endpoints and every primary training-procedure interval for the Faster-R-CNN-minus-YOLO11s difference remains wholly above zero.
 
-**Existing evidence.** Check the clean means and sample sizes in [`detector_comparison.csv`](../results/tables/detector_comparison.csv) and the paired differences, confidence intervals, and corrected p-values in [`statistical_clean_comparison.csv`](../results/tables/statistical_clean_comparison.csv). The frozen artifacts support H1 for all four endpoints at `n=5` paired attempts.
+**Existing evidence.** Check the clean means and sample sizes in [`detector_comparison.csv`](../results/tables/detector_comparison.csv) and the estimand-separated differences and intervals in [`statistical_clean_comparison.csv`](../results/tables/statistical_clean_comparison.csv). The frozen artifacts support H1 for all four endpoints with five independently resampled runs per detector.
 
-**Boundary.** Fixed-threshold precision is not part of H1 and favors YOLO11s at score 0.25. Conditional IoU and Dice are also outside H1: they exclude missed opacities, use four complete pairs for inference, and are not Holm-significant.
+**Boundary.** Fixed-threshold precision is not part of H1; its primary interval crosses zero even though the secondary checkpoint-conditional permutation favors YOLO11s at score 0.25. Conditional IoU and Dice are also outside H1: they exclude missed opacities, use five defined Faster R-CNN and four defined YOLO11s runs, and their primary intervals cross zero.
 
 ## H2 - A shared threshold does not define a shared operating regime
 
