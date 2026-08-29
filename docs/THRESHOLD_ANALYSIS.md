@@ -115,7 +115,7 @@ mismatch rather than a superior precision-recall frontier.
 
 The predeclared selection rule maximizes arithmetic mean F1 across the three validation
 seeds on the same 0.01--0.99 grid. F1 gives precision and recall equal weight without
-inventing an unvalidated clinical cost ratio and retains the already-reviewed Batch 10
+asserting an unmeasured clinical-harm function and retains the already-reviewed Batch 10
 protocol. Exact mean-F1 ties are resolved toward the higher, more selective threshold. The
 rule selects 0.69 for Faster R-CNN and 0.05 for YOLO11s. These values are then frozen and
 each is applied exactly once to each corresponding frozen test bundle; the test results do

@@ -83,7 +83,7 @@ grid, held-out boundary, and metric path. Second, it treats threshold behavior
 as a result rather than a hidden implementation choice by combining an
 exploratory threshold sweep, official precision-recall curves,
 validation-selected operating points, free-response ROC (FROC), and a separate
-cost-weighted validation sensitivity analysis. Third, it broadens the evidence
+recall-weighted F-beta validation sensitivity analysis. Third, it broadens the evidence
 base beyond clean mAP through detection-specific calibration, patient-cluster
 inference, accuracy-efficiency Pareto analysis, decision-curve analysis (DCA),
 digital and acquisition-motivated robustness, and Grad-CAM localization plus
@@ -307,24 +307,40 @@ seed contributed its highest observed sensitivity without exceeding the
 budget. No interpolation or extrapolation was used. The FROC curves describe
 the available n=3 operating frontier; they do not select a clinical threshold.
 
-### 3.5 Cost-weighted threshold sensitivity
+### 3.5 Recall-weighted F-beta and hypothetical error-loss sensitivity
 
-The validation-only cost sensitivity used
+The validation-only preference sensitivity used
 
 $$
-F1_\beta(\tau)=
+F_\beta(\tau)=
 \frac{(1+\beta^2)P(\tau)R(\tau)}{\beta^2P(\tau)+R(\tau)},
-\qquad
-\beta=\sqrt{C_{FN}/C_{FP}},
 $$
 
-for $\beta\in\{1,3,5,10\}$, corresponding to assumed false-negative to
-false-positive cost ratios of 1, 9, 25, and 100. For each detector and beta,
-the selected threshold maximized the lower pointwise 95% bootstrap bound over
-the 0.01--0.99 grid. The same 2,000 hierarchical patient/seed draws were reused
-at every threshold. Decision D-004 keeps this analysis separate from the
-primary maximum-mean-F1 thresholds. No beta is clinically preferred; none of
-these cost-weighted thresholds was applied to test, FROC, Pareto, or DCA.
+for $\beta\in\{1,3,5,10\}$. Beta is a recall-versus-precision preference
+parameter; $\beta^2\in\{1,9,25,100\}$ is the relative recall weight in this
+weighted harmonic mean, not an empirically measured clinical-harm ratio. In
+count form, the objective is
+
+$$
+F_\beta(\tau)=\frac{(1+\beta^2)TP(\tau)}
+{(1+\beta^2)TP(\tau)+\beta^2FN(\tau)+FP(\tau)},
+$$
+
+which is not the same objective as minimizing a linear weighted error. For each
+detector and beta, the canonical sensitivity threshold maximized the lower
+pointwise 95% bootstrap bound over the 0.01--0.99 grid. The original 2,000-draw
+random stream was retained. A descriptive near-optimal plateau contained the
+contiguous thresholds within 0.01 of the maximum lower bound. Each bootstrap
+draw also supplied a mean-F-beta argmax and candidate selection frequency; this
+diagnostic did not replace the canonical lower-bound rule.
+
+A separate hypothetical analysis minimized
+$L(\tau;r)=rFN(\tau)/N+FP(\tau)/N$ for assumed FN:FP loss ratios
+$r\in\{1,9,25,100\}$, with $N$ the validation-image count. These are linear
+box-error penalties, not measured patient harms or deployment utilities.
+Decision D-006 keeps both analyses separate from the primary maximum-mean-F1
+thresholds. Selection and diagnostics used validation only; no sensitivity
+threshold was selected from or applied to test, FROC, Pareto, or DCA.
 
 ### 3.6 Detection-specific confidence calibration
 
@@ -542,11 +558,11 @@ a global asymptote.
 
 ![Figure 3. Frozen three-seed FROC curves and non-interpolated operating points.](../results/figures/froc_curves.png)
 
-### 4.3 Cost-weighted threshold sensitivity
+### 4.3 Recall-weighted F-beta and hypothetical error-loss sensitivity
 
-When the lower pointwise bootstrap bound of $F1_\beta$ was optimized on
+When the lower pointwise bootstrap bound of $F_\beta$ was optimized on
 validation, Faster R-CNN shifted monotonically toward less selective thresholds
-as the assumed false-negative cost increased: 0.69, 0.33, 0.12, and 0.03 for
+as recall preference increased: 0.69, 0.33, 0.12, and 0.03 for
 beta 1, 3, 5, and 10. Corresponding validation recall rose from 0.4404 to
 0.6534, 0.7413, and 0.8207 while precision fell from 0.4164 to 0.1958, 0.1247,
 and 0.0753.
@@ -554,9 +570,26 @@ and 0.0753.
 YOLO11s selected 0.02 at beta 1, with precision 0.3492 and recall 0.3670, and
 reached the 0.01 lower boundary at beta 3, 5, and 10, with precision 0.3025 and
 recall 0.3971. Those three rows are best observed values within the grid, not
-global optima. The cost ratios were hypothetical, intervals were pointwise,
-and no selected cost-weighted threshold was applied to test. Per D-004, these
-results did not replace the primary 0.69/0.05 thresholds.
+global optima. The beta settings are preference weights rather than empirical
+clinical-harm measurements, the intervals are pointwise, and no selected F-beta threshold
+was applied to test. Per D-006, these results did not replace the primary
+0.69/0.05 thresholds.
+
+The 0.01-near-optimal plateaus were 0.64--0.70, 0.27--0.39, 0.07--0.16, and
+0.03--0.04 for Faster R-CNN beta 1, 3, 5, and 10. Its bootstrap selected-tau
+95% intervals were 0.63--0.75, 0.13--0.51, 0.04--0.29, and 0.01--0.09,
+showing substantial selection instability at beta 3 and 5. YOLO11s beta 1 had
+a 0.01--0.05 plateau and bootstrap interval 0.01--0.10; beta 3--10 selected
+0.01 in 99.7%, 100%, and 100% of draws. That concentration reflected the lower
+grid boundary rather than a demonstrated interior optimum.
+
+The separate linear loss selected Faster R-CNN thresholds 0.87, 0.61, 0.23,
+and 0.04 for assumed $r=1,9,25,100$; YOLO11s selected 0.35, 0.01, 0.01, and
+0.01. The beta-1 and r-1 thresholds therefore differed sharply for both
+detectors, directly demonstrating that F-beta optimization was not equivalent
+to the declared linear error-loss minimization. These assumed ratios were not
+clinical valuations, and none of the loss-selected thresholds was applied to
+test.
 
 ### 4.4 Calibration and reliability
 
@@ -781,14 +814,22 @@ runs and four defined YOLO11s runs for the primary interval, and were
 inconclusive. They are useful diagnostics, but should not be compared directly
 with unconditional coverage or AP.
 
-### 5.3 Threshold costs and decision curves do not establish clinical utility
+### 5.3 Preference and hypothetical-loss sweeps do not establish clinical utility
 
-The cost-weighted validation sweep illustrated how assumptions can dominate a
-threshold. Increasing the assumed false-negative cost moved Faster R-CNN
-toward progressively lower thresholds and higher recall. YOLO11s hit the lower
-grid boundary by beta 3, exposing limited room within the declared sweep.
-Because the cost ratios were not estimated from patient outcomes and the
-intervals were pointwise, the analysis is sensitivity evidence only. D-004
+The recall-weighted F-beta validation sweep illustrated how preference settings
+can dominate a threshold. Increasing beta moved Faster R-CNN toward
+progressively lower thresholds and higher recall. YOLO11s hit the lower grid
+boundary by beta 3, exposing limited room within the declared sweep. The wide
+Faster R-CNN bootstrap selected-tau distributions at beta 3 and 5 further show
+that a single grid argmax can be unstable. Beta squared is a relative recall
+weight in the harmonic mean, not a measured clinical-harm ratio.
+
+The separate linear loss sweep made the distinction operational: assumed r-1
+loss selected 0.87/0.35 rather than the beta-1 F-beta choices 0.69/0.02. Its
+ratios assign hypothetical penalties to missed target boxes and false-positive
+detections; they omit patient outcomes, actions, and downstream utility.
+Because both analyses are validation-only, use pointwise intervals, and rely on
+assumed preferences or penalties, they are sensitivity evidence only. D-006
 appropriately preserves the equal-weight validation-F1 thresholds as the
 primary historical operating points.
 
@@ -912,10 +953,14 @@ silently removed.
 
 **Metrics, thresholds, and calibration.** Score-0.25 precision, recall, and F1
 are protocol-sensitivity endpoints. The primary validation-selected thresholds
-use three seeds and equal-weight F1, which does not encode clinical costs. The
-cost-weighted extension assumes cost ratios of 1, 9, 25, and 100; its intervals
-are pointwise, its YOLO optima reach the lower grid boundary, and none of its
-thresholds was tested downstream. Conditional IoU and Dice exclude misses and
+use three seeds and equal-weight F1, which does not encode an elicited
+clinical-harm function. The
+F-beta extension uses beta 1, 3, 5, and 10 as recall-preference parameters, not
+clinical-harm valuations. Its near-optimal plateaus and bootstrap argmax frequencies are
+descriptive; its intervals are pointwise and its YOLO optima reach the lower
+grid boundary. The separate linear loss assumes FN:FP penalties 1, 9, 25, and
+100 without outcome-based valuation. None of these thresholds was tested
+downstream. Conditional IoU and Dice exclude misses and
 have asymmetric descriptive n. D-ECE is evaluated on the same held-out test
 bundles, conditions only on emitted predictions at the 0.001 floor, depends on
 the chosen IoU/binning/cell protocol, and neither fits a calibrator nor measures
@@ -1001,7 +1046,7 @@ YOLO11s was the more attractive compute-oriented pipeline only where mandatory
 human review and a lower resource footprint outweighed its coverage and score
 limitations. Both were vulnerable to digital and acquisition-motivated shifts,
 and both produced weakly localized Grad-CAM maps despite passing basic sanity
-checks. The DCA and threshold-cost analyses clarified conditional regimes but
+checks. The DCA and threshold-sensitivity analyses clarified conditional regimes but
 did not validate clinical utility.
 
 The contribution is therefore a controlled, multi-axis characterization of two

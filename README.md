@@ -334,24 +334,32 @@ The run regenerates `results/tables/calibration_summary.csv`,
 finding, and the distinction from threshold selectivity are in
 `docs/CALIBRATION_ANALYSIS.md`.
 
-### 5f. Run patient-cluster-aware cost-sensitive threshold calibration
+### 5f. Run recall-weighted F-beta threshold sensitivity
 
 This CPU-only sensitivity analysis reuses the six frozen Batch 14 validation
 prediction bundles. It evaluates beta values 1, 3, 5, and 10 over the same
 0.01–0.99 threshold grid, computes hierarchical patient-cluster/seed bootstrap
 intervals, and selects the threshold with the largest lower 95% confidence
-bound. It performs no training, inference, checkpoint loading, or test access:
+bound. Beta is a recall-versus-precision preference parameter, not a measured
+clinical-harm ratio. The run also writes validation-only plateau and bootstrap
+selection-frequency diagnostics plus a separate hypothetical linear
+`r * FN / N + FP / N` loss sweep. It performs no training, inference,
+checkpoint loading, or test access:
 
 ```powershell
 & $benchmarkPython -m src.stats.threshold_calibration --config configs/threshold_calibration.yaml --mode preflight
 & $benchmarkPython -m src.stats.threshold_calibration --config configs/threshold_calibration.yaml --mode run
 ```
 
-The run regenerates `results/tables/threshold_calibration_summary.csv`,
-`results/figures/threshold_calibration_sensitivity.png`, and the provenance
-record at `results/logs/phase19_threshold_calibration/summary.json`. Per D-004,
-these are a separately reported cost-sensitivity extension; they do not replace
-Batch 14's primary operating points. Definitions and findings are in
+The run regenerates
+`results/tables/recall_weighted_fbeta_threshold_summary.csv`,
+`results/tables/recall_weighted_fbeta_threshold_stability.csv`,
+`results/tables/hypothetical_detection_error_loss_summary.csv`,
+`results/figures/recall_weighted_fbeta_threshold_sensitivity.png`, and the
+provenance record at
+`results/logs/phase29_threshold_sensitivity/summary.json`. Per D-006, these
+remain separate from Batch 14's primary operating points and are never selected
+from or applied to test outcomes. Definitions and findings are in
 `docs/THRESHOLD_CALIBRATION.md`.
 
 ### 5g. Run full-test decision curve analysis
@@ -564,7 +572,7 @@ includes every executable analysis module added in Batches 18--23.
 | Paper §4.2 FROC evidence (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
 | Paper §4.5 Pareto evidence (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Paper §4.4 five-seed detection calibration (Batch 18) | `calibration_summary.csv`; `reliability_diagrams.png`; Phase 18 summary | offline `src.stats.calibration --mode run` in §5e |
-| Paper §4.3 cost-sensitive threshold calibration (Batch 19; frozen n=3 validation) | `threshold_calibration_summary.csv`; `threshold_calibration_sensitivity.png`; Phase 19 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
+| Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Paper §4.6 full-test decision curves (Batch 20) | `dca_summary.csv`; `dca_curves.png`; Phase 20 summary | offline `src.clinical.decision_curve --mode run` in §5g |
 | Paper Figure 1 seed-level predictive/compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
 | Paper §4.7; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |

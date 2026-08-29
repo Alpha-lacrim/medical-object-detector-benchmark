@@ -48,9 +48,13 @@ part of the evidence and must travel with any reused number.
   and [seed-level applications](../results/tables/selected_operating_points_per_seed.csv)
   document the primary `n=3` validation-selected thresholds and their one-shot
   test application.
-- [Cost-sensitive threshold sensitivity](../results/tables/threshold_calibration_summary.csv)
-  is a separate `n=3` validation analysis. Per [D-004](DECISION_LOG.md#d-004--keep-cost-weighted-threshold-calibration-as-a-separate-sensitivity-analysis),
-  it does not replace or feed the primary thresholds, FROC, or Pareto artifacts.
+- [Recall-weighted F-beta threshold sensitivity](../results/tables/recall_weighted_fbeta_threshold_summary.csv),
+  its [candidate-level stability frequencies](../results/tables/recall_weighted_fbeta_threshold_stability.csv),
+  and the separate [hypothetical linear detection-error loss](../results/tables/hypothetical_detection_error_loss_summary.csv)
+  are `n=3` validation analyses. Per [D-006](DECISION_LOG.md#d-006--treat-beta-as-an-f-beta-preference-parameter-and-separate-linear-loss),
+  beta is a recall-preference parameter, the assumed loss ratios are not
+  clinical valuations, and none replaces or feeds the primary thresholds,
+  FROC, or Pareto artifacts.
 - [FROC operating points](../results/tables/froc_operating_points.csv) and the
   [Pareto figure](../results/figures/pareto_frontier.png) retain their explicit
   frozen `n=3` scope.

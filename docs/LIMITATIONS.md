@@ -122,24 +122,31 @@ threshold of 0.25 and matching IoU of 0.50. Batch 14 separately selects
 detector-specific thresholds on validation by maximum mean F1 (0.69 for Faster
 R-CNN and 0.05 for YOLO11s) and applies them once to test; these are the primary
 single-threshold operating points for the historical three-seed Batch 14
-analysis. Equal-weight F1 is transparent but does not encode clinical
-false-negative and false-positive costs, and only three validation seeds
+analysis. Equal-weight F1 is transparent but does not encode an empirically
+elicited clinical-harm function, and only three validation seeds
 informed that frozen selection. It was not reselected after the additional
 seeds, and seed 271 also emits nothing at the selected YOLO threshold of 0.05.
 The complete held-out threshold sweep is descriptive rather than a source of
 deployment settings.
 
-Batch 19 adds a separate validation-only cost-sensitivity analysis; D-004
-explicitly prevents it from replacing the Batch 14 primary thresholds. It
-assumes false-negative/false-positive cost ratios of 1, 9, 25, and 100 rather
-than estimating clinical utility from outcomes. Its 2,000-draw hierarchical
-bootstrap resamples 321 validation-patient groups and the three frozen seeds,
-so seed uncertainty remains coarse. The confidence intervals are pointwise,
-not simultaneous over the 99 candidate thresholds, and selecting the maximum
-lower bound is not a 95% guarantee about that selected maximum. YOLO11s reaches
-the 0.01 lower sweep boundary for beta 3, 5, and 10; those thresholds are best
-observed within the grid rather than claimed global optima. None of the
-cost-sensitive thresholds is applied to test or adopted as a deployment rule.
+Batch 29 corrects the separate validation-only F-beta analysis: beta is a
+recall-versus-precision preference parameter, and beta squared is the relative
+recall weight in the harmonic mean, not an empirically measured clinical-harm
+ratio. The frozen beta values 1, 3, 5, and 10 and their original selected
+thresholds are retained under D-006. A 0.01 absolute near-optimal-LCB plateau
+and draw-specific bootstrap argmax frequencies describe threshold instability
+without changing the canonical rule. Faster R-CNN's beta-3 and beta-5
+bootstrap selected-threshold intervals are wide (0.13--0.51 and 0.04--0.29),
+while YOLO11s beta 3--10 remains pinned to the 0.01 lower grid boundary.
+
+The separate hypothetical linear detection-error loss
+`r * FN / N + FP / N` uses assumed ratios 1, 9, 25, and 100. Those ratios assign
+exchangeable penalties to unmatched target boxes and false-positive detections;
+they are not patient-outcome valuations, deployment utilities, or evidence that
+one kind of error causes a fixed amount of clinical harm. Both sensitivity
+analyses use 2,000 patient-cluster/seed draws over only three validation seeds.
+Their intervals are pointwise, not simultaneous over 99 candidates, and none
+of their thresholds is applied to test or adopted as a deployment rule.
 
 **The clean localization summaries have an intentionally asymmetric sample
 size.** Conditional IoU and Dice average only matched true positives; they

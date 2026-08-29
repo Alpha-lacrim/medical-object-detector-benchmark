@@ -1,7 +1,9 @@
-"""Cost-weighted, patient-cluster-aware threshold calibration.
+"""Recall-weighted F-beta validation-threshold sensitivity.
 
 This module operates only on the frozen validation prediction bundles created
-by Phase 14. It never loads a checkpoint or performs model inference.
+by Phase 14. It never loads a checkpoint, performs model inference, or reads
+test labels. Beta is a recall-versus-precision preference parameter, not a
+measured clinical-harm ratio.
 """
 
 from __future__ import annotations
@@ -48,7 +50,8 @@ SUMMARY_FIELDS = (
     "detector",
     "selection_split",
     "beta",
-    "false_negative_to_false_positive_cost_ratio",
+    "recall_to_precision_weight",
+    "beta_interpretation",
     "selected_threshold",
     "selection_boundary",
     "primary_batch14_threshold",
@@ -58,6 +61,17 @@ SUMMARY_FIELDS = (
     "validation_f_beta",
     "f_beta_ci_lower",
     "f_beta_ci_upper",
+    "near_optimal_lcb_tolerance",
+    "near_optimal_plateau_start",
+    "near_optimal_plateau_end",
+    "near_optimal_plateau_width",
+    "near_optimal_plateau_candidate_count",
+    "bootstrap_selected_tau_ci_lower",
+    "bootstrap_selected_tau_median",
+    "bootstrap_selected_tau_ci_upper",
+    "bootstrap_modal_selected_tau",
+    "bootstrap_modal_selection_frequency",
+    "canonical_tau_bootstrap_selection_frequency",
     "confidence_level",
     "bootstrap_resamples",
     "bootstrap_valid_resamples",
@@ -71,6 +85,55 @@ SUMMARY_FIELDS = (
     "relationship_to_primary_threshold",
 )
 
+STABILITY_FIELDS = (
+    "detector",
+    "selection_split",
+    "beta",
+    "recall_to_precision_weight",
+    "candidate_threshold",
+    "canonical_selected_threshold",
+    "canonical_selection_rule",
+    "f_beta_ci_lower",
+    "near_optimal_lcb_tolerance",
+    "in_near_optimal_plateau",
+    "near_optimal_plateau_start",
+    "near_optimal_plateau_end",
+    "near_optimal_plateau_width",
+    "near_optimal_plateau_candidate_count",
+    "bootstrap_selection_count",
+    "bootstrap_selection_frequency",
+    "bootstrap_resamples",
+    "bootstrap_selection_rule",
+    "tie_breaker",
+)
+
+HYPOTHETICAL_LOSS_FIELDS = (
+    "detector",
+    "selection_split",
+    "hypothetical_fn_to_fp_loss_ratio",
+    "assumption_status",
+    "selected_threshold",
+    "selection_boundary",
+    "validation_precision",
+    "validation_recall",
+    "validation_false_negatives_per_image",
+    "validation_false_positives_per_image",
+    "validation_hypothetical_loss_per_image",
+    "loss_ci_lower",
+    "loss_ci_upper",
+    "confidence_level",
+    "bootstrap_resamples",
+    "bootstrap_valid_resamples",
+    "patient_group_count",
+    "validation_image_count",
+    "seed_count",
+    "normalization_unit",
+    "selection_rule",
+    "tie_breaker",
+    "relationship_to_f_beta",
+    "relationship_to_primary_threshold",
+)
+
 
 class StrictModel(BaseModel):
     """Reject undeclared configuration keys and runtime mutation."""
@@ -81,13 +144,15 @@ class StrictModel(BaseModel):
 class InputSettings(StrictModel):
     """Frozen validation inputs and the existing primary threshold table."""
 
+    selection_data_role: Literal["model_development_validation"]
+    validation_split_name: str = Field(pattern=r"^[a-z0-9_-]+$")
     threshold_selection_config: Path
     validation_split_manifest: Path
     primary_operating_points: Path
 
 
 class AnalysisSettings(StrictModel):
-    """Cost sweep, hierarchical bootstrap, and selection contract."""
+    """F-beta sweep, hierarchical bootstrap, and selection contract."""
 
     threshold_start: float = Field(ge=0, le=1)
     threshold_stop: float = Field(ge=0, le=1)
@@ -95,10 +160,13 @@ class AnalysisSettings(StrictModel):
     beta_values: tuple[float, ...] = Field(min_length=1)
     confidence_level: float = Field(gt=0, lt=1)
     bootstrap_resamples: int = Field(ge=100)
+    bootstrap_stream_label: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     bootstrap_method: Literal["paired_hierarchical_patient_cluster_percentile"]
     seed_aggregation: Literal["arithmetic_mean_across_frozen_validation_seeds"]
     selection_rule: Literal["maximum_lower_confidence_bound_f_beta"]
     tie_breaker: Literal["highest_threshold"]
+    near_optimal_absolute_tolerance: float = Field(ge=0, le=1)
+    bootstrap_selection_rule: Literal["maximum_bootstrap_mean_f_beta"]
     manifest_image_column: str = Field(min_length=1)
     patient_group_column: str = Field(min_length=1)
 
@@ -124,6 +192,24 @@ class AnalysisSettings(StrictModel):
         )
 
 
+class HypotheticalLossSettings(StrictModel):
+    """Separate validation-only linear detection-error loss sensitivity."""
+
+    enabled: bool
+    fn_to_fp_loss_ratios: tuple[float, ...] = Field(min_length=1)
+    normalization_unit: Literal["validation_image"]
+    selection_rule: Literal["minimum_mean_hypothetical_detection_error_loss"]
+    tie_breaker: Literal["highest_threshold"]
+
+    @model_validator(mode="after")
+    def validate_ratios(self) -> HypotheticalLossSettings:
+        if any(not np.isfinite(value) or value <= 0 for value in self.fn_to_fp_loss_ratios):
+            raise ValueError("hypothetical loss ratios must be finite and positive")
+        if len(set(self.fn_to_fp_loss_ratios)) != len(self.fn_to_fp_loss_ratios):
+            raise ValueError("hypothetical loss ratios must be unique")
+        return self
+
+
 class PlotSettings(StrictModel):
     """Static sensitivity-figure dimensions."""
 
@@ -136,19 +222,22 @@ class OutputSettings(StrictModel):
     """Required table/figure plus a provenance summary."""
 
     summary_table: Path
+    stability_table: Path
+    hypothetical_loss_table: Path
     sensitivity_figure: Path
     log_dir: Path
     summary_json: Path
 
 
 class ThresholdCalibrationConfig(StrictModel):
-    """Strict Phase 19 threshold-calibration contract."""
+    """Strict Batch 29 threshold-sensitivity contract."""
 
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     analysis_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     seed: int = Field(ge=0)
     inputs: InputSettings
     analysis: AnalysisSettings
+    hypothetical_loss: HypotheticalLossSettings
     plot: PlotSettings
     outputs: OutputSettings
     project_root: Path = Field(exclude=True)
@@ -204,7 +293,7 @@ class BootstrapPlan:
 
 
 def load_threshold_calibration_config(path: str | Path) -> ThresholdCalibrationConfig:
-    """Load and strictly validate the Phase 19 YAML configuration."""
+    """Load and strictly validate the Batch 29 YAML configuration."""
 
     source = Path(path).resolve()
     payload = yaml.safe_load(source.read_text(encoding="utf-8"))
@@ -220,7 +309,11 @@ def f_beta(
     recall: float | FloatArray,
     beta: float,
 ) -> float | FloatArray:
-    """Compute F1_beta, where beta squared is the assumed FN/FP cost ratio."""
+    """Compute F-beta with beta as a recall-versus-precision preference parameter.
+
+    This is the weighted harmonic mean whose relative recall weight is beta
+    squared. That algebra does not identify beta squared with empirical harm.
+    """
 
     if not np.isfinite(beta) or beta <= 0:
         raise ValueError("beta must be finite and positive")
@@ -308,7 +401,11 @@ def _atomic_bytes(path: Path, payload: bytes) -> Path:
     return path
 
 
-def _atomic_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> Path:
+def _atomic_csv(
+    path: Path,
+    fields: Sequence[str],
+    rows: Sequence[Mapping[str, Any]],
+) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
         dir=path.parent, prefix=f".{path.stem}.", suffix=path.suffix
@@ -317,7 +414,7 @@ def _atomic_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> Path:
     temporary = Path(temporary_name)
     try:
         with temporary.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=SUMMARY_FIELDS, lineterminator="\n")
+            writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
         os.replace(temporary, path)
@@ -339,6 +436,27 @@ def _artifact(path: Path, root: Path) -> dict[str, Any]:
     }
 
 
+def validate_validation_only_selection_contract(
+    *,
+    selection_data_role: str,
+    upstream_split_name: str,
+    expected_validation_split_name: str,
+    test_split_accessed: Any,
+    annotation_image_ids: Sequence[str],
+    split_image_ids: Sequence[str],
+) -> None:
+    """Reject any selection evidence that is not the declared validation partition."""
+
+    if selection_data_role != "model_development_validation":
+        raise ValueError("threshold selection must use model-development validation data")
+    if upstream_split_name != expected_validation_split_name:
+        raise ValueError("upstream threshold-selection split is not the declared validation split")
+    if test_split_accessed is not False:
+        raise ValueError("threshold selection manifest does not prove test isolation")
+    if tuple(sorted(annotation_image_ids)) != tuple(sorted(split_image_ids)):
+        raise ValueError("selection labels and validation split manifest cover different images")
+
+
 def _load_frozen_validation(config: ThresholdCalibrationConfig) -> FrozenValidationData:
     selection_config_path = config.resolve(config.inputs.threshold_selection_config)
     selection_config = load_threshold_selection_config(selection_config_path)
@@ -347,7 +465,7 @@ def _load_frozen_validation(config: ThresholdCalibrationConfig) -> FrozenValidat
     if not np.allclose(
         selection_config.selection.thresholds(), config.analysis.thresholds(), atol=0, rtol=0
     ):
-        raise ValueError("cost sweep must reuse the frozen Phase 14 threshold grid")
+        raise ValueError("F-beta sweep must reuse the frozen Phase 14 threshold grid")
 
     manifest_path = selection_config.resolve(selection_config.outputs.validation_manifest)
     manifest = _read_json(manifest_path)
@@ -357,10 +475,7 @@ def _load_frozen_validation(config: ThresholdCalibrationConfig) -> FrozenValidat
         raise ValueError("validation prediction manifest identity or status is invalid")
     if manifest.get("config_sha256") != sha256_file(selection_config_path):
         raise ValueError("validation prediction manifest used a different selection config")
-    if (
-        manifest.get("performs_training") is not False
-        or manifest.get("test_split_accessed") is not False
-    ):
+    if manifest.get("performs_training") is not False:
         raise ValueError("validation manifest violates the no-training/test-isolation contract")
 
     annotation_path = selection_config.resolve(selection_config.inputs.validation_annotations)
@@ -372,6 +487,20 @@ def _load_frozen_validation(config: ThresholdCalibrationConfig) -> FrozenValidat
         raise ValueError("validation annotations differ from the frozen manifest")
     targets, category_names = load_coco_targets(annotation_path)
     target_ids = tuple(target.image_id for target in targets)
+    patient_manifest_path = config.resolve(config.inputs.validation_split_manifest)
+    patient_map = load_patient_group_map(
+        patient_manifest_path,
+        image_column=config.analysis.manifest_image_column,
+        patient_group_column=config.analysis.patient_group_column,
+    )
+    validate_validation_only_selection_contract(
+        selection_data_role=config.inputs.selection_data_role,
+        upstream_split_name=selection_config.inputs.validation_split,
+        expected_validation_split_name=config.inputs.validation_split_name,
+        test_split_accessed=manifest.get("test_split_accessed"),
+        annotation_image_ids=target_ids,
+        split_image_ids=tuple(patient_map),
+    )
     evaluation = manifest.get("evaluation")
     if not isinstance(evaluation, dict):
         raise ValueError("validation manifest lacks evaluator settings")
@@ -438,12 +567,6 @@ def _load_frozen_validation(config: ThresholdCalibrationConfig) -> FrozenValidat
     if len(set(seed_grids.values())) != 1 or not next(iter(seed_grids.values())):
         raise ValueError(f"detectors have incomplete or unequal seed grids: {seed_grids}")
 
-    patient_manifest_path = config.resolve(config.inputs.validation_split_manifest)
-    patient_map = load_patient_group_map(
-        patient_manifest_path,
-        image_column=config.analysis.manifest_image_column,
-        patient_group_column=config.analysis.patient_group_column,
-    )
     patient_clusters = build_patient_clusters(target_ids, patient_map)
     return FrozenValidationData(
         bundles=tuple(bundles),
@@ -515,7 +638,29 @@ def summarize_threshold_counts(
     bootstrap_plan: BootstrapPlan,
     confidence_level: float,
 ) -> dict[str, Any]:
-    """Estimate mean-across-seed F1_beta and its hierarchical percentile CI."""
+    """Estimate mean-across-seed F-beta and its hierarchical percentile CI."""
+
+    summary, _distribution = _summarize_threshold_counts_with_distribution(
+        tp_by_seed_image,
+        fp_by_seed_image,
+        fn_by_seed_image,
+        beta=beta,
+        bootstrap_plan=bootstrap_plan,
+        confidence_level=confidence_level,
+    )
+    return summary
+
+
+def _summarize_threshold_counts_with_distribution(
+    tp_by_seed_image: IntArray,
+    fp_by_seed_image: IntArray,
+    fn_by_seed_image: IntArray,
+    *,
+    beta: float,
+    bootstrap_plan: BootstrapPlan,
+    confidence_level: float,
+) -> tuple[dict[str, Any], FloatArray]:
+    """Return the F-beta summary and draw-level mean used for stability checks."""
 
     if not (
         tp_by_seed_image.shape == fp_by_seed_image.shape == fn_by_seed_image.shape
@@ -556,18 +701,21 @@ def summarize_threshold_counts(
         raise ValueError("every bootstrap draw must retain at least one seed")
     bootstrap_mean = np.sum(bootstrap_f_beta * seed_weights, axis=1) / seed_weight_sums
     valid = bootstrap_mean[np.isfinite(bootstrap_mean)]
-    if not len(valid):
-        raise ValueError("no finite bootstrap F-beta estimates")
+    if len(valid) != len(bootstrap_mean):
+        raise ValueError("every bootstrap F-beta estimate must be finite")
     tail = (1 - confidence_level) / 2
     lower, upper = np.quantile(valid, [tail, 1 - tail])
-    return {
-        "precision": float(np.mean(point_precision)),
-        "recall": float(np.mean(point_recall)),
-        "f_beta": float(np.mean(point_f_beta)),
-        "f_beta_ci_lower": float(lower),
-        "f_beta_ci_upper": float(upper),
-        "bootstrap_valid_resamples": len(valid),
-    }
+    return (
+        {
+            "precision": float(np.mean(point_precision)),
+            "recall": float(np.mean(point_recall)),
+            "f_beta": float(np.mean(point_f_beta)),
+            "f_beta_ci_lower": float(lower),
+            "f_beta_ci_upper": float(upper),
+            "bootstrap_valid_resamples": len(valid),
+        },
+        np.asarray(bootstrap_mean, dtype=np.float64),
+    )
 
 
 def select_calibrated_thresholds(
@@ -587,6 +735,181 @@ def select_calibrated_thresholds(
         )
         selected.append(dict(best))
     return selected
+
+
+def threshold_stability_diagnostics(
+    curve_rows: Sequence[Mapping[str, Any]],
+    bootstrap_distributions: Mapping[tuple[str, float, float], FloatArray],
+    *,
+    near_optimal_absolute_tolerance: float,
+    confidence_level: float,
+    bootstrap_selection_rule: str,
+    tie_breaker: str,
+) -> tuple[list[dict[str, Any]], dict[tuple[str, float], dict[str, Any]]]:
+    """Describe LCB plateaus and bootstrap argmax frequencies without retuning."""
+
+    if not 0 <= near_optimal_absolute_tolerance <= 1:
+        raise ValueError("near-optimal tolerance must lie in [0, 1]")
+    if not 0 < confidence_level < 1:
+        raise ValueError("confidence_level must lie in (0, 1)")
+
+    groups: dict[tuple[str, float], list[Mapping[str, Any]]] = {}
+    for row in curve_rows:
+        key = str(row["detector"]), float(row["beta"])
+        groups.setdefault(key, []).append(row)
+
+    rows: list[dict[str, Any]] = []
+    summaries: dict[tuple[str, float], dict[str, Any]] = {}
+    tail = (1 - confidence_level) / 2
+    for key, unsorted_series in sorted(groups.items()):
+        detector, beta = key
+        series = sorted(unsorted_series, key=lambda row: float(row["threshold"]))
+        thresholds = np.asarray([row["threshold"] for row in series], dtype=np.float64)
+        objective = np.asarray([row["f_beta_ci_lower"] for row in series], dtype=np.float64)
+        canonical_index = int(
+            max(
+                range(len(series)),
+                key=lambda index: (objective[index], thresholds[index]),
+            )
+        )
+        near = objective >= objective[canonical_index] - near_optimal_absolute_tolerance
+        plateau_start_index = canonical_index
+        while plateau_start_index > 0 and near[plateau_start_index - 1]:
+            plateau_start_index -= 1
+        plateau_end_index = canonical_index
+        while plateau_end_index + 1 < len(series) and near[plateau_end_index + 1]:
+            plateau_end_index += 1
+        plateau_mask = np.zeros(len(series), dtype=bool)
+        plateau_mask[plateau_start_index : plateau_end_index + 1] = True
+
+        distribution_matrix = np.stack(
+            [
+                np.asarray(
+                    bootstrap_distributions[(detector, beta, float(threshold))],
+                    dtype=np.float64,
+                )
+                for threshold in thresholds
+            ]
+        )
+        if np.any(~np.isfinite(distribution_matrix)):
+            raise ValueError("bootstrap threshold-stability evidence must be finite")
+        reverse_argmax = np.argmax(distribution_matrix[::-1], axis=0)
+        selected_indices = len(series) - 1 - reverse_argmax
+        selection_counts = np.bincount(selected_indices, minlength=len(series))
+        selection_frequencies = selection_counts / len(selected_indices)
+        selected_taus = thresholds[selected_indices]
+        lower, median, upper = np.quantile(selected_taus, [tail, 0.5, 1 - tail])
+        modal_count = int(np.max(selection_counts))
+        modal_index = int(np.flatnonzero(selection_counts == modal_count)[-1])
+
+        plateau_start = float(thresholds[plateau_start_index])
+        plateau_end = float(thresholds[plateau_end_index])
+        plateau_width = float(np.round(plateau_end - plateau_start, 12))
+        summary = {
+            "near_optimal_lcb_tolerance": near_optimal_absolute_tolerance,
+            "near_optimal_plateau_start": plateau_start,
+            "near_optimal_plateau_end": plateau_end,
+            "near_optimal_plateau_width": plateau_width,
+            "near_optimal_plateau_candidate_count": int(np.sum(plateau_mask)),
+            "bootstrap_selected_tau_ci_lower": float(lower),
+            "bootstrap_selected_tau_median": float(median),
+            "bootstrap_selected_tau_ci_upper": float(upper),
+            "bootstrap_modal_selected_tau": float(thresholds[modal_index]),
+            "bootstrap_modal_selection_frequency": float(selection_frequencies[modal_index]),
+            "canonical_tau_bootstrap_selection_frequency": float(
+                selection_frequencies[canonical_index]
+            ),
+        }
+        summaries[key] = summary
+
+        for index, threshold in enumerate(thresholds):
+            rows.append(
+                {
+                    "detector": detector,
+                    "selection_split": "validation",
+                    "beta": beta,
+                    "recall_to_precision_weight": beta**2,
+                    "candidate_threshold": float(threshold),
+                    "canonical_selected_threshold": float(thresholds[canonical_index]),
+                    "canonical_selection_rule": "maximum_lower_confidence_bound_f_beta",
+                    "f_beta_ci_lower": float(objective[index]),
+                    "near_optimal_lcb_tolerance": near_optimal_absolute_tolerance,
+                    "in_near_optimal_plateau": bool(plateau_mask[index]),
+                    "near_optimal_plateau_start": plateau_start,
+                    "near_optimal_plateau_end": plateau_end,
+                    "near_optimal_plateau_width": plateau_width,
+                    "near_optimal_plateau_candidate_count": int(np.sum(plateau_mask)),
+                    "bootstrap_selection_count": int(selection_counts[index]),
+                    "bootstrap_selection_frequency": float(selection_frequencies[index]),
+                    "bootstrap_resamples": len(selected_indices),
+                    "bootstrap_selection_rule": bootstrap_selection_rule,
+                    "tie_breaker": tie_breaker,
+                }
+            )
+    return rows, summaries
+
+
+def summarize_hypothetical_detection_error_loss(
+    tp_by_seed_image: IntArray,
+    fp_by_seed_image: IntArray,
+    fn_by_seed_image: IntArray,
+    *,
+    fn_to_fp_loss_ratio: float,
+    bootstrap_plan: BootstrapPlan,
+    confidence_level: float,
+) -> dict[str, Any]:
+    """Compute r*FN/N + FP/N for an explicitly hypothetical error-loss ratio."""
+
+    if not np.isfinite(fn_to_fp_loss_ratio) or fn_to_fp_loss_ratio <= 0:
+        raise ValueError("hypothetical FN-to-FP loss ratio must be finite and positive")
+    if not (
+        tp_by_seed_image.shape == fp_by_seed_image.shape == fn_by_seed_image.shape
+        and tp_by_seed_image.ndim == 2
+    ):
+        raise ValueError("TP/FP/FN arrays must share shape (seed, image)")
+    seed_count, image_count = tp_by_seed_image.shape
+    if bootstrap_plan.image_multiplicities.shape[1] != image_count:
+        raise ValueError("bootstrap image multiplicities do not match evidence")
+    if bootstrap_plan.seed_multiplicities.shape != (
+        len(bootstrap_plan.image_multiplicities),
+        seed_count,
+    ):
+        raise ValueError("bootstrap seed multiplicities do not match evidence")
+
+    point_tp = np.sum(tp_by_seed_image, axis=1)
+    point_fp = np.sum(fp_by_seed_image, axis=1)
+    point_fn = np.sum(fn_by_seed_image, axis=1)
+    point_precision, point_recall = _ratios_from_counts(point_tp, point_fp, point_fn)
+    fp_per_image = point_fp / image_count
+    fn_per_image = point_fn / image_count
+    point_loss = fn_to_fp_loss_ratio * fn_per_image + fp_per_image
+
+    weights = bootstrap_plan.image_multiplicities
+    bootstrap_image_counts = np.sum(weights, axis=1)
+    if np.any(bootstrap_image_counts <= 0):
+        raise ValueError("every bootstrap draw must retain at least one validation image")
+    bootstrap_fp = (weights @ fp_by_seed_image.T) / bootstrap_image_counts[:, None]
+    bootstrap_fn = (weights @ fn_by_seed_image.T) / bootstrap_image_counts[:, None]
+    bootstrap_loss = fn_to_fp_loss_ratio * bootstrap_fn + bootstrap_fp
+    seed_weights = bootstrap_plan.seed_multiplicities
+    seed_weight_sums = np.sum(seed_weights, axis=1)
+    if np.any(seed_weight_sums <= 0):
+        raise ValueError("every bootstrap draw must retain at least one seed")
+    bootstrap_mean = np.sum(bootstrap_loss * seed_weights, axis=1) / seed_weight_sums
+    if np.any(~np.isfinite(bootstrap_mean)):
+        raise ValueError("every bootstrap hypothetical-loss estimate must be finite")
+    tail = (1 - confidence_level) / 2
+    lower, upper = np.quantile(bootstrap_mean, [tail, 1 - tail])
+    return {
+        "precision": float(np.mean(point_precision)),
+        "recall": float(np.mean(point_recall)),
+        "false_negatives_per_image": float(np.mean(fn_per_image)),
+        "false_positives_per_image": float(np.mean(fp_per_image)),
+        "hypothetical_loss_per_image": float(np.mean(point_loss)),
+        "loss_ci_lower": float(lower),
+        "loss_ci_upper": float(upper),
+        "bootstrap_valid_resamples": len(bootstrap_mean),
+    }
 
 
 def _threshold_counts(
@@ -617,10 +940,16 @@ def compute_calibration_curve(
     data: FrozenValidationData,
     config: ThresholdCalibrationConfig,
     bootstrap_plan: BootstrapPlan,
-) -> list[dict[str, Any]]:
+) -> tuple[
+    list[dict[str, Any]],
+    dict[tuple[str, float, float], FloatArray],
+    dict[tuple[str, float], tuple[IntArray, IntArray, IntArray]],
+]:
     """Run the threshold outer loop and patient-cluster bootstrap inner analysis."""
 
     rows: list[dict[str, Any]] = []
+    bootstrap_distributions: dict[tuple[str, float, float], FloatArray] = {}
+    count_evidence: dict[tuple[str, float], tuple[IntArray, IntArray, IntArray]] = {}
     targets = list(data.targets)
     for detector in data.detectors:
         detector_bundles = [bundle for bundle in data.bundles if bundle["detector"] == detector]
@@ -643,8 +972,13 @@ def compute_calibration_curve(
             tp_by_seed_image = np.stack(tp_parts)
             fp_by_seed_image = np.stack(fp_parts)
             fn_by_seed_image = np.stack(fn_parts)
+            count_evidence[(detector, threshold)] = (
+                tp_by_seed_image,
+                fp_by_seed_image,
+                fn_by_seed_image,
+            )
             for beta in config.analysis.beta_values:
-                estimate = summarize_threshold_counts(
+                estimate, distribution = _summarize_threshold_counts_with_distribution(
                     tp_by_seed_image,
                     fp_by_seed_image,
                     fn_by_seed_image,
@@ -656,16 +990,70 @@ def compute_calibration_curve(
                     {
                         "detector": detector,
                         "beta": beta,
-                        "false_negative_to_false_positive_cost_ratio": beta**2,
+                        "recall_to_precision_weight": beta**2,
                         "threshold": threshold,
                         **estimate,
                     }
                 )
+                bootstrap_distributions[(detector, beta, threshold)] = distribution
+    return rows, bootstrap_distributions, count_evidence
+
+
+def compute_hypothetical_loss_curve(
+    count_evidence: Mapping[tuple[str, float], tuple[IntArray, IntArray, IntArray]],
+    config: ThresholdCalibrationConfig,
+    bootstrap_plan: BootstrapPlan,
+) -> list[dict[str, Any]]:
+    """Compute the separate linear detection-error loss sweep on validation."""
+
+    rows: list[dict[str, Any]] = []
+    if not config.hypothetical_loss.enabled:
+        return rows
+    for (detector, threshold), (tp, fp, fn) in sorted(count_evidence.items()):
+        for ratio in config.hypothetical_loss.fn_to_fp_loss_ratios:
+            rows.append(
+                {
+                    "detector": detector,
+                    "hypothetical_fn_to_fp_loss_ratio": ratio,
+                    "threshold": threshold,
+                    **summarize_hypothetical_detection_error_loss(
+                        tp,
+                        fp,
+                        fn,
+                        fn_to_fp_loss_ratio=ratio,
+                        bootstrap_plan=bootstrap_plan,
+                        confidence_level=config.analysis.confidence_level,
+                    ),
+                }
+            )
     return rows
+
+
+def select_hypothetical_loss_thresholds(
+    curve_rows: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Minimize validation mean hypothetical loss with the declared tie break."""
+
+    groups: dict[tuple[str, float], list[Mapping[str, Any]]] = {}
+    for row in curve_rows:
+        key = str(row["detector"]), float(row["hypothetical_fn_to_fp_loss_ratio"])
+        groups.setdefault(key, []).append(row)
+    selected: list[dict[str, Any]] = []
+    for _key, candidates in sorted(groups.items()):
+        best = min(
+            candidates,
+            key=lambda row: (
+                float(row["hypothetical_loss_per_image"]),
+                -float(row["threshold"]),
+            ),
+        )
+        selected.append(dict(best))
+    return selected
 
 
 def _summary_rows(
     selected: Sequence[Mapping[str, Any]],
+    stability_summaries: Mapping[tuple[str, float], Mapping[str, Any]],
     data: FrozenValidationData,
     config: ThresholdCalibrationConfig,
 ) -> list[dict[str, Any]]:
@@ -679,9 +1067,8 @@ def _summary_rows(
                 "detector": detector,
                 "selection_split": "validation",
                 "beta": item["beta"],
-                "false_negative_to_false_positive_cost_ratio": item[
-                    "false_negative_to_false_positive_cost_ratio"
-                ],
+                "recall_to_precision_weight": item["recall_to_precision_weight"],
+                "beta_interpretation": "recall_vs_precision_preference_parameter",
                 "selected_threshold": selected_threshold,
                 "selection_boundary": (
                     "lower"
@@ -701,6 +1088,7 @@ def _summary_rows(
                 "validation_f_beta": item["f_beta"],
                 "f_beta_ci_lower": item["f_beta_ci_lower"],
                 "f_beta_ci_upper": item["f_beta_ci_upper"],
+                **stability_summaries[(detector, float(item["beta"]))],
                 "confidence_level": config.analysis.confidence_level,
                 "bootstrap_resamples": config.analysis.bootstrap_resamples,
                 "bootstrap_valid_resamples": item["bootstrap_valid_resamples"],
@@ -711,6 +1099,53 @@ def _summary_rows(
                 "seed_aggregation": config.analysis.seed_aggregation,
                 "selection_rule": config.analysis.selection_rule,
                 "tie_breaker": config.analysis.tie_breaker,
+                "relationship_to_primary_threshold": "sensitivity_extension_not_replacement",
+            }
+        )
+    return rows
+
+
+def _hypothetical_loss_summary_rows(
+    selected: Sequence[Mapping[str, Any]],
+    data: FrozenValidationData,
+    config: ThresholdCalibrationConfig,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in selected:
+        selected_threshold = float(item["threshold"])
+        rows.append(
+            {
+                "detector": item["detector"],
+                "selection_split": "validation",
+                "hypothetical_fn_to_fp_loss_ratio": item["hypothetical_fn_to_fp_loss_ratio"],
+                "assumption_status": "hypothetical_not_empirically_valued",
+                "selected_threshold": selected_threshold,
+                "selection_boundary": (
+                    "lower"
+                    if np.isclose(selected_threshold, config.analysis.threshold_start)
+                    else (
+                        "upper"
+                        if np.isclose(selected_threshold, config.analysis.threshold_stop)
+                        else "none"
+                    )
+                ),
+                "validation_precision": item["precision"],
+                "validation_recall": item["recall"],
+                "validation_false_negatives_per_image": item["false_negatives_per_image"],
+                "validation_false_positives_per_image": item["false_positives_per_image"],
+                "validation_hypothetical_loss_per_image": item["hypothetical_loss_per_image"],
+                "loss_ci_lower": item["loss_ci_lower"],
+                "loss_ci_upper": item["loss_ci_upper"],
+                "confidence_level": config.analysis.confidence_level,
+                "bootstrap_resamples": config.analysis.bootstrap_resamples,
+                "bootstrap_valid_resamples": item["bootstrap_valid_resamples"],
+                "patient_group_count": data.patient_clusters.patient_group_count,
+                "validation_image_count": len(data.targets),
+                "seed_count": len(data.seeds),
+                "normalization_unit": config.hypothetical_loss.normalization_unit,
+                "selection_rule": config.hypothetical_loss.selection_rule,
+                "tie_breaker": config.hypothetical_loss.tie_breaker,
+                "relationship_to_f_beta": "separate_linear_error_loss_not_f_beta",
                 "relationship_to_primary_threshold": "sensitivity_extension_not_replacement",
             }
         )
@@ -756,7 +1191,7 @@ def _atomic_sensitivity_figure(
                 lower_bounds,
                 color=color,
                 linewidth=1.8,
-                label=rf"$\beta$={beta:g} (cost ratio {beta**2:g}:1)",
+                label=rf"$\beta$={beta:g} (recall weight $\beta^2$={beta**2:g})",
             )
             axis.scatter(
                 [selected["threshold"]],
@@ -780,16 +1215,14 @@ def _atomic_sensitivity_figure(
         }.get(detector, detector.replace("_", " ").title())
         axis.set_title(display_name)
         axis.set_xlabel(r"Confidence threshold $\tau$")
-        axis.set_ylabel(r"Lower 95% bootstrap bound of mean $F1_\beta$")
+        axis.set_ylabel(r"Lower 95% bootstrap bound of mean $F_\beta$")
         axis.set_xlim(
             max(0.0, config.analysis.threshold_start - 0.01),
             min(1.0, config.analysis.threshold_stop + 0.01),
         )
         axis.grid(alpha=0.22, linewidth=0.7)
         axis.legend(fontsize=8, frameon=False, loc="best")
-    figure.suptitle(
-        "Cost-sensitive validation-threshold calibration with patient-cluster bootstrap"
-    )
+    figure.suptitle("Recall-weighted F-beta validation-threshold sensitivity")
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
         dir=path.parent, prefix=f".{path.stem}.", suffix=path.suffix
@@ -818,6 +1251,12 @@ def preflight(config: ThresholdCalibrationConfig) -> dict[str, Any]:
         "prediction_bundles": len(data.bundles),
         "thresholds": len(config.analysis.thresholds()),
         "betas": list(config.analysis.beta_values),
+        "beta_interpretation": "recall_vs_precision_preference_parameter",
+        "hypothetical_fn_to_fp_loss_ratios": (
+            list(config.hypothetical_loss.fn_to_fp_loss_ratios)
+            if config.hypothetical_loss.enabled
+            else []
+        ),
         "bootstrap_resamples": config.analysis.bootstrap_resamples,
         "performs_training": False,
         "performs_inference": False,
@@ -826,7 +1265,7 @@ def preflight(config: ThresholdCalibrationConfig) -> dict[str, Any]:
 
 
 def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, Any]:
-    """Run the offline calibration sweep and write deterministic artifacts."""
+    """Run the offline validation sensitivity analyses and write artifacts."""
 
     data = _load_frozen_validation(config)
     bootstrap_plan = build_bootstrap_plan(
@@ -834,12 +1273,35 @@ def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, A
         seed_count=len(data.seeds),
         resamples=config.analysis.bootstrap_resamples,
         base_seed=config.seed,
-        label=config.analysis_id,
+        label=config.analysis.bootstrap_stream_label,
     )
-    curve_rows = compute_calibration_curve(data, config, bootstrap_plan)
+    curve_rows, bootstrap_distributions, count_evidence = compute_calibration_curve(
+        data, config, bootstrap_plan
+    )
     selected = select_calibrated_thresholds(curve_rows)
-    summary_rows = _summary_rows(selected, data, config)
-    table_path = _atomic_csv(config.resolve(config.outputs.summary_table), summary_rows)
+    stability_rows, stability_summaries = threshold_stability_diagnostics(
+        curve_rows,
+        bootstrap_distributions,
+        near_optimal_absolute_tolerance=config.analysis.near_optimal_absolute_tolerance,
+        confidence_level=config.analysis.confidence_level,
+        bootstrap_selection_rule=config.analysis.bootstrap_selection_rule,
+        tie_breaker=config.analysis.tie_breaker,
+    )
+    summary_rows = _summary_rows(selected, stability_summaries, data, config)
+    loss_curve_rows = compute_hypothetical_loss_curve(count_evidence, config, bootstrap_plan)
+    loss_selected = select_hypothetical_loss_thresholds(loss_curve_rows)
+    loss_summary_rows = _hypothetical_loss_summary_rows(loss_selected, data, config)
+    table_path = _atomic_csv(
+        config.resolve(config.outputs.summary_table), SUMMARY_FIELDS, summary_rows
+    )
+    stability_path = _atomic_csv(
+        config.resolve(config.outputs.stability_table), STABILITY_FIELDS, stability_rows
+    )
+    loss_table_path = _atomic_csv(
+        config.resolve(config.outputs.hypothetical_loss_table),
+        HYPOTHETICAL_LOSS_FIELDS,
+        loss_summary_rows,
+    )
     figure_path = _atomic_sensitivity_figure(
         config.resolve(config.outputs.sensitivity_figure),
         curve_rows,
@@ -849,7 +1311,7 @@ def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, A
     )
 
     summary = {
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "complete",
         "analysis_id": config.analysis_id,
         "config_path": config.source_path.relative_to(config.project_root).as_posix(),
@@ -865,11 +1327,25 @@ def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, A
         },
         "method": {
             **config.analysis.model_dump(mode="json"),
-            "cost_ratio_definition": "C_FN/C_FP = beta^2",
+            "beta_interpretation": (
+                "beta is a recall-versus-precision preference parameter; beta^2 is the "
+                "relative recall weight in the weighted harmonic mean"
+            ),
+            "objective_derivation": ("F_beta=(1+beta^2)*TP/((1+beta^2)*TP+beta^2*FN+FP)"),
+            "beta_is_measured_clinical_harm_ratio": False,
             "confidence_interval": "two-sided percentile interval",
             "bootstrap_random_numbers": "common across every threshold and beta",
             "selection_split": "validation",
             "relationship_to_primary_threshold": "sensitivity_extension_not_replacement",
+        },
+        "hypothetical_detection_error_loss": {
+            **config.hypothetical_loss.model_dump(mode="json"),
+            "formula": "L(tau;r)=r*FN(tau)/N+FP(tau)/N",
+            "N_definition": "number of validation images in the observed or bootstrap draw",
+            "assumption_status": "hypothetical_not_empirically_valued",
+            "selection_split": "validation",
+            "relationship_to_f_beta": "separate_linear_error_loss_not_f_beta",
+            "deployment_utility_claimed": False,
         },
         "counts": {
             "detectors": len(data.detectors),
@@ -880,6 +1356,9 @@ def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, A
             "betas": len(config.analysis.beta_values),
             "curve_rows": len(curve_rows),
             "selected_rows": len(summary_rows),
+            "stability_rows": len(stability_rows),
+            "hypothetical_loss_curve_rows": len(loss_curve_rows),
+            "hypothetical_loss_selected_rows": len(loss_summary_rows),
         },
         "upstream": {
             "threshold_selection_config": _artifact(
@@ -902,9 +1381,14 @@ def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, A
             ],
         },
         "selected_operating_points": summary_rows,
+        "threshold_stability": stability_rows,
         "threshold_curves": curve_rows,
+        "hypothetical_loss_selected_operating_points": loss_summary_rows,
+        "hypothetical_loss_curves": loss_curve_rows,
         "artifacts": {
             "summary_table": _artifact(table_path, config.project_root),
+            "stability_table": _artifact(stability_path, config.project_root),
+            "hypothetical_loss_table": _artifact(loss_table_path, config.project_root),
             "sensitivity_figure": _artifact(figure_path, config.project_root),
         },
         "performs_training": False,
@@ -915,9 +1399,12 @@ def run_threshold_calibration(config: ThresholdCalibrationConfig) -> dict[str, A
     result = {
         "status": "complete",
         "summary_table": table_path.as_posix(),
+        "stability_table": stability_path.as_posix(),
+        "hypothetical_loss_table": loss_table_path.as_posix(),
         "sensitivity_figure": figure_path.as_posix(),
         "summary_json": summary_path.as_posix(),
         "selected_operating_points": summary_rows,
+        "hypothetical_loss_selected_operating_points": loss_summary_rows,
     }
     print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
     return result

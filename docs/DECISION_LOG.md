@@ -105,42 +105,49 @@ methodology, CI) are still outstanding and higher priority.
   multi-axis trade-off characterization, and the threshold/score-scale
   mismatch finding—not an architecture-family claim.
 
-## D-004 — Keep cost-weighted threshold calibration as a separate sensitivity analysis
+## D-004 — Keep later validation-threshold sensitivity separate from the primary thresholds
 
 - **Date:** 2026-08-25
-- **Status:** Accepted; stands alongside and does not supersede the Batch 14
-  validation-selected operating points
+- **Status:** Threshold-precedence decision remains accepted; the cost
+  interpretation and terminology are superseded by D-006
 
 ### Context
 
 Batch 14 selected one operating threshold per detector by maximizing arithmetic
-mean, equal-weight F1 across the three frozen validation seeds. The new threshold-
-calibration analysis instead varies the assumed false-negative/false-positive cost
-ratio through $\beta = \sqrt{C_{FN}/C_{FP}}$ and selects the threshold that maximizes
-the patient-cluster-bootstrap lower 95% confidence bound of $F1_\beta$. Allowing both
-selection documents to appear without an explicit precedence rule would make the
-downstream operating-point claims contradictory.
+mean, equal-weight F1 across the three frozen validation seeds. The later
+threshold-sensitivity analysis instead varies $\beta\in\{1,3,5,10\}$ and selects
+the threshold that maximizes the patient-cluster-bootstrap lower 95% confidence
+bound of $F_\beta$. Allowing both selection documents to appear without an
+explicit precedence rule would make the downstream operating-point claims
+contradictory. This entry originally interpreted beta through a direct
+false-negative/false-positive clinical-cost identity; D-006 records why that
+interpretation was unsupported and supersedes it.
 
 ### Decision
 
-The Batch 14 thresholds remain the project's authoritative primary single-threshold
-operating points and the source for the existing downstream threshold, FROC, and
-Pareto results. This batch's full $\beta \in \{1, 3, 5, 10\}$ sweep is a distinct
-cost-sensitivity extension and will be reported separately, including in any later
-paper draft. It does not select one clinically definitive $\beta$ and does not replace
-the Batch 14 thresholds. Even the $\beta=1$ result is not a replacement because its
-lower-confidence-bound objective differs from Batch 14's mean-F1 point objective.
+The Batch 14 thresholds remain the project's authoritative primary
+single-threshold operating points and the source for the existing downstream
+threshold, FROC, and Pareto results. This batch's full
+$\beta\in\{1,3,5,10\}$ sweep is a distinct recall-preference sensitivity and
+will be reported separately, including in any later paper draft. It does not
+select one clinically definitive beta and does not replace the Batch 14
+thresholds. Even the $\beta=1$ result is not a replacement because its
+lower-confidence-bound objective differs from Batch 14's mean-F1 point
+objective.
 
 ### Consequences
 
 - `docs/THRESHOLD_ANALYSIS.md` and its selected operating-point tables remain the
   authoritative source for the primary validation-selected operating points.
-- `docs/THRESHOLD_CALIBRATION.md` and its outputs must be labeled as a sensitivity
-  analysis conditional on assumed costs, the available frozen validation predictions,
-  and the patient-cluster bootstrap protocol.
-- A later paper may compare the threshold shifts across the four assumed cost ratios,
-  but must not present any one setting as a measured clinical utility or silently feed
-  it into existing FROC, Pareto, or other downstream artifacts.
+- `docs/THRESHOLD_CALIBRATION.md` and its outputs must be labeled as a
+  recall-weighted F-beta sensitivity conditional on explicit preference
+  settings, the available frozen validation predictions, and the
+  patient-cluster bootstrap protocol.
+- A later paper may compare threshold shifts across the four beta settings but
+  must not present any one setting as measured clinical utility or silently
+  feed it into existing FROC, Pareto, or other downstream artifacts. Any
+  hypothetical linear misclassification-loss analysis must be reported as a
+  separate objective, as formalized by D-006.
 
 ## D-005 — Separate inferential targets and resample detector runs independently
 
@@ -201,3 +208,56 @@ treated as independent realizations within each detector.
 - Per-run, leave-one-training-run-out, and leave-one-seed-label-out artifacts
   are descriptive influence diagnostics. In particular, deleting seed 271 is
   not a corrected analysis and does not replace the all-attempt result.
+
+## D-006 — Treat beta as an F-beta preference parameter and separate linear loss
+
+- **Date:** 2026-08-29
+- **Status:** Accepted; supersedes D-004's cost interpretation while preserving
+  its threshold-precedence and validation-only decisions
+
+### Context
+
+D-004 correctly prevented the later sensitivity thresholds from replacing the
+Batch 14 primary operating points, but it identified
+$\beta^2$ with an assumed false-negative/false-positive cost ratio. The
+implementation actually maximizes a pointwise lower bootstrap bound of
+$F_\beta$, a weighted harmonic mean of precision and recall. The repository
+contains no citation, patient-outcome valuation, or derivation that makes this
+ratio objective equivalent to minimizing an empirically measured clinical-harm
+function.
+
+### Decision
+
+The frozen $\beta\in\{1,3,5,10\}$ sweep is retained because it was specified
+before test evaluation, but beta is now a recall-versus-precision preference
+parameter. In the weighted harmonic mean, $\beta^2\in\{1,9,25,100\}$ is the
+relative recall weight; it is not a measured clinical harm ratio. The canonical
+name is **recall-weighted F-beta validation-threshold sensitivity**.
+
+The existing F-beta thresholds remain unchanged because the Batch 19 bootstrap
+stream is explicitly preserved. Stability diagnostics are descriptive and use
+validation only: a contiguous near-optimal lower-bound plateau within 0.01 of
+the maximum, the bootstrap distribution of draw-specific selected thresholds,
+and selection frequency for every candidate threshold. They neither tune nor
+alter any test result.
+
+A separate hypothetical detection-error analysis minimizes
+$L(\tau;r)=rFN(\tau)/N+FP(\tau)/N$ for assumed
+$r\in\{1,9,25,100\}$. Here one unmatched target and one false-positive
+detection are assigned explicit linear penalties and $N$ is the number of
+validation images. These ratios are hypothetical methodological assumptions,
+not clinical valuations or deployment utilities. Selection remains
+validation-only, and the analysis is not substituted for F-beta or the Batch 14
+primary thresholds.
+
+### Consequences
+
+- D-004 still governs precedence: Batch 14's 0.69/0.05 thresholds remain the
+  authoritative primary single-threshold operating points and no Batch 29
+  sensitivity threshold is applied to test, FROC, Pareto, or DCA.
+- Canonical tables and the figure use recall-preference terminology and live at
+  new Batch 29 paths. The exact pre-Batch-29 table, figure, and provenance are
+  retained only as explicitly named historical archives.
+- The full threshold-selection path verifies the model-development validation
+  role, upstream validation split, manifest test-isolation flag, and exact
+  agreement between annotation and validation-manifest image identities.

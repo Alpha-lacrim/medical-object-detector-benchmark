@@ -608,8 +608,8 @@ on constrained hardware. This recommendation rests on compute, not on a
 precision-recall frontier advantage: at the validation-selected threshold its
 mean test recall is 0.244, and it has lower sensitivity at every reported FROC
 budget. It is unsuitable as the sole triage gate or a rule-out system and is
-defensible only as an auxiliary cue after model improvement and new external,
-clinically cost-sensitive threshold validation.
+defensible only as an auxiliary cue after model improvement and external
+utility elicitation followed by validation-only threshold selection.
 
 For **autonomous diagnosis, disease exclusion, or treatment guidance**, neither
 model is suitable. Accuracy is low, Grad-CAM localization is weak, corruptions
@@ -679,9 +679,9 @@ case prioritization. YOLO11s is attractive for constrained, human-in-the-loop
 assistance where compute footprint and latency dominate, but its measured miss
 rate precludes use as an autonomous screen. Future work should evaluate the full
 cohort and external sites, extend patient-cluster inference to larger cohorts,
-run robustness and explainability over multiple seeds, evaluate clinically
-cost-sensitive thresholds on validation and external cohorts, assess
-probabilistic calibration,
+run robustness and explainability over multiple seeds, elicit meaningful
+action/error utilities before selecting thresholds on validation and external
+cohorts, assess probabilistic calibration,
 test clinically motivated acquisition shifts, compare augmentation-rich and
 matched-control recipes as separate ablations, add saliency sanity checks or a
 detector-specific method such as D-RISE [@petsiuk2021drise], and perform

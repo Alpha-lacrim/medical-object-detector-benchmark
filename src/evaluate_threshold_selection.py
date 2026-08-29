@@ -796,8 +796,8 @@ def run_threshold_selection(config: ThresholdSelectionConfig) -> dict[str, Any]:
             "split": "validation",
             "rule": "maximum arithmetic mean F1 across the three validation seeds",
             "reason": (
-                "F1 gives precision and recall equal weight without inventing an unvalidated "
-                "clinical cost ratio and preserves the predeclared Batch 10 grid"
+                "F1 gives precision and recall equal weight without asserting an unmeasured "
+                "clinical-harm function and preserves the predeclared Batch 10 grid"
             ),
             "tie_breaker": "highest threshold among exact mean-F1 ties",
             "thresholds": list(thresholds),

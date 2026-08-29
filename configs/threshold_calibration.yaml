@@ -1,8 +1,10 @@
-schema_version: 1
-analysis_id: rsna-phase19-patient-cluster-threshold-calibration
+schema_version: 2
+analysis_id: rsna-phase29-recall-weighted-fbeta-threshold-sensitivity
 seed: 20260825
 
 inputs:
+  selection_data_role: model_development_validation
+  validation_split_name: val
   threshold_selection_config: configs/threshold_selection_n3_frozen.yaml
   validation_split_manifest: data/splits/rsna-pneumonia-5000/val.csv
   primary_operating_points: results/tables/selected_operating_points.csv
@@ -14,12 +16,22 @@ analysis:
   beta_values: [1.0, 3.0, 5.0, 10.0]
   confidence_level: 0.95
   bootstrap_resamples: 2000
+  bootstrap_stream_label: rsna-phase19-patient-cluster-threshold-calibration
   bootstrap_method: paired_hierarchical_patient_cluster_percentile
   seed_aggregation: arithmetic_mean_across_frozen_validation_seeds
   selection_rule: maximum_lower_confidence_bound_f_beta
   tie_breaker: highest_threshold
+  near_optimal_absolute_tolerance: 0.01
+  bootstrap_selection_rule: maximum_bootstrap_mean_f_beta
   manifest_image_column: processed_file
   patient_group_column: nih_patient_id
+
+hypothetical_loss:
+  enabled: true
+  fn_to_fp_loss_ratios: [1.0, 9.0, 25.0, 100.0]
+  normalization_unit: validation_image
+  selection_rule: minimum_mean_hypothetical_detection_error_loss
+  tie_breaker: highest_threshold
 
 plot:
   width_inches: 12.0
@@ -27,7 +39,9 @@ plot:
   dpi: 180
 
 outputs:
-  summary_table: results/tables/threshold_calibration_summary.csv
-  sensitivity_figure: results/figures/threshold_calibration_sensitivity.png
-  log_dir: results/logs/phase19_threshold_calibration
-  summary_json: results/logs/phase19_threshold_calibration/summary.json
+  summary_table: results/tables/recall_weighted_fbeta_threshold_summary.csv
+  stability_table: results/tables/recall_weighted_fbeta_threshold_stability.csv
+  hypothetical_loss_table: results/tables/hypothetical_detection_error_loss_summary.csv
+  sensitivity_figure: results/figures/recall_weighted_fbeta_threshold_sensitivity.png
+  log_dir: results/logs/phase29_threshold_sensitivity
+  summary_json: results/logs/phase29_threshold_sensitivity/summary.json
