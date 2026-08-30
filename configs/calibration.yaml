@@ -1,5 +1,5 @@
-schema_version: 1
-experiment_id: rsna-phase18-detection-calibration
+schema_version: 2
+experiment_id: rsna-phase33-detection-calibration-support-v2
 
 inputs:
   phase5_config: configs/evaluation.yaml
@@ -7,18 +7,30 @@ inputs:
   test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
 
 calibration:
+  # This is the immutable lower bound of the frozen Phase 5 prediction bundles.
   prediction_score_floor: 0.001
   match_iou_threshold: 0.5
   max_detections_per_image: 100
+  # Original Batch 18 / Kuppers full-dimensional experimental setting.
   bins_per_dimension: [5, 5, 5, 5, 5]
-  minimum_samples_per_bin: 8
+  minimum_samples_per_cell: 8
   reliability_bins: 10
+  sensitivity:
+    # Predeclared descriptive grid; it is not used to select a favorable result.
+    equal_bins_per_dimension: [3, 5, 7]
+    minimum_samples_per_cell: [1, 4, 8, 16]
+    confidence_floors: [0.001, 0.005, 0.01, 0.05]
 
 plots:
   dpi: 200
 
 outputs:
-  log_dir: results/logs/phase18_calibration
-  summary_json: results/logs/phase18_calibration/summary.json
-  summary_table: results/tables/calibration_summary.csv
-  reliability_figure: results/figures/reliability_diagrams.png
+  log_dir: results/logs/phase33_calibration_support_v2
+  summary_json: results/logs/phase33_calibration_support_v2/summary.json
+  summary_table: results/tables/calibration_summary_v2.csv
+  support_table: results/tables/calibration_support_v2.csv
+  sensitivity_table: results/tables/calibration_sensitivity_v2.csv
+  reliability_figure: results/figures/reliability_diagrams_confidence_marginal_v2.png
+  support_figure: results/figures/calibration_support_occupancy_v2.png
+  binning_sensitivity_figure: results/figures/calibration_binning_sensitivity_v2.png
+  confidence_floor_sensitivity_figure: results/figures/calibration_confidence_floor_sensitivity_v2.png

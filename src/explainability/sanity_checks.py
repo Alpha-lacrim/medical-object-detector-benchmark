@@ -1,4 +1,4 @@
-"""Run model- and data-randomization sanity checks for detector Grad-CAM maps."""
+"""Run parameter-sensitivity and input-perturbation controls for detector Grad-CAM."""
 
 from __future__ import annotations
 
@@ -36,11 +36,20 @@ from src.explainability.run_explainability import (
 )
 from src.robustness.run_robustness import CorruptedSubsetDataset, _largest_remainder_allocation
 
-SanityTest = Literal["parameter_randomization", "data_randomization"]
+ControlName = Literal[
+    "cascading_model_parameter_randomization",
+    "input_pixel_randomization_control",
+]
 
 DETAIL_FIELDS = (
     "detector",
-    "test",
+    "control",
+    "cascade_stage_index",
+    "cascade_stage_name",
+    "randomized_group_names",
+    "randomized_module_prefixes",
+    "full_model_parameter_randomization",
+    "training_data_randomization_performed",
     "image_id",
     "nih_patient_id",
     "study_stratum",
@@ -48,9 +57,11 @@ DETAIL_FIELDS = (
     "trained_failure_reason",
     "randomized_valid",
     "randomized_failure_reason",
-    "pair_valid",
-    "pair_failure_reason",
-    "correlation",
+    "similarity_valid",
+    "similarity_failure_reason",
+    "pearson_correlation",
+    "spearman_correlation",
+    "ssim",
     "reference_candidate_score",
     "trained_target_score",
     "randomized_target_score",
@@ -62,7 +73,14 @@ DETAIL_FIELDS = (
 
 SUMMARY_FIELDS = (
     "detector",
-    "test",
+    "control",
+    "cascade_stage_index",
+    "cascade_stage_name",
+    "randomized_group_count",
+    "randomized_group_names",
+    "randomized_module_prefixes",
+    "full_model_parameter_randomization",
+    "training_data_randomization_performed",
     "subset_image_count",
     "subset_patient_count",
     "subset_stratum_counts",
@@ -72,17 +90,24 @@ SUMMARY_FIELDS = (
     "randomized_valid_count",
     "randomized_failure_count",
     "randomized_failure_rate",
-    "k_valid_pairs",
+    "k_valid_similarity_pairs",
     "map_pair_failure_count",
     "map_pair_failure_rate",
-    "c_sanity",
-    "correlation_std",
-    "correlation_median",
-    "correlation_min",
-    "correlation_max",
-    "sanity_failure_threshold",
-    "sanity_failure_count",
-    "sanity_failure_rate",
+    "pearson_mean",
+    "pearson_std",
+    "pearson_median",
+    "pearson_min",
+    "pearson_max",
+    "spearman_mean",
+    "spearman_std",
+    "spearman_median",
+    "spearman_min",
+    "spearman_max",
+    "ssim_mean",
+    "ssim_std",
+    "ssim_median",
+    "ssim_min",
+    "ssim_max",
 )
 
 
@@ -115,8 +140,8 @@ class TargetSettings(StrictModel):
     yolo11s_region_scoring: Literal["closest_raw_anchor_center"]
 
 
-class ParameterRandomizationSettings(StrictModel):
-    """Model-copy and parameter-initialization policy."""
+class ParameterInitializationSettings(StrictModel):
+    """Shared model-copy and parameter-initialization policy."""
 
     copy_method: Literal["deep_copy_trained_model"]
     weight_initialization: Literal["xavier_normal"]
@@ -126,24 +151,99 @@ class ParameterRandomizationSettings(StrictModel):
     autocast: Literal["disabled_for_randomized_weight_numerical_validity"]
     gain: float = Field(gt=0)
     seed: int = Field(ge=0, le=2**32 - 1)
+    rng_reset_per_cumulative_stage: Literal[True]
 
 
-class DataRandomizationSettings(StrictModel):
-    """Deterministic within-image pixel permutation policy."""
+class LayerGroup(StrictModel):
+    """One transparent, non-overlapping detector parameter group."""
+
+    name: str = Field(pattern=r"^[a-z0-9][a-z0-9_]*$")
+    description: str = Field(min_length=1)
+    module_prefixes: tuple[str, ...] = Field(min_length=1)
+
+
+class DetectorLayerGroups(StrictModel):
+    """Output-to-input group order for one detector architecture."""
+
+    detector: DetectorName
+    groups: tuple[LayerGroup, ...] = Field(min_length=2)
+
+    @model_validator(mode="after")
+    def validate_groups(self) -> DetectorLayerGroups:
+        names = [group.name for group in self.groups]
+        if len(set(names)) != len(names):
+            raise ValueError(f"duplicate layer-group name for {self.detector}")
+        prefixes = [prefix for group in self.groups for prefix in group.module_prefixes]
+        if len(set(prefixes)) != len(prefixes):
+            raise ValueError(f"duplicate module prefix for {self.detector}")
+        return self
+
+
+class CascadingParameterRandomizationSettings(StrictModel):
+    """Cumulative head-to-input detector-parameter randomization policy."""
+
+    order: Literal["detector_output_to_input"]
+    cumulative: Literal[True]
+    initialization: ParameterInitializationSettings
+    detectors: tuple[DetectorLayerGroups, ...] = Field(min_length=2, max_length=2)
+
+    @model_validator(mode="after")
+    def validate_detectors(self) -> CascadingParameterRandomizationSettings:
+        names = [item.detector for item in self.detectors]
+        if set(names) != set(DETECTORS) or len(set(names)) != len(names):
+            raise ValueError("cascading groups must define Faster R-CNN and YOLO11s exactly once")
+        return self
+
+    def layer_groups(self, detector: DetectorName) -> DetectorLayerGroups:
+        """Return the declared groups for one detector."""
+
+        return next(item for item in self.detectors if item.detector == detector)
+
+
+class InputPixelRandomizationSettings(StrictModel):
+    """Deterministic inference-time input-pixel perturbation policy."""
 
     method: Literal["spatial_pixel_vector_permutation_without_replacement"]
     seed_derivation: Literal["sha256_global_seed_and_image_id"]
     seed: int = Field(ge=0, le=2**32 - 1)
+    interpretation: Literal["input_perturbation_stress_control_only"]
 
 
-class CorrelationSettings(StrictModel):
-    """Map-pair validity and correlation estimand."""
+class SimilaritySettings(StrictModel):
+    """Map normalization, degeneracy, and multi-metric similarity contract."""
 
-    method: Literal["pearson"]
+    methods: tuple[Literal["pearson", "spearman", "ssim"], ...]
     population: Literal["valid_nonconstant_paired_maps"]
+    preprocessing: Literal["bilinear_resize_then_independent_minmax_0_1"]
+    evaluation_size: int = Field(gt=6)
     zero_energy_policy: Literal["exclude_and_report"]
-    sanity_failure_threshold: float = Field(ge=-1, le=1)
     epsilon: float = Field(gt=0)
+    ssim_gaussian_sigma: float = Field(gt=0)
+    ssim_k1: float = Field(gt=0)
+    ssim_k2: float = Field(gt=0)
+
+    @model_validator(mode="after")
+    def validate_methods(self) -> SimilaritySettings:
+        if tuple(self.methods) != ("pearson", "spearman", "ssim"):
+            raise ValueError("v2 requires Pearson, Spearman, and SSIM in that order")
+        return self
+
+
+class ClaimBoundaries(StrictModel):
+    """Machine-readable limits on what the controls establish."""
+
+    adebayo_training_data_randomization: Literal["not_performed"]
+    reason: Literal["requires_retraining_on_randomized_training_annotations_and_fit_verification"]
+    parameter_control_interpretation: Literal["parameter_sensitivity_only"]
+
+
+class HistoricalArtifacts(StrictModel):
+    """Immutable Batch 21 outputs retained with their legacy labels."""
+
+    summary_table: Path
+    detail_table: Path
+    panel_figure: Path
+    summary_json: Path
 
 
 class RuntimeSettings(StrictModel):
@@ -168,7 +268,7 @@ class PanelSettings(StrictModel):
 
 
 class OutputSettings(StrictModel):
-    """Batch 21 generated artifacts."""
+    """Versioned Batch 31 generated artifacts."""
 
     log_dir: Path
     summary_json: Path
@@ -178,18 +278,20 @@ class OutputSettings(StrictModel):
 
 
 class XaiSanityConfig(StrictModel):
-    """Complete immutable Batch 21 experiment contract."""
+    """Complete immutable Batch 31 experiment contract."""
 
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     experiment_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     seed: int = Field(ge=0, le=2**32 - 1)
     phase7_config: Path
     phase7_summary: Path
     sampling: SamplingSettings
     target: TargetSettings
-    parameter_randomization: ParameterRandomizationSettings
-    data_randomization: DataRandomizationSettings
-    correlation: CorrelationSettings
+    cascading_model_parameter_randomization: CascadingParameterRandomizationSettings
+    input_pixel_randomization_control: InputPixelRandomizationSettings
+    similarity: SimilaritySettings
+    claim_boundaries: ClaimBoundaries
+    historical_artifacts: HistoricalArtifacts
     runtime: RuntimeSettings
     panel: PanelSettings
     outputs: OutputSettings
@@ -200,8 +302,10 @@ class XaiSanityConfig(StrictModel):
     def validate_seeds(self) -> XaiSanityConfig:
         if self.sampling.selection_seed != self.seed:
             raise ValueError("nested sample must reuse the primary experiment seed")
-        if len({self.parameter_randomization.seed, self.data_randomization.seed}) != 2:
-            raise ValueError("parameter and data randomization require distinct seeds")
+        parameter_seed = self.cascading_model_parameter_randomization.initialization.seed
+        pixel_seed = self.input_pixel_randomization_control.seed
+        if len({parameter_seed, pixel_seed}) != 2:
+            raise ValueError("parameter and input-pixel controls require distinct seeds")
         return self
 
     def resolve(self, path: Path) -> Path:
@@ -211,7 +315,7 @@ class XaiSanityConfig(StrictModel):
 
 
 def load_xai_sanity_config(path: str | Path) -> XaiSanityConfig:
-    """Load the strict Batch 21 YAML contract."""
+    """Load the strict Batch 31 YAML contract."""
 
     source = Path(path).resolve()
     payload = yaml.safe_load(source.read_text(encoding="utf-8"))
@@ -263,6 +367,12 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"JSON artifact must contain an object: {path}")
     return payload
+
+
+def _portable_path(config: XaiSanityConfig, path: Path) -> str:
+    """Return a clone-stable repository-relative artifact path."""
+
+    return path.resolve().relative_to(config.project_root).as_posix()
 
 
 def select_nested_stratified_rows(
@@ -348,13 +458,13 @@ def _materialize_nested_subset(
         "selection": config.sampling.selection,
         "rng": "numpy.random.Generator(PCG64)",
         "seed": config.sampling.selection_seed,
-        "source_pool_manifest": source.as_posix(),
+        "source_pool_manifest": _portable_path(config, source),
         "source_pool_manifest_sha256": sha256_file(source),
         "source_pool_image_count": len(rows),
         "source_pool_stratum_counts": dict(
             sorted(Counter(row[config.sampling.stratum_column] for row in rows).items())
         ),
-        "output_manifest": output.as_posix(),
+        "output_manifest": _portable_path(config, output),
         "output_manifest_sha256": sha256_file(output),
         "subset_image_count": len(selected),
         "subset_patient_count": len({row[config.sampling.patient_column] for row in selected}),
@@ -436,7 +546,27 @@ def preflight(config: XaiSanityConfig) -> dict[str, Any]:
         "seed": config.seed,
         "sampling": prepared["sampling_audit"],
         "target_layers": [item.model_dump(mode="json") for item in prepared["phase7"].detectors],
+        "cascading_model_parameter_randomization": (
+            config.cascading_model_parameter_randomization.model_dump(mode="json")
+        ),
+        "input_pixel_randomization_control": config.input_pixel_randomization_control.model_dump(
+            mode="json"
+        ),
+        "claim_boundaries": config.claim_boundaries.model_dump(mode="json"),
+        "historical_artifacts": _historical_artifact_identity(config),
         "panel_cases": panel_cases,
+    }
+
+
+def _historical_artifact_identity(config: XaiSanityConfig) -> dict[str, dict[str, str]]:
+    """Resolve and hash the immutable Batch 21 artifacts retained for historical continuity."""
+
+    return {
+        name: {
+            "path": _portable_path(config, config.resolve(path)),
+            "sha256": sha256_file(config.resolve(path)),
+        }
+        for name, path in config.historical_artifacts.model_dump().items()
     }
 
 
@@ -453,30 +583,184 @@ def shuffle_pixel_vectors(image: Image.Image, *, seed: int, image_id: str) -> Im
     return Image.fromarray(np.ascontiguousarray(shuffled))
 
 
+def _pearson_values(first: np.ndarray, second: np.ndarray, *, epsilon: float) -> float | None:
+    first_centered = first - first.mean()
+    second_centered = second - second.mean()
+    first_norm = float(np.linalg.norm(first_centered))
+    second_norm = float(np.linalg.norm(second_centered))
+    if first_norm <= epsilon or second_norm <= epsilon:
+        return None
+    value = float(np.dot(first_centered, second_centered) / (first_norm * second_norm))
+    return float(np.clip(value, -1.0, 1.0)) if np.isfinite(value) else None
+
+
 def pearson_map_correlation(
     first: np.ndarray,
     second: np.ndarray,
     *,
     epsilon: float,
 ) -> float | None:
-    """Return full-resolution Pearson correlation or null for an invalid pair."""
+    """Return Pearson correlation or null for a non-finite or constant map pair."""
 
     if first.shape != second.shape or first.ndim != 2:
-        raise ValueError("sanity-check heatmaps must have matching two-dimensional shapes")
+        raise ValueError("heatmaps must have matching two-dimensional shapes")
     first_values = np.asarray(first, dtype=np.float64).reshape(-1)
     second_values = np.asarray(second, dtype=np.float64).reshape(-1)
     if not np.isfinite(first_values).all() or not np.isfinite(second_values).all():
         return None
-    first_centered = first_values - first_values.mean()
-    second_centered = second_values - second_values.mean()
-    first_norm = float(np.linalg.norm(first_centered))
-    second_norm = float(np.linalg.norm(second_centered))
-    if first_norm <= epsilon or second_norm <= epsilon:
+    return _pearson_values(first_values, second_values, epsilon=epsilon)
+
+
+def normalize_map_for_similarity(
+    heatmap: np.ndarray,
+    *,
+    evaluation_size: int,
+    epsilon: float,
+) -> np.ndarray | None:
+    """Bilinearly resize one finite map and independently min-max normalize it."""
+
+    values = np.asarray(heatmap, dtype=np.float64)
+    if values.ndim != 2 or not np.isfinite(values).all():
         return None
-    value = float(np.dot(first_centered, second_centered) / (first_norm * second_norm))
-    if not np.isfinite(value):
+    resized = np.asarray(
+        Image.fromarray(values.astype(np.float32), mode="F").resize(
+            (evaluation_size, evaluation_size),
+            resample=Image.Resampling.BILINEAR,
+        ),
+        dtype=np.float64,
+    )
+    minimum = float(resized.min())
+    value_range = float(resized.max() - minimum)
+    if not np.isfinite(value_range) or value_range <= epsilon:
         return None
-    return float(np.clip(value, -1.0, 1.0))
+    return np.ascontiguousarray((resized - minimum) / value_range)
+
+
+def spearman_map_correlation(
+    first: np.ndarray,
+    second: np.ndarray,
+    *,
+    epsilon: float,
+) -> float | None:
+    """Return tie-aware Spearman correlation for two normalized maps."""
+
+    from scipy.stats import rankdata
+
+    if first.shape != second.shape or first.ndim != 2:
+        raise ValueError("normalized heatmaps must have matching two-dimensional shapes")
+    if not np.isfinite(first).all() or not np.isfinite(second).all():
+        return None
+    first_ranks = np.asarray(rankdata(first.reshape(-1), method="average"), dtype=np.float64)
+    second_ranks = np.asarray(rankdata(second.reshape(-1), method="average"), dtype=np.float64)
+    return _pearson_values(first_ranks, second_ranks, epsilon=epsilon)
+
+
+def ssim_map_similarity(
+    first: np.ndarray,
+    second: np.ndarray,
+    *,
+    sigma: float,
+    k1: float,
+    k2: float,
+) -> float | None:
+    """Return Gaussian-window SSIM for two maps normalized to the unit interval."""
+
+    from scipy.ndimage import gaussian_filter
+
+    if first.shape != second.shape or first.ndim != 2:
+        raise ValueError("normalized heatmaps must have matching two-dimensional shapes")
+    if not np.isfinite(first).all() or not np.isfinite(second).all():
+        return None
+    first_values = np.asarray(first, dtype=np.float64)
+    second_values = np.asarray(second, dtype=np.float64)
+    mean_first = gaussian_filter(first_values, sigma=sigma, mode="reflect", truncate=3.5)
+    mean_second = gaussian_filter(second_values, sigma=sigma, mode="reflect", truncate=3.5)
+    variance_first = np.maximum(
+        gaussian_filter(first_values * first_values, sigma=sigma, mode="reflect", truncate=3.5)
+        - mean_first * mean_first,
+        0.0,
+    )
+    variance_second = np.maximum(
+        gaussian_filter(second_values * second_values, sigma=sigma, mode="reflect", truncate=3.5)
+        - mean_second * mean_second,
+        0.0,
+    )
+    covariance = (
+        gaussian_filter(first_values * second_values, sigma=sigma, mode="reflect", truncate=3.5)
+        - mean_first * mean_second
+    )
+    c1 = k1**2
+    c2 = k2**2
+    numerator = (2 * mean_first * mean_second + c1) * (2 * covariance + c2)
+    denominator = (mean_first * mean_first + mean_second * mean_second + c1) * (
+        variance_first + variance_second + c2
+    )
+    if not np.isfinite(denominator).all() or np.any(denominator <= 0):
+        return None
+    value = float(np.mean(numerator / denominator, dtype=np.float64))
+    return float(np.clip(value, -1.0, 1.0)) if np.isfinite(value) else None
+
+
+def map_similarity_metrics(
+    first: np.ndarray,
+    second: np.ndarray,
+    *,
+    settings: SimilaritySettings,
+) -> dict[str, Any]:
+    """Normalize a map pair once and compute Pearson, Spearman, and SSIM."""
+
+    if first.shape != second.shape or first.ndim != 2:
+        raise ValueError("control heatmaps must have matching two-dimensional shapes")
+    first_normalized = normalize_map_for_similarity(
+        first,
+        evaluation_size=settings.evaluation_size,
+        epsilon=settings.epsilon,
+    )
+    second_normalized = normalize_map_for_similarity(
+        second,
+        evaluation_size=settings.evaluation_size,
+        epsilon=settings.epsilon,
+    )
+    if first_normalized is None or second_normalized is None:
+        return {
+            "valid": False,
+            "failure_reason": "nonfinite_or_degenerate_map_after_similarity_preprocessing",
+            "pearson_correlation": None,
+            "spearman_correlation": None,
+            "ssim": None,
+        }
+    pearson = pearson_map_correlation(
+        first_normalized,
+        second_normalized,
+        epsilon=settings.epsilon,
+    )
+    spearman = spearman_map_correlation(
+        first_normalized,
+        second_normalized,
+        epsilon=settings.epsilon,
+    )
+    ssim = ssim_map_similarity(
+        first_normalized,
+        second_normalized,
+        sigma=settings.ssim_gaussian_sigma,
+        k1=settings.ssim_k1,
+        k2=settings.ssim_k2,
+    )
+    if pearson is None or spearman is None or ssim is None:
+        return {
+            "valid": False,
+            "failure_reason": "undefined_similarity_metric",
+            "pearson_correlation": None,
+            "spearman_correlation": None,
+            "ssim": None,
+        }
+    return {
+        "valid": True,
+        "failure_reason": None,
+        "pearson_correlation": pearson,
+        "spearman_correlation": spearman,
+        "ssim": ssim,
+    }
 
 
 def xavier_reinitialize_model(
@@ -484,8 +768,9 @@ def xavier_reinitialize_model(
     *,
     seed: int,
     gain: float,
+    module_prefixes: Sequence[str] | None = None,
 ) -> dict[str, Any]:
-    """Xavier-randomize every module weight tensor and zero every module bias tensor."""
+    """Xavier-randomize selected module weights and zero their biases."""
 
     import torch
 
@@ -500,9 +785,15 @@ def xavier_reinitialize_model(
     bias_buffer_tensors = 0
     seen_weights: set[int] = set()
     seen_biases: set[int] = set()
+    randomized_modules: list[str] = []
     with torch.no_grad():
         for module_name, module in model.named_modules():
+            if module_prefixes is not None and not any(
+                _module_matches_prefix(module_name, prefix) for prefix in module_prefixes
+            ):
+                continue
             weight = getattr(module, "weight", None)
+            module_changed = False
             if isinstance(weight, torch.Tensor) and id(weight) not in seen_weights:
                 if not weight.is_floating_point():
                     raise TypeError(f"cannot randomize non-floating weight: {module_name}")
@@ -513,6 +804,7 @@ def xavier_reinitialize_model(
                 xavier_values += weight.numel()
                 one_dimensional_tensors += int(weight.ndim < 2)
                 weight_buffer_tensors += int("weight" in module._buffers)
+                module_changed = True
             bias = getattr(module, "bias", None)
             if isinstance(bias, torch.Tensor) and id(bias) not in seen_biases:
                 if not bias.is_floating_point():
@@ -522,12 +814,17 @@ def xavier_reinitialize_model(
                 bias_tensors += 1
                 bias_values += bias.numel()
                 bias_buffer_tensors += int("bias" in module._buffers)
+                module_changed = True
+            if module_changed:
+                randomized_modules.append(module_name)
     if xavier_tensors == 0:
         raise ValueError("model contains no non-bias parameter to Xavier-randomize")
     return {
         "seed": seed,
         "gain": gain,
         "generator": "torch.Generator(device=cpu)",
+        "module_prefixes": None if module_prefixes is None else list(module_prefixes),
+        "randomized_modules": randomized_modules,
         "xavier_weight_tensor_count": xavier_tensors,
         "xavier_weight_value_count": xavier_values,
         "one_dimensional_row_view_tensor_count": one_dimensional_tensors,
@@ -537,6 +834,97 @@ def xavier_reinitialize_model(
         "zeroed_bias_buffer_tensor_count": bias_buffer_tensors,
         "non_weight_non_bias_buffers_preserved": True,
     }
+
+
+def _module_matches_prefix(module_name: str, prefix: str) -> bool:
+    return module_name == prefix or module_name.startswith(f"{prefix}.")
+
+
+def audit_layer_group_partition(model: Any, groups: DetectorLayerGroups) -> dict[str, Any]:
+    """Require every weight/bias-bearing module to belong to exactly one declared group."""
+
+    import torch
+
+    grouped_modules: dict[str, list[str]] = {group.name: [] for group in groups.groups}
+    unassigned: list[str] = []
+    multiply_assigned: dict[str, list[str]] = {}
+    for module_name, module in model.named_modules():
+        if not any(
+            isinstance(getattr(module, name, None), torch.Tensor) for name in ("weight", "bias")
+        ):
+            continue
+        matched = [
+            group.name
+            for group in groups.groups
+            if any(_module_matches_prefix(module_name, prefix) for prefix in group.module_prefixes)
+        ]
+        if not matched:
+            unassigned.append(module_name)
+        elif len(matched) > 1:
+            multiply_assigned[module_name] = matched
+        else:
+            grouped_modules[matched[0]].append(module_name)
+    empty = [name for name, modules in grouped_modules.items() if not modules]
+    if unassigned or multiply_assigned or empty:
+        raise ValueError(
+            "invalid detector layer-group partition: "
+            f"unassigned={unassigned}, multiply_assigned={multiply_assigned}, empty={empty}"
+        )
+    return {
+        "detector": groups.detector,
+        "group_order": [group.name for group in groups.groups],
+        "group_module_counts": {name: len(modules) for name, modules in grouped_modules.items()},
+        "group_modules": grouped_modules,
+        "weight_bias_module_count": sum(len(modules) for modules in grouped_modules.values()),
+        "partition_complete_and_nonoverlapping": True,
+    }
+
+
+def randomize_cumulative_model(
+    model: Any,
+    *,
+    groups: DetectorLayerGroups,
+    stage_index: int,
+    settings: ParameterInitializationSettings,
+) -> tuple[Any, dict[str, Any]]:
+    """Deep-copy a trained model and randomize groups through one cumulative stage."""
+
+    if not 1 <= stage_index <= len(groups.groups):
+        raise ValueError("cascade stage index is outside the declared layer-group order")
+    partition = audit_layer_group_partition(model, groups)
+    selected_groups = groups.groups[:stage_index]
+    prefixes = [prefix for group in selected_groups for prefix in group.module_prefixes]
+    randomized_model = copy.deepcopy(model)
+    initialization = xavier_reinitialize_model(
+        randomized_model,
+        seed=settings.seed,
+        gain=settings.gain,
+        module_prefixes=prefixes,
+    )
+    audit = {
+        "stage_index": stage_index,
+        "stage_name": selected_groups[-1].name,
+        "randomized_group_names": [group.name for group in selected_groups],
+        "randomized_group_descriptions": [group.description for group in selected_groups],
+        "randomized_module_prefixes": prefixes,
+        "full_model_parameter_randomization": stage_index == len(groups.groups),
+        "partition": partition,
+        "initialization": initialization,
+    }
+    return randomized_model, audit
+
+
+def checkpoint_hashes(paths: Mapping[DetectorName, Path]) -> dict[str, str]:
+    """Hash the on-disk detector checkpoints without loading or modifying them."""
+
+    return {detector: sha256_file(path) for detector, path in paths.items()}
+
+
+def assert_checkpoint_immutability(before: Mapping[str, str], after: Mapping[str, str]) -> None:
+    """Fail if any checkpoint identity changed during an in-memory control run."""
+
+    if dict(before) != dict(after):
+        raise RuntimeError(f"checkpoint immutability violated: before={before}, after={after}")
 
 
 def select_panel_cases(
@@ -797,35 +1185,52 @@ def _extract_reference_map(
 def _detail_row(
     *,
     detector: DetectorName,
-    test: SanityTest,
+    control: ControlName,
+    stage_audit: Mapping[str, Any] | None,
     source_row: Mapping[str, str],
     config: XaiSanityConfig,
     reference: Mapping[str, Any],
     trained: Mapping[str, Any],
     randomized: Mapping[str, Any],
 ) -> dict[str, Any]:
-    correlation = None
-    pair_failure = None
+    metrics = {
+        "valid": False,
+        "failure_reason": None,
+        "pearson_correlation": None,
+        "spearman_correlation": None,
+        "ssim": None,
+    }
     if trained["valid"] and randomized["valid"]:
-        correlation = pearson_map_correlation(
+        metrics = map_similarity_metrics(
             trained["heatmap"],
             randomized["heatmap"],
-            epsilon=config.correlation.epsilon,
+            settings=config.similarity,
         )
-        if correlation is None:
-            pair_failure = "undefined_pearson_correlation"
     else:
         failures = []
         if not trained["valid"]:
             failures.append("trained_cam_invalid")
         if not randomized["valid"]:
             failures.append("randomized_cam_invalid")
-        pair_failure = "+".join(failures)
+        metrics["failure_reason"] = "+".join(failures)
+    group_names = [] if stage_audit is None else stage_audit["randomized_group_names"]
+    prefixes = [] if stage_audit is None else stage_audit["randomized_module_prefixes"]
+    stage_index = 0 if stage_audit is None else int(stage_audit["stage_index"])
+    stage_name = "input_pixel_permutation" if stage_audit is None else stage_audit["stage_name"]
+    full_randomization = bool(
+        stage_audit is not None and stage_audit["full_model_parameter_randomization"]
+    )
     box = reference.get("candidate_box")
     coordinates = [None, None, None, None] if box is None else [float(value) for value in box]
     return {
         "detector": detector,
-        "test": test,
+        "control": control,
+        "cascade_stage_index": stage_index,
+        "cascade_stage_name": stage_name,
+        "randomized_group_names": json.dumps(group_names, separators=(",", ":")),
+        "randomized_module_prefixes": json.dumps(prefixes, separators=(",", ":")),
+        "full_model_parameter_randomization": full_randomization,
+        "training_data_randomization_performed": False,
         "image_id": source_row[config.sampling.id_column],
         "nih_patient_id": source_row[config.sampling.patient_column],
         "study_stratum": source_row[config.sampling.stratum_column],
@@ -833,9 +1238,11 @@ def _detail_row(
         "trained_failure_reason": trained["failure_reason"],
         "randomized_valid": bool(randomized["valid"]),
         "randomized_failure_reason": randomized["failure_reason"],
-        "pair_valid": correlation is not None,
-        "pair_failure_reason": pair_failure,
-        "correlation": correlation,
+        "similarity_valid": bool(metrics["valid"]),
+        "similarity_failure_reason": metrics["failure_reason"],
+        "pearson_correlation": metrics["pearson_correlation"],
+        "spearman_correlation": metrics["spearman_correlation"],
+        "ssim": metrics["ssim"],
         "reference_candidate_score": reference.get("candidate_score"),
         "trained_target_score": trained["candidate_score"],
         "randomized_target_score": randomized["candidate_score"],
@@ -911,7 +1318,7 @@ def _run_detector(
                     phase7=phase7,
                     class_count=subset.num_foreground_classes,
                     reference_box=reference_box,
-                    epsilon=config.correlation.epsilon,
+                    epsilon=config.similarity.epsilon,
                 )
                 if reference_box is not None
                 else _missing_reference_result()
@@ -919,10 +1326,10 @@ def _run_detector(
             clean_results[image_id] = trained
             shuffled = shuffle_pixel_vectors(
                 image,
-                seed=config.data_randomization.seed,
+                seed=config.input_pixel_randomization_control.seed,
                 image_id=image_id,
             )
-            data_randomized = (
+            input_randomized = (
                 _extract_reference_map(
                     detector=detector,
                     model=model,
@@ -934,7 +1341,7 @@ def _run_detector(
                     phase7=phase7,
                     class_count=subset.num_foreground_classes,
                     reference_box=reference_box,
-                    epsilon=config.correlation.epsilon,
+                    epsilon=config.similarity.epsilon,
                 )
                 if reference_box is not None
                 else _missing_reference_result()
@@ -942,12 +1349,13 @@ def _run_detector(
             detail.append(
                 _detail_row(
                     detector=detector,
-                    test="data_randomization",
+                    control="input_pixel_randomization_control",
+                    stage_audit=None,
                     source_row=source_rows[image_id],
                     config=config,
                     reference=reference,
                     trained=trained,
-                    randomized=data_randomized,
+                    randomized=input_randomized,
                 )
             )
             if image_id in panel_names:
@@ -955,134 +1363,166 @@ def _run_detector(
                     "image": np.asarray(image).copy(),
                     "shuffled_image": np.asarray(shuffled).copy(),
                     "trained": trained,
-                    "data_randomized": data_randomized,
+                    "input_pixel_randomized": input_randomized,
+                    "cascading": {},
                 }
             if number % config.runtime.progress_every_images == 0:
                 print(
-                    f"[{detector}] clean/data-randomization {number}/{len(image_names)}",
+                    f"[{detector}] clean/input-pixel control {number}/{len(image_names)}",
                     flush=True,
                 )
 
     model.to("cpu")
     torch.cuda.empty_cache()
-    randomized_model = copy.deepcopy(model)
-    del model
-    initialization_audit = xavier_reinitialize_model(
-        randomized_model,
-        seed=config.parameter_randomization.seed,
-        gain=config.parameter_randomization.gain,
-    )
-    randomized_model.to(device).eval()
-    for parameter in randomized_model.parameters():
-        parameter.requires_grad_(False)
-    module = resolve_module(randomized_model, phase7.layer(detector).module_path)
-    with ActivationCapture(module) as capture:
-        for number, image_id in enumerate(image_names, start=1):
-            index = indices[image_id]
-            record = subset.records[index]
-            image = subset.load_pil(index)
-            trained = clean_results[image_id]
-            reference = reference_results[image_id]
-            reference_box = reference["candidate_box"]
-            parameter_randomized = (
-                _extract_reference_map(
-                    detector=detector,
-                    model=randomized_model,
-                    device=device,
-                    model_config=model_config,
-                    capture=capture,
-                    image=image,
-                    image_size=(record.height, record.width),
-                    phase7=phase7,
-                    class_count=subset.num_foreground_classes,
-                    reference_box=reference_box,
-                    epsilon=config.correlation.epsilon,
+    cascade_settings = config.cascading_model_parameter_randomization
+    detector_groups = cascade_settings.layer_groups(detector)
+    partition_audit = audit_layer_group_partition(model, detector_groups)
+    stage_audits: list[dict[str, Any]] = []
+    for stage_index in range(1, len(detector_groups.groups) + 1):
+        randomized_model, stage_audit = randomize_cumulative_model(
+            model,
+            groups=detector_groups,
+            stage_index=stage_index,
+            settings=cascade_settings.initialization,
+        )
+        stage_audits.append(stage_audit)
+        randomized_model.to(device).eval()
+        for parameter in randomized_model.parameters():
+            parameter.requires_grad_(False)
+        module = resolve_module(randomized_model, phase7.layer(detector).module_path)
+        with ActivationCapture(module) as capture:
+            for number, image_id in enumerate(image_names, start=1):
+                index = indices[image_id]
+                record = subset.records[index]
+                image = subset.load_pil(index)
+                trained = clean_results[image_id]
+                reference = reference_results[image_id]
+                reference_box = reference["candidate_box"]
+                parameter_randomized = (
+                    _extract_reference_map(
+                        detector=detector,
+                        model=randomized_model,
+                        device=device,
+                        model_config=model_config,
+                        capture=capture,
+                        image=image,
+                        image_size=(record.height, record.width),
+                        phase7=phase7,
+                        class_count=subset.num_foreground_classes,
+                        reference_box=reference_box,
+                        epsilon=config.similarity.epsilon,
+                    )
+                    if reference_box is not None
+                    else _missing_reference_result()
                 )
-                if reference_box is not None
-                else _missing_reference_result()
-            )
-            detail.append(
-                _detail_row(
-                    detector=detector,
-                    test="parameter_randomization",
-                    source_row=source_rows[image_id],
-                    config=config,
-                    reference=reference,
-                    trained=trained,
-                    randomized=parameter_randomized,
+                detail.append(
+                    _detail_row(
+                        detector=detector,
+                        control="cascading_model_parameter_randomization",
+                        stage_audit=stage_audit,
+                        source_row=source_rows[image_id],
+                        config=config,
+                        reference=reference,
+                        trained=trained,
+                        randomized=parameter_randomized,
+                    )
                 )
-            )
-            if image_id in panel_names:
-                panel_maps[(detector, image_id)]["parameter_randomized"] = parameter_randomized
-            if number % config.runtime.progress_every_images == 0:
-                print(
-                    f"[{detector}] parameter-randomization {number}/{len(image_names)}",
-                    flush=True,
-                )
+                if image_id in panel_names:
+                    panel_maps[(detector, image_id)]["cascading"][stage_audit["stage_name"]] = (
+                        parameter_randomized
+                    )
+                if number % config.runtime.progress_every_images == 0:
+                    print(
+                        f"[{detector}] cascade {stage_index}/{len(detector_groups.groups)} "
+                        f"{number}/{len(image_names)}",
+                        flush=True,
+                    )
+        randomized_model.to("cpu")
+        del randomized_model
+        gc.collect()
+        torch.cuda.empty_cache()
 
-    del randomized_model, clean_results, reference_results
+    del model, clean_results, reference_results
     gc.collect()
     torch.cuda.empty_cache()
-    return detail, panel_maps, initialization_audit
+    return detail, panel_maps, {"partition": partition_audit, "stages": stage_audits}
 
 
 def aggregate_sanity(
     records: Sequence[Mapping[str, Any]],
     *,
     sampling_audit: Mapping[str, Any],
-    failure_threshold: float,
 ) -> list[dict[str, Any]]:
-    """Compute C_sanity, extraction failures, and high-correlation sanity failures."""
+    """Summarize valid-pair Pearson, Spearman, and SSIM by control stage."""
 
     rows: list[dict[str, Any]] = []
     for detector in DETECTORS:
-        for test in ("parameter_randomization", "data_randomization"):
+        conditions = sorted(
+            {
+                (item["control"], int(item["cascade_stage_index"]), item["cascade_stage_name"])
+                for item in records
+                if item["detector"] == detector
+            },
+            key=lambda item: (0 if item[0] == "input_pixel_randomization_control" else 1, item[1]),
+        )
+        for control, stage_index, stage_name in conditions:
             group = [
-                item for item in records if item["detector"] == detector and item["test"] == test
+                item
+                for item in records
+                if item["detector"] == detector
+                and item["control"] == control
+                and int(item["cascade_stage_index"]) == stage_index
             ]
             if len(group) != sampling_audit["subset_image_count"]:
-                raise AssertionError(f"incomplete sanity grid for {detector}/{test}")
-            correlations = np.asarray(
-                [float(item["correlation"]) for item in group if item["correlation"] is not None],
-                dtype=np.float64,
-            )
+                raise AssertionError(
+                    f"incomplete control grid for {detector}/{control}/{stage_name}"
+                )
+            valid = [item for item in group if item["similarity_valid"]]
+            metric_values = {
+                metric: np.asarray([float(item[metric]) for item in valid], dtype=np.float64)
+                for metric in ("pearson_correlation", "spearman_correlation", "ssim")
+            }
             trained_valid = sum(bool(item["trained_valid"]) for item in group)
             randomized_valid = sum(bool(item["randomized_valid"]) for item in group)
             total = len(group)
-            valid_pairs = len(correlations)
-            sanity_failures = int(np.sum(correlations >= failure_threshold))
-            rows.append(
-                {
-                    "detector": detector,
-                    "test": test,
-                    "subset_image_count": total,
-                    "subset_patient_count": sampling_audit["subset_patient_count"],
-                    "subset_stratum_counts": json.dumps(
-                        sampling_audit["subset_stratum_counts"],
-                        sort_keys=True,
-                        separators=(",", ":"),
-                    ),
-                    "trained_valid_count": trained_valid,
-                    "trained_failure_count": total - trained_valid,
-                    "trained_failure_rate": (total - trained_valid) / total,
-                    "randomized_valid_count": randomized_valid,
-                    "randomized_failure_count": total - randomized_valid,
-                    "randomized_failure_rate": (total - randomized_valid) / total,
-                    "k_valid_pairs": valid_pairs,
-                    "map_pair_failure_count": total - valid_pairs,
-                    "map_pair_failure_rate": (total - valid_pairs) / total,
-                    "c_sanity": float(correlations.mean()) if valid_pairs else None,
-                    "correlation_std": (
-                        float(correlations.std(ddof=1)) if valid_pairs > 1 else None
-                    ),
-                    "correlation_median": (float(np.median(correlations)) if valid_pairs else None),
-                    "correlation_min": float(correlations.min()) if valid_pairs else None,
-                    "correlation_max": float(correlations.max()) if valid_pairs else None,
-                    "sanity_failure_threshold": failure_threshold,
-                    "sanity_failure_count": sanity_failures,
-                    "sanity_failure_rate": (sanity_failures / valid_pairs if valid_pairs else None),
-                }
-            )
+            valid_pairs = len(valid)
+            row = {
+                "detector": detector,
+                "control": control,
+                "cascade_stage_index": stage_index,
+                "cascade_stage_name": stage_name,
+                "randomized_group_count": len(json.loads(group[0]["randomized_group_names"])),
+                "randomized_group_names": group[0]["randomized_group_names"],
+                "randomized_module_prefixes": group[0]["randomized_module_prefixes"],
+                "full_model_parameter_randomization": group[0][
+                    "full_model_parameter_randomization"
+                ],
+                "training_data_randomization_performed": False,
+                "subset_image_count": total,
+                "subset_patient_count": sampling_audit["subset_patient_count"],
+                "subset_stratum_counts": json.dumps(
+                    sampling_audit["subset_stratum_counts"],
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                "trained_valid_count": trained_valid,
+                "trained_failure_count": total - trained_valid,
+                "trained_failure_rate": (total - trained_valid) / total,
+                "randomized_valid_count": randomized_valid,
+                "randomized_failure_count": total - randomized_valid,
+                "randomized_failure_rate": (total - randomized_valid) / total,
+                "k_valid_similarity_pairs": valid_pairs,
+                "map_pair_failure_count": total - valid_pairs,
+                "map_pair_failure_rate": (total - valid_pairs) / total,
+            }
+            for metric, values in metric_values.items():
+                prefix = metric.removesuffix("_correlation")
+                row[f"{prefix}_mean"] = float(values.mean()) if valid_pairs else None
+                row[f"{prefix}_std"] = float(values.std(ddof=1)) if valid_pairs > 1 else None
+                row[f"{prefix}_median"] = float(np.median(values)) if valid_pairs else None
+                row[f"{prefix}_min"] = float(values.min()) if valid_pairs else None
+                row[f"{prefix}_max"] = float(values.max()) if valid_pairs else None
+            rows.append(row)
     return rows
 
 
@@ -1143,22 +1583,34 @@ def _write_panel(
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    correlation_lookup = {
-        (item["detector"], item["test"], item["image_id"]): item["correlation"] for item in records
+    similarity_lookup = {
+        (
+            item["detector"],
+            item["control"],
+            int(item["cascade_stage_index"]),
+            item["image_id"],
+        ): item
+        for item in records
     }
+    detector_groups = {
+        detector: config.cascading_model_parameter_randomization.layer_groups(detector)
+        for detector in DETECTORS
+    }
+    stage_count = len(detector_groups[DETECTORS[0]].groups)
+    if any(len(groups.groups) != stage_count for groups in detector_groups.values()):
+        raise ValueError("the qualitative panel requires the same cascade-stage count per detector")
     rows = [(detector, case) for detector in DETECTORS for case in panel_cases]
     figure, axes = plt.subplots(
         len(rows),
-        5,
+        4 + stage_count,
         figsize=(config.panel.width_inches, config.panel.row_height_inches * len(rows)),
         squeeze=False,
     )
-    column_titles = (
+    fixed_titles = (
         "Original radiograph",
         "Trained model CAM",
-        "Xavier-randomized CAM",
         "Pixel-shuffled input",
-        "Trained model CAM\non shuffled pixels",
+        "CAM on shuffled pixels",
     )
     detector_titles = {"faster_rcnn": "Faster R-CNN", "yolo11s": "YOLO11s"}
     for row_number, (detector, case) in enumerate(rows):
@@ -1168,15 +1620,48 @@ def _write_panel(
         shuffled = rendered["shuffled_image"]
         axes[row_number, 0].imshow(original, cmap="gray")
         _overlay(axes[row_number, 1], original, rendered["trained"], config)
-        _overlay(axes[row_number, 2], original, rendered["parameter_randomized"], config)
-        axes[row_number, 3].imshow(shuffled, cmap="gray")
-        _overlay(axes[row_number, 4], shuffled, rendered["data_randomized"], config)
-        parameter_correlation = correlation_lookup[(detector, "parameter_randomization", image_id)]
-        data_correlation = correlation_lookup[(detector, "data_randomization", image_id)]
-        parameter_text = "NA" if parameter_correlation is None else f"{parameter_correlation:.3f}"
-        data_text = "NA" if data_correlation is None else f"{data_correlation:.3f}"
-        axes[row_number, 2].set_title(f"r = {parameter_text}", fontsize=9)
-        axes[row_number, 4].set_title(f"r = {data_text}", fontsize=9)
+        axes[row_number, 2].imshow(shuffled, cmap="gray")
+        _overlay(axes[row_number, 3], shuffled, rendered["input_pixel_randomized"], config)
+        input_record = similarity_lookup[
+            (detector, "input_pixel_randomization_control", 0, image_id)
+        ]
+        input_text = (
+            "NA"
+            if not input_record["similarity_valid"]
+            else f"rho={input_record['spearman_correlation']:.2f}\nSSIM={input_record['ssim']:.2f}"
+        )
+        axes[row_number, 3].text(
+            0.02,
+            0.02,
+            input_text,
+            transform=axes[row_number, 3].transAxes,
+            fontsize=7,
+            color="white",
+            bbox={"facecolor": "black", "alpha": 0.65, "pad": 2},
+        )
+        for stage_index, group in enumerate(detector_groups[detector].groups, start=1):
+            axis = axes[row_number, 3 + stage_index]
+            _overlay(axis, original, rendered["cascading"][group.name], config)
+            stage_record = similarity_lookup[
+                (detector, "cascading_model_parameter_randomization", stage_index, image_id)
+            ]
+            metric_text = (
+                f"{group.name}\nNA"
+                if not stage_record["similarity_valid"]
+                else (
+                    f"{group.name}\nrho={stage_record['spearman_correlation']:.2f} "
+                    f"SSIM={stage_record['ssim']:.2f}"
+                )
+            )
+            axis.text(
+                0.02,
+                0.02,
+                metric_text,
+                transform=axis.transAxes,
+                fontsize=6,
+                color="white",
+                bbox={"facecolor": "black", "alpha": 0.65, "pad": 2},
+            )
         axes[row_number, 0].set_ylabel(
             f"{detector_titles[detector]}\n{case['study_stratum']}",
             fontsize=9,
@@ -1184,28 +1669,14 @@ def _write_panel(
         for column_number, axis in enumerate(axes[row_number]):
             axis.set_xticks([])
             axis.set_yticks([])
-            if row_number == 0 and column_number not in {2, 4}:
-                axis.set_title(column_titles[column_number], fontsize=10)
-    axes[0, 2].text(
-        0.5,
-        1.12,
-        column_titles[2],
-        transform=axes[0, 2].transAxes,
-        ha="center",
-        va="bottom",
-        fontsize=10,
-    )
-    axes[0, 4].text(
-        0.5,
-        1.12,
-        column_titles[4],
-        transform=axes[0, 4].transAxes,
-        ha="center",
-        va="bottom",
-        fontsize=10,
-    )
+            if row_number == 0:
+                if column_number < len(fixed_titles):
+                    title = fixed_titles[column_number]
+                else:
+                    title = f"Cascade {column_number - len(fixed_titles) + 1}"
+                axis.set_title(title.replace("_", " "), fontsize=8)
     figure.suptitle(
-        "Grad-CAM sanity checks (cyan: differentiated candidate box)",
+        "Grad-CAM v2 controls: input-pixel perturbation and cumulative parameter randomization",
         fontsize=14,
     )
     figure.tight_layout(rect=(0, 0, 1, 0.98))
@@ -1231,12 +1702,16 @@ def _source_identity(config: XaiSanityConfig) -> dict[str, str]:
 
 
 def run_sanity_checks(config: XaiSanityConfig) -> dict[str, Any]:
-    """Execute both sanity tests for both seed-17 detector checkpoints."""
+    """Execute v2 controls for both seed-17 detector checkpoints."""
 
     from src.utils.seed import initialize_reproducibility, seed_everything
 
     initialize_reproducibility(config.seed, config.resolve(config.outputs.log_dir))
     prepared = _prepare_sanity(config)
+    phase7_prepared = prepared["phase7_prepared"]
+    phase6 = phase7_prepared["phase6"]
+    checkpoint_paths = {item.detector: phase6.resolve(item.checkpoint) for item in phase6.detectors}
+    checkpoints_before = checkpoint_hashes(checkpoint_paths)
     panel_cases = select_panel_cases(
         prepared["selected_rows"],
         id_column=config.sampling.id_column,
@@ -1245,7 +1720,7 @@ def run_sanity_checks(config: XaiSanityConfig) -> dict[str, Any]:
     panel_names = {item["image_id"] for item in panel_cases}
     records: list[dict[str, Any]] = []
     panel_maps: dict[tuple[DetectorName, str], dict[str, Any]] = {}
-    initialization: dict[str, Any] = {}
+    cascade_audits: dict[str, Any] = {}
     for detector in DETECTORS:
         seed_everything(config.seed)
         detector_rows, detector_panel, audit = _run_detector(
@@ -1256,14 +1731,24 @@ def run_sanity_checks(config: XaiSanityConfig) -> dict[str, Any]:
         )
         records.extend(detector_rows)
         panel_maps.update(detector_panel)
-        initialization[detector] = audit
-    records.sort(key=lambda item: (item["detector"], item["test"], item["image_id"]))
-    if len(records) != config.sampling.size * len(DETECTORS) * 2:
-        raise AssertionError("Batch 21 detector/test/image grid is incomplete")
+        cascade_audits[detector] = audit
+    records.sort(
+        key=lambda item: (
+            item["detector"],
+            item["control"],
+            int(item["cascade_stage_index"]),
+            item["image_id"],
+        )
+    )
+    condition_count = sum(
+        1 + len(config.cascading_model_parameter_randomization.layer_groups(detector).groups)
+        for detector in DETECTORS
+    )
+    if len(records) != config.sampling.size * condition_count:
+        raise AssertionError("Batch 31 detector/control/stage/image grid is incomplete")
     aggregate = aggregate_sanity(
         records,
         sampling_audit=prepared["sampling_audit"],
-        failure_threshold=config.correlation.sanity_failure_threshold,
     )
     detail_path = _atomic_csv(
         config.resolve(config.outputs.detail_table),
@@ -1282,53 +1767,65 @@ def run_sanity_checks(config: XaiSanityConfig) -> dict[str, Any]:
         panel_maps=panel_maps,
         records=records,
     )
+    checkpoints_after = checkpoint_hashes(checkpoint_paths)
+    assert_checkpoint_immutability(checkpoints_before, checkpoints_after)
     phase7: ExplainabilityConfig = prepared["phase7"]
-    phase7_prepared = prepared["phase7_prepared"]
-    phase6 = phase7_prepared["phase6"]
-    checkpoints = {
-        item.detector: sha256_file(phase6.resolve(item.checkpoint)) for item in phase6.detectors
-    }
     artifacts = {
-        "subset_manifest": config.resolve(config.sampling.output_manifest).as_posix(),
+        "subset_manifest": _portable_path(config, config.resolve(config.sampling.output_manifest)),
         "subset_manifest_sha256": sha256_file(config.resolve(config.sampling.output_manifest)),
-        "detail_table": detail_path.as_posix(),
+        "detail_table": _portable_path(config, detail_path),
         "detail_table_sha256": sha256_file(detail_path),
-        "summary_table": summary_path.as_posix(),
+        "summary_table": _portable_path(config, summary_path),
         "summary_table_sha256": sha256_file(summary_path),
-        "panel_figure": figure_path.as_posix(),
+        "panel_figure": _portable_path(config, figure_path),
         "panel_figure_sha256": sha256_file(figure_path),
     }
     summary = {
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "complete",
         "experiment_id": config.experiment_id,
         "seed_scope": {
             "training_seed": config.seed,
             "scope": "primary checkpoint only for both detectors",
         },
-        "config_path": config.source_path.as_posix(),
+        "config_path": _portable_path(config, config.source_path),
         "config_sha256": sha256_file(config.source_path),
         "source_identity": _source_identity(config),
         "phase7_provenance": {
-            "config_path": phase7.source_path.as_posix(),
+            "config_path": _portable_path(config, phase7.source_path),
             "config_sha256": sha256_file(phase7.source_path),
-            "summary_path": prepared["phase7_summary_path"].as_posix(),
+            "summary_path": _portable_path(config, prepared["phase7_summary_path"]),
             "summary_sha256": sha256_file(prepared["phase7_summary_path"]),
             "target_layers": [item.model_dump(mode="json") for item in phase7.detectors],
         },
-        "checkpoints": checkpoints,
+        "checkpoints": checkpoints_before,
+        "checkpoint_immutability": {
+            "before": checkpoints_before,
+            "after": checkpoints_after,
+            "verified": True,
+            "mutation_scope": "in_memory_deep_copies_only",
+        },
         "sampling": prepared["sampling_audit"],
         "target": config.target.model_dump(mode="json"),
-        "parameter_randomization": {
-            **config.parameter_randomization.model_dump(mode="json"),
-            "per_detector_initialization": initialization,
+        "cascading_model_parameter_randomization": {
+            **config.cascading_model_parameter_randomization.model_dump(mode="json"),
+            "per_detector_audit": cascade_audits,
         },
-        "data_randomization": config.data_randomization.model_dump(mode="json"),
-        "correlation": {
-            **config.correlation.model_dump(mode="json"),
-            "formula": "C_sanity = (1/K) * sum_k Corr(M_trained[k], M_randomized[k])",
-            "k_definition": "image pairs with two valid, nonconstant heatmaps",
+        "input_pixel_randomization_control": config.input_pixel_randomization_control.model_dump(
+            mode="json"
+        ),
+        "claim_boundaries": config.claim_boundaries.model_dump(mode="json"),
+        "similarity": {
+            **config.similarity.model_dump(mode="json"),
+            "pearson": "linear correlation of normalized evaluation-grid values",
+            "spearman": "Pearson correlation of average ranks on normalized evaluation-grid values",
+            "ssim": "mean Gaussian-window structural similarity with data_range=1",
+            "k_definition": "pairs with two finite, nonconstant maps after preprocessing",
+            "degenerate_map_handling": (
+                "exclude from every metric and report the shared failure count"
+            ),
         },
+        "historical_batch21_artifacts": _historical_artifact_identity(config),
         "aggregate": aggregate,
         "per_image": records,
         "qualitative_selection": {
@@ -1338,7 +1835,7 @@ def run_sanity_checks(config: XaiSanityConfig) -> dict[str, Any]:
         "artifacts": artifacts,
     }
     machine_summary_path = _atomic_json(config.resolve(config.outputs.summary_json), summary)
-    artifacts["summary_json"] = machine_summary_path.as_posix()
+    artifacts["summary_json"] = _portable_path(config, machine_summary_path)
     artifacts["summary_json_sha256"] = sha256_file(machine_summary_path)
     return {"summary": summary, "artifacts": artifacts}
 

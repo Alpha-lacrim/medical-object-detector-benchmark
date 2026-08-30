@@ -1,5 +1,5 @@
-schema_version: 1
-experiment_id: rsna-phase21-gradcam-sanity
+schema_version: 2
+experiment_id: rsna-phase31-gradcam-sanity-v2
 seed: 17
 
 phase7_config: configs/explainability.yaml
@@ -7,7 +7,7 @@ phase7_summary: results/logs/phase7_explainability/summary.json
 
 sampling:
   source_pool_manifest: data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv
-  output_manifest: results/logs/phase21_xai_sanity/subset_manifest.csv
+  output_manifest: results/logs/phase31_xai_sanity_v2/subset_manifest.csv
   size: 50
   id_column: processed_file
   patient_column: nih_patient_id
@@ -22,27 +22,88 @@ target:
   faster_rcnn_region_scoring: fixed_roi_classifier
   yolo11s_region_scoring: closest_raw_anchor_center
 
-parameter_randomization:
-  copy_method: deep_copy_trained_model
-  weight_initialization: xavier_normal
-  one_dimensional_weight_view: row_vector
-  bias_initialization: zeros
-  preserve_non_weight_non_bias_buffers: true
-  autocast: disabled_for_randomized_weight_numerical_validity
-  gain: 1.0
-  seed: 17
+cascading_model_parameter_randomization:
+  order: detector_output_to_input
+  cumulative: true
+  initialization:
+    copy_method: deep_copy_trained_model
+    weight_initialization: xavier_normal
+    one_dimensional_weight_view: row_vector
+    bias_initialization: zeros
+    preserve_non_weight_non_bias_buffers: true
+    autocast: disabled_for_randomized_weight_numerical_validity
+    gain: 1.0
+    seed: 17
+    rng_reset_per_cumulative_stage: true
+  detectors:
+    - detector: faster_rcnn
+      groups:
+        - name: detector_output_heads
+          description: RPN objectness/box-regression head plus final ROI class/box predictor.
+          module_prefixes: [rpn.head, roi_heads.box_predictor]
+        - name: roi_and_pyramid_heads
+          description: ROI representation head and feature-pyramid lateral/output convolutions.
+          module_prefixes: [roi_heads.box_head, backbone.fpn]
+        - name: backbone_layer4
+          description: Deepest ResNet-50 residual stage (C5).
+          module_prefixes: [backbone.body.layer4]
+        - name: backbone_layer3
+          description: ResNet-50 C4 stage that emits the audited Grad-CAM activation.
+          module_prefixes: [backbone.body.layer3]
+        - name: backbone_layer2
+          description: ResNet-50 C3 residual stage.
+          module_prefixes: [backbone.body.layer2]
+        - name: backbone_early
+          description: ResNet-50 C2 stage and convolution/batch-normalization stem.
+          module_prefixes: [backbone.body.layer1, backbone.body.conv1, backbone.body.bn1]
+    - detector: yolo11s
+      groups:
+        - name: detect_output_head
+          description: YOLO11 Detect module, including box-distribution and class-output branches.
+          module_prefixes: [model.23]
+        - name: pan_deep_neck
+          description: Lower-resolution PAN downsampling and fusion blocks.
+          module_prefixes: [model.17, model.19, model.20, model.22]
+        - name: pan_shallow_neck
+          description: Upsampling and high-resolution PAN fusion blocks.
+          module_prefixes: [model.13, model.16]
+        - name: backbone_deep
+          description: Deep backbone blocks from the stride-32 stage through attention/SPPF.
+          module_prefixes: [model.7, model.8, model.9, model.10]
+        - name: backbone_target_stage
+          description: Stride-16 transition and P4 block that emits the audited Grad-CAM activation.
+          module_prefixes: [model.5, model.6]
+        - name: backbone_early
+          description: YOLO11 input stem and stride-4/stride-8 backbone blocks.
+          module_prefixes: [model.0, model.1, model.2, model.3, model.4]
 
-data_randomization:
+input_pixel_randomization_control:
   method: spatial_pixel_vector_permutation_without_replacement
   seed_derivation: sha256_global_seed_and_image_id
   seed: 31017
+  interpretation: input_perturbation_stress_control_only
 
-correlation:
-  method: pearson
+similarity:
+  methods: [pearson, spearman, ssim]
   population: valid_nonconstant_paired_maps
+  preprocessing: bilinear_resize_then_independent_minmax_0_1
+  evaluation_size: 40
   zero_energy_policy: exclude_and_report
-  sanity_failure_threshold: 0.5
   epsilon: 1.0e-12
+  ssim_gaussian_sigma: 1.5
+  ssim_k1: 0.01
+  ssim_k2: 0.03
+
+claim_boundaries:
+  adebayo_training_data_randomization: not_performed
+  reason: requires_retraining_on_randomized_training_annotations_and_fit_verification
+  parameter_control_interpretation: parameter_sensitivity_only
+
+historical_artifacts:
+  summary_table: results/tables/gradcam_sanity_summary.csv
+  detail_table: results/tables/gradcam_sanity_per_image.csv
+  panel_figure: results/figures/gradcam_sanity_panel.png
+  summary_json: results/logs/phase21_xai_sanity/summary.json
 
 runtime:
   device: cuda
@@ -55,13 +116,13 @@ panel:
   colormap: inferno
   candidate_color: cyan
   line_width: 1.5
-  width_inches: 17.5
+  width_inches: 30.0
   row_height_inches: 3.1
   dpi: 180
 
 outputs:
-  log_dir: results/logs/phase21_xai_sanity
-  summary_json: results/logs/phase21_xai_sanity/summary.json
-  detail_table: results/tables/gradcam_sanity_per_image.csv
-  summary_table: results/tables/gradcam_sanity_summary.csv
-  panel_figure: results/figures/gradcam_sanity_panel.png
+  log_dir: results/logs/phase31_xai_sanity_v2
+  summary_json: results/logs/phase31_xai_sanity_v2/summary.json
+  detail_table: results/tables/gradcam_sanity_v2_per_image.csv
+  summary_table: results/tables/gradcam_sanity_v2_summary.csv
+  panel_figure: results/figures/gradcam_sanity_v2_panel.png

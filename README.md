@@ -5,11 +5,24 @@ RSNA Pneumonia Detection Challenge. It measures clean detection performance,
 compute, common-corruption robustness, Grad-CAM localization, and paired
 statistical uncertainty under one patient-safe data and evaluation protocol.
 
-The project is complete. The 12-section study is in
-[`report/report.md`](report/report.md), the consolidated scope statement is in
-[`docs/LIMITATIONS.md`](docs/LIMITATIONS.md), and the exact generated evidence
-is under [`results/`](results/). This is a retrospective benchmark, not a
-clinical device or diagnostic system.
+The project is complete. This is a retrospective benchmark, not a clinical
+device or diagnostic system.
+
+## Canonical document hierarchy
+
+| Location | Canonical role |
+|---|---|
+| [`report/paper_draft.md`](report/paper_draft.md) | **Current manuscript.** Reporting audits, hypothesis links, and submission preparation must be assessed against this file. |
+| [`report/report.md`](report/report.md) | **Historical/full technical report.** It is preserved as a detailed project record and is not the current paper. Do not rewrite it merely to mirror the manuscript. |
+| [`docs/`](docs/) | **Analysis, methodology, decision, and audit record.** These files explain provenance and scope but do not replace the manuscript. |
+| [`results/`](results/) | **Numerical source of truth.** Manuscript prose and tables are rounded views of these generated artifacts. |
+
+The consolidated scope statement is
+[`docs/LIMITATIONS.md`](docs/LIMITATIONS.md), and the current reporting,
+hypothesis, citation, and author-declaration audits are indexed from
+[`docs/REPORTING_CHECKLIST.md`](docs/REPORTING_CHECKLIST.md). If prose and a
+generated result disagree, resolve the discrepancy from `results/` rather than
+treating either report document as a numerical source.
 
 ## Headline result
 
@@ -320,19 +333,23 @@ scenario-conditional interpretation are in `docs/PARETO_ANALYSIS.md`.
 This CPU-only analysis reads all ten frozen Phase 5 prediction bundles. It
 matches every detection retained at the 0.001 bundle floor through the canonical
 IoU-0.50 matcher and computes the full box-sensitive Detection Expected
-Calibration Error over confidence, relative center, width, and height. It does
-not fit a calibrator, load checkpoints, run inference, or train a model:
+Calibration Error over confidence, relative center, width, and height. Class is
+a categorical stratum. The run also records per-run cell support/occupancy and
+executes the predeclared bin/minimum-cell and confidence-floor sensitivity grid.
+It does not fit a calibrator, load checkpoints, run inference, or train a model:
 
 ```powershell
 & $benchmarkPython -m src.stats.calibration --config configs/calibration.yaml --mode preflight
 & $benchmarkPython -m src.stats.calibration --config configs/calibration.yaml --mode run
 ```
 
-The run regenerates `results/tables/calibration_summary.csv`,
-`results/figures/reliability_diagrams.png`, and the exact provenance record at
-`results/logs/phase18_calibration/summary.json`. Definitions, the five-seed
-finding, and the distinction from threshold selectivity are in
-`docs/CALIBRATION_ANALYSIS.md`.
+The run regenerates the versioned `calibration_summary_v2.csv`,
+`calibration_support_v2.csv`, and `calibration_sensitivity_v2.csv` tables; the
+confidence-only marginal reliability, support/occupancy, binning/support, and
+floor-sensitivity v2 figures; and exact provenance at
+`results/logs/phase33_calibration_support_v2/summary.json`. Definitions,
+descriptive findings, population limits, and the separation from exam-level
+probability calibration/DCA are in `docs/CALIBRATION_ANALYSIS.md`.
 
 ### 5f. Run recall-weighted F-beta threshold sensitivity
 
@@ -425,29 +442,47 @@ This regenerates the report Section 8 evidence:
 - `results/figures/robustness_map_50_95_relative.png` (report Figure 6); and
 - `results/logs/phase6_robustness/summary.json` plus 72 prediction bundles.
 
-## 6a. Run the raw-radiography acquisition-shift analysis
+## 6a. Audit the radiography-motivated synthetic acquisition/display analysis
 
-This checkpoint-only extension reuses the frozen 300-image robustness sample
-and both seed-17 checkpoints. Preflight directly verifies all ignored raw DICOM
-files, their metadata contract, and exact pixel equivalence between clean raw
-reconversion and the canonical PNGs before any GPU work. The full run applies
-standard DICOM `LINEAR` VOI Window Center/Width alternatives,
-signal-dependent Poisson count noise, and finite Gaussian detector/processing
-blur kernels before the shared per-image min-max scaler.
+Batch 32 reuses the frozen 300-image robustness sample and the historical
+Batch 22 predictions without GPU inference. Every sampled object is a lossy,
+workstation-converted Secondary Capture object (`ConversionType=WSD`), despite
+recording `Modality=CR`. Pixel Intensity Relationship/Sign, Modality LUT or
+Rescale, and VOI fields are absent in all 300 headers. The stored values
+therefore do not establish an approximately linear X-ray-signal scale.
+
+The four DICOM `LINEAR` Window Center/Width conditions are class-A display
+transform sensitivities. The signal-dependent Poisson-like conditions are
+physically unsupported as dose/quantum-noise proxies for these values and are
+retained only as class-B generic intensity perturbations. Gaussian kernels are
+class-C spatial-resolution-motivated blur proxies, not scanner- or
+reconstruction-specific models. The audit also measures every perturbation
+before and after canonical per-image min-max scaling. `DSI = 1 - shifted /
+clean` remains a descriptive performance-retention/domain-sensitivity index,
+not an estimate of inter-site transportability.
 
 ```powershell
 & $benchmarkPython -m pytest tests/test_radiography_shifts.py tests/test_prepare.py -q
 & $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode preflight
-& $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode smoke
-& $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode run
+& $benchmarkPython -m src.robustness.radiography_shifts --config configs/acquisition_shifts.yaml --mode audit
 ```
 
-This generates:
+This CPU-only audit generates:
 
-- `results/tables/acquisition_shift_results.csv`, including clean and shifted
-  performance plus `DSI = 1 - shifted / clean` for all seven unified metrics;
-- `results/logs/phase22_acquisition_shifts/summary.json`; and
-- 20 resumable, hash-bound prediction bundles.
+- `results/tables/acquisition_shift_dicom_metadata_audit.csv`, one row per
+  sampled image with field-level missingness;
+- `results/tables/acquisition_shift_preprocessing_per_image.csv` and
+  `acquisition_shift_preprocessing_summary.csv`, with pre/post-min-max
+  perturbation diagnostics;
+- `results/tables/radiography_synthetic_shift_results.csv`, which relabels the
+  unchanged historical detector results under the corrected scientific scope;
+  and
+- `results/logs/phase32_acquisition_shift_audit/summary.json`, including hashes
+  of all audit products and the 20 unchanged historical prediction bundles.
+
+The original `acquisition_shift_results.csv`, Phase 22 summary, and prediction
+bundles remain preserved as superseded historical evidence. Re-running
+`--mode smoke` or `--mode run` is unnecessary for this correction.
 
 The method, findings, metadata constraints, and explicit distinction from the
 post-conversion digital corruption grid are documented in
@@ -479,13 +514,16 @@ This regenerates the report Section 9 evidence:
 - `results/figures/gradcam_failure_cases.png` (report Figure 9); and
 - `results/logs/phase7_explainability/summary.json`.
 
-## 7a. Run the Grad-CAM sanity checks
+## 7a. Run the Grad-CAM sensitivity controls
 
 This checkpoint-only extension selects 50 images from the already-frozen
-robustness manifest, then compares trained maps with maps after Xavier weight
-randomization and deterministic within-image pixel shuffling. It performs no
-training. Preflight validates the Phase 6/7 provenance and materializes the
-nested 50-image manifest before CUDA is initialized.
+robustness manifest, then compares trained maps with six detector-specific,
+cumulative head-to-input model-parameter randomization stages and a
+deterministic within-image pixel-vector permutation. The latter is an
+input-pixel perturbation control, not Adebayo training-label data
+randomization. That randomized-label retraining experiment was not performed.
+Preflight validates Phase 6/7 provenance and the historical artifact hashes
+before CUDA is initialized; the run also verifies checkpoint immutability.
 
 ```powershell
 & $benchmarkPython -m pytest tests/test_xai_sanity.py tests/test_gradcam.py tests/test_explainability.py -q
@@ -495,10 +533,14 @@ nested 50-image manifest before CUDA is initialized.
 
 This generates:
 
-- `results/tables/gradcam_sanity_summary.csv`;
-- `results/tables/gradcam_sanity_per_image.csv`;
-- `results/figures/gradcam_sanity_panel.png`; and
-- `results/logs/phase21_xai_sanity/summary.json` plus the nested-subset manifest.
+- `results/tables/gradcam_sanity_v2_summary.csv`;
+- `results/tables/gradcam_sanity_v2_per_image.csv`;
+- `results/figures/gradcam_sanity_v2_panel.png`; and
+- `results/logs/phase31_xai_sanity_v2/summary.json` plus the nested-subset manifest.
+
+The unversioned Batch 21 table/detail/panel and Phase 21 summary remain frozen
+historical artifacts. Their legacy `data_randomization` label means the
+input-pixel control only.
 
 The method, denominators, zero-map failures, and interpretation are documented
 in [`docs/XAI_SANITY.md`](docs/XAI_SANITY.md).
@@ -573,14 +615,14 @@ includes every executable analysis module added in Batches 18--23.
 | Paper §4.2 validation-selected operating points (frozen n=3) | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
 | Paper §4.2 FROC evidence (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
 | Paper §4.5 Pareto evidence (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
-| Paper §4.4 five-seed detection calibration (Batch 18) | `calibration_summary.csv`; `reliability_diagrams.png`; Phase 18 summary | offline `src.stats.calibration --mode run` in §5e |
+| Paper §4.4 five-seed detection calibration and support sensitivity (Batch 33 v2) | `calibration_summary_v2.csv`; `calibration_support_v2.csv`; `calibration_sensitivity_v2.csv`; four v2 figures; Phase 33 summary | offline `src.stats.calibration --mode run` in §5e |
 | Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Supplementary non-standard raw-score utility audit (Batch 30) | `raw_score_threshold_utility_summary.csv`; `raw_score_threshold_utility_sensitivity.png`; Phase 30 summary; exact pre-Batch-30 archives | offline `src.clinical.raw_score_utility --mode run` in §5g |
 | Paper Figure 1 seed-level predictive/compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
 | Paper §4.6; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
-| Paper §4.7 acquisition-shift sensitivity (Batch 22) | `acquisition_shift_results.csv`; 20 prediction bundles; Phase 22 summary | checkpoint-only `src.robustness.radiography_shifts --mode run` in §6a |
+| Paper §4.7 radiography-motivated synthetic acquisition/display sensitivity (Batch 32) | per-image DICOM audit; pre/post-min-max diagnostics; `radiography_synthetic_shift_results.csv`; Phase 32 summary; unchanged historical bundles | CPU-only `src.robustness.radiography_shifts --mode audit` in §6a |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
-| Paper §4.8 Grad-CAM parameter/data sanity checks (Batch 21) | `gradcam_sanity*.csv`; `gradcam_sanity_panel.png`; Phase 21 summary | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
+| Paper §4.8 Grad-CAM v2 parameter cascade and input-pixel control (Batch 31) | `gradcam_sanity_v2*.csv`; `gradcam_sanity_v2_panel.png`; Phase 31 summary; frozen Batch 21 artifacts | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
 | Paper §4.9; report Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
 | Frozen seed-17 corruption inference | `statistical_robustness_comparison.csv` | prior full-scope statistics `--mode run` after §6; not rerun for n=5 |
 

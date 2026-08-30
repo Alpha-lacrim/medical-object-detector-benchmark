@@ -61,10 +61,14 @@ part of the evidence and must travel with any reused number.
 
 ## S4. Calibration and exploratory raw-score utility
 
-- [Five-seed D-ECE table](../results/tables/calibration_summary.csv) and
-  [reliability diagrams](../results/figures/reliability_diagrams.png) describe
-  calibration of emitted detections at the 0.001 bundle floor; they do not fit
-  a calibrator or estimate missed-target or clinical-risk calibration.
+- The versioned [five-seed D-ECE table](../results/tables/calibration_summary_v2.csv),
+  [cell-support table](../results/tables/calibration_support_v2.csv),
+  [predeclared sensitivity grid](../results/tables/calibration_sensitivity_v2.csv),
+  and [confidence-only marginal reliability diagrams](../results/figures/reliability_diagrams_confidence_marginal_v2.png)
+  describe emitted detections at the 0.001 bundle floor. The 1-D diagram is not
+  a visualization of all five D-ECE dimensions. These outputs do not fit a
+  calibrator or estimate missed-target, exam-level, or clinical-risk
+  calibration.
 - The historical Batch 20 calculation is retained only as an explicitly
   **non-standard raw-score threshold utility/sensitivity** analysis. The
   [relabeled table](../results/tables/raw_score_threshold_utility_summary.csv),
@@ -89,11 +93,19 @@ part of the evidence and must travel with any reused number.
   contain the full 497-row inferential grid. Superseded image-level results are
   retained only in the explicitly named
   [audit archive](../results/tables/statistical_robustness_comparison_image_level_archive.csv).
-- [Acquisition-shift results](../results/tables/acquisition_shift_results.csv)
-  contain 20 detector/condition rows and all seven metric-specific degradation
-  sensitivity indices. [Method and scope](ACQUISITION_SHIFTS.md) distinguish
-  this raw-array, acquisition-motivated sensitivity analysis from the generic
-  post-conversion digital-corruption benchmark.
+- [Reclassified synthetic-shift results](../results/tables/radiography_synthetic_shift_results.csv)
+  contain 20 unchanged detector/condition results and all seven descriptive
+  performance-retention/domain-sensitivity indices under corrected labels.
+  The [per-image DICOM audit](../results/tables/acquisition_shift_dicom_metadata_audit.csv)
+  and [preprocessing summary](../results/tables/acquisition_shift_preprocessing_summary.csv)
+  show that all 300 inputs are lossy, workstation-converted Secondary Capture
+  objects and quantify which perturbations canonical per-image min-max scaling
+  cancels or re-stretches. [Method and scope](ACQUISITION_SHIFTS.md) classify
+  each transform separately and exclude dose simulation, scanner-specific
+  modeling, clinical robustness, and inter-site transportability claims. The
+  original `acquisition_shift_results.csv` and Phase 22 bundles are retained as
+  superseded historical evidence; the CPU-only correction is hash-bound in the
+  [Phase 32 summary](../results/logs/phase32_acquisition_shift_audit/summary.json).
 
 ## S6. Explainability and sanity evidence
 
@@ -101,11 +113,13 @@ part of the evidence and must travel with any reused number.
   [aggregate localization](../results/tables/gradcam_localization_summary.csv),
   and [qualitative case manifest](../results/tables/gradcam_qualitative_cases.csv)
   preserve all target-level and selected-case evidence.
-- [Per-image sanity results](../results/tables/gradcam_sanity_per_image.csv),
-  [sanity summary](../results/tables/gradcam_sanity_summary.csv), and
-  [panel](../results/figures/gradcam_sanity_panel.png) document the nested
-  50-image parameter- and data-randomization checks and explicit invalid-map
-  denominators.
+- [Per-image v2 control results](../results/tables/gradcam_sanity_v2_per_image.csv),
+  [v2 summary](../results/tables/gradcam_sanity_v2_summary.csv), and
+  [v2 panel](../results/figures/gradcam_sanity_v2_panel.png) document the nested
+  50-image six-stage model-parameter cascade, input-pixel perturbation control,
+  Pearson/Spearman/SSIM metrics, and invalid-map denominators. The unversioned
+  Batch 21 files remain historical; their legacy `data_randomization` label
+  denotes input-pixel shuffling, not randomized-label training.
 
 ## S7. Statistical evidence and archives
 

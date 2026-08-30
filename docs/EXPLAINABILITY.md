@@ -57,7 +57,9 @@ metric denominator. YOLO11s had no zero maps.
 | Faster R-CNN | 110 / 111 | 0.0869 | 0.0713 | +0.0156 | 0.1091 |
 | YOLO11s | 111 / 111 | 0.0975 | 0.0718 | +0.0257 | 0.1261 |
 
-The image-macro mean energy scores are 0.0896 for Faster R-CNN and 0.0940 for
+These are small absolute overlaps. Exceeding the box-area reference by 0.0156
+or 0.0257 does not constitute strong localization, and no inferential analysis
+tests either lift. The image-macro mean energy scores are 0.0896 for Faster R-CNN and 0.0940 for
 YOLO11s. On the 110 targets with valid maps from both models, YOLO has higher
 energy in 76 and Faster R-CNN in 34; mean Faster-minus-YOLO energy is -0.0091
 and the median difference is -0.0240. Paired pointing outcomes are: 1 both hit,
@@ -118,11 +120,16 @@ ROI Align backward is not bitwise deterministic; the run uses the project's
 seeded deterministic-warn-only policy and records its environment, but Faster
 R-CNN CAM bytes are not guaranteed identical across hardware/library reruns.
 
-The checkpoint-only [Grad-CAM sanity extension](XAI_SANITY.md) subsequently
-found near-zero trained-versus-randomized map correlations for both detectors
-under parameter and pixel randomization. That supports parameter/input
-sensitivity but does not alter the weak-localization result or turn any map
-into evidence of clinical reasoning.
+The checkpoint-only [v2 Grad-CAM control analysis](XAI_SANITY.md) subsequently
+added detector-specific, head-to-backbone cascading model-parameter
+randomization and Pearson, Spearman, and SSIM comparisons on normalized maps.
+Low similarity after the full-model stages supports parameter sensitivity only.
+The retained pixel shuffle is explicitly an input-pixel perturbation control,
+not the Adebayo training-label data-randomization test; randomized-label
+retraining was not performed. Neither control alters the weak-localization
+result or turns any map into evidence of anatomical correctness, causal
+faithfulness, clinical reasoning, or dependence on the learned data-label
+relationship.
 
 ## Reproduction
 

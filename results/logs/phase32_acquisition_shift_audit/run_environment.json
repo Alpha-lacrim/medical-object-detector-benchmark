@@ -1,0 +1,52 @@
+{
+  "captured_at_utc": "2026-08-30T13:17:06.945597+00:00",
+  "determinism_notes": [
+    "PYTHONHASHSEED affects hashing only in subsequently started interpreters.",
+    "Unsupported deterministic PyTorch operations emit warnings and must be recorded with the affected run."
+  ],
+  "nvidia_smi": {
+    "gpus": [
+      {
+        "driver_version": "610.47",
+        "index": 0,
+        "memory_mib": 8188,
+        "name": "NVIDIA GeForce RTX 4060 Laptop GPU"
+      }
+    ],
+    "parse_errors": [],
+    "returncode": 0,
+    "status": "ok",
+    "stderr": ""
+  },
+  "pip_freeze": {
+    "artifact": "pip_freeze.txt",
+    "method": "importlib.metadata",
+    "returncode": 1,
+    "status": "fallback",
+    "stderr": "C:\\Users\\Pouyan\\PycharmProjects\\Uni\\Deep Learning\\DP_Final_Project\\.venv\\Scripts\\python.exe: No module named pip"
+  },
+  "runtime": {
+    "numpy_version": "2.4.4",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python_executable": "C:\\Users\\Pouyan\\PycharmProjects\\Uni\\Deep Learning\\DP_Final_Project\\.venv\\Scripts\\python.exe",
+    "python_version": "3.11.15"
+  },
+  "seed": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_available": false,
+    "deterministic": true,
+    "python_hash_seed_applies_on_restart": true,
+    "seed": 17,
+    "torch_available": true,
+    "warn_only": true
+  },
+  "torch": {
+    "available": true,
+    "cuda_available": false,
+    "cuda_build_version": null,
+    "cudnn_version": null,
+    "device_count": 0,
+    "devices": [],
+    "version": "2.6.0+cpu"
+  }
+}

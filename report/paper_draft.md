@@ -22,16 +22,19 @@ precision, whereas YOLO11s delivered approximately threefold throughput, 78%
 fewer parameters, and about 21-fold fewer registered operations. One YOLO11s
 seed retained plausible average precision but compressed all test scores below
 0.042, exposing recipe-level score instability. Detection-specific calibration
-was also poorer for YOLO11s (mean D-ECE 0.0990 versus 0.0320). Patient-cluster
+was descriptively higher for YOLO11s (mean D-ECE 0.0990 versus 0.0320), with
+sparse-cell and protocol sensitivity reported separately. Patient-cluster
 and independent-run bootstrap intervals remained positive for Faster R-CNN
 recall, F1, and both AP endpoints. The fixed-threshold precision interval
 crossed zero under this primary training-procedure estimand, although a
 secondary permutation test conditional on the observed checkpoints favored
 YOLO11s. Conditional matched-box IoU and Dice were inconclusive.
-Digital and raw-array acquisition-motivated stress tests showed substantial,
-condition-specific degradation in both pipelines. Grad-CAM maps passed basic
-parameter and input randomization checks but localized annotated opacities only
-weakly. These results establish a multi-axis trade-off between two disclosed
+Digital corruptions and radiography-motivated synthetic acquisition/display
+shifts showed condition-specific degradation in both pipelines. Grad-CAM
+controls showed low
+similarity after full model-parameter randomization and severe input-pixel
+perturbation, but maps localized annotated opacities only weakly. These results
+establish a multi-axis trade-off between two disclosed
 pipelines, not a universal detector-family ranking or evidence of clinical
 readiness.
 
@@ -116,8 +119,8 @@ non-maximum suppression. Distributed regression follows the general approach
 introduced with Generalized Focal Loss [@li2020gfl]. Because YOLO11 has no
 standalone peer-reviewed architecture paper, the pinned source release,
 official configuration, and instantiated graph are the implementation
-authority [@ultralytics2024yolo11; @ultralytics2026yoloarchitecture;
-@ultralytics2026yolo11config]. YOLO11s was chosen over a larger model to fit the
+authority [@ultralytics2024yolo11; @ultralytics2026release;
+@ultralytics2026yoloarchitecture; @ultralytics2026yolo11config]. YOLO11s was chosen over a larger model to fit the
 8-GB GPU budget and over the newer NMS-free YOLO26 family to retain closer
 continuity with the medical-detector literature.
 
@@ -165,8 +168,8 @@ under lighting, noise, blur, and compression shifts
 [@michaelis2019detectionrobustness]. The ordered multi-severity principle is
 useful for controlled stress testing, but digital corruptions applied to PNGs
 must not be presented as scanner, acquisition, site, or population shift. We
-therefore analyze post-conversion corruptions and raw-array,
-acquisition-physics-motivated transformations as separate experiments with
+therefore analyze post-conversion corruptions and radiography-motivated
+synthetic acquisition/display transformations as separate experiments with
 different claim boundaries.
 
 Confidence calibration is likewise distinct from threshold selectivity.
@@ -185,8 +188,10 @@ candidate selection and NMS are not themselves explained. Plausible heatmaps
 can persist after model randomization and do not demonstrate causal or
 clinically appropriate reasoning [@adebayo2018sanity; @arun2021saliency]. We
 therefore pair qualitative maps with energy-in-box and pointing-game measures
-[@zhang2016excitation], then test whether maps change after parameter and input
-randomization.
+[@zhang2016excitation], then assess parameter sensitivity with cumulative
+head-to-backbone randomization and response to a separate inference-time
+input-pixel perturbation. Adebayo et al.'s distinct data-randomization test
+permutes training labels and retrains the model; we did not perform that test.
 
 ## 3. Materials and Methods
 
@@ -201,12 +206,20 @@ as the task label because the bounding boxes represent a non-specific
 radiographic finding rather than microbiologically or clinically confirmed
 pneumonia.
 
-Hardware and time constraints motivated a deterministic 5,000-study subset.
-The Kaggle `patientId` identifies an examination rather than a unique person,
-so the official RSNA mapping was used to recover NIH patient keys. A
-seed-17, stratified procedure selected studies from 2,136 patient groups and
-assigned whole groups to train, validation, or test. Patient-key intersections
-among splits were empty.
+Hardware and time constraints motivated a deterministic 5,000-study subset;
+there was no formal statistical sample-size or power calculation. Selection
+used seed 17, SHA-256 ordering, and the three study-level label strata while
+keeping every examination from an NIH patient group together and tracking the
+source-cohort stratum proportions. The remaining 21,684 labeled source studies
+were excluded for compute scope rather than annotation-quality failure. The
+Kaggle `patientId` identifies an examination rather than a unique person, so
+the official RSNA mapping was used to recover NIH patient keys. The selected
+studies came from 2,136 patient groups and were assigned as whole groups to
+train, model-optimization (named `validation` in repository artifacts), or
+internal-testing splits. Patient-key intersections among splits were empty.
+The hardware-driven size improves reproducibility on the stated laptop but
+widens sampling uncertainty and limits generalizability to the complete source
+cohort.
 
 | Split | Radiographs | NIH patient groups | Lung Opacity | No opacity / not normal | Normal | Boxes |
 |---|---:|---:|---:|---:|---:|---:|
@@ -255,15 +268,16 @@ controlled, disclosed pipelines rather than architecture alone. Full optimizer,
 checkpoint, timing-gate, and environment details are delegated to the
 [supplementary implementation record](../docs/SUPPLEMENTARY.md#s8-decisions-limitations-and-reproduction).
 
-### 3.3 Unified held-out evaluation and seed scopes
+### 3.3 Unified internal testing and seed scopes
 
-Checkpoint selection used validation mAP only. After all checkpoints were
-frozen, both adapters emitted original-image `xyxy` boxes, canonical category
-IDs, and scores to one evaluator. It computed official COCO AP at IoU 0.50 and
-averaged from 0.50 to 0.95; global micro precision, recall, and F1 at score
-0.25 and match IoU 0.50; and mean box IoU and Dice over matched true positives.
-Predictions were capped at 100 per image. Conditional IoU and Dice do not
-penalize missed targets and were interpreted jointly with recall.
+Checkpoint selection used model-optimization-split mAP only. After all
+checkpoints were frozen, internal testing used the patient-disjoint test split.
+Both adapters emitted original-image `xyxy` boxes, canonical category IDs, and
+scores to one evaluator. It computed official COCO AP at IoU 0.50 and averaged
+from 0.50 to 0.95 [@lin2014coco]; global micro precision, recall, and F1 at
+score 0.25 and match IoU 0.50; and mean box IoU and Dice over matched true
+positives. Predictions were capped at 100 per image. Conditional IoU and Dice
+do not penalize missed targets and were interpreted jointly with recall.
 
 The evidence has deliberately different scopes:
 
@@ -343,13 +357,17 @@ downstream outcome analysis.
 
 ### 3.6 Detection-specific confidence calibration
 
-Calibration used all post-NMS detections retained at the common 0.001 bundle
-floor. The canonical same-class greedy matcher at IoU 0.50 labeled each
-detection as a matched true positive or false positive. Following Küppers et
-al. [@kuppers2020calibration], confidence, relative center coordinates, width,
-and height formed a five-dimensional vector. Each dimension was partitioned
-into five equal-width bins, and cells with fewer than eight detections were
-excluded. For included cells $b$, D-ECE was
+Calibration used all post-NMS detections retained by score `>= 0.001`. The
+canonical matcher used stable descending-score order, a 100-detection image
+cap, same-class pairing to the highest-IoU currently unmatched target, no
+target reuse, and IoU `>= 0.50`. Following Küppers et al.
+[@kuppers2020calibration], predicted class was a categorical stratum; the
+one-class benchmark therefore had one stratum. Confidence, relative center
+coordinates, width, and height formed the five numeric dimensions. Each was
+partitioned into five equal-width bins. Internal edges entered the upper bin
+and 1.0 entered the final bin. Cells with fewer than eight detections
+contributed zero, while all emitted detections remained in the weighting
+denominator. For supported cells $b$, D-ECE was
 
 $$
 \operatorname{D\text{-}ECE}=
@@ -358,10 +376,18 @@ $$
 \right|.
 $$
 
-This is black-box precision calibration conditional on emitted detections.
-Missed targets have no score and are outside the estimand. No recalibration map
-was fitted, and reliability diagrams were one-dimensional visual summaries;
-the numerical endpoint remained the five-dimensional D-ECE.
+This is black-box detection-confidence calibration conditional on emitted
+detections. A missed ground-truth object has no emitted confidence and is
+outside the estimand. Per run, we reported total detections, 3,125 possible
+cells, occupied and supported cells, supported-detection fraction, and
+supported-cell sizes. A predeclared descriptive grid crossed 3, 5, and 7 bins
+per numeric dimension with minimum-cell sizes 1, 4, 8, and 16; the original
+5-bin/minimum-8 setting remained primary. Confidence-floor sensitivity used
+0.001, 0.005, 0.01, and 0.05. No setting selected a favorable result, no run
+was specially handled, and no recalibration map was fitted. Reliability
+diagrams were confidence-only marginal summaries, not visualizations of all
+five D-ECE dimensions. D-ECE was programmatically separate from exam-level
+outcome-probability calibration required for valid decision-curve analysis.
 
 ### 3.7 Compute and Pareto analysis
 
@@ -379,7 +405,7 @@ FPS, latency, parameters, or estimated GFLOPs. Strict dominance required every
 seed of one detector to be better than every seed of the other on both directed
 axes. Mean-only ordering was insufficient.
 
-### 3.8 Digital and acquisition-motivated robustness
+### 3.8 Digital corruption and radiography-motivated synthetic sensitivity
 
 The fixed robustness sample contained 300 test radiographs from 183 patients:
 68 opacity-positive and 232 negative images with 111 boxes. Proportional
@@ -392,21 +418,35 @@ compression, each at five ordered severities. Performance was reported both
 raw and as clean-relative retention. These were deterministic transformations
 of uint8 PNGs, not acquisition or site-shift simulations.
 
-The separate raw-array study verified that all 300 source DICOMs were 8-bit
-unsigned `CR`/`MONOCHROME2` radiographs without native Window Center/Width, VOI
-LUT, Modality LUT, rescale, pixel-padding, or calibrated exposure metadata.
-Before the shared 8-bit scaler it applied four exact DICOM default-`LINEAR`
-center/width alternatives, three signal-dependent Poisson count conditions,
-and finite 3x3, 5x5, and 9x9 Gaussian kernels. The primary endpoint was
+The separate stored-array study was re-audited against current DICOM PS3.3 and
+PS3.4 [@dicom2026ps33; @dicom2026ps34]. All 300 objects record `Modality=CR`,
+but their SOP Class is Secondary Capture Image Storage; every object is workstation-converted (`WSD`),
+8-bit `MONOCHROME2`, and marked as previously lossily JPEG-compressed. All lack
+Pixel Intensity Relationship/Sign, Presentation Intent Type, Modality
+LUT/rescale, VOI LUT/Window Center/Width, and processing descriptions. The
+stored values therefore cannot be classified as linear or logarithmic in
+incident X-ray signal or reliably inverted to such a scale.
+
+Before the shared 8-bit scaler, four exact DICOM default-`LINEAR` center/width
+alternatives tested display-transform sensitivity (class A). Three
+signal-dependent Poisson-like count conditions were retained only as generic
+intensity perturbations (class B) while classified physically unsupported for
+these values (class D). Finite 3x3, 5x5, and 9x9 Gaussian kernels tested a
+generic blur/spatial-resolution proxy (class C), not a scanner-specific model.
+The primary descriptive endpoint was
 
 $$
 \mathrm{DSI}=1-\frac{\mathrm{performance}_{shifted}}
 {\mathrm{performance}_{clean}},
 $$
 
-using mAP@0.5:0.95. These settings are acquisition-physics-motivated internal
-stress tests, not recovered vendor presets, calibrated dose response, measured
-scanner transfer functions, or clinical robustness.
+using mAP@0.5:0.95. DSI was treated only as a descriptive
+performance-retention/domain-sensitivity index, not an estimator of inter-site
+transportability. Per-image normalized MAE and RMSE were also computed before
+and after min-max scaling to quantify attenuation or amplification by canonical
+preprocessing. These are internal synthetic sensitivities, not recovered vendor
+presets, a dose/quantum-noise or validated low-dose simulation, measured scanner
+transfer functions, or clinical robustness.
 
 ### 3.9 Grad-CAM localization and sanity checks
 
@@ -417,25 +457,35 @@ target was the foreground probability of the low-threshold candidate with
 highest IoU. Operating-point false negatives used an explicitly labeled,
 annotation-guided proxy candidate. CAM energy within the ground-truth rectangle
 and pointing-game accuracy quantified spatial agreement; box-area fraction was
-a no-localization reference.
+a no-localization reference. These localization values are descriptive; no
+inferential analysis tests their difference from the area reference.
 
-The sanity analysis selected a nested, stratified 50-image/41-patient subset.
+The control analysis selected a nested, stratified 50-image/41-patient subset.
 Each trained model's highest-score candidate defined a fixed reference region.
-Parameter randomization reinitialized every weight with seeded Xavier-normal
-values and set biases to zero. Data randomization permuted RGB pixel vectors
-over spatial positions while preserving their multiset and supplying identical
-shuffled pixels to both detectors. Both tests used a fixed-region,
+Cascading model-parameter randomization started with detector output heads and
+cumulatively added neck and progressively earlier backbone groups in six
+detector-specific stages. Each stage used a fresh in-memory model copy, seeded
+Xavier-normal weights, zero biases, and preserved other buffers; the sixth
+stage was a full model-parameter randomization control. The separate
+input-pixel randomization control permuted RGB pixel vectors over spatial
+positions while preserving their multiset and supplying identical shuffled
+pixels to both trained detectors. Both controls used a fixed-region,
 pre-activation foreground target to avoid requiring a fully randomized
 proposal generator to emit valid post-NMS geometry. This target differs from
-the primary Grad-CAM estimand. Mean full-resolution Pearson correlation between
-trained and randomized maps was $C_{sanity}$; correlations at least 0.50 were
-predeclared descriptive failures. Zero, constant, non-finite, or failed maps
-were excluded and counted, not imputed.
+the primary Grad-CAM estimand. Maps were bilinearly reduced to 40x40,
+independently min-max normalized, and compared with Pearson correlation,
+tie-aware Spearman rank correlation, and Gaussian-window SSIM
+[@wang2004ssim]. Non-finite or
+degenerate pairs were excluded from every metric and counted, not imputed. The
+on-disk checkpoint hashes were unchanged. The canonical Adebayo
+training-label data-randomization test was not performed because randomized-
+annotation retraining and fit verification were outside scope.
 
 ### 3.10 Inferential targets and patient-cluster protocol
 
 The primary **training-procedure estimand** included held-out patient sampling
-and stochastic retraining variability. Clean pointwise 95% intervals used
+and stochastic retraining variability. Clean pointwise 95% bootstrap intervals
+[@efron1993bootstrap] used
 2,000 two-stage draws: patient groups were sampled with replacement, every exam
 from a selected patient moved together, and trained runs were sampled
 independently within detector. Same-number seeds were not treated as matched
@@ -448,8 +498,9 @@ reconstructed from the sampled predictions in every draw.
 
 The secondary **checkpoint-conditional estimand** held the observed checkpoints
 fixed. Two-sided permutation tests used 5,000 patient-group detector-label
-swaps with a plus-one correction; their p-values were Holm-adjusted across the
-seven clean endpoints and are labeled conditional on observed checkpoints.
+swaps with a plus-one correction [@phipson2010permutation]; their p-values were
+Holm-adjusted [@holm1979simple] across the seven clean endpoints and are labeled
+conditional on observed checkpoints.
 The unstandardized training-procedure difference, Faster R-CNN minus YOLO11s,
 was the effect estimate. No seed-aware p-value was introduced. For the 35 corruption
 conditions, raw performance and clean-relative retention were tested
@@ -571,20 +622,30 @@ test.
 
 Across five seeds, Faster R-CNN mean D-ECE was 0.0320 +/- 0.0058, compared with
 0.0990 +/- 0.0232 for YOLO11s. The seed ranges did not overlap: 0.0266--0.0403
-and 0.0714--0.1313. YOLO11s seed 271 was the detector's worst-calibrated run.
-Among 962 detections retained at the 0.001 floor, mean confidence was 0.00538
-but the matched true-positive fraction was 0.15073. Its absolute global gap was
-0.14535 and five-dimensional D-ECE was 0.13130. The pathology therefore
-involved scores that substantially understated empirical detection correctness,
-not merely a threshold chosen too high.
+and 0.0714--0.1313. These are equal-run descriptive summaries; no D-ECE
+inferential comparison was performed. The largest observed YOLO11s value was
+0.13130 for seed 271. All 962 detections from that run at the 0.001 floor were
+retained, with mean confidence 0.00538 and matched fraction 0.15073. This was
+an observed result, not a method-level expectation or special-case branch.
 
-Figure 4 shows confidence-only reliability summaries. The D-ECE result is more
-informative because a modest global confidence gap can coexist with large
-location/scale-conditional error, as occurred for YOLO11s seed 137. Calibration
-remained conditional on emitted detections and was evaluated, not fitted, on
-the test set.
+The five-dimensional grid was sparse: 68--354 of 3,125 possible cells were
+occupied per run and 15--169 met the eight-detection minimum. Supported-cell
+detection fractions were 0.879--0.983 for Faster R-CNN and 0.543--0.906 for
+YOLO11s. Across the predeclared 3/5/7-bin by 1/4/8/16-minimum grid, descriptive
+mean D-ECE ranged from 0.0131 to 0.0531 and from 0.0500 to 0.1551,
+respectively; Faster R-CNN remained lower at all 12 common settings, while
+absolute values changed with support. Raising the score floor to 0.005 retained
+only 46.6% and 53.1% of the two detectors' baseline emitted populations on
+average. At 0.05 one YOLO11s run emitted no detection and its D-ECE was
+undefined, not zero. Thus the floor materially defined the evaluated
+population.
 
-![Figure 4. Reliability diagrams for all five seeds. The numerical endpoint is five-dimensional D-ECE, not the one-dimensional visual curve.](../results/figures/reliability_diagrams.png)
+Figure 4 is a confidence-only marginal reliability summary. It does not
+visualize the full class/location/scale-conditioned D-ECE. Calibration remained
+conditional on emitted detections and was evaluated, not fitted, on the test
+set; missed targets and clinical/exam risk were outside the population.
+
+![Figure 4. Confidence-only marginal reliability diagrams for all five runs per detector. This one-dimensional visual is not a visualization of all five D-ECE dimensions.](../results/figures/reliability_diagrams_confidence_marginal_v2.png)
 
 ### 4.5 Compute and the Pareto frontier
 
@@ -636,21 +697,26 @@ led to different conclusions.
 
 ![Figure 6. Seed-17 clean-relative mAP@0.5:0.95 under seven post-conversion digital corruptions and five severities.](../results/figures/robustness_map_50_95_relative.png)
 
-### 4.7 Raw-array acquisition-shift sensitivity
+### 4.7 Radiography-motivated synthetic acquisition/display sensitivity
 
-Acquisition-motivated shifts produced ordered mAP degradation within the
-Poisson and Gaussian series. Under the strongest Poisson condition (12.5% of
-the declared count reference), Faster R-CNN shifted mAP was 0.101314 with DSI
-0.314529; YOLO11s shifted mAP was 0.042981 with DSI 0.436641. Under 9x9,
-sigma-2.0 blur, the corresponding DSI values were 0.248532 and 0.282869.
-YOLO11s had larger DSI at every tested Poisson level and blur kernel.
+The signal-dependent Poisson-like and Gaussian series produced ordered mAP
+degradation. Under the strongest Poisson-like condition (relative count budget
+0.125), Faster R-CNN shifted mAP was 0.101314 with DSI 0.314529; YOLO11s shifted
+mAP was 0.042981 with DSI 0.436641. This condition is not a dose or quantum-noise
+proxy. Under 9x9, sigma-2.0 generic blur, the corresponding DSI values were
+0.248532 and 0.282869. YOLO11s had larger descriptive DSI at every tested
+Poisson-like level and blur kernel.
 
 The VOI results were smaller and mixed. Center shifts produced Faster R-CNN
 DSI 0.0431 and 0.0862 versus YOLO11s 0.1177 and 0.0089. A 0.75-width window
 gave DSI 0.0716 and -0.0132; the 1.25-width window was nearly neutral
-(-0.0001 and 0.0009). This interaction was expected because per-image min-max
-scaling can cancel non-clipping affine changes. No VOI result establishes
-scanner-setting invariance. The full seven-metric, 20-row table remains in
+(-0.0001 and 0.0009). The image-space audit showed why: min-max scaling reduced
+the median NMAE of the two center shifts by 48.2% and 40.7%, and almost
+completely cancelled the widened window (median post-scaling NMAE zero; 264/300
+images exactly identical). It did not materially cancel the narrow window or
+Poisson-like noise and re-stretched the normalized Gaussian-blur differences.
+No display result establishes scanner-setting invariance, and DSI does not
+estimate site transportability. The full seven-metric, 20-row table remains in
 [Supplementary Section S5](../docs/SUPPLEMENTARY.md#s5-complete-digital-corruption-and-acquisition-shift-grids).
 
 ### 4.8 Explainability and XAI sanity findings
@@ -665,19 +731,24 @@ not imply cleaner attention. Faster maps were generally more clustered but
 often centered on the mediastinum, shoulders, chest wall, borders, markers, or
 devices; YOLO maps were more diffuse and punctate across similarly irrelevant
 or unannotated regions. False-negative proxy maps were conditional analyses of
-latent candidates, not explanations of emitted detections.
+latent candidates, not explanations of emitted detections. The absolute
+energy-over-area lifts were only 0.0156 and 0.0257 and were not tested
+inferentially; neither constitutes strong localization.
 
-The sanity tests supported basic parameter and input sensitivity. Mean
-trained-randomized correlation was 0.0014 for Faster R-CNN parameter
-randomization and -0.0159 for data randomization; YOLO11s values were 0.0234
-and -0.0034. No valid map crossed the predeclared correlation threshold of
-0.50. Seven Faster R-CNN shuffled-input maps and four YOLO11s
-randomized-weight maps were zero or constant and excluded rather than imputed.
-The result reduces concern that the maps are invariant architecture templates,
-but does not change the weak-localization finding or validate clinical
-reasoning (Figure 7).
+At the final full model-parameter stage, Faster R-CNN mean
+Pearson/Spearman/SSIM values were 0.0025/0.0287/0.0381 (50 valid pairs), and
+YOLO11s values were 0.0242/0.0795/0.0476 (46 pairs). Intermediate cumulative
+stages were non-monotonic and remain descriptive. These low final-stage
+similarities support parameter sensitivity under the stated audit but do not
+prove anatomical correctness, causal faithfulness, or clinical reasoning. For
+the input-pixel control, Faster R-CNN means were -0.0206/-0.0188/0.2468 (43
+pairs) and YOLO11s means were -0.0021/0.0133/0.0067 (50 pairs). The non-zero
+Faster R-CNN SSIM illustrates why one correlation was insufficient. This
+severe perturbation control does not test dependence on the training
+data-label relationship; randomized-label retraining was not performed
+(Figure 7).
 
-![Figure 7. Nested 50-image Grad-CAM parameter- and data-randomization sanity panel.](../results/figures/gradcam_sanity_panel.png)
+![Figure 7. Nested 50-image Grad-CAM input-pixel control and six-stage cascading model-parameter randomization panel.](../results/figures/gradcam_sanity_v2_panel.png)
 
 ### 4.9 Estimand-separated statistical synthesis
 
@@ -713,13 +784,14 @@ changed the precision difference from -0.1024 to -0.1892, F1 from 0.1419 to
 0.0938, and mAP@0.5:0.95 from 0.04533 to 0.04504. Seed 271 was not excluded
 from the corrected analysis wherever its endpoint was defined.
 
-The six retrospective hypotheses were supported under their stated operational
-checks: higher Faster R-CNN coverage/AP; a shared-threshold operating mismatch;
-no strict accuracy-compute Pareto dominance; corruption-specific relative
-degradation; weak but parameter/input-sensitive Grad-CAM localization; and
-lower Faster R-CNN D-ECE with seed 271 the worst YOLO calibration result. These
-are structured summaries of the same frozen evidence, not independent
-confirmatory tests or preregistered claims.
+The retrospective checks summarized higher Faster R-CNN coverage/AP; a
+shared-threshold operating mismatch; no strict accuracy-compute Pareto
+dominance; corruption-specific relative degradation; weak localization with
+parameter-sensitive Grad-CAM and response to severe input-pixel perturbation;
+and descriptively lower Faster R-CNN D-ECE. The calibration audit did not
+predeclare that a named run should be an outlier. These are structured
+summaries of the same frozen evidence, not independent confirmatory tests or
+preregistered claims.
 
 ## 5. Discussion
 
@@ -737,14 +809,15 @@ also differed sharply, 0.69 versus 0.05.
 
 Calibration supplied a complementary result. Threshold selectivity concerns
 which ranked boxes survive a cutoff; D-ECE concerns whether the scores describe
-empirical correctness conditional on location and scale. YOLO11s seed 271
-demonstrated that ranking quality and score behavior can diverge: AP remained
-within the sibling-seed range even as all scores compressed below 0.042 and
-substantially understated the matched true-positive fraction. This observation
-is a property of the disclosed augmentation-disabled training recipe as much
-as of the instantiated model. It argues for reporting curves, detector-specific
-validation selection, calibration, and all attempted seeds rather than relying
-on one shared threshold.
+empirical correctness conditional on class, location, and scale among emitted
+detections. In the observed YOLO11s seed-271 run, AP remained within the
+sibling-seed range even as all scores compressed below 0.042 and mean
+confidence was below the matched fraction. That result was not anticipated or
+handled specially. The sparse-cell and floor sensitivity also showed that
+absolute D-ECE depends materially on histogram support and which detections
+enter the population. The evidence argues for reporting curves,
+detector-specific validation selection, occupancy, sensitivity, and all
+attempted runs rather than relying on one shared threshold or one D-ECE value.
 
 ### 5.2 Accuracy and efficiency remain opposed
 
@@ -794,22 +867,27 @@ retention advantage remained supported while the raw mAP difference did not.
 This is precisely why raw and relative estimands, pointwise intervals, and
 family-adjusted tests must be kept distinct.
 
-Raw-array experiments added acquisition motivation without adding external
-validity. Both detectors degraded monotonically under stronger synthetic
-Poisson noise and Gaussian blur, with larger DSI for YOLO11s at each tested
-level. VOI behavior was smaller and mixed because the source files lacked
-native display transforms and the downstream per-image min-max scaler could
-cancel non-clipping changes. Neither experiment introduced a new scanner,
-protocol, institution, or patient population. The correct claim is sensitivity
-to declared transformations, not clinical robustness.
+The stored-array experiment adds radiography motivation without external
+validity or a common level of physical support. DICOM `LINEAR` settings test
+synthetic display transforms; Gaussian blur is only a generic
+spatial-resolution proxy; and the count perturbation is Poisson-like intensity
+noise, not a dose/quantum-noise simulation. Both checkpoints degraded as the
+latter two series strengthened, with larger descriptive DSI for YOLO11s at each
+level. Display-transform behavior was smaller and mixed because the source
+objects lacked native VOI settings and per-image min-max scaling partly or
+almost completely cancelled some changes. Neither experiment introduced a new
+scanner, protocol, institution, or patient population. The correct claim is
+sensitivity to declared transforms, not clinical robustness or site
+transportability.
 
-### 5.5 Explainability passes a necessary check but remains weak evidence
+### 5.5 Parameter sensitivity does not rescue weak localization
 
-The Grad-CAM randomization tests addressed a narrow methodological concern:
-maps changed when learned parameters or image spatial structure were destroyed.
-Passing this check makes the maps more defensible for model-specific failure
-analysis. It does not make them causal explanations. Energy-in-box exceeded the
-box-area reference only modestly, pointing accuracy was near 0.1, and both
+Low similarity after cascading to full model-parameter randomization addresses
+the narrow concern that the maps are invariant to model parameters. The
+input-pixel control separately shows response when image spatial structure is
+destroyed; it is not evidence of dependence on the learned data-label
+relationship. Neither result makes the maps causal explanations. Energy-in-box
+exceeded the box-area reference only modestly, pointing accuracy was near 0.1, and both
 models frequently highlighted extra-box anatomy, markers, devices, and borders.
 The maps therefore identify suspicious associations and failure patterns, not
 clinically validated reasoning.
@@ -859,7 +937,7 @@ prevalence representative. Precision and false-positive behavior are therefore
 benchmark characteristics, not deployment predictive values. Results may not
 transport to pediatric patients, portable-care
 settings, contemporary equipment, other institutions, modalities, or
-multi-class tasks. No external test set or demographic subgroup/fairness
+multi-class tasks. No external testing dataset or demographic subgroup/fairness
 analysis was available. Source accrual dates, full acquisition-device and
 exposure details, participant demographics, and several reference-standard
 details are absent.
@@ -902,8 +980,12 @@ grid boundary. The separate linear loss assumes FN:FP penalties 1, 9, 25, and
 downstream. Conditional IoU and Dice exclude misses and
 have asymmetric descriptive n. D-ECE is evaluated on the same held-out test
 bundles, conditions only on emitted predictions at the 0.001 floor, depends on
-the chosen IoU/binning/cell protocol, and neither fits a calibrator nor measures
-missed-target or clinical-risk calibration.
+the chosen IoU/binning/minimum-cell protocol, and has only 68--354 occupied of
+3,125 possible cells per run. Its comparison is descriptive; the reported
+support and predeclared bin/floor sensitivities show that the absolute estimate
+is population- and sparsity-dependent. D-ECE neither fits a calibrator nor
+measures a missed ground-truth object (which has no emitted confidence),
+exam-level risk, clinical-risk calibration, or patient harm.
 
 **Decision analysis.** The historical exploratory calculation defined action
 by maximum detector confidence `>= tau` and reused the same raw `tau` in the
@@ -918,27 +1000,38 @@ ten retained runs; no calibrator was selected or fitted. The enriched internal
 test subset (169/750 positives; 323 patient groups) is not a deployment-
 prevalence sample. The preserved calculation supplies no conventional
 net-benefit, clinical-utility, beneficial-range, or deployment-readiness
-evidence.
+evidence. Detection-level D-ECE was not used as an exam-level probability and
+is programmatically separate from the validation-frozen outcome-probability
+calibration required by any future valid DCA.
 
-**Robustness.** The digital severity indices are not physically calibrated or
-comparable across corruption types. Repeated transformations of the same 300
-images are not independent deployment cohorts. The raw DICOM sample contains
-only 8-bit CR arrays without native VOI, modality transforms, calibrated
-exposure, or detector-response metadata. DICOM windows are controlled
-sensitivity settings, Poisson counts are synthetic dose proxies, and Gaussian
-kernels are not measured scanner transfer functions. Per-image scaling can
-cancel affine changes. Neither robustness experiment establishes scanner
-safety, external-site transportability, population robustness, or clinical
-robustness.
+**Robustness.** Digital severity indices are not physically calibrated or
+comparable across corruption types, and repeated transformations of the same
+300 images are not independent deployment cohorts. The stored-array sample is
+workstation-converted, lossily compressed Secondary Capture despite recording
+`Modality=CR`; it lacks intensity-relationship/sign, presentation intent,
+modality/VOI transforms, calibrated exposure, and detector-response metadata.
+The four DICOM windows are synthetic display sensitivities. Poisson-like noise
+is physically unsupported as a dose/quantum-noise proxy and is not a validated
+low-dose acquisition simulation. Gaussian blur is not a measured scanner
+transfer function or reconstruction model. Per-image scaling partly cancels
+center shifts, almost completely cancels the widened window, and can re-stretch
+blur differences. DSI is descriptive and does not estimate transportability.
+Neither experiment establishes scanner safety, population robustness, or
+clinical robustness.
 
 **Explainability.** Grad-CAM uses coarse 40x40 maps and explains one selected
 score, not proposal generation, NMS, box regression, candidate selection, or a
 complete causal decision. False-negative maps are annotation-guided proxy
 analyses unavailable in deployment. Box-based metrics treat coarse rectangles
-as opacity masks. The sanity extension uses one random initialization, a severe
-pixel permutation, a different fixed-region/pre-activation target, and excludes
-11 zero or constant randomized maps. Near-zero correlations establish only
-basic parameter/input sensitivity, not medical validity or causal attention.
+as opacity masks; the small descriptive energy-over-area lifts are not
+inferential evidence of strong localization. The v2 control extension uses one
+deterministic random draw per cumulative stage, a severe pixel permutation, and
+a different fixed-region/pre-activation target. It excludes seven Faster R-CNN
+input-control maps and four YOLO11s full-randomization maps. Low final-stage
+Pearson, Spearman, and SSIM values establish only parameter sensitivity under
+this audit. The pixel shuffle is an input perturbation, not Adebayo
+training-label data randomization; that retraining experiment was not
+performed. Neither control establishes medical validity or causal attention.
 
 **Statistical uncertainty.** Patient-cluster resampling and label swaps correct
 the identified within-patient independence error for observed exams, but do not
@@ -990,9 +1083,11 @@ Neither result defines a single winner. Faster R-CNN was the more defensible
 accuracy-oriented pipeline for internal, GPU-backed research scenarios;
 YOLO11s was the more attractive compute-oriented pipeline only where mandatory
 human review and a lower resource footprint outweighed its coverage and score
-limitations. Both were vulnerable to digital and acquisition-motivated shifts,
-and both produced weakly localized Grad-CAM maps despite passing basic sanity
-checks. Threshold-sensitivity analyses clarified conditional regimes but did
+limitations. Both were vulnerable to digital and radiography-motivated
+synthetic acquisition/display shifts,
+and both produced weakly localized Grad-CAM maps despite showing sensitivity to
+full model-parameter randomization. Threshold-sensitivity analyses clarified
+conditional regimes but did
 not validate clinical utility; the historical raw-score utility calculation
 was excluded from the evidentiary synthesis because it was not standard DCA.
 

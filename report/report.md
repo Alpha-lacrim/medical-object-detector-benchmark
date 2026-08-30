@@ -682,7 +682,8 @@ cohort and external sites, extend patient-cluster inference to larger cohorts,
 run robustness and explainability over multiple seeds, elicit meaningful
 action/error utilities before selecting thresholds on validation and external
 cohorts, assess probabilistic calibration,
-test clinically motivated acquisition shifts, compare augmentation-rich and
+test validated scanner-specific acquisition shifts on suitable source data,
+compare augmentation-rich and
 matched-control recipes as separate ablations, add saliency sanity checks or a
 detector-specific method such as D-RISE [@petsiuk2021drise], and perform
 prospective workflow evaluation before making any clinical claim.

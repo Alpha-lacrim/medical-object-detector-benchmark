@@ -1,4 +1,4 @@
-"""Evaluate acquisition-physics-motivated shifts on raw planar radiographs."""
+"""Audit and evaluate synthetic radiography acquisition/display sensitivities."""
 
 from __future__ import annotations
 
@@ -41,8 +41,63 @@ from src.robustness.run_robustness import (
     load_robustness_config,
 )
 
-ShiftFamily = Literal["voi_window", "dose_noise", "detector_blur"]
-ShiftKind = Literal["dicom_linear_window", "poisson_dose", "gaussian_blur"]
+ShiftFamily = Literal[
+    "display_transform",
+    "poisson_like_intensity_noise",
+    "spatial_resolution_blur",
+]
+ShiftKind = Literal["dicom_linear_window", "poisson_like_noise", "gaussian_blur"]
+ScientificClass = Literal["A", "B", "C", "D"]
+
+DICOM_AUDIT_ATTRIBUTES: tuple[tuple[str, str], ...] = (
+    ("sop_class_uid", "SOPClassUID"),
+    ("modality", "Modality"),
+    ("photometric_interpretation", "PhotometricInterpretation"),
+    ("bits_allocated", "BitsAllocated"),
+    ("bits_stored", "BitsStored"),
+    ("pixel_representation", "PixelRepresentation"),
+    ("pixel_intensity_relationship", "PixelIntensityRelationship"),
+    ("pixel_intensity_relationship_sign", "PixelIntensityRelationshipSign"),
+    ("rescale_slope", "RescaleSlope"),
+    ("rescale_intercept", "RescaleIntercept"),
+    ("rescale_type", "RescaleType"),
+    ("modality_lut_sequence_item_count", "ModalityLUTSequence"),
+    ("voi_lut_sequence_item_count", "VOILUTSequence"),
+    ("window_center", "WindowCenter"),
+    ("window_width", "WindowWidth"),
+    ("voi_lut_function", "VOILUTFunction"),
+    ("window_center_width_explanation", "WindowCenterWidthExplanation"),
+    ("presentation_intent_type", "PresentationIntentType"),
+    ("presentation_lut_shape", "PresentationLUTShape"),
+    ("image_type", "ImageType"),
+    ("pixel_presentation", "PixelPresentation"),
+    (
+        "acquisition_device_processing_description",
+        "AcquisitionDeviceProcessingDescription",
+    ),
+    ("acquisition_device_processing_code", "AcquisitionDeviceProcessingCode"),
+    ("derivation_description", "DerivationDescription"),
+    ("conversion_type", "ConversionType"),
+    ("lossy_image_compression", "LossyImageCompression"),
+    ("lossy_image_compression_ratio", "LossyImageCompressionRatio"),
+    ("lossy_image_compression_method", "LossyImageCompressionMethod"),
+    ("burned_in_annotation", "BurnedInAnnotation"),
+    ("recognizable_visual_features", "RecognizableVisualFeatures"),
+    ("real_world_value_mapping_item_count", "RealWorldValueMappingSequence"),
+)
+
+SEQUENCE_AUDIT_ATTRIBUTES = {
+    "ModalityLUTSequence",
+    "VOILUTSequence",
+    "RealWorldValueMappingSequence",
+}
+
+SCIENTIFIC_CLASS_DEFINITIONS = {
+    "A": "DICOM display-transform sensitivity",
+    "B": "generic intensity perturbation",
+    "C": "physics-motivated proxy",
+    "D": "physically unsupported for these stored values",
+}
 
 
 class StrictModel(BaseModel):
@@ -60,13 +115,21 @@ class InputSettings(StrictModel):
     expected_subset_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     processed_id_column: str = Field(min_length=1)
     raw_file_column: str = Field(min_length=1)
+    historical_results_table: Path
+    expected_historical_results_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    historical_summary_json: Path
+    expected_historical_summary_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
 class MetadataContract(StrictModel):
     """Expected metadata for the frozen raw-radiograph sample."""
 
     allowed_modalities: tuple[str, ...] = Field(min_length=1)
+    allowed_sop_class_uids: tuple[str, ...] = Field(min_length=1)
     allowed_photometric_interpretations: tuple[str, ...] = Field(min_length=1)
+    allowed_conversion_types: tuple[str, ...] = Field(min_length=1)
+    allowed_lossy_image_compression_values: tuple[str, ...] = Field(min_length=1)
+    allowed_lossy_image_compression_methods: tuple[str, ...] = Field(min_length=1)
     bits_allocated: int = Field(ge=1, le=64)
     bits_stored: int = Field(ge=1, le=64)
     pixel_representation: Literal[0, 1]
@@ -80,16 +143,27 @@ class RuntimeSettings(StrictModel):
     smoke_images: int = Field(ge=1, le=10)
 
 
+class DiagnosticSettings(StrictModel):
+    """Thresholds used only to label min-max cancellation diagnostics."""
+
+    almost_complete_residual_ratio_max: float = Field(ge=0, le=1)
+    partial_cancellation_fraction_min: float = Field(ge=0, le=1)
+
+
 class RadiographyShift(StrictModel):
     """One raw-array radiography shift and its declared parameters."""
 
     id: str = Field(pattern=r"^[a-z0-9][a-z0-9_]*$")
     family: ShiftFamily
     kind: ShiftKind
+    display_name: str = Field(min_length=1)
+    scientific_class: ScientificClass
+    retained_use_class: Literal["A", "B", "C"]
+    interpretation: str = Field(min_length=1)
     center_offset_fraction: float | None = None
     width_multiplier: float | None = None
     reference_full_scale_counts: float | None = None
-    dose_fraction: float | None = None
+    relative_count_fraction: float | None = None
     gaussian_kernel_size: int | None = None
     gaussian_sigma_pixels: float | None = None
 
@@ -101,13 +175,16 @@ class RadiographyShift(StrictModel):
             "center_offset_fraction": self.center_offset_fraction,
             "width_multiplier": self.width_multiplier,
             "reference_full_scale_counts": self.reference_full_scale_counts,
-            "dose_fraction": self.dose_fraction,
+            "relative_count_fraction": self.relative_count_fraction,
             "gaussian_kernel_size": self.gaussian_kernel_size,
             "gaussian_sigma_pixels": self.gaussian_sigma_pixels,
         }
         required = {
             "dicom_linear_window": {"center_offset_fraction", "width_multiplier"},
-            "poisson_dose": {"reference_full_scale_counts", "dose_fraction"},
+            "poisson_like_noise": {
+                "reference_full_scale_counts",
+                "relative_count_fraction",
+            },
             "gaussian_blur": {"gaussian_kernel_size", "gaussian_sigma_pixels"},
         }[self.kind]
         present = {name for name, value in values.items() if value is not None}
@@ -116,9 +193,9 @@ class RadiographyShift(StrictModel):
                 f"{self.kind} requires exactly {sorted(required)}, found {sorted(present)}"
             )
         expected_family = {
-            "dicom_linear_window": "voi_window",
-            "poisson_dose": "dose_noise",
-            "gaussian_blur": "detector_blur",
+            "dicom_linear_window": "display_transform",
+            "poisson_like_noise": "poisson_like_intensity_noise",
+            "gaussian_blur": "spatial_resolution_blur",
         }[self.kind]
         if self.family != expected_family:
             raise ValueError(f"{self.kind} must use family {expected_family}")
@@ -130,8 +207,15 @@ class RadiographyShift(StrictModel):
             raise ValueError("width_multiplier must be positive")
         if self.reference_full_scale_counts is not None and self.reference_full_scale_counts <= 0:
             raise ValueError("reference_full_scale_counts must be positive")
-        if self.dose_fraction is not None and not 0 < self.dose_fraction <= 1:
-            raise ValueError("dose_fraction must be in (0, 1]")
+        if self.relative_count_fraction is not None and not 0 < self.relative_count_fraction <= 1:
+            raise ValueError("relative_count_fraction must be in (0, 1]")
+        expected_classes = {
+            "dicom_linear_window": ("A", "A"),
+            "poisson_like_noise": ("D", "B"),
+            "gaussian_blur": ("C", "C"),
+        }[self.kind]
+        if (self.scientific_class, self.retained_use_class) != expected_classes:
+            raise ValueError(f"{self.kind} must use scientific/retained classes {expected_classes}")
         if self.gaussian_kernel_size is not None and (
             self.gaussian_kernel_size < 3 or self.gaussian_kernel_size % 2 == 0
         ):
@@ -152,17 +236,24 @@ class OutputSettings(StrictModel):
     smoke_results_table: Path
     summary_json: Path
     results_table: Path
+    audit_log_dir: Path
+    metadata_audit_table: Path
+    preprocessing_per_image_table: Path
+    preprocessing_summary_table: Path
+    reclassified_results_table: Path
+    audit_summary_json: Path
 
 
 class AcquisitionShiftConfig(StrictModel):
     """Strict complete acquisition-shift experiment contract."""
 
-    schema_version: Literal[1]
+    schema_version: Literal[2]
     experiment_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     seed: int = Field(ge=0, le=2**32 - 1)
     inputs: InputSettings
     metadata_contract: MetadataContract
     runtime: RuntimeSettings
+    diagnostics: DiagnosticSettings
     shifts: tuple[RadiographyShift, ...] = Field(min_length=3)
     outputs: OutputSettings
     project_root: Path = Field(exclude=True)
@@ -176,11 +267,13 @@ class AcquisitionShiftConfig(StrictModel):
         if len(set(identifiers)) != len(identifiers):
             raise ValueError("radiography shift IDs must be unique")
         if {shift.family for shift in self.shifts} != {
-            "voi_window",
-            "dose_noise",
-            "detector_blur",
+            "display_transform",
+            "poisson_like_intensity_noise",
+            "spatial_resolution_blur",
         }:
-            raise ValueError("shift grid must cover VOI windows, dose noise, and detector blur")
+            raise ValueError(
+                "shift grid must cover display, Poisson-like, and spatial-resolution families"
+            )
         return self
 
     def resolve(self, path: Path) -> Path:
@@ -198,6 +291,7 @@ class PreparedAnalysis:
     raw_paths: Mapping[str, Path]
     selected_rows: tuple[Mapping[str, str], ...]
     raw_audit: Mapping[str, Any]
+    metadata_rows: tuple[Mapping[str, Any], ...]
     invert_monochrome1: bool
 
 
@@ -295,10 +389,12 @@ def apply_radiography_shift(
             output_max=possible_high,
         )
 
-    if shift.kind == "poisson_dose":
+    if shift.kind == "poisson_like_noise":
         dynamic_range = possible_high - possible_low
         normalized = np.clip((array - possible_low) / dynamic_range, 0.0, 1.0)
-        expected_full_scale = float(shift.reference_full_scale_counts) * float(shift.dose_fraction)
+        expected_full_scale = float(shift.reference_full_scale_counts) * float(
+            shift.relative_count_fraction
+        )
         generator = np.random.default_rng(_derived_seed(seed, image_id, shift.id))
         sampled_counts = generator.poisson(normalized * expected_full_scale)
         estimate = possible_low + sampled_counts * (dynamic_range / expected_full_scale)
@@ -430,26 +526,112 @@ def _modality_transform_present(dataset: Any) -> bool:
     )
 
 
+def _audit_value(dataset: Any, attribute: str) -> tuple[str, bool]:
+    """Return one PHI-safe selected metadata value and an explicit missing flag."""
+
+    if not hasattr(dataset, attribute):
+        return "", True
+    value = getattr(dataset, attribute)
+    if value is None or str(value) == "":
+        return "", True
+    if attribute in SEQUENCE_AUDIT_ATTRIBUTES:
+        return str(len(value)), False
+    if isinstance(value, (list, tuple)):
+        return "\\".join(str(item) for item in value), False
+    return str(value), False
+
+
+def _signal_relationship_assessment(dataset: Any) -> tuple[str, bool, str]:
+    """Classify whether stored values justify an X-ray-signal Poisson model."""
+
+    relationship = str(getattr(dataset, "PixelIntensityRelationship", "")).upper()
+    sign = str(getattr(dataset, "PixelIntensityRelationshipSign", ""))
+    sop_class_uid = str(getattr(dataset, "SOPClassUID", ""))
+    if (
+        relationship == "LIN"
+        and sign in {"1", "+1", "-1"}
+        and sop_class_uid not in {"1.2.840.10008.5.1.4.1.1.7"}
+    ):
+        return (
+            "approximately_linear_xray_signal_relationship_declared",
+            True,
+            "Pixel Intensity Relationship is LIN with a declared sign in a modality-specific IOD.",
+        )
+    if relationship == "LOG":
+        reason = "Pixel Intensity Relationship is LOG and no reliable inverse is available."
+    elif relationship:
+        reason = (
+            f"Pixel Intensity Relationship is {relationship}; no validated signal inverse "
+            "is available."
+        )
+    else:
+        reason = "Pixel Intensity Relationship and Sign are missing."
+    if sop_class_uid == "1.2.840.10008.5.1.4.1.1.7":
+        reason += (
+            " The object is workstation-converted Secondary Capture, which does not establish "
+            "detector-signal proportionality."
+        )
+    return "unknown_processed_stored_values", False, reason
+
+
+def _metadata_audit_row(
+    dataset: Any,
+    *,
+    processed_name: str,
+    raw_name: str,
+) -> dict[str, Any]:
+    """Build one complete selected-field DICOM metadata/missingness row."""
+
+    from pydicom.uid import UID
+
+    row: dict[str, Any] = {
+        "processed_file": processed_name,
+        "source_file": raw_name,
+    }
+    for output_name, attribute in DICOM_AUDIT_ATTRIBUTES:
+        value, missing = _audit_value(dataset, attribute)
+        row[output_name] = value
+        row[f"{output_name}_missing"] = missing
+    sop_uid = row["sop_class_uid"]
+    row["sop_class_name"] = UID(sop_uid).name if sop_uid else ""
+    transfer_syntax = getattr(getattr(dataset, "file_meta", None), "TransferSyntaxUID", "")
+    transfer_syntax_text = str(transfer_syntax)
+    row["transfer_syntax_uid"] = transfer_syntax_text
+    row["transfer_syntax_uid_missing"] = not bool(transfer_syntax_text)
+    row["transfer_syntax_name"] = UID(transfer_syntax_text).name if transfer_syntax_text else ""
+    relationship_class, eligible, reason = _signal_relationship_assessment(dataset)
+    row["stored_pixel_relationship_class"] = relationship_class
+    row["xray_signal_proportionality_demonstrated"] = eligible
+    row["xray_signal_poisson_proxy_eligible"] = eligible
+    row["xray_signal_poisson_proxy_assessment"] = reason
+    return row
+
+
 def _audit_raw_files(
     config: AcquisitionShiftConfig,
     rows: Sequence[Mapping[str, str]],
     *,
     dataset_contract: Mapping[str, Any],
     base_dataset: Any,
-) -> tuple[dict[str, Path], dict[str, Any]]:
+) -> tuple[dict[str, Path], dict[str, Any], tuple[Mapping[str, Any], ...]]:
     import pydicom
 
     raw_dir = Path(dataset_contract["raw_dir"])
     raw_paths: dict[str, Path] = {}
     missing: list[str] = []
     modality_counts: Counter[str] = Counter()
+    sop_class_counts: Counter[str] = Counter()
     photometric_counts: Counter[str] = Counter()
+    conversion_type_counts: Counter[str] = Counter()
+    lossy_compression_counts: Counter[str] = Counter()
+    lossy_method_counts: Counter[str] = Counter()
     native_voi_count = 0
     modality_transform_count = 0
     clean_pixel_mismatch_count = 0
     raw_minima: list[float] = []
     raw_maxima: list[float] = []
     raw_manifest = hashlib.sha256()
+    metadata_rows: list[dict[str, Any]] = []
     base_paths = {
         record.file_name: base_dataset.image_path(index)
         for index, record in enumerate(base_dataset.records)
@@ -474,16 +656,42 @@ def _audit_raw_files(
             raise ValueError(f"manifest references an unknown processed image: {processed_name}")
         dataset = pydicom.dcmread(path)
         pixels = np.asarray(dataset.pixel_array)
+        metadata_row = _metadata_audit_row(
+            dataset,
+            processed_name=processed_name,
+            raw_name=raw_name,
+        )
+        metadata_rows.append(metadata_row)
+        sop_class_uid = str(getattr(dataset, "SOPClassUID", ""))
         modality = str(getattr(dataset, "Modality", "")).upper()
         photometric = str(getattr(dataset, "PhotometricInterpretation", "")).upper()
+        conversion_type = str(getattr(dataset, "ConversionType", "")).upper()
+        lossy_compression = str(getattr(dataset, "LossyImageCompression", ""))
+        lossy_method = str(getattr(dataset, "LossyImageCompressionMethod", ""))
+        sop_class_counts[sop_class_uid] += 1
         modality_counts[modality] += 1
         photometric_counts[photometric] += 1
+        conversion_type_counts[conversion_type] += 1
+        lossy_compression_counts[lossy_compression] += 1
+        lossy_method_counts[lossy_method] += 1
         native_voi_count += int(_native_voi_present(dataset))
         modality_transform_count += int(_modality_transform_present(dataset))
         if modality not in config.metadata_contract.allowed_modalities:
             raise ValueError(f"unexpected DICOM modality {modality!r} in {raw_name}")
+        if sop_class_uid not in config.metadata_contract.allowed_sop_class_uids:
+            raise ValueError(f"unexpected DICOM SOP Class UID {sop_class_uid!r} in {raw_name}")
         if photometric not in config.metadata_contract.allowed_photometric_interpretations:
             raise ValueError(f"unexpected Photometric Interpretation {photometric!r}")
+        if conversion_type not in config.metadata_contract.allowed_conversion_types:
+            raise ValueError(f"unexpected Conversion Type {conversion_type!r} in {raw_name}")
+        if lossy_compression not in config.metadata_contract.allowed_lossy_image_compression_values:
+            raise ValueError(
+                f"unexpected Lossy Image Compression {lossy_compression!r} in {raw_name}"
+            )
+        if lossy_method not in config.metadata_contract.allowed_lossy_image_compression_methods:
+            raise ValueError(
+                f"unexpected Lossy Image Compression Method {lossy_method!r} in {raw_name}"
+            )
         expected_metadata = {
             "BitsAllocated": config.metadata_contract.bits_allocated,
             "BitsStored": config.metadata_contract.bits_stored,
@@ -522,22 +730,47 @@ def _audit_raw_files(
         raise ValueError(
             f"raw clean conversion differs from {clean_pixel_mismatch_count} canonical PNGs"
         )
-    return raw_paths, {
-        "raw_dicom_count": len(raw_paths),
-        "missing_raw_dicom_count": 0,
-        "raw_files_sha256": raw_manifest.hexdigest(),
-        "modality_counts": dict(sorted(modality_counts.items())),
-        "photometric_interpretation_counts": dict(sorted(photometric_counts.items())),
-        "native_voi_metadata_count": native_voi_count,
-        "modality_transform_count": modality_transform_count,
-        "bits_allocated": config.metadata_contract.bits_allocated,
-        "bits_stored": config.metadata_contract.bits_stored,
-        "pixel_representation": config.metadata_contract.pixel_representation,
-        "raw_value_minimum": min(raw_minima),
-        "raw_value_maximum": max(raw_maxima),
-        "clean_png_pixel_mismatch_count": clean_pixel_mismatch_count,
-        "clean_png_pixel_identity": "all raw reconversions are byte-for-byte pixel identical",
+    field_missing_counts = {
+        field: sum(int(bool(row[f"{field}_missing"])) for row in metadata_rows)
+        for field, _attribute in DICOM_AUDIT_ATTRIBUTES
     }
+    field_missing_counts["transfer_syntax_uid"] = sum(
+        int(bool(row["transfer_syntax_uid_missing"])) for row in metadata_rows
+    )
+    poisson_eligible_count = sum(
+        int(bool(row["xray_signal_poisson_proxy_eligible"])) for row in metadata_rows
+    )
+    return (
+        raw_paths,
+        {
+            "raw_dicom_count": len(raw_paths),
+            "missing_raw_dicom_count": 0,
+            "raw_files_sha256": raw_manifest.hexdigest(),
+            "sop_class_uid_counts": dict(sorted(sop_class_counts.items())),
+            "modality_counts": dict(sorted(modality_counts.items())),
+            "photometric_interpretation_counts": dict(sorted(photometric_counts.items())),
+            "conversion_type_counts": dict(sorted(conversion_type_counts.items())),
+            "lossy_image_compression_counts": dict(sorted(lossy_compression_counts.items())),
+            "lossy_image_compression_method_counts": dict(sorted(lossy_method_counts.items())),
+            "native_voi_metadata_count": native_voi_count,
+            "modality_transform_count": modality_transform_count,
+            "field_missing_counts": dict(sorted(field_missing_counts.items())),
+            "xray_signal_poisson_proxy_eligible_count": poisson_eligible_count,
+            "stored_pixel_scale_conclusion": (
+                "Workstation-converted, lossily compressed Secondary Capture values; physical "
+                "linearity, logarithmic mapping, and a reliable inverse to incident X-ray signal "
+                "are not established."
+            ),
+            "bits_allocated": config.metadata_contract.bits_allocated,
+            "bits_stored": config.metadata_contract.bits_stored,
+            "pixel_representation": config.metadata_contract.pixel_representation,
+            "raw_value_minimum": min(raw_minima),
+            "raw_value_maximum": max(raw_maxima),
+            "clean_png_pixel_mismatch_count": clean_pixel_mismatch_count,
+            "clean_png_pixel_identity": "all raw reconversions are byte-for-byte pixel identical",
+        },
+        tuple(metadata_rows),
+    )
 
 
 def _prepare_analysis(config: AcquisitionShiftConfig) -> PreparedAnalysis:
@@ -572,7 +805,7 @@ def _prepare_analysis(config: AcquisitionShiftConfig) -> PreparedAnalysis:
     processed_names = {row[config.inputs.processed_id_column] for row in rows}
     if processed_names != phase6_prepared["selected_names"]:
         raise ValueError("raw acquisition rows differ from the frozen Phase 6 selection")
-    raw_paths, raw_audit = _audit_raw_files(
+    raw_paths, raw_audit, metadata_rows = _audit_raw_files(
         config,
         rows,
         dataset_contract=dataset_contract,
@@ -584,23 +817,29 @@ def _prepare_analysis(config: AcquisitionShiftConfig) -> PreparedAnalysis:
         raw_paths=raw_paths,
         selected_rows=tuple(rows),
         raw_audit=raw_audit,
+        metadata_rows=metadata_rows,
         invert_monochrome1=bool(dataset_contract["invert_monochrome1"]),
     )
 
 
 def _condition_payload(shift: RadiographyShift) -> dict[str, Any]:
     return {
-        "shift_id": shift.id,
-        "shift_family": shift.family,
+        "legacy_shift_id": shift.id,
+        "display_name": shift.display_name,
+        "scientific_class": shift.scientific_class,
+        "scientific_class_definition": SCIENTIFIC_CLASS_DEFINITIONS[shift.scientific_class],
+        "retained_use_class": shift.retained_use_class,
+        "reporting_family": shift.family,
         "shift_kind": shift.kind,
+        "interpretation": shift.interpretation,
         "center_offset_fraction": shift.center_offset_fraction,
         "width_multiplier": shift.width_multiplier,
         "reference_full_scale_counts": shift.reference_full_scale_counts,
-        "dose_fraction": shift.dose_fraction,
-        "expected_full_scale_counts": (
+        "relative_count_fraction": shift.relative_count_fraction,
+        "synthetic_full_scale_count_budget": (
             None
             if shift.reference_full_scale_counts is None
-            else shift.reference_full_scale_counts * float(shift.dose_fraction)
+            else shift.reference_full_scale_counts * float(shift.relative_count_fraction)
         ),
         "gaussian_kernel_size": shift.gaussian_kernel_size,
         "gaussian_sigma_pixels": shift.gaussian_sigma_pixels,
@@ -667,6 +906,329 @@ def _repository_path(path: Path, project_root: Path) -> str:
         raise ValueError(f"artifact path is outside the project root: {path}") from error
 
 
+def _normalized_error_metrics(
+    reference: np.ndarray,
+    perturbed: np.ndarray,
+    *,
+    normalization_range: float,
+) -> dict[str, float]:
+    """Return MAE/RMSE magnitudes in native and normalized image space."""
+
+    if normalization_range <= 0 or not math.isfinite(normalization_range):
+        raise ValueError("normalization_range must be finite and positive")
+    difference = np.asarray(perturbed, dtype=np.float64) - np.asarray(reference, dtype=np.float64)
+    mae = float(np.mean(np.abs(difference)))
+    rmse = float(np.sqrt(np.mean(np.square(difference))))
+    return {
+        "mae": mae,
+        "nmae": mae / normalization_range,
+        "rmse": rmse,
+        "nrmse": rmse / normalization_range,
+        "changed_pixel_fraction": float(np.mean(difference != 0)),
+    }
+
+
+def _preprocessing_diagnostics(
+    config: AcquisitionShiftConfig,
+    prepared: PreparedAnalysis,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Measure each transform before and after canonical per-image min-max scaling."""
+
+    import pydicom
+
+    rows_by_processed = {
+        row[config.inputs.processed_id_column]: row for row in prepared.selected_rows
+    }
+    detail_rows: list[dict[str, Any]] = []
+    for processed_name in sorted(prepared.raw_paths):
+        dataset = pydicom.dcmread(prepared.raw_paths[processed_name])
+        original = np.asarray(dataset.pixel_array, dtype=np.float64).squeeze()
+        possible_low, possible_high = _stored_value_range(dataset)
+        stored_range = possible_high - possible_low
+        photometric = str(getattr(dataset, "PhotometricInterpretation", ""))
+        clean_uint8 = scale_radiograph_to_uint8(
+            original,
+            photometric_interpretation=photometric,
+            invert_monochrome1=prepared.invert_monochrome1,
+        )
+        source_name = rows_by_processed[processed_name][config.inputs.raw_file_column]
+        for shift in config.shifts:
+            shifted = apply_radiography_shift(
+                original,
+                dataset,
+                shift,
+                seed=config.seed,
+                image_id=processed_name,
+            )
+            shifted_uint8 = scale_radiograph_to_uint8(
+                shifted,
+                photometric_interpretation=photometric,
+                invert_monochrome1=prepared.invert_monochrome1,
+            )
+            before = _normalized_error_metrics(
+                original,
+                shifted,
+                normalization_range=stored_range,
+            )
+            after = _normalized_error_metrics(
+                clean_uint8,
+                shifted_uint8,
+                normalization_range=255.0,
+            )
+            residual_ratio = None if before["nmae"] == 0 else after["nmae"] / before["nmae"]
+            detail_rows.append(
+                {
+                    "processed_file": processed_name,
+                    "source_file": source_name,
+                    **_condition_payload(shift),
+                    "before_minmax_mae_stored_units": before["mae"],
+                    "before_minmax_nmae": before["nmae"],
+                    "before_minmax_rmse_stored_units": before["rmse"],
+                    "before_minmax_nrmse": before["nrmse"],
+                    "before_minmax_changed_pixel_fraction": before["changed_pixel_fraction"],
+                    "after_minmax_mae_uint8_units": after["mae"],
+                    "after_minmax_nmae": after["nmae"],
+                    "after_minmax_rmse_uint8_units": after["rmse"],
+                    "after_minmax_nrmse": after["nrmse"],
+                    "after_minmax_changed_pixel_fraction": after["changed_pixel_fraction"],
+                    "minmax_mae_residual_ratio": residual_ratio,
+                    "minmax_cancellation_fraction": (
+                        None if residual_ratio is None else 1.0 - residual_ratio
+                    ),
+                    "after_minmax_exact_pixel_identity": bool(
+                        np.array_equal(clean_uint8, shifted_uint8)
+                    ),
+                }
+            )
+
+    summary_rows: list[dict[str, Any]] = []
+    for shift in config.shifts:
+        selected = [row for row in detail_rows if row["legacy_shift_id"] == shift.id]
+        before_nmae = np.asarray([row["before_minmax_nmae"] for row in selected])
+        after_nmae = np.asarray([row["after_minmax_nmae"] for row in selected])
+        residual = np.asarray(
+            [
+                row["minmax_mae_residual_ratio"]
+                for row in selected
+                if row["minmax_mae_residual_ratio"] is not None
+            ]
+        )
+        median_residual = float(np.median(residual))
+        median_cancellation = 1.0 - median_residual
+        if median_residual <= config.diagnostics.almost_complete_residual_ratio_max:
+            category = "almost_completely_cancelled"
+        elif median_cancellation >= config.diagnostics.partial_cancellation_fraction_min:
+            category = "partly_cancelled"
+        else:
+            category = "not_materially_cancelled"
+        summary_rows.append(
+            {
+                **_condition_payload(shift),
+                "image_count": len(selected),
+                "before_minmax_nmae_mean": float(np.mean(before_nmae)),
+                "before_minmax_nmae_median": float(np.median(before_nmae)),
+                "before_minmax_nmae_p95": float(np.quantile(before_nmae, 0.95)),
+                "after_minmax_nmae_mean": float(np.mean(after_nmae)),
+                "after_minmax_nmae_median": float(np.median(after_nmae)),
+                "after_minmax_nmae_p95": float(np.quantile(after_nmae, 0.95)),
+                "minmax_mae_residual_ratio_mean": float(np.mean(residual)),
+                "minmax_mae_residual_ratio_median": median_residual,
+                "minmax_cancellation_fraction_median": median_cancellation,
+                "exact_pixel_identity_count": sum(
+                    int(bool(row["after_minmax_exact_pixel_identity"])) for row in selected
+                ),
+                "preprocessing_effect_category": category,
+            }
+        )
+    return detail_rows, summary_rows
+
+
+def _reclassified_historical_results(
+    config: AcquisitionShiftConfig,
+) -> tuple[list[dict[str, Any]], list[dict[str, str]], str]:
+    """Relabel frozen Phase 22 results without recomputing predictions or metrics."""
+
+    historical_table = config.resolve(config.inputs.historical_results_table)
+    if sha256_file(historical_table) != config.inputs.expected_historical_results_sha256:
+        raise ValueError("historical Phase 22 acquisition-shift table SHA-256 changed")
+    historical_summary = config.resolve(config.inputs.historical_summary_json)
+    if sha256_file(historical_summary) != config.inputs.expected_historical_summary_sha256:
+        raise ValueError("historical Phase 22 acquisition-shift summary SHA-256 changed")
+    with historical_table.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise ValueError("historical Phase 22 results table has no header")
+        historical_rows = [dict(row) for row in reader]
+        historical_fields = tuple(reader.fieldnames)
+    shifts = {shift.id: shift for shift in config.shifts}
+    if len(historical_rows) != 2 * len(shifts):
+        raise ValueError("historical result row count does not match detector/shift grid")
+    excluded_fields = {
+        "shift_id",
+        "shift_family",
+        "shift_kind",
+        "dose_fraction",
+        "expected_full_scale_counts",
+        "reference_full_scale_counts",
+        "center_offset_fraction",
+        "width_multiplier",
+        "gaussian_kernel_size",
+        "gaussian_sigma_pixels",
+    }
+    relabeled: list[dict[str, Any]] = []
+    bundle_manifest: list[dict[str, str]] = []
+    bundle_aggregate = hashlib.sha256()
+    seen_bundles: set[str] = set()
+    for old in historical_rows:
+        legacy_id = old["shift_id"]
+        if legacy_id not in shifts:
+            raise ValueError(f"historical result has unknown shift ID {legacy_id!r}")
+        row: dict[str, Any] = {"detector": old["detector"]}
+        row.update(_condition_payload(shifts[legacy_id]))
+        for field in historical_fields:
+            if field == "detector" or field in excluded_fields:
+                continue
+            row[field] = old[field]
+        bundle_path_text = old["prediction_bundle"]
+        bundle_path = config.resolve(Path(bundle_path_text))
+        bundle_hash = sha256_file(bundle_path)
+        if bundle_hash != old["prediction_bundle_sha256"]:
+            raise ValueError(f"historical prediction bundle hash changed: {bundle_path_text}")
+        if bundle_path_text not in seen_bundles:
+            seen_bundles.add(bundle_path_text)
+            bundle_manifest.append({"path": bundle_path_text, "sha256": bundle_hash})
+            bundle_aggregate.update(bundle_path_text.encode())
+            bundle_aggregate.update(b"\0")
+            bundle_aggregate.update(bundle_hash.encode("ascii"))
+            bundle_aggregate.update(b"\n")
+        relabeled.append(row)
+    return relabeled, bundle_manifest, bundle_aggregate.hexdigest()
+
+
+def run_metadata_and_preprocessing_audit(
+    config: AcquisitionShiftConfig,
+) -> dict[str, Any]:
+    """Write the CPU-only Batch 32 DICOM, normalization, and relabeling audit."""
+
+    from src.utils.seed import initialize_reproducibility
+
+    prepared = _prepare_analysis(config)
+    audit_log_dir = config.resolve(config.outputs.audit_log_dir)
+    initialize_reproducibility(config.seed, audit_log_dir)
+    detail_rows, diagnostic_rows = _preprocessing_diagnostics(config, prepared)
+    relabeled_rows, bundle_manifest, bundle_aggregate_hash = _reclassified_historical_results(
+        config
+    )
+
+    metadata_fields = ["processed_file", "source_file"]
+    for field, _attribute in DICOM_AUDIT_ATTRIBUTES:
+        metadata_fields.extend((field, f"{field}_missing"))
+        if field == "sop_class_uid":
+            metadata_fields.append("sop_class_name")
+    metadata_fields.extend(
+        (
+            "transfer_syntax_uid",
+            "transfer_syntax_uid_missing",
+            "transfer_syntax_name",
+            "stored_pixel_relationship_class",
+            "xray_signal_proportionality_demonstrated",
+            "xray_signal_poisson_proxy_eligible",
+            "xray_signal_poisson_proxy_assessment",
+        )
+    )
+    metadata_path = config.resolve(config.outputs.metadata_audit_table)
+    detail_path = config.resolve(config.outputs.preprocessing_per_image_table)
+    diagnostic_path = config.resolve(config.outputs.preprocessing_summary_table)
+    reclassified_path = config.resolve(config.outputs.reclassified_results_table)
+    _atomic_csv(metadata_path, tuple(metadata_fields), prepared.metadata_rows)
+    _atomic_csv(detail_path, tuple(detail_rows[0]), detail_rows)
+    _atomic_csv(diagnostic_path, tuple(diagnostic_rows[0]), diagnostic_rows)
+    _atomic_csv(reclassified_path, tuple(relabeled_rows[0]), relabeled_rows)
+
+    source_identity = _source_identity(config)
+    artifacts = {
+        "metadata_audit_table": _repository_path(metadata_path, config.project_root),
+        "metadata_audit_table_sha256": sha256_file(metadata_path),
+        "preprocessing_per_image_table": _repository_path(detail_path, config.project_root),
+        "preprocessing_per_image_table_sha256": sha256_file(detail_path),
+        "preprocessing_summary_table": _repository_path(diagnostic_path, config.project_root),
+        "preprocessing_summary_table_sha256": sha256_file(diagnostic_path),
+        "reclassified_results_table": _repository_path(reclassified_path, config.project_root),
+        "reclassified_results_table_sha256": sha256_file(reclassified_path),
+    }
+    summary = {
+        "schema_version": 1,
+        "experiment_id": "rsna-phase32-radiography-shift-audit",
+        "status": "complete",
+        "scope": "CPU-only metadata, image-space, and historical-output audit",
+        "performs_training": False,
+        "performs_inference": False,
+        "gpu_inference_decision": (
+            "not rerun: the historical transformed pixels and detector outputs remain valid "
+            "as synthetic sensitivities; only their physical interpretation was unsupported"
+        ),
+        "dicom_standard_reference": {
+            "edition_observed_at_audit": "DICOM PS3.3/PS3.4 2026c",
+            "current_standard_url": "https://dicom.nema.org/medical/dicom/current/",
+            "sections": [
+                "PS3.3 C.7.6.3.1.2 Photometric Interpretation",
+                "PS3.3 C.8.11.3.1.2 Pixel Intensity Relationship and Grayscale Transformations",
+                "PS3.3 C.11.1 Modality LUT Module",
+                "PS3.3 C.11.2 VOI LUT Module",
+                "PS3.3 A.8 Secondary Capture Image IODs",
+                "PS3.3 C.8.6 Secondary Capture Modules",
+                "PS3.4 B.5 Standard SOP Classes",
+            ],
+        },
+        "raw_input_audit": dict(prepared.raw_audit),
+        "scientific_class_definitions": SCIENTIFIC_CLASS_DEFINITIONS,
+        "conditions": [_condition_payload(shift) for shift in config.shifts],
+        "preprocessing_effect_thresholds": config.diagnostics.model_dump(mode="json"),
+        "preprocessing_diagnostics": diagnostic_rows,
+        "historical_phase22_artifacts": {
+            "results_table": _repository_path(
+                config.resolve(config.inputs.historical_results_table), config.project_root
+            ),
+            "results_table_sha256": config.inputs.expected_historical_results_sha256,
+            "summary_json": _repository_path(
+                config.resolve(config.inputs.historical_summary_json), config.project_root
+            ),
+            "summary_json_sha256": config.inputs.expected_historical_summary_sha256,
+            "prediction_bundle_count": len(bundle_manifest),
+            "prediction_bundles_sha256": bundle_aggregate_hash,
+            "prediction_bundles": bundle_manifest,
+            "status": "numerically retained; terminology superseded by Batch 32",
+        },
+        "dsi_definition": (
+            "1 - (shifted performance / clean performance); descriptive performance "
+            "retention/domain-sensitivity index only, not inter-site transportability"
+        ),
+        "config_path": _repository_path(config.source_path, config.project_root),
+        "config_sha256": sha256_file(config.source_path),
+        "source_identity": dict(source_identity),
+        "artifacts": artifacts,
+    }
+    summary_path = config.resolve(config.outputs.audit_summary_json)
+    _atomic_json(summary_path, summary)
+    artifacts["summary_json"] = _repository_path(summary_path, config.project_root)
+    artifacts["summary_json_sha256"] = sha256_file(summary_path)
+    print(
+        json.dumps(
+            {
+                "status": "complete",
+                "performs_inference": False,
+                "metadata_rows": len(prepared.metadata_rows),
+                "preprocessing_rows": len(detail_rows),
+                "reclassified_result_rows": len(relabeled_rows),
+                "summary": artifacts["summary_json"],
+            },
+            indent=2,
+        ),
+        flush=True,
+    )
+    return {"summary": summary, "artifacts": artifacts}
+
+
 def _result_row(
     detector: DetectorSettings,
     shift: RadiographyShift,
@@ -716,16 +1278,21 @@ def _write_results(
         "center_offset_fraction",
         "width_multiplier",
         "reference_full_scale_counts",
-        "dose_fraction",
-        "expected_full_scale_counts",
+        "relative_count_fraction",
+        "synthetic_full_scale_count_budget",
         "gaussian_kernel_size",
         "gaussian_sigma_pixels",
     )
     base_fields = (
         "detector",
-        "shift_id",
-        "shift_family",
+        "legacy_shift_id",
+        "display_name",
+        "scientific_class",
+        "scientific_class_definition",
+        "retained_use_class",
+        "reporting_family",
         "shift_kind",
+        "interpretation",
         *parameter_fields,
         "image_count",
         "target_count",
@@ -770,7 +1337,10 @@ def _write_results(
             "Filtered frozen Phase 5 seed-17 predictions; the raw-array clean "
             "reconversion is pixel-identical to every canonical sample PNG."
         ),
-        "dsi_definition": "1 - (shifted performance / clean performance); not clipped",
+        "dsi_definition": (
+            "1 - (shifted performance / clean performance); descriptive and not clipped; "
+            "does not estimate inter-site transportability"
+        ),
         "primary_performance_metric": "map_50_95",
         "evaluation": prepared.phase6.evaluation.model_dump(mode="json"),
         "config_path": _repository_path(config.source_path, config.project_root),
@@ -937,7 +1507,7 @@ def run_acquisition_shifts(
     rows.sort(
         key=lambda row: (
             detector_order[str(row["detector"])],
-            shift_order[str(row["shift_id"])],
+            shift_order[str(row["legacy_shift_id"])],
         )
     )
     result = _write_results(
@@ -968,7 +1538,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=Path("configs/acquisition_shifts.yaml"))
-    parser.add_argument("--mode", choices=("preflight", "smoke", "run"), required=True)
+    parser.add_argument("--mode", choices=("preflight", "audit", "smoke", "run"), required=True)
     return parser
 
 
@@ -979,6 +1549,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     config = load_acquisition_shift_config(args.config)
     if args.mode == "preflight":
         print(json.dumps(preflight(config), indent=2, sort_keys=True))
+        return 0
+    if args.mode == "audit":
+        run_metadata_and_preprocessing_audit(config)
         return 0
     run_acquisition_shifts(config, scope="smoke" if args.mode == "smoke" else "full")
     return 0

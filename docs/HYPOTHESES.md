@@ -70,36 +70,39 @@ This question concerns two disclosed implementations under one controlled protoc
 
 **Operational check.** Compare each detector's all-target mean energy-in-box with its mean box-area reference and inspect pointing-game accuracy in the summary table; then inspect the preselected true-positive, false-positive, and false-negative-proxy panels for extra-box activation. The interpretation fails if the text treats a plausible map as a causal explanation or as validation of clinical reasoning, regardless of localization score.
 
-**Existing evidence.** Check [`gradcam_localization_summary.csv`](../results/tables/gradcam_localization_summary.csv), [the shared true-positive panels](../results/figures/gradcam_good_predictions.png), [the shared false-positive panels](../results/figures/gradcam_bad_predictions.png), and [the false-negative proxy panels](../results/figures/gradcam_failure_cases.png). The frozen artifacts support H5 descriptively: energy-in-box exceeds the box-area reference only modestly, pointing accuracy is low for both detectors, and the qualitative panels show frequent activation on anatomy, borders, markers, and devices outside the annotated opacity.
+**Existing evidence.** Check [`gradcam_localization_summary.csv`](../results/tables/gradcam_localization_summary.csv), [the shared true-positive panels](../results/figures/gradcam_good_predictions.png), [the shared false-positive panels](../results/figures/gradcam_bad_predictions.png), [the false-negative proxy panels](../results/figures/gradcam_failure_cases.png), and the [v2 sensitivity-control summary](../results/tables/gradcam_sanity_v2_summary.csv). The frozen artifacts support H5 descriptively: energy-in-box exceeds the box-area reference only modestly, pointing accuracy is low for both detectors, the qualitative panels show frequent activation outside the annotated opacity, and low full-model-randomization similarity supports parameter sensitivity without validating localization.
 
-**Boundary.** The analysis is seed-17-only and target- and layer-dependent. It contains no causal intervention or clinical-reasoning ground truth; false-negative maps use annotation-guided proxy candidates and do not explain an emitted detection.
+**Boundary.** The analysis is seed-17-only and target- and layer-dependent. It contains no causal intervention or clinical-reasoning ground truth; false-negative maps use annotation-guided proxy candidates and do not explain an emitted detection. The pixel shuffle is an input-pixel perturbation control, not Adebayo training-label data randomization; randomized-annotation retraining was not performed, so no data-label-dependence claim follows.
 
 ## H6 - Detection confidence calibration
 
-**Hypothesis.** Faster R-CNN will have lower full multivariate Detection Expected
-Calibration Error (D-ECE) than YOLO11s across the five frozen test seeds, and YOLO11s seed
-271 will be the detector's worst-calibrated seed because its abnormally compressed scores
-substantially understate the empirical fraction of matched true-positive detections.
+**Retrospective descriptive question.** Under one common full multivariate Detection
+Expected Calibration Error (D-ECE) protocol, what values and support are observed for the
+ten frozen detector runs? This audit was added after the original detector results and is
+not a preregistered directional hypothesis. In particular, the method did not predeclare
+that any named seed should be an outlier.
 
 **Operational check.** For every detector and seed, retain all predictions at the frozen
 0.001 bundle floor, apply the canonical score-ordered same-class matcher at IoU 0.50, and
 compute the Küppers et al. five-dimensional D-ECE over confidence, relative box center, and
-relative box width/height. H6 is supported only if Faster R-CNN has the lower across-seed
-mean D-ECE and seed 271 has the highest YOLO11s D-ECE without imputation or exclusion. Its
-mean confidence, matched-detection fraction, absolute global gap, and D-ECE must all remain
-explicit.
+relative box width/height. Report every run uniformly, including total/possible/occupied/
+supported cells, the detection fraction contributing through supported cells, supported-cell
+sizes, the predeclared bin/minimum-support grid, and confidence-floor sensitivity. Do not
+exclude or impute a run to stabilize the metric.
 
-**Existing evidence.** Check [`calibration_summary.csv`](../results/tables/calibration_summary.csv)
-and [the reliability diagrams](../results/figures/reliability_diagrams.png). The five-seed
-artifacts support H6 descriptively: mean D-ECE is `0.0320 +/- 0.0058` for Faster R-CNN and
-`0.0990 +/- 0.0232` for YOLO11s. Seed 271 is the largest YOLO11s D-ECE at `0.1313`; its
-mean score is `0.00538` while `0.15073` of its 962 retained detections are matched true
-positives.
+**Observed evidence.** Check [`calibration_summary_v2.csv`](../results/tables/calibration_summary_v2.csv),
+the [support table](../results/tables/calibration_support_v2.csv), and the
+[confidence-only marginal reliability figure](../results/figures/reliability_diagrams_confidence_marginal_v2.png).
+The equal-run descriptive means are `0.0320 +/- 0.0058` for Faster R-CNN and
+`0.0990 +/- 0.0232` for YOLO11s. The largest observed YOLO11s value is `0.1313` for seed
+271; its mean score is `0.00538` while `0.15073` of its 962 retained detections are matched
+true positives. That observation is reported after analysis, not encoded as a special case.
 
 **Boundary.** D-ECE measures precision calibration conditional on the emitted prediction
 population; missed targets have no confidence and therefore do not enter this black-box
-calibration estimand. The result is descriptive test-set evaluation of raw confidences, not a
-fitted recalibration map, external validation, or evidence of calibrated clinical risk. It is
-also separate from H2's score-scale/selectivity mismatch: H2 compares operating regimes as a
-threshold moves, whereas H6 asks whether stated probabilities agree with empirical detection
-correctness within confidence/location/scale bins.
+calibration estimand. The sparse five-dimensional histogram and minimum-cell rule materially
+affect support, so absolute values require the occupancy and sensitivity diagnostics. The
+result is descriptive test-set evaluation of raw confidences, not a fitted recalibration map,
+external validation, clinical-risk calibration, or run-level inference. It is also separate
+from H2's score-scale/selectivity mismatch and from any separately calibrated exam-level
+probability that could enter valid decision-curve analysis.

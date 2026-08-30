@@ -55,6 +55,15 @@ selection, mixed precision, bounded batches, and early stopping. These choices
 make the study reproducible on the stated laptop but increase sampling
 uncertainty and narrow generalization to the full challenge cohort.
 
+No formal statistical sample-size or power calculation determined the 5,000
+studies. Seed 17 and deterministic SHA-256 ordering selected whole NIH patient
+groups while tracking the three source label strata; the remaining 21,684
+labeled studies were excluded for hardware scope, not annotation-audit failure.
+Stratification and patient grouping reduce avoidable imbalance and leakage but
+do not turn a hardware-constrained subset into a prevalence-representative or
+statistically powered clinical sample. The resulting estimates may differ from
+those for the full source cohort even before considering external populations.
+
 The primary development pipeline uses seed 17. The held-out headline comparison
 adds seeds 42, 137, 271, and 314 for five predeclared full trainings per
 detector. All five attempted seeds are retained for AP and fixed-threshold
@@ -159,15 +168,19 @@ specific `n=5` versus `n=4`; paired inference uses the four complete seed pairs
 localization is also undefined for the seed-17 YOLO checkpoint under the
 darkest corruption, which is a separate, corruption-specific event.
 
-Batch 18 separately measures raw-score calibration with the full five-dimensional D-ECE
-over confidence and relative box center/scale. It uses all five frozen seeds and every
-post-NMS prediction retained at the 0.001 bundle floor, including YOLO11s seed 271. This is
-test-set evaluation rather than validation-fitted recalibration: no calibrated mapping is
-learned or evaluated on an independent second holdout. The estimand is conditional on emitted
-detections, so missed targets without a score do not enter it. Absolute D-ECE also depends on
-the fixed IoU-0.50 correctness rule, five-bin feature partition, and eight-sample cell
-minimum; it is not directly comparable to D-ECE under a different protocol and does not
-establish calibrated clinical risk.
+The versioned detection-calibration audit measures full five-dimensional D-ECE over
+confidence and relative box center/scale for all five frozen seeds and every post-NMS
+prediction retained at the 0.001 bundle floor. This is descriptive test-set evaluation,
+not validation-fitted recalibration or a patient/run-level inferential comparison. Its
+estimand is conditional on emitted detections: a missed ground-truth object has no emitted
+confidence and therefore lies outside the D-ECE population. The (5^5=3,125)-cell grid is
+sparse (68--354 occupied and 15--169 meeting the eight-detection minimum per run), and the
+supported detection fraction ranges from 0.543 to 0.983. Absolute D-ECE changes with the
+bin/minimum-cell grid and with the confidence-floor population; the versioned occupancy and
+predeclared sensitivity outputs must accompany the original five-bin/minimum-8 values. D-ECE
+under another protocol is not directly comparable and does not establish missed-target,
+exam-level, or clinical-risk calibration. It is programmatically separate from the
+validation-frozen exam-level outcome probabilities required by any valid DCA.
 
 Batch 30 classified the historical Batch 20 calculation as **non-standard for
 conventional DCA interpretation**. It used maximum emitted detector confidence
@@ -213,20 +226,30 @@ The grid measures digital robustness under the specified transformations, not
 clinical robustness or safety. It repeatedly transforms the same 300 images,
 so corruption conditions are not independent deployment cohorts.
 
-Batch 22 separately applies acquisition-physics-motivated shifts to the raw
-DICOM stored arrays before the canonical 8-bit conversion. The sampled files
-are 8-bit unsigned CR radiographs with no native Window Center/Width, VOI LUT,
-Modality LUT, Rescale Slope/Intercept, or calibrated exposure metadata.
-Consequently, the exact DICOM `LINEAR` windows are controlled sensitivity
-settings rather than recovered vendor presets; the Poisson count budgets are
-synthetic dose-reduction proxies rather than patient-dose measurements; and the
-Gaussian kernels are ordered detector/processing-blur proxies rather than
-measured scanner transfer functions. Per-image min-max scaling can also cancel
-non-clipping affine changes. This raw-stage analysis is distinct from and more
-acquisition-motivated than the post-conversion digital corruption grid, but it
-still reuses the same 300 images and one checkpoint per detector. It does not
-establish clinical robustness, external-site transportability, scanner safety,
-or performance under a prospectively changed acquisition protocol.
+Batch 32 re-audited the ten pre-conversion synthetic shifts against the current
+DICOM standard. Although all 300 objects record `Modality=CR`, every object is
+actually Secondary Capture Image Storage, workstation-converted (`WSD`), 8-bit
+`MONOCHROME2`, and marked as previously lossily JPEG-compressed. All lack Pixel
+Intensity Relationship/Sign, Presentation Intent Type, Modality LUT/rescale,
+VOI LUT/Window Center/Width, processing descriptions, and calibrated exposure
+or detector-response metadata. The stored values therefore cannot be shown to
+be linear or logarithmic in incident X-ray signal, nor inverted reliably to
+such a scale.
+
+The DICOM `LINEAR` alternatives remain class-A display-transform sensitivity
+settings, not recovered vendor presets. The former dose conditions are class D
+for physical validity and retained only as class-B signal-dependent
+Poisson-like intensity perturbations; they are not dose/quantum-noise proxies
+and not validated low-dose acquisition simulations. Gaussian kernels are
+class-C generic blur/spatial-resolution proxies, not a detector MTF,
+reconstruction kernel, or scanner model. Per-image min-max scaling partly
+cancels the two center shifts and almost completely cancels the widened window
+(264/300 exact pixel identities), while it can re-stretch blur differences.
+DSI is only a descriptive performance-retention/domain-sensitivity index and
+does not estimate inter-site transportability. The historical detector outputs
+remain numerically valid for these synthetic sensitivities, so no inference was
+rerun. Neither stress test establishes clinical robustness, scanner safety, or
+performance under a prospectively changed acquisition protocol.
 
 ## Explainability scope
 
@@ -257,18 +280,42 @@ and records the environment, but Faster R-CNN CAM bytes may vary slightly on a
 different hardware/library rerun. More broadly, a plausible heatmap is a
 failure-analysis association map and not evidence of clinical reasoning.
 
-Batch 21 adds parameter- and data-randomization sanity checks on a nested
-50-image/41-patient subset of the same robustness pool. Near-zero correlations
-show sensitivity to learned weights and spatial input structure, but this is a
-necessary methodological check rather than evidence of causal or clinically
-appropriate attention. The sanity analysis uses a fixed trained reference
-region and pre-activation foreground score rather than Phase 7's ground-truth-
-associated post-activation target. It also excludes seven Faster R-CNN
-shuffled-input maps and four YOLO11s randomized-weight maps that become zero or
-constant; the one random initialization, severe out-of-distribution pixel
-permutation, and coarse interpolated maps limit generalization.
+Batch 31 corrects and extends the nested 50-image/41-patient control analysis.
+The historical Batch 21 “data randomization” label referred to inference-time
+within-image pixel-vector shuffling. It is retained only as an input-pixel
+randomization stress control and cannot establish sensitivity to the learned
+training data-label relationship. The canonical Adebayo training-label
+data-randomization test was not performed because it would require retraining
+identical detectors on randomized annotations and verifying that those tasks
+were fit. The historical all-weights reinitialization is a full
+model-parameter randomization control, not a cascading reproduction.
+
+The v2 extension adds six transparent cumulative head-to-input layer groups for
+each detector and compares independently normalized 40 by 40 maps with Pearson,
+tie-aware Spearman, and Gaussian-window SSIM. Low similarity after full-model
+randomization supports only parameter sensitivity under this audit. It does not
+establish anatomical correctness, causal faithfulness, clinical reasoning, or
+medical validity. The curve uses one deterministic random draw per stage, one
+seed-17 checkpoint per detector, and no inferential interval; its non-monotonic
+intermediate similarities should remain descriptive. Seven Faster R-CNN
+input-control maps and four YOLO11s full-randomization maps are zero or constant
+and excluded from all metrics rather than imputed.
+
+The control analysis also uses a fixed trained reference region and a
+pre-activation foreground target rather than Phase 7's ground-truth-associated
+post-activation target. Pixel permutation is a severe out-of-distribution
+perturbation. Faster R-CNN retains mean input-control SSIM 0.2468 despite
+near-zero mean Pearson and Spearman correlations, underscoring that no single
+similarity measure fully characterizes map persistence.
 
 ## Statistical scope
+
+All H1--H5 statements were recorded retrospectively after most result artifacts
+existed, and H6 was added as a retrospective descriptive calibration question.
+They are traceability devices, not preregistered or confirmatory hypotheses.
+H1 is compound, while its primary intervals are pointwise rather than a
+multiplicity-adjusted simultaneous family; therefore its all-endpoint pattern
+must not be presented as a prospectively controlled confirmatory test.
 
 Batch 13 identified and corrected the original image-level clustering error.
 The primary training-procedure bootstrap resamples all exams from each NIH
@@ -309,9 +356,19 @@ medical-device regulatory process, such as FDA clearance or CE marking. Those
 activities are beyond this project; mentioning them defines the boundary of the
 claims and is not an implementation deliverable.
 
-The Batch 23 CLAIM, TRIPOD+AI, and STARD-AI crosswalk is a repository-evidence
-audit, not certification of compliance. The evidence base still lacks source
-accrual dates, a local ethics/consent determination, registration,
-funding/conflict disclosures, patient/public involvement, a participant-flow
-diagram, demographic subgroup/fairness evaluation, and external evaluation.
-Narrative reporting cannot repair those gaps without new traceable evidence.
+The Batch 34 checklist assesses the current `report/paper_draft.md`, not the
+historical technical report. CLAIM 2024 is the primary medical-imaging AI
+framework, but the internal crosswalk is not an official completed submission
+checklist and does not establish compliance. Final STARD-AI 2025 is aimed at
+diagnostic-accuracy studies using an AI index test; this object-localization
+benchmark lacks a participant-level diagnostic index-test/reference-standard
+analysis and is used only by analogy. TRIPOD+AI is likewise used only by
+analogy because no individualized diagnostic or prognostic probability model
+is developed. The evidence base still lacks source accrual dates, an
+author-confirmed ethics/data-use and consent determination, funding and
+competing-interest declarations, author contributions, a release-ready
+data/code availability statement, patient/public involvement disclosure, a
+participant-flow diagram, demographic subgroup/fairness evaluation, and
+external testing. Narrative reporting cannot repair those gaps without new
+traceable evidence; the unresolved declarations are isolated in
+[`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md).
