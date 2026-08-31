@@ -16,6 +16,8 @@ device or diagnostic system.
 | [`report/report.md`](report/report.md) | **Historical/full technical report.** It is preserved as a detailed project record and is not the current paper. Do not rewrite it merely to mirror the manuscript. |
 | [`docs/`](docs/) | **Analysis, methodology, decision, and audit record.** These files explain provenance and scope but do not replace the manuscript. |
 | [`results/`](results/) | **Numerical source of truth.** Manuscript prose and tables are rounded views of these generated artifacts. |
+| [`results/scientific_artifact_manifest.json`](results/scientific_artifact_manifest.json) | **Frozen critical-artifact inventory.** Hashes, schemas, generators, configs, inputs, phases, and regeneration requirements. |
+| [`report/paper_claim_sources.yaml`](report/paper_claim_sources.yaml) | **Numerical claim bindings.** Exact source cells/calculations and manuscript rounding tolerances. |
 
 The consolidated scope statement is
 [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md), and the current reporting,
@@ -79,9 +81,30 @@ reproduction requires:
   `$HOME\.kaggle\kaggle.json`. Credentials must never be committed.
 
 Raw images, processed images, downloaded pretrained weights, and trained
-checkpoints are intentionally Git-ignored. The commands below regenerate them.
-The measured workstation used an RTX 4060 Laptop GPU with 8 GB VRAM, 16 GB RAM,
-and an i7-13650HX; timing will vary on other machines.
+checkpoints are intentionally Git-ignored. The commands below document their
+generation, but a Git checkout alone cannot regenerate inference or training
+evidence without those licensed/external inputs. The exact ten trained
+checkpoints still existed locally at the 2026-08-31 audit and are hash-bound in
+`results/checkpoint_release_manifest.json`; they have not been uploaded and no
+public download URL is claimed. The measured workstation used an RTX 4060
+Laptop GPU with 8 GB VRAM, 16 GB RAM, and an i7-13650HX; timing will vary on
+other machines.
+
+### Reproducibility boundary
+
+These are distinct claims; success at one level does not establish the next:
+
+| Level | Scope |
+|---|---|
+| Software tests pass | CI checks the locked CPU install, formatting/lint, tests, package smoke path, critical-artifact hashes/schemas/references, and selected manuscript claim bindings. It performs no training, large download, or GPU inference. |
+| Committed-analysis reproduction | CPU analysis commands replay derived evidence from frozen committed predictions/provenance. This does not recreate the predictions. |
+| Exact inference reproduction | Requires the exact ten checkpoint hashes, licensed/processed RSNA data, configs, pinned CUDA stack, and a compatible GPU. It is outside standard CI. |
+| Exact retraining reproducibility | Requires the original data and pretrained initialization plus the full ten-run GPU budget. Fixed seeds and environment make the protocol reproducible, but warning-only CUDA ROI Align nondeterminism prevents a bitwise-identity guarantee. It is outside standard CI. |
+
+Green CI means that the software and committed evidence snapshot pass their
+declared checks. It never means that all published results were regenerated
+from raw data. See `docs/REPRODUCIBILITY.md` for the full contract, environment
+lock roles, RNG controls, known nondeterminism, and checkpoint release audit.
 
 ## 1. Create the pinned environment
 
@@ -94,14 +117,16 @@ uv pip install --python .venv --no-deps --editable .
 $benchmarkPython = (Resolve-Path .\.venv\Scripts\python.exe).Path
 & $benchmarkPython -m pip check
 & $benchmarkPython -m pytest -q
-& $benchmarkPython -m ruff check src tests
+& $benchmarkPython -m ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py scripts/build_scientific_artifact_manifest.py
 ```
 
-`requirements.txt` is the authoritative exact dependency list. Each experiment
-also writes `pip_freeze.txt` and `run_environment.json` before CUDA
+`pyproject.toml` declares project dependencies, `uv.lock` is the CI resolver
+lock, `.python-version` fixes Python 3.11.15, and `requirements.txt` records the
+exact adopted CUDA-environment package versions for the setup above. Each
+experiment also writes `pip_freeze.txt` and `run_environment.json` before CUDA
 initialization. Deterministic algorithms use warning mode because the pinned
-Torchvision CUDA ROI Align backward used by Grad-CAM is not bitwise
-deterministic.
+Torchvision CUDA ROI Align backward used by Faster R-CNN/Grad-CAM is not
+bitwise deterministic.
 
 ## 2. Acquire and prepare the dataset
 
@@ -649,7 +674,10 @@ remain seed-17-only.
 
 Report and paper-draft values are rounded views of committed machine-readable
 artifacts; manuscript assembly does not recompute them. The index explicitly
-includes every executable analysis module added in Batches 18--23.
+includes every executable analysis module added in Batches 18--23. The
+scientific artifact manifest makes the manuscript-critical subset and its full
+hash/schema/config/input boundary machine-readable; the claim-source manifest
+adds exact bindings for central numerical prose and table claims.
 
 | Report or paper item | Generated source | Regenerating command |
 |---|---|---|
@@ -710,9 +738,12 @@ Every item in the benchmark's Definition of Done is satisfied:
   primary-seed 300-image/111-box robustness and explainability scope,
   augmentation choice, detector asymmetries, and RTX 4060 8 GB / 16 GB RAM
   constraints.
-- [x] **Clean-checkout reproduction commands.** Sections 1–8 above provide the
-  exact ordered commands and the artifact index maps every report table and
-  figure to its generating command.
+- [x] **Documented reproduction commands and boundary.** Sections 1–8 provide
+  the exact ordered commands and the artifact index maps report evidence to
+  generators. A clean checkout can run software verification and the committed
+  offline analyses whose frozen inputs are present; exact inference and
+  retraining additionally require the external data/checkpoints described
+  above.
 
 ## Repository verification
 
@@ -720,13 +751,17 @@ After a reproduction or code change, run:
 
 ```powershell
 & $benchmarkPython -m pytest -q
-& $benchmarkPython -m ruff check src tests
+& $benchmarkPython -m ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py scripts/build_scientific_artifact_manifest.py
+& $benchmarkPython scripts/verify_scientific_artifacts.py
+& $benchmarkPython scripts/verify_paper_claims.py
 git diff --check
 ```
 
-See `docs/REPRODUCIBILITY.md` for the seed/environment contract and the
-phase-specific documents under `docs/` for complete metric, corruption,
-Grad-CAM, and inference definitions.
+The two verifier commands are lightweight integrity/consistency checks over
+committed evidence; they do not regenerate models or predictions. See
+`docs/REPRODUCIBILITY.md` for the complete four-level boundary and the
+phase-specific documents under `docs/` for metric, corruption, Grad-CAM, and
+inference definitions.
 
 ## License
 
@@ -743,4 +778,9 @@ RSNA/NIH dataset and dataset-derived image content remain governed by the
 [RSNA challenge terms](https://www.rsna.org/-/media/files/rsna/education/ai-resources-and-training/ai-image-challenge/pneumonia-detection-challenge-terms-of-use-and-attribution.pdf);
 pretrained model weights and external dependencies remain governed by their
 respective licenses. Raw datasets and trained weights are not distributed in
-this repository.
+this repository. The 2026-08-31 audit found all ten exact best checkpoints
+locally and recorded their sizes/hashes in
+`results/checkpoint_release_manifest.json`. Public release is assessed as
+feasible only after the attribution, AGPL, Torchvision-pretraining permission,
+and serialized-metadata review described in `docs/REPRODUCIBILITY.md`. No
+checkpoint download link exists at present.

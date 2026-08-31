@@ -1,0 +1,3347 @@
+{
+  "schema_version": 1,
+  "manifest_purpose": "Hash and schema gate for the committed artifacts that directly support the current manuscript; this does not claim that CI reruns inference or training.",
+  "canonical_manuscript": "report/paper_draft.md",
+  "generated_by": "scripts/build_scientific_artifact_manifest.py",
+  "verification_command": "python scripts/verify_scientific_artifacts.py",
+  "manuscript_critical_paths": [
+    "data/manifests/rsna-pneumonia-5000-audit.json",
+    "results/logs/phase5_evaluation/summary.json",
+    "results/tables/detector_comparison.csv",
+    "results/tables/detector_comparison_per_seed.csv",
+    "results/logs/phase35_operating_regime_n5/threshold_summary.json",
+    "results/tables/threshold_sweep_n5_sensitivity.csv",
+    "results/tables/precision_recall_curves_n5_sensitivity.csv",
+    "results/figures/precision_recall_curves_n5_sensitivity.png",
+    "results/figures/f1_vs_threshold_n5_sensitivity.png",
+    "results/logs/phase35_operating_regime_n5/froc_summary.json",
+    "results/tables/froc_operating_points_n5_sensitivity.csv",
+    "results/figures/froc_curves_n5_sensitivity.png",
+    "results/logs/phase35_operating_regime_n5/pareto_summary.json",
+    "results/tables/pareto_summary_n5_sensitivity.csv",
+    "results/figures/pareto_frontier_n5_sensitivity.png",
+    "results/logs/phase35_operating_regime_n5/summary.json",
+    "results/tables/selected_operating_points_n5_sensitivity.csv",
+    "results/tables/operating_regime_n5_inventory.csv",
+    "results/tables/operating_regime_n3_vs_n5_conclusions.csv",
+    "results/logs/phase29_threshold_sensitivity/summary.json",
+    "results/tables/recall_weighted_fbeta_threshold_summary.csv",
+    "results/tables/recall_weighted_fbeta_threshold_stability.csv",
+    "results/tables/hypothetical_detection_error_loss_summary.csv",
+    "results/logs/phase33_calibration_support_v2/summary.json",
+    "results/tables/calibration_summary_v2.csv",
+    "results/tables/calibration_support_v2.csv",
+    "results/tables/calibration_sensitivity_v2.csv",
+    "results/figures/reliability_diagrams_confidence_marginal_v2.png",
+    "results/logs/phase23_reporting/raincloud_metrics_summary.json",
+    "results/figures/raincloud_metrics.png",
+    "results/logs/phase6_robustness/summary.json",
+    "results/tables/robustness_results.csv",
+    "results/figures/robustness_map_50_95_relative.png",
+    "results/logs/phase32_acquisition_shift_audit/summary.json",
+    "results/tables/acquisition_shift_dicom_metadata_audit.csv",
+    "results/tables/acquisition_shift_preprocessing_summary.csv",
+    "results/tables/radiography_synthetic_shift_results.csv",
+    "results/logs/phase7_explainability/summary.json",
+    "results/tables/gradcam_localization_summary.csv",
+    "results/logs/phase31_xai_sanity_v2/summary.json",
+    "results/tables/gradcam_sanity_v2_summary.csv",
+    "results/figures/gradcam_sanity_v2_panel.png",
+    "results/logs/phase8_statistics/summary.json",
+    "results/tables/statistical_clean_comparison.csv",
+    "results/tables/statistical_robustness_comparison.csv",
+    "results/tables/statistical_clean_leave_one_seed_label_out.csv"
+  ],
+  "artifacts": [
+    {
+      "path": "data/manifests/rsna-pneumonia-5000-audit.json",
+      "sha256": "75f08b27d4a1f1414e0a05cdbbb3d16daa0f60d844fedaa6fb3628840a473e9b",
+      "generating_script": "src/data/prepare.py",
+      "generating_script_sha256": "928d619e63b43b73dfb7d43648eb4fc1acdb9f8457056a858e862d780af23cbc",
+      "config": {
+        "path": "configs/dataset.yaml",
+        "sha256": "419ed20987cce95c61f7806d0913f09b9d3452df5e0b1ac2c091f8e6ff109693"
+      },
+      "input_artifacts": [
+        {
+          "path": "data/raw/rsna-pneumonia/stage_2_train_labels.csv",
+          "sha256": "bb40b7e956e9922a6b275ed4a158197568cf9ab618017d53db6159b1b624bb65",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "data/raw/rsna-pneumonia/stage_2_detailed_class_info.csv",
+          "sha256": "c004c12dea2042cc23e3b848f65e8cb2e725799afaa90f13ee81f854bcc9614d",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "data/raw/rsna-pneumonia/mappings.json",
+          "sha256": "803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27",
+          "availability": "external_or_ignored"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "audit",
+          "dataset_id",
+          "image_processing",
+          "input_counts",
+          "input_files",
+          "outputs",
+          "schema_version",
+          "split_group_overlap",
+          "splits",
+          "subsample"
+        ]
+      },
+      "study_phase": "Phase 2 - dataset preparation",
+      "reproduction_tier": "external_data_preparation",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase5_evaluation/summary.json",
+      "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+      "generating_script": "src/evaluate.py",
+      "generating_script_sha256": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+      "config": {
+        "path": "configs/evaluation.yaml",
+        "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test.csv",
+          "sha256": "9c9b1a71fb1340b96b7ae8f93bfa8e281ddb7ab2b9f5edcd4d1cdbd314646a6f",
+          "availability": "committed"
+        },
+        {
+          "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+          "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+          "availability": "external_or_ignored"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "annotation_count",
+          "artifacts",
+          "category_names",
+          "comparison",
+          "config_path",
+          "config_sha256",
+          "evaluation",
+          "experiment_id",
+          "image_count",
+          "mean_std",
+          "runs",
+          "schema_version",
+          "split",
+          "statistics",
+          "status",
+          "test_annotation_path",
+          "test_annotation_sha256",
+          "test_split_accessed"
+        ]
+      },
+      "study_phase": "Phase 5 - unified clean evaluation",
+      "reproduction_tier": "exact_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": [
+        "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+        "results/tables/detector_comparison.csv",
+        "results/tables/detector_comparison_mean_std.csv",
+        "results/tables/detector_comparison_per_seed.csv"
+      ]
+    },
+    {
+      "path": "results/tables/detector_comparison.csv",
+      "sha256": "c5f3181845d1fd3ea84ce39c1b8329080a8108217e5eee13281ae75f129818a1",
+      "generating_script": "src/evaluate.py",
+      "generating_script_sha256": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+      "config": {
+        "path": "configs/evaluation.yaml",
+        "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "metric",
+          "unit",
+          "faster_rcnn_mean",
+          "faster_rcnn_std",
+          "faster_rcnn_mean_plus_minus_std",
+          "faster_rcnn_n",
+          "faster_rcnn_attempted_n",
+          "faster_rcnn_undefined_seeds",
+          "faster_rcnn_undefined_reason",
+          "yolo11s_mean",
+          "yolo11s_std",
+          "yolo11s_mean_plus_minus_std",
+          "yolo11s_n",
+          "yolo11s_attempted_n",
+          "yolo11s_undefined_seeds",
+          "yolo11s_undefined_reason",
+          "sample_size_note"
+        ],
+        "exact_columns": [
+          "metric",
+          "unit",
+          "faster_rcnn_mean",
+          "faster_rcnn_std",
+          "faster_rcnn_mean_plus_minus_std",
+          "faster_rcnn_n",
+          "faster_rcnn_attempted_n",
+          "faster_rcnn_undefined_seeds",
+          "faster_rcnn_undefined_reason",
+          "yolo11s_mean",
+          "yolo11s_std",
+          "yolo11s_mean_plus_minus_std",
+          "yolo11s_n",
+          "yolo11s_attempted_n",
+          "yolo11s_undefined_seeds",
+          "yolo11s_undefined_reason",
+          "sample_size_note"
+        ],
+        "row_count": 14
+      },
+      "study_phase": "Phase 5 - unified clean evaluation",
+      "reproduction_tier": "exact_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/detector_comparison_per_seed.csv",
+      "sha256": "5d2bd5c1f2e2a6f666efbde49c9d6c30d047cb25e8326f5f90052233c14374e4",
+      "generating_script": "src/evaluate.py",
+      "generating_script_sha256": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+      "config": {
+        "path": "configs/evaluation.yaml",
+        "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "seed",
+          "run_id",
+          "best_epoch",
+          "completed_epochs",
+          "split",
+          "image_count",
+          "target_count",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "operating_point_prediction_count",
+          "coco_prediction_count",
+          "maximum_prediction_score",
+          "score_threshold",
+          "match_iou_threshold",
+          "coco_minimum_score",
+          "max_detections",
+          "precision",
+          "recall",
+          "f1",
+          "iou",
+          "dice",
+          "conditional_localization_defined",
+          "conditional_localization_undefined_reason",
+          "map_50",
+          "map_50_95",
+          "evaluation_inference_seconds",
+          "evaluation_fps",
+          "profile_fps",
+          "inference_time_ms",
+          "p50_inference_time_ms",
+          "p95_inference_time_ms",
+          "total_parameters",
+          "trainable_parameters",
+          "gflops",
+          "peak_gpu_memory_mib",
+          "training_time_seconds",
+          "checkpoint_size_mib",
+          "checkpoint_sha256",
+          "prediction_bundle"
+        ],
+        "exact_columns": [
+          "detector",
+          "seed",
+          "run_id",
+          "best_epoch",
+          "completed_epochs",
+          "split",
+          "image_count",
+          "target_count",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "operating_point_prediction_count",
+          "coco_prediction_count",
+          "maximum_prediction_score",
+          "score_threshold",
+          "match_iou_threshold",
+          "coco_minimum_score",
+          "max_detections",
+          "precision",
+          "recall",
+          "f1",
+          "iou",
+          "dice",
+          "conditional_localization_defined",
+          "conditional_localization_undefined_reason",
+          "map_50",
+          "map_50_95",
+          "evaluation_inference_seconds",
+          "evaluation_fps",
+          "profile_fps",
+          "inference_time_ms",
+          "p50_inference_time_ms",
+          "p95_inference_time_ms",
+          "total_parameters",
+          "trainable_parameters",
+          "gflops",
+          "peak_gpu_memory_mib",
+          "training_time_seconds",
+          "checkpoint_size_mib",
+          "checkpoint_sha256",
+          "prediction_bundle"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 5 - unified clean evaluation",
+      "reproduction_tier": "exact_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase35_operating_regime_n5/threshold_summary.json",
+      "sha256": "ec3ac7bdde29eef2475e1715ccaa35198da0693951dee1bf7740e2b6e828f306",
+      "generating_script": "src/evaluate_threshold_sweep.py",
+      "generating_script_sha256": "a1c0718c03fe5fcaa761f198b5eb56b639517a55c4778b5d58d0a821a5047de3",
+      "config": {
+        "path": "configs/threshold_sweep_n5_sensitivity.yaml",
+        "sha256": "6e28151b576306e26abacfbddff33f56fbcf6b480723399cb86f37ba91148a3c"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+          "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+          "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+          "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+          "sha256": "0f8c5d2e615f65d337b74126c0226f2bd3f5fd069660b47756d2461d22e04a44",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+          "sha256": "b0d11508dd7319ea3524f0c05658df95bdf81c28d169592a22eeb98ea964e316",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis",
+          "artifacts",
+          "coco_reproduction",
+          "config_path",
+          "config_sha256",
+          "counts",
+          "experiment_id",
+          "finding_summary",
+          "operating_targets",
+          "schema_version",
+          "source_identity",
+          "status",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 35 - five-run operating-regime sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/threshold_sweep_n5_sensitivity.csv",
+        "results/tables/threshold_sweep_per_seed_n5_sensitivity.csv",
+        "results/tables/precision_recall_curves_n5_sensitivity.csv",
+        "results/tables/precision_recall_curves_per_seed_n5_sensitivity.csv",
+        "results/tables/threshold_operating_targets_n5_sensitivity.csv",
+        "results/figures/precision_recall_curves_n5_sensitivity.png",
+        "results/figures/f1_vs_threshold_n5_sensitivity.png"
+      ]
+    },
+    {
+      "path": "results/tables/threshold_sweep_n5_sensitivity.csv",
+      "sha256": "faa0df49e86e710b51668d23588e736ffac03f0508040d38c97f3f38d4ca49ac",
+      "generating_script": "src/evaluate_threshold_sweep.py",
+      "generating_script_sha256": "a1c0718c03fe5fcaa761f198b5eb56b639517a55c4778b5d58d0a821a5047de3",
+      "config": {
+        "path": "configs/threshold_sweep_n5_sensitivity.yaml",
+        "sha256": "6e28151b576306e26abacfbddff33f56fbcf6b480723399cb86f37ba91148a3c"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/threshold_summary.json",
+          "sha256": "ec3ac7bdde29eef2475e1715ccaa35198da0693951dee1bf7740e2b6e828f306",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "threshold",
+          "seed_count",
+          "precision",
+          "precision_std",
+          "precision_mean_plus_minus_std",
+          "recall",
+          "recall_std",
+          "recall_mean_plus_minus_std",
+          "f1",
+          "f1_std",
+          "f1_mean_plus_minus_std"
+        ],
+        "exact_columns": [
+          "detector",
+          "threshold",
+          "seed_count",
+          "precision",
+          "precision_std",
+          "precision_mean_plus_minus_std",
+          "recall",
+          "recall_std",
+          "recall_mean_plus_minus_std",
+          "f1",
+          "f1_std",
+          "f1_mean_plus_minus_std"
+        ],
+        "row_count": 198
+      },
+      "study_phase": "Phase 35 - five-run operating-regime sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/precision_recall_curves_n5_sensitivity.csv",
+      "sha256": "c1635575ee9b135aacee4fcc1b98d4639bec66d31f6f6094b87a37c25b0feeee",
+      "generating_script": "src/evaluate_threshold_sweep.py",
+      "generating_script_sha256": "a1c0718c03fe5fcaa761f198b5eb56b639517a55c4778b5d58d0a821a5047de3",
+      "config": {
+        "path": "configs/threshold_sweep_n5_sensitivity.yaml",
+        "sha256": "6e28151b576306e26abacfbddff33f56fbcf6b480723399cb86f37ba91148a3c"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/threshold_summary.json",
+          "sha256": "ec3ac7bdde29eef2475e1715ccaa35198da0693951dee1bf7740e2b6e828f306",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "curve",
+          "iou_definition",
+          "recall",
+          "seed_count",
+          "precision",
+          "precision_std",
+          "average_precision",
+          "average_precision_std"
+        ],
+        "exact_columns": [
+          "detector",
+          "curve",
+          "iou_definition",
+          "recall",
+          "seed_count",
+          "precision",
+          "precision_std",
+          "average_precision",
+          "average_precision_std"
+        ],
+        "row_count": 404
+      },
+      "study_phase": "Phase 35 - five-run operating-regime sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/precision_recall_curves_n5_sensitivity.png",
+      "sha256": "30337dc86b20837ba0ac1b3432ef2cc1e43732cdde9447442dfd48a80b1da024",
+      "generating_script": "src/evaluate_threshold_sweep.py",
+      "generating_script_sha256": "a1c0718c03fe5fcaa761f198b5eb56b639517a55c4778b5d58d0a821a5047de3",
+      "config": {
+        "path": "configs/threshold_sweep_n5_sensitivity.yaml",
+        "sha256": "6e28151b576306e26abacfbddff33f56fbcf6b480723399cb86f37ba91148a3c"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/precision_recall_curves_n5_sensitivity.csv",
+          "sha256": "c1635575ee9b135aacee4fcc1b98d4639bec66d31f6f6094b87a37c25b0feeee",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 2270,
+        "height": 956
+      },
+      "study_phase": "Phase 35 - five-run operating-regime sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/f1_vs_threshold_n5_sensitivity.png",
+      "sha256": "f748c81806af668db39ffdb6b57d23ddda2b9722e5b7856e7fdfe1ff6d5adee2",
+      "generating_script": "src/evaluate_threshold_sweep.py",
+      "generating_script_sha256": "a1c0718c03fe5fcaa761f198b5eb56b639517a55c4778b5d58d0a821a5047de3",
+      "config": {
+        "path": "configs/threshold_sweep_n5_sensitivity.yaml",
+        "sha256": "6e28151b576306e26abacfbddff33f56fbcf6b480723399cb86f37ba91148a3c"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/threshold_sweep_n5_sensitivity.csv",
+          "sha256": "faa0df49e86e710b51668d23588e736ffac03f0508040d38c97f3f38d4ca49ac",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 1586,
+        "height": 1028
+      },
+      "study_phase": "Phase 35 - five-run operating-regime sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase35_operating_regime_n5/froc_summary.json",
+      "sha256": "66e67246e58262205fda67c6aeeb94ce723ed3b17dc4b51f8a6bfd3672c45b8e",
+      "generating_script": "src/plot_froc_curves.py",
+      "generating_script_sha256": "e08f469b33d1599cc7ba175963bb63a274506acbab2b74858c2f1024e87c2a36",
+      "config": {
+        "path": "configs/froc_n5_sensitivity.yaml",
+        "sha256": "c70c394fb9bc5ed45bf1de3241af3ebaf6ff0bcfec449952681e471cb3d2cc73"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/threshold_summary.json",
+          "sha256": "ec3ac7bdde29eef2475e1715ccaa35198da0693951dee1bf7740e2b6e828f306",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/threshold_sweep_per_seed_n5_sensitivity.csv",
+          "sha256": "fbc4d9d5fbf9250a906b65550ef172aef574fc88424e1d4ace19f9b918f32245",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "artifacts",
+          "config_path",
+          "config_sha256",
+          "counts",
+          "operating_points",
+          "operating_points_per_seed",
+          "protocol",
+          "schema_version",
+          "source_identity",
+          "status",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 35 - five-run FROC sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/froc_curves_n5_sensitivity.csv",
+        "results/tables/froc_curves_per_seed_n5_sensitivity.csv",
+        "results/tables/froc_operating_points_n5_sensitivity.csv",
+        "results/figures/froc_curves_n5_sensitivity.png"
+      ]
+    },
+    {
+      "path": "results/tables/froc_operating_points_n5_sensitivity.csv",
+      "sha256": "069b3d13f4c8e677506e8e9667debcda2c1b702539574c6715b1815a81c3d231",
+      "generating_script": "src/plot_froc_curves.py",
+      "generating_script_sha256": "e08f469b33d1599cc7ba175963bb63a274506acbab2b74858c2f1024e87c2a36",
+      "config": {
+        "path": "configs/froc_n5_sensitivity.yaml",
+        "sha256": "c70c394fb9bc5ed45bf1de3241af3ebaf6ff0bcfec449952681e471cb3d2cc73"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/froc_summary.json",
+          "sha256": "66e67246e58262205fda67c6aeeb94ce723ed3b17dc4b51f8a6bfd3672c45b8e",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "seed_count",
+          "sensitivity",
+          "sensitivity_std",
+          "sensitivity_mean_plus_minus_std",
+          "achieved_fp_per_image",
+          "achieved_fp_per_image_std",
+          "selected_threshold_mean",
+          "selected_threshold_min",
+          "selected_threshold_max",
+          "selection_rule"
+        ],
+        "exact_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "seed_count",
+          "sensitivity",
+          "sensitivity_std",
+          "sensitivity_mean_plus_minus_std",
+          "achieved_fp_per_image",
+          "achieved_fp_per_image_std",
+          "selected_threshold_mean",
+          "selected_threshold_min",
+          "selected_threshold_max",
+          "selection_rule"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 35 - five-run FROC sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/froc_curves_n5_sensitivity.png",
+      "sha256": "4b481f1193c6933dc14c48d09d28b653f09d0d1eef9ee2b1f83afb907738aa32",
+      "generating_script": "src/plot_froc_curves.py",
+      "generating_script_sha256": "e08f469b33d1599cc7ba175963bb63a274506acbab2b74858c2f1024e87c2a36",
+      "config": {
+        "path": "configs/froc_n5_sensitivity.yaml",
+        "sha256": "c70c394fb9bc5ed45bf1de3241af3ebaf6ff0bcfec449952681e471cb3d2cc73"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/froc_curves_n5_sensitivity.csv",
+          "sha256": "796c948edcfe971d5cf417846faa3cd11bf8fa218fc6e520b6531a8e1f20ddc0",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 1676,
+        "height": 1136
+      },
+      "study_phase": "Phase 35 - five-run FROC sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase35_operating_regime_n5/pareto_summary.json",
+      "sha256": "1db709b7b6f1079759c851af525a40f24a2ac726d31790214637e13d79a9a147",
+      "generating_script": "src/plot_pareto_frontier.py",
+      "generating_script_sha256": "70ab81331475a5d13c33e8e1f6db3bc181d3012f943e76a47a3a451c98e5c993",
+      "config": {
+        "path": "configs/pareto_n5_sensitivity.yaml",
+        "sha256": "c4dab8e779aec6ab657fc160fabedee72df64ad8a0a16ad4d1e643998f8e914f"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/detector_comparison_per_seed.csv",
+          "sha256": "5d2bd5c1f2e2a6f666efbde49c9d6c30d047cb25e8326f5f90052233c14374e4",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/selected_operating_points_per_seed_n5_sensitivity.csv",
+          "sha256": "ee834d9d95e24d139f9e404d3e395cab94ad57dd8782a3e32e70f8559987f13d",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "aggregate",
+          "aggregation",
+          "analysis_id",
+          "artifacts",
+          "config_path",
+          "config_sha256",
+          "dominance_by_panel",
+          "points",
+          "schema_version",
+          "scope",
+          "source_identity",
+          "status",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 35 - five-run Pareto sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/pareto_points_n5_sensitivity.csv",
+        "results/tables/pareto_summary_n5_sensitivity.csv",
+        "results/figures/pareto_frontier_n5_sensitivity.png"
+      ]
+    },
+    {
+      "path": "results/tables/pareto_summary_n5_sensitivity.csv",
+      "sha256": "495a166cc974c31ebc1c8ceb5fdbafe3c659b4429b440d02063310c326944261",
+      "generating_script": "src/plot_pareto_frontier.py",
+      "generating_script_sha256": "70ab81331475a5d13c33e8e1f6db3bc181d3012f943e76a47a3a451c98e5c993",
+      "config": {
+        "path": "configs/pareto_n5_sensitivity.yaml",
+        "sha256": "c4dab8e779aec6ab657fc160fabedee72df64ad8a0a16ad4d1e643998f8e914f"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/pareto_summary.json",
+          "sha256": "1db709b7b6f1079759c851af525a40f24a2ac726d31790214637e13d79a9a147",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "metric",
+          "unit",
+          "run_count",
+          "mean",
+          "sample_std"
+        ],
+        "exact_columns": [
+          "detector",
+          "metric",
+          "unit",
+          "run_count",
+          "mean",
+          "sample_std"
+        ],
+        "row_count": 12
+      },
+      "study_phase": "Phase 35 - five-run Pareto sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/pareto_frontier_n5_sensitivity.png",
+      "sha256": "05bd7041c38829ebc7836f51fafa347a0cff5dc23874616bfba62ac46030c3c7",
+      "generating_script": "src/plot_pareto_frontier.py",
+      "generating_script_sha256": "70ab81331475a5d13c33e8e1f6db3bc181d3012f943e76a47a3a451c98e5c993",
+      "config": {
+        "path": "configs/pareto_n5_sensitivity.yaml",
+        "sha256": "c4dab8e779aec6ab657fc160fabedee72df64ad8a0a16ad4d1e643998f8e914f"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/pareto_points_n5_sensitivity.csv",
+          "sha256": "4f9bf76b39a8fed05f723da351dcc68053355741b90a75847eae6571e9b163f1",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 2805,
+        "height": 1851
+      },
+      "study_phase": "Phase 35 - five-run Pareto sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase35_operating_regime_n5/summary.json",
+      "sha256": "297a395cb484c0e4628f3c68ff8dfb6a2c67a1b33fd7a1c3a24f21277de9a68a",
+      "generating_script": "src/analyze_operating_regime_sensitivity.py",
+      "generating_script_sha256": "49ee1d2d1e5018198a5d09f4438de4f649b650d3d9ec135b34fa396b55e763d8",
+      "config": {
+        "path": "configs/operating_regime_n5_sensitivity.yaml",
+        "sha256": "0857afcd16515f44d13acabd578becc9591c055659509fe421ea901271e45240"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/threshold_summary.json",
+          "sha256": "ec3ac7bdde29eef2475e1715ccaa35198da0693951dee1bf7740e2b6e828f306",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase35_operating_regime_n5/froc_summary.json",
+          "sha256": "66e67246e58262205fda67c6aeeb94ce723ed3b17dc4b51f8a6bfd3672c45b8e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase35_operating_regime_n5/pareto_summary.json",
+          "sha256": "1db709b7b6f1079759c851af525a40f24a2ac726d31790214637e13d79a9a147",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/summary.json",
+          "sha256": "4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "artifacts",
+          "conclusions",
+          "config_path",
+          "config_sha256",
+          "inventory",
+          "protocol",
+          "schema_version",
+          "source_identity",
+          "status",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 35 - operating-regime conclusion audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/selected_operating_points_n5_sensitivity.csv",
+        "results/tables/selected_operating_points_per_seed_n5_sensitivity.csv",
+        "results/tables/operating_regime_n5_inventory.csv",
+        "results/tables/operating_regime_n3_vs_n5_conclusions.csv"
+      ]
+    },
+    {
+      "path": "results/tables/selected_operating_points_n5_sensitivity.csv",
+      "sha256": "89693b860248999228f18c3fc8ede0007463b0e35378dc4894340f10ad7cb875",
+      "generating_script": "src/analyze_operating_regime_sensitivity.py",
+      "generating_script_sha256": "49ee1d2d1e5018198a5d09f4438de4f649b650d3d9ec135b34fa396b55e763d8",
+      "config": {
+        "path": "configs/operating_regime_n5_sensitivity.yaml",
+        "sha256": "0857afcd16515f44d13acabd578becc9591c055659509fe421ea901271e45240"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/summary.json",
+          "sha256": "297a395cb484c0e4628f3c68ff8dfb6a2c67a1b33fd7a1c3a24f21277de9a68a",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "selection_split",
+          "selection_rule",
+          "tie_breaker",
+          "selected_threshold",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "validation_precision",
+          "validation_precision_std",
+          "validation_recall",
+          "validation_recall_std",
+          "validation_f1",
+          "validation_f1_std",
+          "test_precision",
+          "test_precision_std",
+          "test_recall",
+          "test_recall_std",
+          "test_f1",
+          "test_f1_std"
+        ],
+        "exact_columns": [
+          "detector",
+          "selection_split",
+          "selection_rule",
+          "tie_breaker",
+          "selected_threshold",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "validation_precision",
+          "validation_precision_std",
+          "validation_recall",
+          "validation_recall_std",
+          "validation_f1",
+          "validation_f1_std",
+          "test_precision",
+          "test_precision_std",
+          "test_recall",
+          "test_recall_std",
+          "test_f1",
+          "test_f1_std"
+        ],
+        "row_count": 2
+      },
+      "study_phase": "Phase 35 - unchanged validation-threshold application",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/operating_regime_n5_inventory.csv",
+      "sha256": "c9ec9b72568a04c336ada51750d48cf85bf2b746c0449f044ec646c2e86919f5",
+      "generating_script": "src/analyze_operating_regime_sensitivity.py",
+      "generating_script_sha256": "49ee1d2d1e5018198a5d09f4438de4f649b650d3d9ec135b34fa396b55e763d8",
+      "config": {
+        "path": "configs/operating_regime_n5_sensitivity.yaml",
+        "sha256": "0857afcd16515f44d13acabd578becc9591c055659509fe421ea901271e45240"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/summary.json",
+          "sha256": "297a395cb484c0e4628f3c68ff8dfb6a2c67a1b33fd7a1c3a24f21277de9a68a",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "analysis",
+          "n5_recomputable",
+          "frozen_input_scope",
+          "historical_n3_artifact",
+          "n5_sensitivity_artifact",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "performs_training",
+          "reselects_threshold",
+          "uses_test_for_tuning",
+          "seed_271_policy"
+        ],
+        "exact_columns": [
+          "analysis",
+          "n5_recomputable",
+          "frozen_input_scope",
+          "historical_n3_artifact",
+          "n5_sensitivity_artifact",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "performs_training",
+          "reselects_threshold",
+          "uses_test_for_tuning",
+          "seed_271_policy"
+        ],
+        "row_count": 4
+      },
+      "study_phase": "Phase 35 - operating-regime conclusion audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/operating_regime_n3_vs_n5_conclusions.csv",
+      "sha256": "6af7172bac6a5d78df7f46574db40ff1974a5c4d15f07f829fb7c9a474b0d051",
+      "generating_script": "src/analyze_operating_regime_sensitivity.py",
+      "generating_script_sha256": "49ee1d2d1e5018198a5d09f4438de4f649b650d3d9ec135b34fa396b55e763d8",
+      "config": {
+        "path": "configs/operating_regime_n5_sensitivity.yaml",
+        "sha256": "0857afcd16515f44d13acabd578becc9591c055659509fe421ea901271e45240"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase35_operating_regime_n5/summary.json",
+          "sha256": "297a395cb484c0e4628f3c68ff8dfb6a2c67a1b33fd7a1c3a24f21277de9a68a",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "analysis",
+          "conclusion",
+          "n3_run_count",
+          "n5_run_count",
+          "n3_result",
+          "n5_result",
+          "n3_directional_margin",
+          "n5_directional_margin",
+          "classification",
+          "seed_271_effect"
+        ],
+        "exact_columns": [
+          "analysis",
+          "conclusion",
+          "n3_run_count",
+          "n5_run_count",
+          "n3_result",
+          "n5_result",
+          "n3_directional_margin",
+          "n5_directional_margin",
+          "classification",
+          "seed_271_effect"
+        ],
+        "row_count": 19
+      },
+      "study_phase": "Phase 35 - operating-regime conclusion audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase29_threshold_sensitivity/summary.json",
+      "sha256": "9e0ae11ac7a222f5a5da7a5594f8beb78c578833761d0b8d71c713944d4d8422",
+      "generating_script": "src/stats/threshold_calibration.py",
+      "generating_script_sha256": "a2df63f3f52ee1d543b41a049043c373cbe37999ea0c4d844e03969cc38f8f9d",
+      "config": {
+        "path": "configs/threshold_calibration.yaml",
+        "sha256": "ee3ed892c51c0437a31762894a4f51b110b644d7b5e9c6d1665c2cba72d32a34"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+          "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed17_validation_predictions.json.gz",
+          "sha256": "355413196476a14d87865ea20edc946f1e1b56e8320200d072a516d622160763",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed42_validation_predictions.json.gz",
+          "sha256": "6cc4b57a1cf7a789b5bb1a0af7d726db6417a024b65c1dea3b7bb1e69653afde",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed137_validation_predictions.json.gz",
+          "sha256": "14142327d8482e5cb8700d02bc293011c43a6191755d72db729bea3170467966",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed17_validation_predictions.json.gz",
+          "sha256": "7e42737d2d664acfb47a1bbb3552e4a21d0c44f44bde4b571e97d5e6b91cdab3",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed42_validation_predictions.json.gz",
+          "sha256": "2b3431029e208040f9e41c5a2865f260cf987e03f1424e289e0adc96a2e91478",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed137_validation_predictions.json.gz",
+          "sha256": "8d2caef6eb29cec81788ca3b9facf48c7bd6e44776074601a87df3dbcca38b89",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "accesses_test_split",
+          "analysis_id",
+          "artifacts",
+          "config_path",
+          "config_sha256",
+          "counts",
+          "hypothetical_detection_error_loss",
+          "hypothetical_loss_curves",
+          "hypothetical_loss_selected_operating_points",
+          "method",
+          "performs_inference",
+          "performs_training",
+          "schema_version",
+          "selected_operating_points",
+          "source_identity",
+          "status",
+          "threshold_curves",
+          "threshold_stability",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 29 - validation threshold sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/recall_weighted_fbeta_threshold_summary.csv",
+        "results/tables/recall_weighted_fbeta_threshold_stability.csv",
+        "results/tables/hypothetical_detection_error_loss_summary.csv",
+        "results/figures/recall_weighted_fbeta_threshold_sensitivity.png"
+      ]
+    },
+    {
+      "path": "results/tables/recall_weighted_fbeta_threshold_summary.csv",
+      "sha256": "25d3d085ff0c28329a5e85d2827ad5e490611c71eec1e17ec459d7bd8ef69504",
+      "generating_script": "src/stats/threshold_calibration.py",
+      "generating_script_sha256": "a2df63f3f52ee1d543b41a049043c373cbe37999ea0c4d844e03969cc38f8f9d",
+      "config": {
+        "path": "configs/threshold_calibration.yaml",
+        "sha256": "ee3ed892c51c0437a31762894a4f51b110b644d7b5e9c6d1665c2cba72d32a34"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase29_threshold_sensitivity/summary.json",
+          "sha256": "9e0ae11ac7a222f5a5da7a5594f8beb78c578833761d0b8d71c713944d4d8422",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "selection_split",
+          "beta",
+          "recall_to_precision_weight",
+          "beta_interpretation",
+          "selected_threshold",
+          "selection_boundary",
+          "primary_batch14_threshold",
+          "threshold_change_from_batch14",
+          "validation_precision",
+          "validation_recall",
+          "validation_f_beta",
+          "f_beta_ci_lower",
+          "f_beta_ci_upper",
+          "near_optimal_lcb_tolerance",
+          "near_optimal_plateau_start",
+          "near_optimal_plateau_end",
+          "near_optimal_plateau_width",
+          "near_optimal_plateau_candidate_count",
+          "bootstrap_selected_tau_ci_lower",
+          "bootstrap_selected_tau_median",
+          "bootstrap_selected_tau_ci_upper",
+          "bootstrap_modal_selected_tau",
+          "bootstrap_modal_selection_frequency",
+          "canonical_tau_bootstrap_selection_frequency",
+          "confidence_level",
+          "bootstrap_resamples",
+          "bootstrap_valid_resamples",
+          "patient_group_count",
+          "validation_image_count",
+          "seed_count",
+          "bootstrap_method",
+          "seed_aggregation",
+          "selection_rule",
+          "tie_breaker",
+          "relationship_to_primary_threshold"
+        ],
+        "exact_columns": [
+          "detector",
+          "selection_split",
+          "beta",
+          "recall_to_precision_weight",
+          "beta_interpretation",
+          "selected_threshold",
+          "selection_boundary",
+          "primary_batch14_threshold",
+          "threshold_change_from_batch14",
+          "validation_precision",
+          "validation_recall",
+          "validation_f_beta",
+          "f_beta_ci_lower",
+          "f_beta_ci_upper",
+          "near_optimal_lcb_tolerance",
+          "near_optimal_plateau_start",
+          "near_optimal_plateau_end",
+          "near_optimal_plateau_width",
+          "near_optimal_plateau_candidate_count",
+          "bootstrap_selected_tau_ci_lower",
+          "bootstrap_selected_tau_median",
+          "bootstrap_selected_tau_ci_upper",
+          "bootstrap_modal_selected_tau",
+          "bootstrap_modal_selection_frequency",
+          "canonical_tau_bootstrap_selection_frequency",
+          "confidence_level",
+          "bootstrap_resamples",
+          "bootstrap_valid_resamples",
+          "patient_group_count",
+          "validation_image_count",
+          "seed_count",
+          "bootstrap_method",
+          "seed_aggregation",
+          "selection_rule",
+          "tie_breaker",
+          "relationship_to_primary_threshold"
+        ],
+        "row_count": 8
+      },
+      "study_phase": "Phase 29 - validation threshold sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/recall_weighted_fbeta_threshold_stability.csv",
+      "sha256": "e41c13e8ad575462c7461406c0f9a59c317d979de424a45a9679a465a912a674",
+      "generating_script": "src/stats/threshold_calibration.py",
+      "generating_script_sha256": "a2df63f3f52ee1d543b41a049043c373cbe37999ea0c4d844e03969cc38f8f9d",
+      "config": {
+        "path": "configs/threshold_calibration.yaml",
+        "sha256": "ee3ed892c51c0437a31762894a4f51b110b644d7b5e9c6d1665c2cba72d32a34"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase29_threshold_sensitivity/summary.json",
+          "sha256": "9e0ae11ac7a222f5a5da7a5594f8beb78c578833761d0b8d71c713944d4d8422",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "selection_split",
+          "beta",
+          "recall_to_precision_weight",
+          "candidate_threshold",
+          "canonical_selected_threshold",
+          "canonical_selection_rule",
+          "f_beta_ci_lower",
+          "near_optimal_lcb_tolerance",
+          "in_near_optimal_plateau",
+          "near_optimal_plateau_start",
+          "near_optimal_plateau_end",
+          "near_optimal_plateau_width",
+          "near_optimal_plateau_candidate_count",
+          "bootstrap_selection_count",
+          "bootstrap_selection_frequency",
+          "bootstrap_resamples",
+          "bootstrap_selection_rule",
+          "tie_breaker"
+        ],
+        "exact_columns": [
+          "detector",
+          "selection_split",
+          "beta",
+          "recall_to_precision_weight",
+          "candidate_threshold",
+          "canonical_selected_threshold",
+          "canonical_selection_rule",
+          "f_beta_ci_lower",
+          "near_optimal_lcb_tolerance",
+          "in_near_optimal_plateau",
+          "near_optimal_plateau_start",
+          "near_optimal_plateau_end",
+          "near_optimal_plateau_width",
+          "near_optimal_plateau_candidate_count",
+          "bootstrap_selection_count",
+          "bootstrap_selection_frequency",
+          "bootstrap_resamples",
+          "bootstrap_selection_rule",
+          "tie_breaker"
+        ],
+        "row_count": 792
+      },
+      "study_phase": "Phase 29 - validation threshold sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/hypothetical_detection_error_loss_summary.csv",
+      "sha256": "edd0564fc62edf3122b46cb7402a22e6706e64ed3de6f420a6d8f810164a8105",
+      "generating_script": "src/stats/threshold_calibration.py",
+      "generating_script_sha256": "a2df63f3f52ee1d543b41a049043c373cbe37999ea0c4d844e03969cc38f8f9d",
+      "config": {
+        "path": "configs/threshold_calibration.yaml",
+        "sha256": "ee3ed892c51c0437a31762894a4f51b110b644d7b5e9c6d1665c2cba72d32a34"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase29_threshold_sensitivity/summary.json",
+          "sha256": "9e0ae11ac7a222f5a5da7a5594f8beb78c578833761d0b8d71c713944d4d8422",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "selection_split",
+          "hypothetical_fn_to_fp_loss_ratio",
+          "assumption_status",
+          "selected_threshold",
+          "selection_boundary",
+          "validation_precision",
+          "validation_recall",
+          "validation_false_negatives_per_image",
+          "validation_false_positives_per_image",
+          "validation_hypothetical_loss_per_image",
+          "loss_ci_lower",
+          "loss_ci_upper",
+          "confidence_level",
+          "bootstrap_resamples",
+          "bootstrap_valid_resamples",
+          "patient_group_count",
+          "validation_image_count",
+          "seed_count",
+          "normalization_unit",
+          "selection_rule",
+          "tie_breaker",
+          "relationship_to_f_beta",
+          "relationship_to_primary_threshold"
+        ],
+        "exact_columns": [
+          "detector",
+          "selection_split",
+          "hypothetical_fn_to_fp_loss_ratio",
+          "assumption_status",
+          "selected_threshold",
+          "selection_boundary",
+          "validation_precision",
+          "validation_recall",
+          "validation_false_negatives_per_image",
+          "validation_false_positives_per_image",
+          "validation_hypothetical_loss_per_image",
+          "loss_ci_lower",
+          "loss_ci_upper",
+          "confidence_level",
+          "bootstrap_resamples",
+          "bootstrap_valid_resamples",
+          "patient_group_count",
+          "validation_image_count",
+          "seed_count",
+          "normalization_unit",
+          "selection_rule",
+          "tie_breaker",
+          "relationship_to_f_beta",
+          "relationship_to_primary_threshold"
+        ],
+        "row_count": 8
+      },
+      "study_phase": "Phase 29 - hypothetical detection-error loss",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase33_calibration_support_v2/summary.json",
+      "sha256": "a4461b3c399fd7a002d3f4d1f38475e482340c0611dcea6fb9df905369907e31",
+      "generating_script": "src/stats/calibration.py",
+      "generating_script_sha256": "86105a00e64d11785057d118fe54521d854dc9839b1e8ec14db2d2567e499583",
+      "config": {
+        "path": "configs/calibration.yaml",
+        "sha256": "bad08a237dc0af0171a0aa9790138a5336289abaf580cc174e817b041b367eea"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+          "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+          "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+          "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+          "sha256": "0f8c5d2e615f65d337b74126c0226f2bd3f5fd069660b47756d2461d22e04a44",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+          "sha256": "b0d11508dd7319ea3524f0c05658df95bdf81c28d169592a22eeb98ea964e316",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "artifacts",
+          "detector_summaries",
+          "exam_level_probability_calibration",
+          "experiment_id",
+          "implementation",
+          "method",
+          "pooled_reliability_bins_confidence_only_marginal",
+          "primary_multivariate_cells",
+          "reliability_bins_confidence_only_marginal",
+          "run_rows",
+          "schema_version",
+          "seeds",
+          "sensitivity",
+          "sensitivity_rows",
+          "source",
+          "status",
+          "support_rows"
+        ]
+      },
+      "study_phase": "Phase 33 - detection calibration support audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/calibration_summary_v2.csv",
+        "results/tables/calibration_support_v2.csv",
+        "results/tables/calibration_sensitivity_v2.csv",
+        "results/figures/reliability_diagrams_confidence_marginal_v2.png",
+        "results/figures/calibration_support_occupancy_v2.png",
+        "results/figures/calibration_binning_sensitivity_v2.png",
+        "results/figures/calibration_confidence_floor_sensitivity_v2.png"
+      ]
+    },
+    {
+      "path": "results/tables/calibration_summary_v2.csv",
+      "sha256": "69a7c1457894487b96fc200deccaa6aabfb49f3a8068ac379bca5d9db975ef92",
+      "generating_script": "src/stats/calibration.py",
+      "generating_script_sha256": "86105a00e64d11785057d118fe54521d854dc9839b1e8ec14db2d2567e499583",
+      "config": {
+        "path": "configs/calibration.yaml",
+        "sha256": "bad08a237dc0af0171a0aa9790138a5336289abaf580cc174e817b041b367eea"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase33_calibration_support_v2/summary.json",
+          "sha256": "a4461b3c399fd7a002d3f4d1f38475e482340c0611dcea6fb9df905369907e31",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "row_type",
+          "detector",
+          "seed",
+          "run_count",
+          "total_detections",
+          "matched_true_positives",
+          "false_positives",
+          "mean_confidence",
+          "fraction_true_positives",
+          "global_calibration_gap",
+          "maximum_confidence",
+          "detection_ece",
+          "detection_ece_std",
+          "detection_ece_mean_plus_minus_std",
+          "detection_ece_defined",
+          "class_count",
+          "total_possible_multidimensional_cells",
+          "occupied_cells",
+          "supported_cells",
+          "detections_in_supported_cells",
+          "fraction_detections_in_supported_cells",
+          "supported_cell_size_median",
+          "supported_cell_size_min",
+          "supported_cell_size_max",
+          "prediction_score_floor",
+          "match_iou_threshold",
+          "max_detections_per_image",
+          "numeric_calibration_dimensions",
+          "class_handling",
+          "bins_per_dimension",
+          "minimum_samples_per_cell"
+        ],
+        "exact_columns": [
+          "row_type",
+          "detector",
+          "seed",
+          "run_count",
+          "total_detections",
+          "matched_true_positives",
+          "false_positives",
+          "mean_confidence",
+          "fraction_true_positives",
+          "global_calibration_gap",
+          "maximum_confidence",
+          "detection_ece",
+          "detection_ece_std",
+          "detection_ece_mean_plus_minus_std",
+          "detection_ece_defined",
+          "class_count",
+          "total_possible_multidimensional_cells",
+          "occupied_cells",
+          "supported_cells",
+          "detections_in_supported_cells",
+          "fraction_detections_in_supported_cells",
+          "supported_cell_size_median",
+          "supported_cell_size_min",
+          "supported_cell_size_max",
+          "prediction_score_floor",
+          "match_iou_threshold",
+          "max_detections_per_image",
+          "numeric_calibration_dimensions",
+          "class_handling",
+          "bins_per_dimension",
+          "minimum_samples_per_cell"
+        ],
+        "row_count": 12
+      },
+      "study_phase": "Phase 33 - detection calibration support audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/calibration_support_v2.csv",
+      "sha256": "8e1b842cd09a73bf9511a62807f736d50014d72e1a46ffd15a02631f010dc708",
+      "generating_script": "src/stats/calibration.py",
+      "generating_script_sha256": "86105a00e64d11785057d118fe54521d854dc9839b1e8ec14db2d2567e499583",
+      "config": {
+        "path": "configs/calibration.yaml",
+        "sha256": "bad08a237dc0af0171a0aa9790138a5336289abaf580cc174e817b041b367eea"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase33_calibration_support_v2/summary.json",
+          "sha256": "a4461b3c399fd7a002d3f4d1f38475e482340c0611dcea6fb9df905369907e31",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "seed",
+          "total_detections_entering_calibration",
+          "class_count",
+          "total_possible_multidimensional_cells",
+          "occupied_cells",
+          "cells_meeting_minimum_support",
+          "detections_in_supported_cells",
+          "fraction_detections_contributing_to_supported_cells",
+          "supported_cell_size_median",
+          "supported_cell_size_min",
+          "supported_cell_size_max",
+          "detection_ece",
+          "detection_ece_defined",
+          "prediction_score_floor",
+          "bins_per_dimension",
+          "minimum_samples_per_cell"
+        ],
+        "exact_columns": [
+          "detector",
+          "seed",
+          "total_detections_entering_calibration",
+          "class_count",
+          "total_possible_multidimensional_cells",
+          "occupied_cells",
+          "cells_meeting_minimum_support",
+          "detections_in_supported_cells",
+          "fraction_detections_contributing_to_supported_cells",
+          "supported_cell_size_median",
+          "supported_cell_size_min",
+          "supported_cell_size_max",
+          "detection_ece",
+          "detection_ece_defined",
+          "prediction_score_floor",
+          "bins_per_dimension",
+          "minimum_samples_per_cell"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 33 - detection calibration support audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/calibration_sensitivity_v2.csv",
+      "sha256": "b7461af1abf7f52ce75e4b86cf909ca76d879c2ae2326043f4058ce966edc8c1",
+      "generating_script": "src/stats/calibration.py",
+      "generating_script_sha256": "86105a00e64d11785057d118fe54521d854dc9839b1e8ec14db2d2567e499583",
+      "config": {
+        "path": "configs/calibration.yaml",
+        "sha256": "bad08a237dc0af0171a0aa9790138a5336289abaf580cc174e817b041b367eea"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase33_calibration_support_v2/summary.json",
+          "sha256": "a4461b3c399fd7a002d3f4d1f38475e482340c0611dcea6fb9df905369907e31",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "sensitivity_type",
+          "detector",
+          "seed",
+          "equal_bins_per_dimension",
+          "bins_per_dimension",
+          "minimum_samples_per_cell",
+          "confidence_floor",
+          "is_original_setting",
+          "detection_ece",
+          "detection_ece_defined",
+          "undefined_reason",
+          "total_detections_entering_calibration",
+          "baseline_floor_detection_count",
+          "detections_removed_from_baseline_floor",
+          "fraction_baseline_detections_retained",
+          "total_possible_multidimensional_cells",
+          "occupied_cells",
+          "cells_meeting_minimum_support",
+          "detections_in_supported_cells",
+          "fraction_detections_contributing_to_supported_cells",
+          "supported_cell_size_median",
+          "supported_cell_size_min",
+          "supported_cell_size_max"
+        ],
+        "exact_columns": [
+          "sensitivity_type",
+          "detector",
+          "seed",
+          "equal_bins_per_dimension",
+          "bins_per_dimension",
+          "minimum_samples_per_cell",
+          "confidence_floor",
+          "is_original_setting",
+          "detection_ece",
+          "detection_ece_defined",
+          "undefined_reason",
+          "total_detections_entering_calibration",
+          "baseline_floor_detection_count",
+          "detections_removed_from_baseline_floor",
+          "fraction_baseline_detections_retained",
+          "total_possible_multidimensional_cells",
+          "occupied_cells",
+          "cells_meeting_minimum_support",
+          "detections_in_supported_cells",
+          "fraction_detections_contributing_to_supported_cells",
+          "supported_cell_size_median",
+          "supported_cell_size_min",
+          "supported_cell_size_max"
+        ],
+        "row_count": 160
+      },
+      "study_phase": "Phase 33 - detection calibration support audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/reliability_diagrams_confidence_marginal_v2.png",
+      "sha256": "9cc56b16903d8937c4669027f4b97d1b469576c58ca370201ce2fa940f106a65",
+      "generating_script": "src/stats/calibration.py",
+      "generating_script_sha256": "86105a00e64d11785057d118fe54521d854dc9839b1e8ec14db2d2567e499583",
+      "config": {
+        "path": "configs/calibration.yaml",
+        "sha256": "bad08a237dc0af0171a0aa9790138a5336289abaf580cc174e817b041b367eea"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/calibration_summary_v2.csv",
+          "sha256": "69a7c1457894487b96fc200deccaa6aabfb49f3a8068ac379bca5d9db975ef92",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 2380,
+        "height": 1067
+      },
+      "study_phase": "Phase 33 - detection calibration support audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase23_reporting/raincloud_metrics_summary.json",
+      "sha256": "e50ebf71542aef812a629744b39fca10dacec8d6fc72d688ca5c221167c4242b",
+      "generating_script": "src/plot_raincloud_metrics.py",
+      "generating_script_sha256": "685d0db02ab1b9e12bc84578062975900e2c469d619b719d73eba2a4854678b4",
+      "config": {
+        "path": "configs/raincloud_metrics.yaml",
+        "sha256": "a615f158e197b6f93d8fc1c7ee22a344a637ec38cefe6cc4e0eb81ec858ce834"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/detector_comparison.csv",
+          "sha256": "c5f3181845d1fd3ea84ce39c1b8329080a8108217e5eee13281ae75f129818a1",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/detector_comparison_per_seed.csv",
+          "sha256": "5d2bd5c1f2e2a6f666efbde49c9d6c30d047cb25e8326f5f90052233c14374e4",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "figure",
+          "figure_sha256",
+          "inputs",
+          "metrics",
+          "schema_version"
+        ]
+      },
+      "study_phase": "Phase 23 - seed-distribution visualization",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/figures/raincloud_metrics.png"
+      ]
+    },
+    {
+      "path": "results/figures/raincloud_metrics.png",
+      "sha256": "0ffdfcf0667c752dfe43bac413caf0202991b5466bc7c322b9e6d33f1128ea4c",
+      "generating_script": "src/plot_raincloud_metrics.py",
+      "generating_script_sha256": "685d0db02ab1b9e12bc84578062975900e2c469d619b719d73eba2a4854678b4",
+      "config": {
+        "path": "configs/raincloud_metrics.yaml",
+        "sha256": "a615f158e197b6f93d8fc1c7ee22a344a637ec38cefe6cc4e0eb81ec858ce834"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase23_reporting/raincloud_metrics_summary.json",
+          "sha256": "e50ebf71542aef812a629744b39fca10dacec8d6fc72d688ca5c221167c4242b",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 2906,
+        "height": 2730
+      },
+      "study_phase": "Phase 23 - seed-distribution visualization",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase6_robustness/summary.json",
+      "sha256": "4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b",
+      "generating_script": "src/robustness/run_robustness.py",
+      "generating_script_sha256": "78f2cef6899f229073ca8c10299f192b9f32ec09655a8cb70c8b431b321c79d5",
+      "config": {
+        "path": "configs/corruptions.yaml",
+        "sha256": "f0b86d036209c0ce73f7041a9a5c9f848b1632035bf1b69fd829ecd84b0113af"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv",
+          "sha256": "63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "artifacts",
+          "config_path",
+          "config_sha256",
+          "corruption_fingerprint",
+          "evaluation",
+          "experiment_id",
+          "family_means",
+          "grid",
+          "prediction_bundles",
+          "results",
+          "sampling",
+          "schema_version",
+          "seed_scope",
+          "source_identity",
+          "status"
+        ]
+      },
+      "study_phase": "Phase 6 - common-corruption robustness",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": [
+        "results/logs/phase6_robustness/predictions/faster_rcnn__brighter_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__brighter_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__brighter_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__brighter_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__brighter_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__clean.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__darker_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__darker_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__darker_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__darker_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__darker_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_blur_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_blur_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_blur_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_blur_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_blur_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_noise_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_noise_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_noise_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_noise_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__gaussian_noise_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__jpeg_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__jpeg_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__jpeg_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__jpeg_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__jpeg_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__motion_blur_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__motion_blur_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__motion_blur_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__motion_blur_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__motion_blur_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__salt_and_pepper_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__salt_and_pepper_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__salt_and_pepper_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__salt_and_pepper_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/faster_rcnn__salt_and_pepper_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__brighter_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__brighter_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__brighter_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__brighter_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__brighter_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__clean.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__darker_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__darker_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__darker_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__darker_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__darker_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_blur_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_blur_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_blur_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_blur_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_blur_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_noise_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_noise_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_noise_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_noise_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__gaussian_noise_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__jpeg_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__jpeg_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__jpeg_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__jpeg_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__jpeg_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__motion_blur_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__motion_blur_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__motion_blur_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__motion_blur_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__motion_blur_s5.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__salt_and_pepper_s1.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__salt_and_pepper_s2.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__salt_and_pepper_s3.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__salt_and_pepper_s4.json.gz",
+        "results/logs/phase6_robustness/predictions/yolo11s__salt_and_pepper_s5.json.gz",
+        "results/tables/robustness_results.csv",
+        "results/tables/robustness_curves.csv",
+        "results/tables/robustness_family_mean_curves.csv",
+        "results/figures/robustness_map_50_95_raw.png",
+        "results/figures/robustness_map_50_95_relative.png"
+      ]
+    },
+    {
+      "path": "results/tables/robustness_results.csv",
+      "sha256": "eadbc2cacde2724052f30f25c4a88db1fd31c2a1b994f91516a9044c137ba2ee",
+      "generating_script": "src/robustness/run_robustness.py",
+      "generating_script_sha256": "78f2cef6899f229073ca8c10299f192b9f32ec09655a8cb70c8b431b321c79d5",
+      "config": {
+        "path": "configs/corruptions.yaml",
+        "sha256": "f0b86d036209c0ce73f7041a9a5c9f848b1632035bf1b69fd829ecd84b0113af"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase6_robustness/summary.json",
+          "sha256": "4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "condition_id",
+          "family",
+          "corruption",
+          "kind",
+          "severity",
+          "value",
+          "unit",
+          "image_count",
+          "target_count",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "inference_seconds",
+          "prediction_bundle",
+          "prediction_bundle_sha256",
+          "precision",
+          "precision_relative",
+          "precision_degradation",
+          "recall",
+          "recall_relative",
+          "recall_degradation",
+          "f1",
+          "f1_relative",
+          "f1_degradation",
+          "iou",
+          "iou_relative",
+          "iou_degradation",
+          "dice",
+          "dice_relative",
+          "dice_degradation",
+          "map_50",
+          "map_50_relative",
+          "map_50_degradation",
+          "map_50_95",
+          "map_50_95_relative",
+          "map_50_95_degradation"
+        ],
+        "exact_columns": [
+          "detector",
+          "condition_id",
+          "family",
+          "corruption",
+          "kind",
+          "severity",
+          "value",
+          "unit",
+          "image_count",
+          "target_count",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "inference_seconds",
+          "prediction_bundle",
+          "prediction_bundle_sha256",
+          "precision",
+          "precision_relative",
+          "precision_degradation",
+          "recall",
+          "recall_relative",
+          "recall_degradation",
+          "f1",
+          "f1_relative",
+          "f1_degradation",
+          "iou",
+          "iou_relative",
+          "iou_degradation",
+          "dice",
+          "dice_relative",
+          "dice_degradation",
+          "map_50",
+          "map_50_relative",
+          "map_50_degradation",
+          "map_50_95",
+          "map_50_95_relative",
+          "map_50_95_degradation"
+        ],
+        "row_count": 72
+      },
+      "study_phase": "Phase 6 - common-corruption robustness",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/robustness_map_50_95_relative.png",
+      "sha256": "115fad32af64fd705c35ec55185ba1d885d583986dda5ede699b62eb6039285b",
+      "generating_script": "src/robustness/run_robustness.py",
+      "generating_script_sha256": "78f2cef6899f229073ca8c10299f192b9f32ec09655a8cb70c8b431b321c79d5",
+      "config": {
+        "path": "configs/corruptions.yaml",
+        "sha256": "f0b86d036209c0ce73f7041a9a5c9f848b1632035bf1b69fd829ecd84b0113af"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/robustness_curves.csv",
+          "sha256": "90cad59d5c0a706a66b8dc485cf2622456de598a1bdeb54ca276dce9496ddf96",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 3060,
+        "height": 1530
+      },
+      "study_phase": "Phase 6 - common-corruption robustness",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase32_acquisition_shift_audit/summary.json",
+      "sha256": "4c603e84d134011a3c5aec7da80293f8f8ab9c7f363fd8b56c74d4f6fee88bd6",
+      "generating_script": "src/robustness/radiography_shifts.py",
+      "generating_script_sha256": "bb75f8d5a9a199045d9ce2e4d56d396b9b3c6d9443e930f759e1d8ae1ffa2063",
+      "config": {
+        "path": "configs/acquisition_shifts.yaml",
+        "sha256": "07731bdbb87d908acd4e1145998f8c828aec2c6fb8ff5bffac69ebba02e9ea83"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase22_acquisition_shifts/summary.json",
+          "sha256": "4782ac7cba8429f6a5968c25272160110fc5add92820ef02c0414a12b043f692",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv",
+          "sha256": "63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__gaussian_kernel_3.json.gz",
+          "sha256": "2d030ae972dad7ce1c2024a8f17fb925baa3aa8fb90b270709c9c54d56ef8814",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__gaussian_kernel_5.json.gz",
+          "sha256": "a89c31d0f8c0b8f925c423f69ae1edbc3d08e38834d3ddab7287564823491971",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__gaussian_kernel_9.json.gz",
+          "sha256": "034e2d98492ab6a87f1b798972f3d9cae6510509aacc7e55b38b3c0413ff05be",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__poisson_dose_12p5pct.json.gz",
+          "sha256": "53385ac857578c897f940e4086f6202b399e39628d4af19d61a6c1f17ca450c0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__poisson_dose_25pct.json.gz",
+          "sha256": "62a51299760fd1ffd08b2bacc4da654a6c751b12498c0e9e0636b8c76488919f",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__poisson_dose_50pct.json.gz",
+          "sha256": "1f6122674a302650a8c24098116a6195c1eb1c8905f78494c9408709fea9da29",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_center_higher.json.gz",
+          "sha256": "22766321e31a0fba0ebfae5468f55ca41f8c1126f2f4039067604074b429d2c4",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_center_lower.json.gz",
+          "sha256": "ac87b2b8ce44ba3c8dc2dcc0dedb6081c3ac95dc3f35033b65d9b27f30fc0d9e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_width_narrow.json.gz",
+          "sha256": "ec4cd652a582ec72a3caf8adc6b429f9eeaa189cc2f557dcfd6b6624ca783708",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_width_wide.json.gz",
+          "sha256": "c6e52bd8c4f78f6c1b6392f86552f0d2d12ce05f7e1770ab46267f03bbaab2d9",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__gaussian_kernel_3.json.gz",
+          "sha256": "73375fd1d1b1e53b16b961ffad9d96464428b8b3809f94e0d0bb8cec5cfd39e0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__gaussian_kernel_5.json.gz",
+          "sha256": "bb7ea12c2ff21483a6fe3ae10b53a8dd5ac459779e02ad43d03153b1c5933c0d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__gaussian_kernel_9.json.gz",
+          "sha256": "1f4c3f51b72039dc9995ca816bb12ae9975958e00cdee93c61e4e48f2608de10",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__poisson_dose_12p5pct.json.gz",
+          "sha256": "6a7fbadbeeb0113aedd9ef5028fa15985e56d13522d417c091841ceafa7f5f6c",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__poisson_dose_25pct.json.gz",
+          "sha256": "917d039c34fa93cae4153ac82ed44b9835c69b0fd2d7b46c2d70fb40ec8c2550",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__poisson_dose_50pct.json.gz",
+          "sha256": "dd7e3156566ec263478c5704eec81e0d374814015e245c640018d6f377d72efa",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_center_higher.json.gz",
+          "sha256": "a9b19aac698218e409e9af9fe308f7b0251c921756fd7d3f4287b92edd5f8a91",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_center_lower.json.gz",
+          "sha256": "372a0fd42c21be12b3d52929b5b6489285b3c98e60d73dbb4a34dfd181f25f26",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_width_narrow.json.gz",
+          "sha256": "2583317cc7d73bb92ec92ac4195a95afba93edcbf57a1a3c104feebe98fc3c64",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_width_wide.json.gz",
+          "sha256": "d40ac291cf68b7637ed29efcf977091e55f94e623499894a6723d08c29a74c95",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "artifacts",
+          "conditions",
+          "config_path",
+          "config_sha256",
+          "dicom_standard_reference",
+          "dsi_definition",
+          "experiment_id",
+          "gpu_inference_decision",
+          "historical_phase22_artifacts",
+          "performs_inference",
+          "performs_training",
+          "preprocessing_diagnostics",
+          "preprocessing_effect_thresholds",
+          "raw_input_audit",
+          "schema_version",
+          "scientific_class_definitions",
+          "scope",
+          "source_identity",
+          "status"
+        ]
+      },
+      "study_phase": "Phase 32 - acquisition/display shift audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__gaussian_kernel_3.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__gaussian_kernel_5.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__gaussian_kernel_9.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__poisson_dose_12p5pct.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__poisson_dose_25pct.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__poisson_dose_50pct.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_center_higher.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_center_lower.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_width_narrow.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/faster_rcnn__voi_width_wide.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__gaussian_kernel_3.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__gaussian_kernel_5.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__gaussian_kernel_9.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__poisson_dose_12p5pct.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__poisson_dose_25pct.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__poisson_dose_50pct.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_center_higher.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_center_lower.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_width_narrow.json.gz",
+        "results/logs/phase22_acquisition_shifts/predictions/yolo11s__voi_width_wide.json.gz",
+        "results/tables/acquisition_shift_dicom_metadata_audit.csv",
+        "results/tables/acquisition_shift_preprocessing_per_image.csv",
+        "results/tables/acquisition_shift_preprocessing_summary.csv",
+        "results/tables/radiography_synthetic_shift_results.csv"
+      ]
+    },
+    {
+      "path": "results/tables/acquisition_shift_dicom_metadata_audit.csv",
+      "sha256": "013adc8bf93f5962a7bd759f553960659bfefd80bf6319dcde5c285790600fa1",
+      "generating_script": "src/robustness/radiography_shifts.py",
+      "generating_script_sha256": "bb75f8d5a9a199045d9ce2e4d56d396b9b3c6d9443e930f759e1d8ae1ffa2063",
+      "config": {
+        "path": "configs/acquisition_shifts.yaml",
+        "sha256": "07731bdbb87d908acd4e1145998f8c828aec2c6fb8ff5bffac69ebba02e9ea83"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase32_acquisition_shift_audit/summary.json",
+          "sha256": "4c603e84d134011a3c5aec7da80293f8f8ab9c7f363fd8b56c74d4f6fee88bd6",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "processed_file",
+          "source_file",
+          "sop_class_uid",
+          "sop_class_uid_missing",
+          "sop_class_name",
+          "modality",
+          "modality_missing",
+          "photometric_interpretation",
+          "photometric_interpretation_missing",
+          "bits_allocated",
+          "bits_allocated_missing",
+          "bits_stored",
+          "bits_stored_missing",
+          "pixel_representation",
+          "pixel_representation_missing",
+          "pixel_intensity_relationship",
+          "pixel_intensity_relationship_missing",
+          "pixel_intensity_relationship_sign",
+          "pixel_intensity_relationship_sign_missing",
+          "rescale_slope",
+          "rescale_slope_missing",
+          "rescale_intercept",
+          "rescale_intercept_missing",
+          "rescale_type",
+          "rescale_type_missing",
+          "modality_lut_sequence_item_count",
+          "modality_lut_sequence_item_count_missing",
+          "voi_lut_sequence_item_count",
+          "voi_lut_sequence_item_count_missing",
+          "window_center",
+          "window_center_missing",
+          "window_width",
+          "window_width_missing",
+          "voi_lut_function",
+          "voi_lut_function_missing",
+          "window_center_width_explanation",
+          "window_center_width_explanation_missing",
+          "presentation_intent_type",
+          "presentation_intent_type_missing",
+          "presentation_lut_shape",
+          "presentation_lut_shape_missing",
+          "image_type",
+          "image_type_missing",
+          "pixel_presentation",
+          "pixel_presentation_missing",
+          "acquisition_device_processing_description",
+          "acquisition_device_processing_description_missing",
+          "acquisition_device_processing_code",
+          "acquisition_device_processing_code_missing",
+          "derivation_description",
+          "derivation_description_missing",
+          "conversion_type",
+          "conversion_type_missing",
+          "lossy_image_compression",
+          "lossy_image_compression_missing",
+          "lossy_image_compression_ratio",
+          "lossy_image_compression_ratio_missing",
+          "lossy_image_compression_method",
+          "lossy_image_compression_method_missing",
+          "burned_in_annotation",
+          "burned_in_annotation_missing",
+          "recognizable_visual_features",
+          "recognizable_visual_features_missing",
+          "real_world_value_mapping_item_count",
+          "real_world_value_mapping_item_count_missing",
+          "transfer_syntax_uid",
+          "transfer_syntax_uid_missing",
+          "transfer_syntax_name",
+          "stored_pixel_relationship_class",
+          "xray_signal_proportionality_demonstrated",
+          "xray_signal_poisson_proxy_eligible",
+          "xray_signal_poisson_proxy_assessment"
+        ],
+        "exact_columns": [
+          "processed_file",
+          "source_file",
+          "sop_class_uid",
+          "sop_class_uid_missing",
+          "sop_class_name",
+          "modality",
+          "modality_missing",
+          "photometric_interpretation",
+          "photometric_interpretation_missing",
+          "bits_allocated",
+          "bits_allocated_missing",
+          "bits_stored",
+          "bits_stored_missing",
+          "pixel_representation",
+          "pixel_representation_missing",
+          "pixel_intensity_relationship",
+          "pixel_intensity_relationship_missing",
+          "pixel_intensity_relationship_sign",
+          "pixel_intensity_relationship_sign_missing",
+          "rescale_slope",
+          "rescale_slope_missing",
+          "rescale_intercept",
+          "rescale_intercept_missing",
+          "rescale_type",
+          "rescale_type_missing",
+          "modality_lut_sequence_item_count",
+          "modality_lut_sequence_item_count_missing",
+          "voi_lut_sequence_item_count",
+          "voi_lut_sequence_item_count_missing",
+          "window_center",
+          "window_center_missing",
+          "window_width",
+          "window_width_missing",
+          "voi_lut_function",
+          "voi_lut_function_missing",
+          "window_center_width_explanation",
+          "window_center_width_explanation_missing",
+          "presentation_intent_type",
+          "presentation_intent_type_missing",
+          "presentation_lut_shape",
+          "presentation_lut_shape_missing",
+          "image_type",
+          "image_type_missing",
+          "pixel_presentation",
+          "pixel_presentation_missing",
+          "acquisition_device_processing_description",
+          "acquisition_device_processing_description_missing",
+          "acquisition_device_processing_code",
+          "acquisition_device_processing_code_missing",
+          "derivation_description",
+          "derivation_description_missing",
+          "conversion_type",
+          "conversion_type_missing",
+          "lossy_image_compression",
+          "lossy_image_compression_missing",
+          "lossy_image_compression_ratio",
+          "lossy_image_compression_ratio_missing",
+          "lossy_image_compression_method",
+          "lossy_image_compression_method_missing",
+          "burned_in_annotation",
+          "burned_in_annotation_missing",
+          "recognizable_visual_features",
+          "recognizable_visual_features_missing",
+          "real_world_value_mapping_item_count",
+          "real_world_value_mapping_item_count_missing",
+          "transfer_syntax_uid",
+          "transfer_syntax_uid_missing",
+          "transfer_syntax_name",
+          "stored_pixel_relationship_class",
+          "xray_signal_proportionality_demonstrated",
+          "xray_signal_poisson_proxy_eligible",
+          "xray_signal_poisson_proxy_assessment"
+        ],
+        "row_count": 300
+      },
+      "study_phase": "Phase 32 - acquisition/display shift audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/acquisition_shift_preprocessing_summary.csv",
+      "sha256": "db29cce7db814b32b5fc07ab98b9f9137b151ee4f54f66c15684f66b927e3977",
+      "generating_script": "src/robustness/radiography_shifts.py",
+      "generating_script_sha256": "bb75f8d5a9a199045d9ce2e4d56d396b9b3c6d9443e930f759e1d8ae1ffa2063",
+      "config": {
+        "path": "configs/acquisition_shifts.yaml",
+        "sha256": "07731bdbb87d908acd4e1145998f8c828aec2c6fb8ff5bffac69ebba02e9ea83"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase32_acquisition_shift_audit/summary.json",
+          "sha256": "4c603e84d134011a3c5aec7da80293f8f8ab9c7f363fd8b56c74d4f6fee88bd6",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "legacy_shift_id",
+          "display_name",
+          "scientific_class",
+          "scientific_class_definition",
+          "retained_use_class",
+          "reporting_family",
+          "shift_kind",
+          "interpretation",
+          "center_offset_fraction",
+          "width_multiplier",
+          "reference_full_scale_counts",
+          "relative_count_fraction",
+          "synthetic_full_scale_count_budget",
+          "gaussian_kernel_size",
+          "gaussian_sigma_pixels",
+          "image_count",
+          "before_minmax_nmae_mean",
+          "before_minmax_nmae_median",
+          "before_minmax_nmae_p95",
+          "after_minmax_nmae_mean",
+          "after_minmax_nmae_median",
+          "after_minmax_nmae_p95",
+          "minmax_mae_residual_ratio_mean",
+          "minmax_mae_residual_ratio_median",
+          "minmax_cancellation_fraction_median",
+          "exact_pixel_identity_count",
+          "preprocessing_effect_category"
+        ],
+        "exact_columns": [
+          "legacy_shift_id",
+          "display_name",
+          "scientific_class",
+          "scientific_class_definition",
+          "retained_use_class",
+          "reporting_family",
+          "shift_kind",
+          "interpretation",
+          "center_offset_fraction",
+          "width_multiplier",
+          "reference_full_scale_counts",
+          "relative_count_fraction",
+          "synthetic_full_scale_count_budget",
+          "gaussian_kernel_size",
+          "gaussian_sigma_pixels",
+          "image_count",
+          "before_minmax_nmae_mean",
+          "before_minmax_nmae_median",
+          "before_minmax_nmae_p95",
+          "after_minmax_nmae_mean",
+          "after_minmax_nmae_median",
+          "after_minmax_nmae_p95",
+          "minmax_mae_residual_ratio_mean",
+          "minmax_mae_residual_ratio_median",
+          "minmax_cancellation_fraction_median",
+          "exact_pixel_identity_count",
+          "preprocessing_effect_category"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 32 - acquisition/display shift audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/radiography_synthetic_shift_results.csv",
+      "sha256": "ddf85db437d29bd0e3a9e7ff9553517e303114bcf94ed0e5154a20f4caac945d",
+      "generating_script": "src/robustness/radiography_shifts.py",
+      "generating_script_sha256": "bb75f8d5a9a199045d9ce2e4d56d396b9b3c6d9443e930f759e1d8ae1ffa2063",
+      "config": {
+        "path": "configs/acquisition_shifts.yaml",
+        "sha256": "07731bdbb87d908acd4e1145998f8c828aec2c6fb8ff5bffac69ebba02e9ea83"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase32_acquisition_shift_audit/summary.json",
+          "sha256": "4c603e84d134011a3c5aec7da80293f8f8ab9c7f363fd8b56c74d4f6fee88bd6",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "legacy_shift_id",
+          "display_name",
+          "scientific_class",
+          "scientific_class_definition",
+          "retained_use_class",
+          "reporting_family",
+          "shift_kind",
+          "interpretation",
+          "center_offset_fraction",
+          "width_multiplier",
+          "reference_full_scale_counts",
+          "relative_count_fraction",
+          "synthetic_full_scale_count_budget",
+          "gaussian_kernel_size",
+          "gaussian_sigma_pixels",
+          "image_count",
+          "target_count",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "inference_seconds",
+          "prediction_bundle",
+          "prediction_bundle_sha256",
+          "clean_precision",
+          "shifted_precision",
+          "precision_ratio",
+          "precision_dsi",
+          "clean_recall",
+          "shifted_recall",
+          "recall_ratio",
+          "recall_dsi",
+          "clean_f1",
+          "shifted_f1",
+          "f1_ratio",
+          "f1_dsi",
+          "clean_iou",
+          "shifted_iou",
+          "iou_ratio",
+          "iou_dsi",
+          "clean_dice",
+          "shifted_dice",
+          "dice_ratio",
+          "dice_dsi",
+          "clean_map_50",
+          "shifted_map_50",
+          "map_50_ratio",
+          "map_50_dsi",
+          "clean_map_50_95",
+          "shifted_map_50_95",
+          "map_50_95_ratio",
+          "map_50_95_dsi"
+        ],
+        "exact_columns": [
+          "detector",
+          "legacy_shift_id",
+          "display_name",
+          "scientific_class",
+          "scientific_class_definition",
+          "retained_use_class",
+          "reporting_family",
+          "shift_kind",
+          "interpretation",
+          "center_offset_fraction",
+          "width_multiplier",
+          "reference_full_scale_counts",
+          "relative_count_fraction",
+          "synthetic_full_scale_count_budget",
+          "gaussian_kernel_size",
+          "gaussian_sigma_pixels",
+          "image_count",
+          "target_count",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "inference_seconds",
+          "prediction_bundle",
+          "prediction_bundle_sha256",
+          "clean_precision",
+          "shifted_precision",
+          "precision_ratio",
+          "precision_dsi",
+          "clean_recall",
+          "shifted_recall",
+          "recall_ratio",
+          "recall_dsi",
+          "clean_f1",
+          "shifted_f1",
+          "f1_ratio",
+          "f1_dsi",
+          "clean_iou",
+          "shifted_iou",
+          "iou_ratio",
+          "iou_dsi",
+          "clean_dice",
+          "shifted_dice",
+          "dice_ratio",
+          "dice_dsi",
+          "clean_map_50",
+          "shifted_map_50",
+          "map_50_ratio",
+          "map_50_dsi",
+          "clean_map_50_95",
+          "shifted_map_50_95",
+          "map_50_95_ratio",
+          "map_50_95_dsi"
+        ],
+        "row_count": 20
+      },
+      "study_phase": "Phase 32 - acquisition/display shift audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase7_explainability/summary.json",
+      "sha256": "2b8d2d5835c113e8dc24af9eecbece62571cc5bcc689bcb245c1f74e1c23a848",
+      "generating_script": "src/explainability/run_explainability.py",
+      "generating_script_sha256": "35e0519f715b0f54a07c3fcd586db21562254d4f335639becf2c1675e9f5c297",
+      "config": {
+        "path": "configs/explainability.yaml",
+        "sha256": "ffdbd1bc856ff5c75e0287c91e2bbc892352c6d80ec8b2bba6d5e13a76a05679"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase6_robustness/summary.json",
+          "sha256": "4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "aggregate",
+          "artifacts",
+          "checkpoints",
+          "config_path",
+          "config_sha256",
+          "experiment_id",
+          "method",
+          "metric",
+          "paired_descriptive_comparison",
+          "phase6_provenance",
+          "population",
+          "qualitative_selection",
+          "schema_version",
+          "seed_scope",
+          "source_identity",
+          "status",
+          "target_layers"
+        ]
+      },
+      "study_phase": "Phase 7 - Grad-CAM localization",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/gradcam_localization_summary.csv",
+        "results/tables/gradcam_localization_per_target.csv",
+        "results/tables/gradcam_qualitative_cases.csv",
+        "results/figures/gradcam_good_predictions.png",
+        "results/figures/gradcam_bad_predictions.png",
+        "results/figures/gradcam_failure_cases.png"
+      ]
+    },
+    {
+      "path": "results/tables/gradcam_localization_summary.csv",
+      "sha256": "dbdf9869737a71d64d3d0e540ca1def2a31b5bbe2992d51e7288ae11119f9c7b",
+      "generating_script": "src/explainability/run_explainability.py",
+      "generating_script_sha256": "35e0519f715b0f54a07c3fcd586db21562254d4f335639becf2c1675e9f5c297",
+      "config": {
+        "path": "configs/explainability.yaml",
+        "sha256": "ffdbd1bc856ff5c75e0287c91e2bbc892352c6d80ec8b2bba6d5e13a76a05679"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase7_explainability/summary.json",
+          "sha256": "2b8d2d5835c113e8dc24af9eecbece62571cc5bcc689bcb245c1f74e1c23a848",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "operating_status",
+          "target_count",
+          "valid_cam_count",
+          "zero_energy_cam_count",
+          "image_count",
+          "mean_energy_in_box",
+          "median_energy_in_box",
+          "pointing_game_accuracy",
+          "mean_box_area_fraction",
+          "mean_energy_lift_over_area",
+          "image_macro_mean_energy_in_box",
+          "image_macro_pointing_game_accuracy"
+        ],
+        "exact_columns": [
+          "detector",
+          "operating_status",
+          "target_count",
+          "valid_cam_count",
+          "zero_energy_cam_count",
+          "image_count",
+          "mean_energy_in_box",
+          "median_energy_in_box",
+          "pointing_game_accuracy",
+          "mean_box_area_fraction",
+          "mean_energy_lift_over_area",
+          "image_macro_mean_energy_in_box",
+          "image_macro_pointing_game_accuracy"
+        ],
+        "row_count": 6
+      },
+      "study_phase": "Phase 7 - Grad-CAM localization",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase31_xai_sanity_v2/summary.json",
+      "sha256": "88d386c215bf483cea66ef02c3b2b4e90ad548f54a1a8f6fe451da153463e176",
+      "generating_script": "src/explainability/sanity_checks.py",
+      "generating_script_sha256": "06c376200fa70235f79fb24bc403a1921903d963ec0bdf7901a1acebb1f16522",
+      "config": {
+        "path": "configs/xai_sanity.yaml",
+        "sha256": "68aa4faa218ecc2ba6c76d7f223565dff47ac7059de6e4ed7dd9b8ba45724bf3"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase7_explainability/summary.json",
+          "sha256": "2b8d2d5835c113e8dc24af9eecbece62571cc5bcc689bcb245c1f74e1c23a848",
+          "availability": "committed"
+        },
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test_robustness_seed17_n300.csv",
+          "sha256": "63b4dd706dc2fcd8a528a935957ccb318ed2cde51a6fd87d20feca348d00fc5e",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "aggregate",
+          "artifacts",
+          "cascading_model_parameter_randomization",
+          "checkpoint_immutability",
+          "checkpoints",
+          "claim_boundaries",
+          "config_path",
+          "config_sha256",
+          "experiment_id",
+          "historical_batch21_artifacts",
+          "input_pixel_randomization_control",
+          "per_image",
+          "phase7_provenance",
+          "qualitative_selection",
+          "sampling",
+          "schema_version",
+          "seed_scope",
+          "similarity",
+          "source_identity",
+          "status",
+          "target"
+        ]
+      },
+      "study_phase": "Phase 31 - Grad-CAM sensitivity controls",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/gradcam_sanity_v2_summary.csv",
+        "results/tables/gradcam_sanity_v2_per_image.csv",
+        "results/figures/gradcam_sanity_v2_panel.png",
+        "results/logs/phase31_xai_sanity_v2/subset_manifest.csv"
+      ]
+    },
+    {
+      "path": "results/tables/gradcam_sanity_v2_summary.csv",
+      "sha256": "23a8b47c65ba2d4d076262f71f3ec1f5c1aec9a6715ee1a67ee0ceaed3dc6f51",
+      "generating_script": "src/explainability/sanity_checks.py",
+      "generating_script_sha256": "06c376200fa70235f79fb24bc403a1921903d963ec0bdf7901a1acebb1f16522",
+      "config": {
+        "path": "configs/xai_sanity.yaml",
+        "sha256": "68aa4faa218ecc2ba6c76d7f223565dff47ac7059de6e4ed7dd9b8ba45724bf3"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase31_xai_sanity_v2/summary.json",
+          "sha256": "88d386c215bf483cea66ef02c3b2b4e90ad548f54a1a8f6fe451da153463e176",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "control",
+          "cascade_stage_index",
+          "cascade_stage_name",
+          "randomized_group_count",
+          "randomized_group_names",
+          "randomized_module_prefixes",
+          "full_model_parameter_randomization",
+          "training_data_randomization_performed",
+          "subset_image_count",
+          "subset_patient_count",
+          "subset_stratum_counts",
+          "trained_valid_count",
+          "trained_failure_count",
+          "trained_failure_rate",
+          "randomized_valid_count",
+          "randomized_failure_count",
+          "randomized_failure_rate",
+          "k_valid_similarity_pairs",
+          "map_pair_failure_count",
+          "map_pair_failure_rate",
+          "pearson_mean",
+          "pearson_std",
+          "pearson_median",
+          "pearson_min",
+          "pearson_max",
+          "spearman_mean",
+          "spearman_std",
+          "spearman_median",
+          "spearman_min",
+          "spearman_max",
+          "ssim_mean",
+          "ssim_std",
+          "ssim_median",
+          "ssim_min",
+          "ssim_max"
+        ],
+        "exact_columns": [
+          "detector",
+          "control",
+          "cascade_stage_index",
+          "cascade_stage_name",
+          "randomized_group_count",
+          "randomized_group_names",
+          "randomized_module_prefixes",
+          "full_model_parameter_randomization",
+          "training_data_randomization_performed",
+          "subset_image_count",
+          "subset_patient_count",
+          "subset_stratum_counts",
+          "trained_valid_count",
+          "trained_failure_count",
+          "trained_failure_rate",
+          "randomized_valid_count",
+          "randomized_failure_count",
+          "randomized_failure_rate",
+          "k_valid_similarity_pairs",
+          "map_pair_failure_count",
+          "map_pair_failure_rate",
+          "pearson_mean",
+          "pearson_std",
+          "pearson_median",
+          "pearson_min",
+          "pearson_max",
+          "spearman_mean",
+          "spearman_std",
+          "spearman_median",
+          "spearman_min",
+          "spearman_max",
+          "ssim_mean",
+          "ssim_std",
+          "ssim_median",
+          "ssim_min",
+          "ssim_max"
+        ],
+        "row_count": 14
+      },
+      "study_phase": "Phase 31 - Grad-CAM sensitivity controls",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/gradcam_sanity_v2_panel.png",
+      "sha256": "7eac38050cdb8f27932c24f150f5f0d8141e17105b81d25dd5b7968ff63e2204",
+      "generating_script": "src/explainability/sanity_checks.py",
+      "generating_script_sha256": "06c376200fa70235f79fb24bc403a1921903d963ec0bdf7901a1acebb1f16522",
+      "config": {
+        "path": "configs/xai_sanity.yaml",
+        "sha256": "68aa4faa218ecc2ba6c76d7f223565dff47ac7059de6e4ed7dd9b8ba45724bf3"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/gradcam_sanity_v2_summary.csv",
+          "sha256": "23a8b47c65ba2d4d076262f71f3ec1f5c1aec9a6715ee1a67ee0ceaed3dc6f51",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 5379,
+        "height": 3285
+      },
+      "study_phase": "Phase 31 - Grad-CAM sensitivity controls",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase8_statistics/summary.json",
+      "sha256": "99e50465d1992dcc261ece84cb597f33dc3fadb6502e16205630fe63de117646",
+      "generating_script": "src/stats/run_statistics.py",
+      "generating_script_sha256": "cd806244fec9932e6c5e580362e88249837f817ca75fc1d32f7c0139d20515e0",
+      "config": {
+        "path": "configs/statistics.yaml",
+        "sha256": "d1d12f986cf62924491436c784e2147ee94380497f43590a534c5ffcaf152de2"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase6_robustness/summary.json",
+          "sha256": "4fe09e19bc7b7d620ab9e6a3785ecae0bb2ef16cb517fce1bc287b2de2fafb2b",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test.csv",
+          "sha256": "9c9b1a71fb1340b96b7ae8f93bfa8e281ddb7ab2b9f5edcd4d1cdbd314646a6f",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis",
+          "artifacts",
+          "clean",
+          "clean_only_refresh",
+          "config_path",
+          "config_sha256",
+          "experiment_id",
+          "holm_significance_comparison",
+          "inference_unit",
+          "inferential_targets",
+          "mcnemar",
+          "multiple_comparisons",
+          "paired_seed_sensitivity",
+          "robustness",
+          "schema_version",
+          "seed_influence_diagnostics",
+          "seed_pairing_audit",
+          "source_identity",
+          "status",
+          "superseded_image_level_results",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 8/28 - estimand-separated statistics",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/statistical_clean_comparison.csv",
+        "results/tables/statistical_clean_per_run_metrics.csv",
+        "results/tables/statistical_clean_leave_one_run_out.csv",
+        "results/tables/statistical_clean_leave_one_seed_label_out.csv",
+        "results/tables/statistical_robustness_comparison.csv"
+      ]
+    },
+    {
+      "path": "results/tables/statistical_clean_comparison.csv",
+      "sha256": "cf17182a5330f9f51d702e2f283dcf92accf3f78ef24e2030f86e1ee90cb12bb",
+      "generating_script": "src/stats/run_statistics.py",
+      "generating_script_sha256": "cd806244fec9932e6c5e580362e88249837f817ca75fc1d32f7c0139d20515e0",
+      "config": {
+        "path": "configs/statistics.yaml",
+        "sha256": "d1d12f986cf62924491436c784e2147ee94380497f43590a534c5ffcaf152de2"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase8_statistics/summary.json",
+          "sha256": "99e50465d1992dcc261ece84cb597f33dc3fadb6502e16205630fe63de117646",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "scope",
+          "condition_id",
+          "family",
+          "corruption",
+          "severity",
+          "estimand",
+          "metric",
+          "unit",
+          "detector_a",
+          "detector_b",
+          "image_count",
+          "patient_group_count",
+          "seed_count",
+          "detector_a_run_count",
+          "detector_b_run_count",
+          "detector_a_run_ids",
+          "detector_b_run_ids",
+          "attempted_seed_count",
+          "paired_seed_ids",
+          "excluded_pair_seed_ids",
+          "seed_eligibility_policy",
+          "seed_eligibility_note",
+          "endpoint_conditioning",
+          "seed_271_contribution",
+          "primary_inferential_target",
+          "confidence_level",
+          "detector_a_estimate",
+          "detector_a_ci_low",
+          "detector_a_ci_high",
+          "detector_b_estimate",
+          "detector_b_ci_low",
+          "detector_b_ci_high",
+          "difference_a_minus_b",
+          "difference_ci_low",
+          "difference_ci_high",
+          "bootstrap_resamples",
+          "bootstrap_valid_a",
+          "bootstrap_valid_b",
+          "bootstrap_valid_difference",
+          "test_name",
+          "permutation_resamples",
+          "permutation_valid",
+          "p_value_raw",
+          "p_value_holm",
+          "checkpoint_conditional_test_name",
+          "checkpoint_conditional_observed_difference",
+          "p_value_raw_conditional_on_observed_checkpoints",
+          "p_value_holm_conditional_on_observed_checkpoints",
+          "holm_family_size",
+          "effect_size_name",
+          "effect_size",
+          "effect_size_n",
+          "status",
+          "reason"
+        ],
+        "exact_columns": [
+          "scope",
+          "condition_id",
+          "family",
+          "corruption",
+          "severity",
+          "estimand",
+          "metric",
+          "unit",
+          "detector_a",
+          "detector_b",
+          "image_count",
+          "patient_group_count",
+          "seed_count",
+          "detector_a_run_count",
+          "detector_b_run_count",
+          "detector_a_run_ids",
+          "detector_b_run_ids",
+          "attempted_seed_count",
+          "paired_seed_ids",
+          "excluded_pair_seed_ids",
+          "seed_eligibility_policy",
+          "seed_eligibility_note",
+          "endpoint_conditioning",
+          "seed_271_contribution",
+          "primary_inferential_target",
+          "confidence_level",
+          "detector_a_estimate",
+          "detector_a_ci_low",
+          "detector_a_ci_high",
+          "detector_b_estimate",
+          "detector_b_ci_low",
+          "detector_b_ci_high",
+          "difference_a_minus_b",
+          "difference_ci_low",
+          "difference_ci_high",
+          "bootstrap_resamples",
+          "bootstrap_valid_a",
+          "bootstrap_valid_b",
+          "bootstrap_valid_difference",
+          "test_name",
+          "permutation_resamples",
+          "permutation_valid",
+          "p_value_raw",
+          "p_value_holm",
+          "checkpoint_conditional_test_name",
+          "checkpoint_conditional_observed_difference",
+          "p_value_raw_conditional_on_observed_checkpoints",
+          "p_value_holm_conditional_on_observed_checkpoints",
+          "holm_family_size",
+          "effect_size_name",
+          "effect_size",
+          "effect_size_n",
+          "status",
+          "reason"
+        ],
+        "row_count": 7
+      },
+      "study_phase": "Phase 8/28 - estimand-separated statistics",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/statistical_robustness_comparison.csv",
+      "sha256": "59c9ec17abacef102f854e463039e569fa22bac97e6fbc55c99af7f20f2dcb02",
+      "generating_script": "src/stats/run_statistics.py",
+      "generating_script_sha256": "cd806244fec9932e6c5e580362e88249837f817ca75fc1d32f7c0139d20515e0",
+      "config": {
+        "path": "configs/statistics.yaml",
+        "sha256": "d1d12f986cf62924491436c784e2147ee94380497f43590a534c5ffcaf152de2"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase8_statistics/summary.json",
+          "sha256": "99e50465d1992dcc261ece84cb597f33dc3fadb6502e16205630fe63de117646",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "scope",
+          "condition_id",
+          "family",
+          "corruption",
+          "severity",
+          "estimand",
+          "metric",
+          "unit",
+          "detector_a",
+          "detector_b",
+          "image_count",
+          "patient_group_count",
+          "seed_count",
+          "confidence_level",
+          "detector_a_estimate",
+          "detector_a_ci_low",
+          "detector_a_ci_high",
+          "detector_b_estimate",
+          "detector_b_ci_low",
+          "detector_b_ci_high",
+          "difference_a_minus_b",
+          "difference_ci_low",
+          "difference_ci_high",
+          "bootstrap_resamples",
+          "bootstrap_valid_a",
+          "bootstrap_valid_b",
+          "bootstrap_valid_difference",
+          "test_name",
+          "permutation_resamples",
+          "permutation_valid",
+          "p_value_raw",
+          "p_value_holm",
+          "holm_family_size",
+          "effect_size_name",
+          "effect_size",
+          "effect_size_n",
+          "status",
+          "reason"
+        ],
+        "exact_columns": [
+          "scope",
+          "condition_id",
+          "family",
+          "corruption",
+          "severity",
+          "estimand",
+          "metric",
+          "unit",
+          "detector_a",
+          "detector_b",
+          "image_count",
+          "patient_group_count",
+          "seed_count",
+          "confidence_level",
+          "detector_a_estimate",
+          "detector_a_ci_low",
+          "detector_a_ci_high",
+          "detector_b_estimate",
+          "detector_b_ci_low",
+          "detector_b_ci_high",
+          "difference_a_minus_b",
+          "difference_ci_low",
+          "difference_ci_high",
+          "bootstrap_resamples",
+          "bootstrap_valid_a",
+          "bootstrap_valid_b",
+          "bootstrap_valid_difference",
+          "test_name",
+          "permutation_resamples",
+          "permutation_valid",
+          "p_value_raw",
+          "p_value_holm",
+          "holm_family_size",
+          "effect_size_name",
+          "effect_size",
+          "effect_size_n",
+          "status",
+          "reason"
+        ],
+        "row_count": 497
+      },
+      "study_phase": "Phase 8/28 - estimand-separated statistics",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/statistical_clean_leave_one_seed_label_out.csv",
+      "sha256": "4b392d72c1211c270c86b0e59be1cfc05d37fb75f15314dbe35096ae34c04f0a",
+      "generating_script": "src/stats/run_statistics.py",
+      "generating_script_sha256": "cd806244fec9932e6c5e580362e88249837f817ca75fc1d32f7c0139d20515e0",
+      "config": {
+        "path": "configs/statistics.yaml",
+        "sha256": "d1d12f986cf62924491436c784e2147ee94380497f43590a534c5ffcaf152de2"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase8_statistics/summary.json",
+          "sha256": "99e50465d1992dcc261ece84cb597f33dc3fadb6502e16205630fe63de117646",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "omitted_seed_label",
+          "metric",
+          "endpoint_conditioning",
+          "detector_a_estimate",
+          "detector_b_estimate",
+          "difference_a_minus_b",
+          "full_difference_a_minus_b",
+          "change_from_full_difference",
+          "detector_a_run_count",
+          "detector_b_run_count",
+          "detector_a_run_ids",
+          "detector_b_run_ids",
+          "interpretation"
+        ],
+        "exact_columns": [
+          "omitted_seed_label",
+          "metric",
+          "endpoint_conditioning",
+          "detector_a_estimate",
+          "detector_b_estimate",
+          "difference_a_minus_b",
+          "full_difference_a_minus_b",
+          "change_from_full_difference",
+          "detector_a_run_count",
+          "detector_b_run_count",
+          "detector_a_run_ids",
+          "detector_b_run_ids",
+          "interpretation"
+        ],
+        "row_count": 35
+      },
+      "study_phase": "Phase 28 - seed-influence diagnostic",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    }
+  ]
+}

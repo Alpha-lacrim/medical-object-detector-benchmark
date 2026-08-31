@@ -19,7 +19,7 @@ AP@0.5 recall positions and higher sensitivity at all five reported
 false-positive budgets. Validation selected thresholds of 0.69 and 0.05 from
 the original three runs, respectively, and those thresholds were retained. In the
 five-seed clean analysis, Faster R-CNN achieved higher recall, F1, and average
-precision, whereas YOLO11s delivered approximately threefold throughput, 78%
+precision, whereas YOLO11s delivered approximately 3-fold throughput, 78%
 fewer parameters, and about 21-fold fewer registered operations. One YOLO11s
 seed retained plausible average precision but compressed all test scores below
 0.042, exposing recipe-level score instability. Detection-specific calibration

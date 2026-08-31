@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-31",
+  "scope": "Ten validation-selected best checkpoints used by the five-seed Phase 5 evaluator",
+  "phase5_summary": {
+    "path": "results/logs/phase5_evaluation/summary.json",
+    "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130"
+  },
+  "local_audit": {
+    "all_exact_files_present_at_audit": true,
+    "all_hashes_match_phase5_summary": true,
+    "checkpoint_count": 10,
+    "total_size_bytes": 962924817
+  },
+  "distribution": {
+    "status": "manifest_ready_binaries_not_published",
+    "public_download_url": null,
+    "repository_commit_policy": "Checkpoint binaries remain Git-ignored and must not be committed.",
+    "release_action": "A human release owner may upload the ten files as external release assets after completing the stated license, attribution, and privacy review.",
+    "archive_recommendation": "Use the release_filename values unchanged, publish this manifest beside the assets, and verify every SHA-256 after upload."
+  },
+  "public_release_feasibility": {
+    "determination": "feasible_with_conditions",
+    "not_legal_advice": true,
+    "conditions": [
+      "Release the repository-authored project and YOLO11s fine-tuned weights under AGPL-3.0-only with complete corresponding source and attribution.",
+      "Carry the RSNA/NIH challenge attribution required by the Pneumonia Detection Challenge terms.",
+      "Before publishing the Faster R-CNN assets, the human release owner must confirm the use-case compatibility of the COCO-derived Torchvision initialization; Torchvision explicitly delegates pretrained-weight permission checks to users.",
+      "Perform a final privacy/security review of serialized checkpoint metadata and load untrusted PyTorch artifacts only in an isolated environment."
+    ],
+    "authoritative_sources": [
+      {
+        "finding": "RSNA permits use for academic, educational, commercial, and non-commercial purposes and states attribution requirements for redistribution.",
+        "url": "https://www.rsna.org/-/media/Files/RSNA/Education/AI-resources-and-training/AI-image-challenge/pneumonia-detection-challenge-terms-of-use-and-attribution.ashx"
+      },
+      {
+        "finding": "Ultralytics states that trained and fine-tuned YOLO models are AGPL-3.0 by default.",
+        "url": "https://www.ultralytics.com/license"
+      },
+      {
+        "finding": "Torchvision is BSD-3-Clause, but its model documentation warns that pretrained weights can carry dataset-derived terms and places permission review on the user.",
+        "url": "https://docs.pytorch.org/vision/stable/models.html"
+      }
+    ]
+  },
+  "checkpoints": [
+    {
+      "detector": "faster_rcnn",
+      "seed": 17,
+      "run_id": "faster_rcnn_rsna_seed17_full",
+      "source_path": "results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt",
+      "release_filename": "faster_rcnn_rsna_seed17_best_model.pt",
+      "size_bytes": 173412170,
+      "sha256": "9ec35c5d761f8e4bf7a43f7999f388ac1ffc0d533f62746409db280706dffab4",
+      "config": {
+        "path": "configs/faster_rcnn.yaml",
+        "sha256": "ef1e3ebe1fbe3cf1a6e27bf8b9c12f61719c2ea8771c9758f64dc278dd0e2633"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 42,
+      "run_id": "faster_rcnn_rsna_seed42_full",
+      "source_path": "results/checkpoints/faster_rcnn_rsna_seed42_full/best_model.pt",
+      "release_filename": "faster_rcnn_rsna_seed42_best_model.pt",
+      "size_bytes": 173412170,
+      "sha256": "c97813cf5dfe50b6eb074fe50cd4a870bb24e5a667bfaf8b94b37a844fd2b83d",
+      "config": {
+        "path": "configs/faster_rcnn_seed42.yaml",
+        "sha256": "c632ca100199787bb681e23fb8f3ac4426cfcd288537b1256bcef201e0af7464"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 137,
+      "run_id": "faster_rcnn_rsna_seed137_full",
+      "source_path": "results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt",
+      "release_filename": "faster_rcnn_rsna_seed137_best_model.pt",
+      "size_bytes": 173412170,
+      "sha256": "0d651d620c4106de296648960424326980ff13dd631a9baa120997590abc2a78",
+      "config": {
+        "path": "configs/faster_rcnn_seed137.yaml",
+        "sha256": "77dd468667f86ae34b48718f2fd9197a2334f9eec09eed75184ac9557e3d8279"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 271,
+      "run_id": "faster_rcnn_rsna_seed271_full",
+      "source_path": "results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt",
+      "release_filename": "faster_rcnn_rsna_seed271_best_model.pt",
+      "size_bytes": 173412170,
+      "sha256": "fa7ef259b30d5ce19c954e3e30ddecf3c6d74d05e82c5d525eb499a2db2c998f",
+      "config": {
+        "path": "configs/faster_rcnn_seed271.yaml",
+        "sha256": "1374056522f088d22609d5ea0da490de880f48e0e4841ace0f0a6ee6861fbaa7"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 314,
+      "run_id": "faster_rcnn_rsna_seed314_full",
+      "source_path": "results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt",
+      "release_filename": "faster_rcnn_rsna_seed314_best_model.pt",
+      "size_bytes": 173412170,
+      "sha256": "e2147d0c45b1c7e369270a2d737e08b564fedd37cd88e2456ec13df03e4591a7",
+      "config": {
+        "path": "configs/faster_rcnn_seed314.yaml",
+        "sha256": "b20dfe1ebc6355cf6921fc59d86271f0abd74e9046d359930e2d5bb76c106eb7"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 17,
+      "run_id": "yolo11s_rsna_seed17_full",
+      "source_path": "results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt",
+      "release_filename": "yolo11s_rsna_seed17_best_model.pt",
+      "size_bytes": 19172819,
+      "sha256": "65909164e82c1ef53c0d38e0d898d37bbbec5f46cb9f5cd029e76ba486c0371c",
+      "config": {
+        "path": "configs/yolo.yaml",
+        "sha256": "5a9bd54c730a42db166d8e5c7075f863f914b5be7c66567f5bc91a70b50ef8d2"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 42,
+      "run_id": "yolo11s_rsna_seed42_full",
+      "source_path": "results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt",
+      "release_filename": "yolo11s_rsna_seed42_best_model.pt",
+      "size_bytes": 19172691,
+      "sha256": "7710372489e96c547aebd4c868663c33a8cf62f8ec48557049b7de8b2a6ab1c0",
+      "config": {
+        "path": "configs/yolo_seed42.yaml",
+        "sha256": "303a26c5debb26cadfc703d2d571d2f9507d5da636d1829e46a2d35dc9fb18b3"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 137,
+      "run_id": "yolo11s_rsna_seed137_full",
+      "source_path": "results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt",
+      "release_filename": "yolo11s_rsna_seed137_best_model.pt",
+      "size_bytes": 19173331,
+      "sha256": "b7677b5343b5d3930616f1b5a530f6005ded88dfc54f7e8fdecbe93e3a04fa19",
+      "config": {
+        "path": "configs/yolo_seed137.yaml",
+        "sha256": "f726b54408681308eb149d7bb11eec17ed1c33f5f5c93233425b11cbf9bf38e5"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 271,
+      "run_id": "yolo11s_rsna_seed271_full",
+      "source_path": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+      "release_filename": "yolo11s_rsna_seed271_best_model.pt",
+      "size_bytes": 19172435,
+      "sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+      "config": {
+        "path": "configs/yolo_seed271.yaml",
+        "sha256": "15f40539b0091892a6d3f168b0c2813b903ee87123cba4725b14889963b0c41b"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 314,
+      "run_id": "yolo11s_rsna_seed314_full",
+      "source_path": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+      "release_filename": "yolo11s_rsna_seed314_best_model.pt",
+      "size_bytes": 19172691,
+      "sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+      "config": {
+        "path": "configs/yolo_seed314.yaml",
+        "sha256": "d436f4f635bbbaa6a0719eab1f158de1c81a744749a684f171b29c81da43cdbb"
+      },
+      "exists_locally_at_audit": true,
+      "phase5_hash_match": true
+    }
+  ]
+}
