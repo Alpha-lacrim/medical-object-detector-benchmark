@@ -1,0 +1,9 @@
+detector,target_metric,target_value,response_metric,status,threshold,response,response_std,seeds_reaching_target,seed_count,selection_rule
+faster_rcnn,precision,0.5,recall,reachable,0.79,0.23805970149253727,0.11325103262742657,5,5,maximum mean recall among swept thresholds with mean precision >= target; no interpolation
+faster_rcnn,precision,0.9,recall,not_reachable_at_any_swept_threshold,,,,3,5,maximum mean recall among swept thresholds with mean precision >= target; no interpolation
+faster_rcnn,recall,0.3,precision,reachable,0.73,0.4072777422352929,0.10828015122494168,5,5,maximum mean precision among swept thresholds with mean recall >= target; no interpolation
+faster_rcnn,recall,0.5,precision,reachable,0.46,0.25966067826446837,0.05059688871224498,5,5,maximum mean precision among swept thresholds with mean recall >= target; no interpolation
+yolo11s,precision,0.5,recall,reachable,0.46,0.04253731343283582,0.05531960239775148,4,5,maximum mean recall among swept thresholds with mean precision >= target; no interpolation
+yolo11s,precision,0.9,recall,not_reachable_at_any_swept_threshold,,,,4,5,maximum mean recall among swept thresholds with mean precision >= target; no interpolation
+yolo11s,recall,0.3,precision,not_reachable_at_any_swept_threshold,,,,3,5,maximum mean precision among swept thresholds with mean recall >= target; no interpolation
+yolo11s,recall,0.5,precision,not_reachable_at_any_swept_threshold,,,,0,5,maximum mean precision among swept thresholds with mean recall >= target; no interpolation

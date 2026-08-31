@@ -313,3 +313,53 @@ used for calibration decisions.
   22.533% image-level prevalence) is enriched and internal, not a deployment-
   prevalence sample. Even a future probability-valid DCA on this population
   would not establish external clinical utility or deployment readiness.
+
+## D-008 — Use n=5 as the principal operating-regime sensitivity display
+
+- **Date:** 2026-08-31
+- **Status:** Accepted; preserves the historical n=3 analysis and does not
+  supersede D-004/D-006 threshold precedence
+
+### Context
+
+The threshold sweep, official PR curves, FROC, validation-selected operating
+points, and Pareto figure were originally frozen over seeds 17, 42, and 137.
+The later clean comparison retained five predeclared attempts per detector,
+including YOLO11s seed 271, but the operating-regime artifacts were not then
+expanded. All ten hash-bound test prediction bundles and all ten run-specific
+compute tables now exist, so the test-side analyses can be recomputed without
+training, inference, threshold reselection, or test-set tuning. Validation
+predictions still exist only for the original three runs per detector.
+
+### Decision
+
+The manuscript's principal operating-regime figures use the separately
+versioned n=5 all-attempt sensitivity. The original n=3 figures and tables
+remain unchanged, explicitly historical/prespecified provenance artifacts.
+
+This choice follows design and provenance rather than visual preference. The
+five-run set is the complete predeclared attempt population already governing
+the clean comparison and avoids presenting a central curve after omitting an
+adverse but valid run. Every n=5 test result is a deterministic offline
+redescription of predictions frozen before Batch 35. The detector thresholds
+remain exactly 0.69 and 0.05, selected by maximum mean F1 on the original n=3
+validation bundles; the n=5 fixed-threshold and recall-Pareto results are
+sensitivity evaluations of those frozen rules, not n=5 threshold selection.
+
+### Consequences
+
+- Official PR and exploratory 0.01--0.99 threshold figures, FROC, and Pareto
+  use visibly labeled n=5 sensitivity paths in the current manuscript.
+- Historical filenames without an n=5 suffix remain n=3 and are never
+  overwritten or relabeled. Their values remain available for direct
+  n=3-versus-n=5 comparison.
+- Seed 271 contributes nonzero threshold-free AP and low-threshold FROC points,
+  but defined zero precision/recall/F1 at score 0.25 and at the frozen YOLO11s
+  threshold 0.05. It is not filtered because of those zeros.
+- The threshold-selection sample size remains n=3 even where test evaluation
+  uses n=5. No later F-beta or hypothetical-loss threshold enters these
+  analyses, consistent with D-004 and D-006.
+- The dedicated conclusion table reports every unchanged, strengthened,
+  weakened, or reversed finding. It records weakened shared-threshold
+  precision/recall margins and AP gaps as well as strengthened F1,
+  fixed-threshold, FROC, and AP@0.5 position-count results; no reversal occurs.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
 import tempfile
 from collections.abc import Mapping, Sequence
@@ -15,7 +16,30 @@ import numpy as np
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from src.evaluate import sha256_file
+
 Direction = Literal["higher", "lower"]
+
+PARETO_POINT_FIELDS = (
+    "detector",
+    "seed",
+    "run_id",
+    "map_50_95",
+    "recall",
+    "recall_threshold",
+    "throughput_fps",
+    "mean_latency_ms",
+    "total_parameters",
+    "estimated_gflops",
+)
+PARETO_AGGREGATE_FIELDS = (
+    "detector",
+    "metric",
+    "unit",
+    "run_count",
+    "mean",
+    "sample_std",
+)
 
 
 class StrictModel(BaseModel):
@@ -46,6 +70,16 @@ class AnalysisSettings(StrictModel):
 
     recall_operating_point: Literal["validation_selected_maximum_mean_f1"]
     numeric_tolerance: float = Field(gt=0)
+    expected_seeds: tuple[int, ...] | None = None
+    scope_label: str = "configured frozen-run scope"
+
+    @model_validator(mode="after")
+    def validate_expected_seeds(self) -> AnalysisSettings:
+        if self.expected_seeds is not None and (
+            not self.expected_seeds or len(set(self.expected_seeds)) != len(self.expected_seeds)
+        ):
+            raise ValueError("analysis.expected_seeds must be unique and non-empty")
+        return self
 
 
 class DetectorSettings(StrictModel):
@@ -69,6 +103,9 @@ class OutputSettings(StrictModel):
     """Declared Pareto output path."""
 
     figure: Path
+    points_table: Path | None = None
+    aggregate_table: Path | None = None
+    summary_json: Path | None = None
 
 
 class ParetoConfig(StrictModel):
@@ -81,6 +118,8 @@ class ParetoConfig(StrictModel):
     detectors: dict[str, DetectorSettings]
     plot: PlotSettings
     outputs: OutputSettings
+    project_root: Path = Field(exclude=True)
+    source_path: Path = Field(exclude=True)
 
     @model_validator(mode="after")
     def require_two_detectors(self) -> ParetoConfig:
@@ -88,6 +127,11 @@ class ParetoConfig(StrictModel):
         if len(self.detectors) != 2:
             raise ValueError("detectors must declare exactly two entries")
         return self
+
+    def resolve(self, path: Path) -> Path:
+        """Resolve one configured path against the repository root."""
+
+        return path if path.is_absolute() else (self.project_root / path).resolve()
 
 
 @dataclass(frozen=True)
@@ -123,9 +167,13 @@ class PanelSpec:
 
 def load_pareto_config(path: str | Path) -> ParetoConfig:
     """Load and validate the Pareto YAML configuration."""
-    config_path = Path(path)
+    config_path = Path(path).resolve()
     with config_path.open("r", encoding="utf-8") as handle:
         raw = yaml.safe_load(handle)
+    if not isinstance(raw, dict):
+        raise ValueError("Pareto config must contain a mapping")
+    raw["project_root"] = config_path.parent.parent.resolve()
+    raw["source_path"] = config_path
     return ParetoConfig.model_validate(raw)
 
 
@@ -176,7 +224,10 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
     """Join and cross-check all frozen accuracy, threshold, and compute artifacts."""
     detector_names = set(config.detectors)
     tolerance = config.analysis.numeric_tolerance
-    comparison_rows = _read_csv(config.inputs.comparison_per_seed)
+    comparison_per_seed_path = config.resolve(config.inputs.comparison_per_seed)
+    selected_path = config.resolve(config.inputs.selected_operating_points)
+    selected_per_seed_path = config.resolve(config.inputs.selected_operating_points_per_seed)
+    comparison_rows = _read_csv(comparison_per_seed_path)
     comparison_by_run: dict[str, Mapping[str, str]] = {}
     for row in comparison_rows:
         detector = row.get("detector", "")
@@ -191,7 +242,7 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
             )
         comparison_by_run[run_id] = row
 
-    selected_summary = _read_csv(config.inputs.selected_operating_points)
+    selected_summary = _read_csv(selected_path)
     if {row.get("detector", "") for row in selected_summary} != detector_names:
         raise ValueError("selected operating-point detectors do not match config")
     if any(row.get("selection_split") != "validation" for row in selected_summary):
@@ -200,11 +251,11 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
         row["detector"]: _float(
             row,
             "selected_threshold",
-            source=config.inputs.selected_operating_points,
+            source=selected_path,
         )
         for row in selected_summary
     }
-    selected_per_seed = _read_csv(config.inputs.selected_operating_points_per_seed)
+    selected_per_seed = _read_csv(selected_per_seed_path)
     recall_by_key: dict[tuple[str, int], float] = {}
     for row in selected_per_seed:
         detector = row.get("detector", "")
@@ -215,13 +266,13 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
         threshold = _float(
             row,
             "selected_threshold",
-            source=config.inputs.selected_operating_points_per_seed,
+            source=selected_per_seed_path,
         )
         if not np.isclose(threshold, thresholds[detector], rtol=0.0, atol=tolerance):
             raise ValueError(f"per-seed selected threshold differs for {detector}")
         key = (
             detector,
-            _integer(row, "seed", source=config.inputs.selected_operating_points_per_seed),
+            _integer(row, "seed", source=selected_per_seed_path),
         )
         if key in recall_by_key:
             raise ValueError(
@@ -230,12 +281,13 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
         recall_by_key[key] = _float(
             row,
             "test_recall",
-            source=config.inputs.selected_operating_points_per_seed,
+            source=selected_per_seed_path,
         )
 
     points: list[ParetoPoint] = []
     seen_runs: set[str] = set()
-    for compute_path in config.inputs.compute_tables:
+    for configured_compute_path in config.inputs.compute_tables:
+        compute_path = config.resolve(configured_compute_path)
         for compute_row in _read_csv(compute_path):
             run_id = compute_row.get("run_id", "")
             if run_id not in comparison_by_run:
@@ -245,7 +297,7 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
             seen_runs.add(run_id)
             comparison = comparison_by_run[run_id]
             detector = comparison["detector"]
-            seed = _integer(comparison, "seed", source=config.inputs.comparison_per_seed)
+            seed = _integer(comparison, "seed", source=comparison_per_seed_path)
             compute_seed = _integer(compute_row, "seed", source=compute_path)
             if seed != compute_seed:
                 raise ValueError(f"{compute_path}: seed does not match {run_id}")
@@ -260,7 +312,7 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
                     map_50_95=_float(
                         comparison,
                         "map_50_95",
-                        source=config.inputs.comparison_per_seed,
+                        source=comparison_per_seed_path,
                     ),
                     recall=recall_by_key[key],
                     recall_threshold=thresholds[detector],
@@ -275,8 +327,15 @@ def load_pareto_points(config: ParetoConfig) -> list[ParetoPoint]:
         missing = sorted(set(comparison_by_run) - seen_runs)
         raise ValueError(f"compute tables do not cover comparison runs: {missing}")
     _validate_seed_grid(points, detector_names)
+    if config.analysis.expected_seeds is not None:
+        observed_seeds = {point.seed for point in points}
+        if observed_seeds != set(config.analysis.expected_seeds):
+            raise ValueError(
+                "Pareto seed grid differs from analysis.expected_seeds: "
+                f"observed={sorted(observed_seeds)} expected={list(config.analysis.expected_seeds)}"
+            )
     _validate_publication_summary(points, config)
-    _validate_threshold_summary(points, selected_summary, config)
+    _validate_threshold_summary(points, selected_summary, config, selected_path=selected_path)
     return sorted(points, key=lambda point: (point.detector, point.seed))
 
 
@@ -296,17 +355,18 @@ def _validate_publication_summary(
     config: ParetoConfig,
 ) -> None:
     """Verify the plotted seed-level AP values reproduce the publication table."""
-    summary_rows = _read_csv(config.inputs.comparison_summary)
+    summary_path = config.resolve(config.inputs.comparison_summary)
+    summary_rows = _read_csv(summary_path)
     map_rows = [row for row in summary_rows if row.get("metric") == "map_50_95"]
     if len(map_rows) != 1:
-        raise ValueError(f"{config.inputs.comparison_summary}: expected one map_50_95 summary row")
+        raise ValueError(f"{summary_path}: expected one map_50_95 summary row")
     row = map_rows[0]
     for detector, settings in config.detectors.items():
         observed = np.mean([point.map_50_95 for point in points if point.detector == detector])
         expected = _float(
             row,
             f"{settings.summary_prefix}_mean",
-            source=config.inputs.comparison_summary,
+            source=summary_path,
         )
         _assert_close(
             float(observed),
@@ -320,6 +380,8 @@ def _validate_threshold_summary(
     points: Sequence[ParetoPoint],
     summary_rows: Sequence[Mapping[str, str]],
     config: ParetoConfig,
+    *,
+    selected_path: Path,
 ) -> None:
     """Verify seed recalls reproduce the validation-selected test summary."""
     for detector in config.detectors:
@@ -331,7 +393,7 @@ def _validate_threshold_summary(
         selected_threshold = _float(
             matching[0],
             "selected_threshold",
-            source=config.inputs.selected_operating_points,
+            source=selected_path,
         )
         _assert_close(
             threshold,
@@ -339,9 +401,7 @@ def _validate_threshold_summary(
             tolerance=config.analysis.numeric_tolerance,
             context=f"{detector} validation-selected threshold",
         )
-        expected = _float(
-            matching[0], "test_recall", source=config.inputs.selected_operating_points
-        )
+        expected = _float(matching[0], "test_recall", source=selected_path)
         observed = float(np.mean([point.recall for point in detector_points]))
         _assert_close(
             observed,
@@ -454,6 +514,98 @@ def dominance_by_panel(points: Sequence[ParetoPoint]) -> dict[str, str | None]:
     }
 
 
+def pareto_point_rows(points: Sequence[ParetoPoint]) -> list[dict[str, Any]]:
+    """Serialize the exact run-level observations shown in the Pareto panels."""
+
+    return [
+        {field: getattr(point, field) for field in PARETO_POINT_FIELDS}
+        for point in sorted(points, key=lambda item: (item.detector, item.seed))
+    ]
+
+
+def aggregate_pareto_points(points: Sequence[ParetoPoint]) -> list[dict[str, Any]]:
+    """Report equal-run means, sample SDs, and run counts for plotted endpoints."""
+
+    metrics = {
+        "map_50_95": "ratio",
+        "recall": "ratio",
+        "throughput_fps": "images/second",
+        "mean_latency_ms": "milliseconds/image",
+        "total_parameters": "parameters",
+        "estimated_gflops": "GFLOPs/image",
+    }
+    rows: list[dict[str, Any]] = []
+    for detector in sorted({point.detector for point in points}):
+        detector_points = [point for point in points if point.detector == detector]
+        for metric, unit in metrics.items():
+            values = np.asarray(
+                [float(getattr(point, metric)) for point in detector_points], dtype=np.float64
+            )
+            sample_std = 0.0 if np.all(values == values[0]) else float(np.std(values, ddof=1))
+            rows.append(
+                {
+                    "detector": detector,
+                    "metric": metric,
+                    "unit": unit,
+                    "run_count": len(values),
+                    "mean": float(np.mean(values)),
+                    "sample_std": sample_std,
+                }
+            )
+    return rows
+
+
+def _atomic_csv(
+    path: Path,
+    fieldnames: Sequence[str],
+    rows: Sequence[Mapping[str, Any]],
+) -> Path:
+    """Write a CSV atomically."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent, prefix=f".{path.stem}.", suffix=path.suffix
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        with temporary.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return path
+
+
+def _atomic_json(path: Path, payload: Mapping[str, Any]) -> Path:
+    """Write deterministic JSON atomically."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        temporary.write_bytes(
+            (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+        )
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return path
+
+
+def _artifact(path: Path, root: Path) -> dict[str, Any]:
+    """Describe one provenance-bound artifact."""
+
+    return {
+        "path": path.resolve().relative_to(root).as_posix(),
+        "sha256": sha256_file(path),
+        "size_bytes": path.stat().st_size,
+    }
+
+
 def _atomic_figure(path: Path, figure: Any, *, dpi: int) -> Path:
     """Save a figure atomically so partial files are never published."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -488,7 +640,7 @@ def plot_pareto_frontier(
     if len(seeds) > len(markers):
         raise ValueError(f"plot supports at most {len(markers)} distinct seeds")
     marker_by_seed = dict(zip(seeds, markers, strict=False))
-    annotation_offsets = ((5, 5), (5, 5), (5, -12), (5, -12), (5, 5))
+    annotation_offsets = ((6, 7), (6, 7), (6, -12), (-24, -12), (6, 7))
     offset_by_seed = {
         seed: annotation_offsets[index % len(annotation_offsets)]
         for index, seed in enumerate(seeds)
@@ -590,14 +742,105 @@ def plot_pareto_frontier(
         )
         figure.suptitle(
             f"Accuracy-efficiency trade-offs across {len(seeds)} training seeds\n"
+            f"{config.analysis.scope_label}\n"
             "Recall panels evaluate each detector's validation-selected mean-F1 threshold "
             f"once on test ({threshold_text})",
-            fontsize=14,
+            fontsize=13,
             fontweight="bold",
         )
-        return _atomic_figure(config.outputs.figure, figure, dpi=config.plot.dpi)
+        return _atomic_figure(config.resolve(config.outputs.figure), figure, dpi=config.plot.dpi)
     finally:
         plt.close(figure)
+
+
+def run_pareto(config: ParetoConfig) -> dict[str, Any]:
+    """Write the Pareto figure and optional run/aggregate provenance artifacts."""
+
+    points = load_pareto_points(config)
+    point_rows = pareto_point_rows(points)
+    aggregate_rows = aggregate_pareto_points(points)
+    dominance = dominance_by_panel(points)
+    figure_path = plot_pareto_frontier(points, config)
+
+    artifacts: dict[str, Any] = {"figure": _artifact(figure_path, config.project_root)}
+    if config.outputs.points_table is not None:
+        points_path = _atomic_csv(
+            config.resolve(config.outputs.points_table), PARETO_POINT_FIELDS, point_rows
+        )
+        artifacts["points_table"] = _artifact(points_path, config.project_root)
+    if config.outputs.aggregate_table is not None:
+        aggregate_path = _atomic_csv(
+            config.resolve(config.outputs.aggregate_table),
+            PARETO_AGGREGATE_FIELDS,
+            aggregate_rows,
+        )
+        artifacts["aggregate_table"] = _artifact(aggregate_path, config.project_root)
+
+    summary = {
+        "schema_version": 1,
+        "status": "complete",
+        "analysis_id": config.analysis_id,
+        "config_path": config.source_path.relative_to(config.project_root).as_posix(),
+        "config_sha256": sha256_file(config.source_path),
+        "source_identity": {
+            Path(__file__).resolve().relative_to(config.project_root).as_posix(): sha256_file(
+                Path(__file__).resolve()
+            )
+        },
+        "scope": {
+            "label": config.analysis.scope_label,
+            "seeds": sorted({point.seed for point in points}),
+            "runs_per_detector": len({point.seed for point in points}),
+            "recall_threshold_selection_split": "validation",
+            "recall_threshold_selection_run_count": {
+                row["detector"]: int(float(row.get("threshold_selection_run_count", 3)))
+                for row in _read_csv(config.resolve(config.inputs.selected_operating_points))
+            },
+            "performs_training": False,
+            "performs_checkpoint_loading": False,
+            "performs_model_inference": False,
+        },
+        "aggregation": {
+            "points": (
+                "one observation per frozen detector/run: run-specific AP and compute joined "
+                "to test recall at the unchanged detector threshold selected from the original "
+                "validation runs"
+            ),
+            "summary": "equal-run arithmetic mean and sample standard deviation",
+            "dominance": (
+                "a detector dominates only if every one of its run points is strictly better "
+                "than every competing run point on both directed axes"
+            ),
+        },
+        "dominance_by_panel": dominance,
+        "points": point_rows,
+        "aggregate": aggregate_rows,
+        "upstream": {
+            "comparison_summary": _artifact(
+                config.resolve(config.inputs.comparison_summary), config.project_root
+            ),
+            "comparison_per_seed": _artifact(
+                config.resolve(config.inputs.comparison_per_seed), config.project_root
+            ),
+            "selected_operating_points": _artifact(
+                config.resolve(config.inputs.selected_operating_points), config.project_root
+            ),
+            "selected_operating_points_per_seed": _artifact(
+                config.resolve(config.inputs.selected_operating_points_per_seed),
+                config.project_root,
+            ),
+            "compute_tables": [
+                _artifact(config.resolve(path), config.project_root)
+                for path in config.inputs.compute_tables
+            ],
+        },
+        "artifacts": artifacts,
+    }
+    if config.outputs.summary_json is not None:
+        summary_path = config.resolve(config.outputs.summary_json)
+        _atomic_json(summary_path, summary)
+        print(json.dumps({"status": "complete", "summary": summary_path.as_posix()}, indent=2))
+    return summary
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -627,8 +870,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         f"Validated {len(points)} frozen seed rows; thresholds={thresholds}; dominance={dominance}"
     )
     if args.mode == "run":
-        output = plot_pareto_frontier(points, config)
-        print(f"Wrote {output}")
+        run_pareto(config)
     return 0
 
 

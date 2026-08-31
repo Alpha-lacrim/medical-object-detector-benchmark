@@ -138,6 +138,26 @@ seeds, and seed 271 also emits nothing at the selected YOLO threshold of 0.05.
 The complete held-out threshold sweep is descriptive rather than a source of
 deployment settings.
 
+Batch 35 recomputes test-side threshold, official PR, FROC, frozen-threshold,
+and Pareto sensitivity over all five attempts without changing the n=3
+validation selection. This improves consistency with the clean comparison but
+does not create five-run validation evidence: threshold-selection n remains 3
+while sensitivity test n is 5. The 0.01--0.99 test sweep remains exploratory,
+its peak F1 and fixed-target rows are not selection rules, and pointwise
+mean +/- sample-SD bands over five runs remain coarse. Seed 271 contributes its
+observed nonzero AP and low-score FROC behavior but defined zeros at 0.25 and
+0.05. The n=5 Pareto cloud uses five hardware rows per detector, but timing is
+still specific to one laptop/software state, and strict cloud dominance is a
+deterministic descriptive rule rather than uncertainty quantification.
+
+The n=3-to-n=5 audit is not uniformly favorable. Shared-threshold YOLO11s
+precision and Faster R-CNN recall margins weaken, as do the mean AP gaps; the
+shared-threshold F1, all five FROC, and all three frozen-threshold gaps
+strengthen; the AP@0.5 position count strengthens; the AP@0.5:0.95 position
+count and all four Pareto labels are unchanged. No conclusion reverses. These
+classifications compare observed margins and must not be read as inferential
+evidence that adding two more training runs caused a true effect change.
+
 Batch 29 corrects the separate validation-only F-beta analysis: beta is a
 recall-versus-precision preference parameter, and beta squared is the relative
 recall weight in the harmonic mean, not an empirically measured clinical-harm

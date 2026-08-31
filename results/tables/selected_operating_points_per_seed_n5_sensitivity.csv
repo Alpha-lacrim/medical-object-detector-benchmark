@@ -1,0 +1,11 @@
+detector,seed,selection_split,selection_rule,selected_threshold,threshold_selection_run_count,test_run_count,test_precision,test_recall,test_f1,test_true_positives,test_false_positives,test_false_negatives,test_prediction_count,test_target_count
+faster_rcnn,17,validation,maximum arithmetic mean F1 across three validation seeds,0.69,3,5,0.29545454545454547,0.3880597014925373,0.33548387096774196,104,248,164,352,268
+faster_rcnn,42,validation,maximum arithmetic mean F1 across three validation seeds,0.69,3,5,0.32926829268292684,0.40298507462686567,0.3624161073825503,108,220,160,328,268
+faster_rcnn,137,validation,maximum arithmetic mean F1 across three validation seeds,0.69,3,5,0.43820224719101125,0.291044776119403,0.34977578475336324,78,100,190,178,268
+faster_rcnn,271,validation,maximum arithmetic mean F1 across three validation seeds,0.69,3,5,0.4051724137931034,0.35074626865671643,0.376,94,138,174,232,268
+faster_rcnn,314,validation,maximum arithmetic mean F1 across three validation seeds,0.69,3,5,0.344,0.3208955223880597,0.332046332046332,86,164,182,250,268
+yolo11s,17,validation,maximum arithmetic mean F1 across three validation seeds,0.05,3,5,0.29411764705882354,0.26119402985074625,0.27667984189723316,70,168,198,238,268
+yolo11s,42,validation,maximum arithmetic mean F1 across three validation seeds,0.05,3,5,0.3181818181818182,0.26119402985074625,0.2868852459016394,70,150,198,220,268
+yolo11s,137,validation,maximum arithmetic mean F1 across three validation seeds,0.05,3,5,0.3163841807909605,0.208955223880597,0.251685393258427,56,121,212,177,268
+yolo11s,271,validation,maximum arithmetic mean F1 across three validation seeds,0.05,3,5,0.0,0.0,0.0,0,0,268,0,268
+yolo11s,314,validation,maximum arithmetic mean F1 across three validation seeds,0.05,3,5,0.3333333333333333,0.24253731343283583,0.28077753779697623,65,130,203,195,268

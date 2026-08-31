@@ -1,0 +1,13 @@
+detector,metric,unit,run_count,mean,sample_std
+faster_rcnn,map_50_95,ratio,5,0.09950157082350385,0.006680724714320561
+faster_rcnn,recall,ratio,5,0.35074626865671643,0.046304752410413645
+faster_rcnn,throughput_fps,images/second,5,20.275036662772074,5.623353639789695
+faster_rcnn,mean_latency_ms,milliseconds/image,5,53.93342160008251,21.149090276982722
+faster_rcnn,total_parameters,parameters,5,43256153.0,0.0
+faster_rcnn,estimated_gflops,GFLOPs/image,5,450.7637248,0.0
+yolo11s,map_50_95,ratio,5,0.05416835343057739,0.006030311771848994
+yolo11s,recall,ratio,5,0.19477611940298506,0.11095336070295891
+yolo11s,throughput_fps,images/second,5,60.28982114387253,12.622863103213357
+yolo11s,mean_latency_ms,milliseconds/image,5,17.225947599908977,3.8263454810026087
+yolo11s,total_parameters,parameters,5,9428179.0,0.0
+yolo11s,estimated_gflops,GFLOPs/image,5,21.4198784,0.0

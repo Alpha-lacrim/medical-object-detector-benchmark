@@ -21,6 +21,24 @@ def test_froc_archive_config_and_frozen_source_grid() -> None:
     assert len(aggregate_froc_curve(rows)) == 198
 
 
+def test_froc_n5_path_contains_all_runs_including_seed_271() -> None:
+    config = load_froc_config("configs/froc_n5_sensitivity.yaml")
+    rows, image_count, summary = load_froc_rows(config)
+
+    assert image_count == 750
+    assert summary["counts"]["seeds_per_detector"] == 5
+    assert len(rows) == 990
+    assert {(row["detector"], row["seed"]) for row in rows} == {
+        (detector, seed)
+        for detector in ("faster_rcnn", "yolo11s")
+        for seed in (17, 42, 137, 271, 314)
+    }
+    yolo_271 = [row for row in rows if row["detector"] == "yolo11s" and row["seed"] == 271]
+    assert len(yolo_271) == 99
+    assert any(row["sensitivity"] > 0 for row in yolo_271 if row["threshold"] < 0.05)
+    assert all(row["sensitivity"] == 0 for row in yolo_271 if row["threshold"] >= 0.05)
+
+
 def test_froc_budget_selection_is_non_interpolated_and_seed_specific() -> None:
     rows = [
         {

@@ -12,11 +12,13 @@ summary but performs no training, checkpoint loading, inference, or prediction r
 The evidence has four distinct scopes that must not be merged:
 
 - The clean unified comparison uses all five predeclared attempts for precision, recall, F1, AP@0.5, and AP@0.5:0.95. Conditional IoU and Dice use four complete seed pairs (`n=4`) for inference because YOLO11s seed 271 has no fixed-threshold true positive.
-- Precision-recall, validation-threshold, FROC, and Pareto artifacts are frozen three-seed analyses.
+- The validation-selected thresholds remain the frozen three-seed choices. Precision-recall,
+  FROC, fixed-threshold application, and Pareto now also have a five-run frozen-bundle
+  sensitivity; the original unsuffixed n=3 artifacts remain unchanged as provenance.
 - Robustness and Grad-CAM artifacts use only the primary seed-17 checkpoints on the fixed 300-image sample.
 - Detection calibration uses all five seeds per detector and every frozen post-NMS test
-  prediction retained at the 0.001 bundle floor. It is distinct from the frozen three-seed
-  threshold analyses.
+  prediction retained at the 0.001 bundle floor. It remains distinct from both the historical
+  n=3 threshold selection and the n=5 test-side operating-regime sensitivity.
 
 ## Primary research question
 
@@ -40,9 +42,9 @@ This question concerns two disclosed implementations under one controlled protoc
 
 **Operational check.** Three signatures must occur together: (1) the frozen score-0.25 comparison shows higher YOLO11s precision but lower YOLO11s recall; (2) the official AP@0.5 precision-recall curve favors Faster R-CNN at more recall positions, with no position favoring YOLO11s; and (3) Faster R-CNN sensitivity is higher at every predeclared FROC budget of 0.125, 0.25, 0.5, 1, and 2 false positives per image.
 
-**Existing evidence.** Check [`detector_comparison_n3_archive.csv`](../results/tables/detector_comparison_n3_archive.csv), [`precision_recall_curves.csv`](../results/tables/precision_recall_curves.csv), [the precision-recall figure](../results/figures/precision_recall_curves.png), [`froc_operating_points.csv`](../results/tables/froc_operating_points.csv), and [the FROC figure](../results/figures/froc_curves.png). The frozen artifacts support H2: Faster R-CNN is higher at 96 of 101 AP@0.5 recall positions, five are tied, and it has higher sensitivity at all five reported FROC budgets.
+**Existing evidence.** Check [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv), [the n=5 precision-recall figure](../results/figures/precision_recall_curves_n5_sensitivity.png), [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv), and [the n=5 FROC figure](../results/figures/froc_curves_n5_sensitivity.png), with the original unsuffixed n=3 files retained as provenance. The sensitivity supports H2: Faster R-CNN is higher at 97 of 101 AP@0.5 recall positions, four are tied, and it has higher sensitivity at all five reported FROC budgets.
 
-**Boundary.** This is a frozen `n=3` score-scale/selectivity finding, not an `n=5` curve analysis and not evidence of probabilistic miscalibration. The YOLO11s test-sweep FROC curve reaches the lower threshold boundary at 0.01, so its plateau is not a claimed global asymptote.
+**Boundary.** This is a five-run test-side sensitivity of a historical n=3 analysis, not evidence of probabilistic miscalibration or n=5 validation selection. The YOLO11s test-sweep FROC curve reaches the lower threshold boundary at 0.01, so its plateau is not a claimed global asymptote. Seed 271 is retained exactly as observed.
 
 ## H3 - Accuracy-compute Pareto trade-off
 
@@ -50,9 +52,9 @@ This question concerns two disclosed implementations under one controlled protoc
 
 **Operational check.** In each AP-or-recall versus compute panel, the conservative all-seeds dominance rule must find no detector whose every seed is strictly better than every alternative seed on both axes. The underlying tables must preserve the expected opposite directions on accuracy and compute.
 
-**Existing evidence.** Check [the four-panel Pareto figure](../results/figures/pareto_frontier.png), the frozen clean seed rows in [`detector_comparison_per_seed_n3_archive.csv`](../results/tables/detector_comparison_per_seed_n3_archive.csv), and the validation-selected test recall rows in [`selected_operating_points_per_seed.csv`](../results/tables/selected_operating_points_per_seed.csv). The frozen `n=3` artifacts support H3 in all four panels.
+**Existing evidence.** Check [the n=5 four-panel Pareto sensitivity](../results/figures/pareto_frontier_n5_sensitivity.png), [`pareto_points_n5_sensitivity.csv`](../results/tables/pareto_points_n5_sensitivity.csv), and the frozen-threshold recall rows in [`selected_operating_points_per_seed_n5_sensitivity.csv`](../results/tables/selected_operating_points_per_seed_n5_sensitivity.csv). The historical n=3 figure remains unchanged; both scopes support H3 in all four panels.
 
-**Boundary.** The result compares these measured pipelines on the stated laptop. It is not a universal ranking of detector families, a deployment-utility calculation, or a five-seed Pareto analysis.
+**Boundary.** The result compares these measured pipelines on the stated laptop. It is not a universal ranking of detector families or a deployment-utility calculation. The Pareto sensitivity is n=5, but its recall thresholds were selected from n=3 validation evidence.
 
 ## H4 - Corruption degradation is type- and severity-specific
 

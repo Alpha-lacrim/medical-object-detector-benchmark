@@ -177,11 +177,13 @@ This table retains the original score-0.25 operating point. Across all five
 attempts, Faster R-CNN has about 1.84 times YOLO11s' mAP@0.5:0.95 and much
 higher recall and F1. YOLO11s' higher mean precision at the same nominal cutoff
 is an operating-point score-scale effect, not evidence of a generally superior
-precision-recall frontier. The earlier finding that Faster R-CNN has higher
-mean precision at 96 of 101 official AP@0.5 recall positions is a frozen
-three-seed Batch 10 analysis; neither that curve nor the Batch 14 threshold
-selection was rerun in Batch 16. The validation-selected 0.69/0.05 test values
-therefore remain historical three-seed results, not five-seed summaries.
+precision-recall frontier. The current five-run frozen-bundle sensitivity finds
+higher Faster R-CNN mean precision at 97 of 101 AP@0.5 recall positions, with
+four ties. It retains the original 96-of-101 three-seed Batch 10 result as
+historical provenance. The detector-specific thresholds remain the Batch 14
+validation selections (0.69/0.05, selected with n=3); applying them unchanged
+to all five test bundles gives a five-run sensitivity, not a new threshold
+selection.
 
 ### Operational confidence-score instability
 
@@ -206,8 +208,8 @@ tests retain Holm-corrected evidence for precision, recall, F1, and both AP
 differences. Conditional IoU/Dice remain non-significant and use four complete
 seed pairs. The fixed-threshold precision result does not establish a frontier
 advantage. See `THRESHOLD_ANALYSIS.md`, `PARETO_ANALYSIS.md`,
-`FROC_ANALYSIS.md`, and `STATISTICAL_ANALYSIS.md`; the first three remain
-explicitly three-seed analyses.
+`FROC_ANALYSIS.md`, and `STATISTICAL_ANALYSIS.md`; the first three preserve the
+pre-specified n=3 artifacts and separately label their n=5 sensitivities.
 
 ## Reproduction
 

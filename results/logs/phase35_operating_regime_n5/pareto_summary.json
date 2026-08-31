@@ -1,0 +1,351 @@
+{
+  "aggregate": [
+    {
+      "detector": "faster_rcnn",
+      "mean": 0.09950157082350385,
+      "metric": "map_50_95",
+      "run_count": 5,
+      "sample_std": 0.006680724714320561,
+      "unit": "ratio"
+    },
+    {
+      "detector": "faster_rcnn",
+      "mean": 0.35074626865671643,
+      "metric": "recall",
+      "run_count": 5,
+      "sample_std": 0.046304752410413645,
+      "unit": "ratio"
+    },
+    {
+      "detector": "faster_rcnn",
+      "mean": 20.275036662772074,
+      "metric": "throughput_fps",
+      "run_count": 5,
+      "sample_std": 5.623353639789695,
+      "unit": "images/second"
+    },
+    {
+      "detector": "faster_rcnn",
+      "mean": 53.93342160008251,
+      "metric": "mean_latency_ms",
+      "run_count": 5,
+      "sample_std": 21.149090276982722,
+      "unit": "milliseconds/image"
+    },
+    {
+      "detector": "faster_rcnn",
+      "mean": 43256153.0,
+      "metric": "total_parameters",
+      "run_count": 5,
+      "sample_std": 0.0,
+      "unit": "parameters"
+    },
+    {
+      "detector": "faster_rcnn",
+      "mean": 450.7637248,
+      "metric": "estimated_gflops",
+      "run_count": 5,
+      "sample_std": 0.0,
+      "unit": "GFLOPs/image"
+    },
+    {
+      "detector": "yolo11s",
+      "mean": 0.05416835343057739,
+      "metric": "map_50_95",
+      "run_count": 5,
+      "sample_std": 0.006030311771848994,
+      "unit": "ratio"
+    },
+    {
+      "detector": "yolo11s",
+      "mean": 0.19477611940298506,
+      "metric": "recall",
+      "run_count": 5,
+      "sample_std": 0.11095336070295891,
+      "unit": "ratio"
+    },
+    {
+      "detector": "yolo11s",
+      "mean": 60.28982114387253,
+      "metric": "throughput_fps",
+      "run_count": 5,
+      "sample_std": 12.622863103213357,
+      "unit": "images/second"
+    },
+    {
+      "detector": "yolo11s",
+      "mean": 17.225947599908977,
+      "metric": "mean_latency_ms",
+      "run_count": 5,
+      "sample_std": 3.8263454810026087,
+      "unit": "milliseconds/image"
+    },
+    {
+      "detector": "yolo11s",
+      "mean": 9428179.0,
+      "metric": "total_parameters",
+      "run_count": 5,
+      "sample_std": 0.0,
+      "unit": "parameters"
+    },
+    {
+      "detector": "yolo11s",
+      "mean": 21.4198784,
+      "metric": "estimated_gflops",
+      "run_count": 5,
+      "sample_std": 0.0,
+      "unit": "GFLOPs/image"
+    }
+  ],
+  "aggregation": {
+    "dominance": "a detector dominates only if every one of its run points is strictly better than every competing run point on both directed axes",
+    "points": "one observation per frozen detector/run: run-specific AP and compute joined to test recall at the unchanged detector threshold selected from the original validation runs",
+    "summary": "equal-run arithmetic mean and sample standard deviation"
+  },
+  "analysis_id": "rsna-phase35-pareto-n5-sensitivity",
+  "artifacts": {
+    "aggregate_table": {
+      "path": "results/tables/pareto_summary_n5_sensitivity.csv",
+      "sha256": "495a166cc974c31ebc1c8ceb5fdbafe3c659b4429b440d02063310c326944261",
+      "size_bytes": 865
+    },
+    "figure": {
+      "path": "results/figures/pareto_frontier_n5_sensitivity.png",
+      "sha256": "05bd7041c38829ebc7836f51fafa347a0cff5dc23874616bfba62ac46030c3c7",
+      "size_bytes": 290950
+    },
+    "points_table": {
+      "path": "results/tables/pareto_points_n5_sensitivity.csv",
+      "sha256": "4f9bf76b39a8fed05f723da351dcc68053355741b90a75847eae6571e9b163f1",
+      "size_bytes": 1525
+    }
+  },
+  "config_path": "configs/pareto_n5_sensitivity.yaml",
+  "config_sha256": "c4dab8e779aec6ab657fc160fabedee72df64ad8a0a16ad4d1e643998f8e914f",
+  "dominance_by_panel": {
+    "a": null,
+    "b": null,
+    "c": null,
+    "d": null
+  },
+  "points": [
+    {
+      "detector": "faster_rcnn",
+      "estimated_gflops": 450.7637248,
+      "map_50_95": 0.0983562201940088,
+      "mean_latency_ms": 90.91535900004601,
+      "recall": 0.3880597014925373,
+      "recall_threshold": 0.69,
+      "run_id": "faster_rcnn_rsna_seed17_full",
+      "seed": 17,
+      "throughput_fps": 10.99924161328444,
+      "total_parameters": 43256153
+    },
+    {
+      "detector": "faster_rcnn",
+      "estimated_gflops": 450.7637248,
+      "map_50_95": 0.10538413110006555,
+      "mean_latency_ms": 45.82394099976227,
+      "recall": 0.40298507462686567,
+      "recall_threshold": 0.69,
+      "run_id": "faster_rcnn_rsna_seed42_full",
+      "seed": 42,
+      "throughput_fps": 21.82265379586596,
+      "total_parameters": 43256153
+    },
+    {
+      "detector": "faster_rcnn",
+      "estimated_gflops": 450.7637248,
+      "map_50_95": 0.1032238024790173,
+      "mean_latency_ms": 51.40781300055096,
+      "recall": 0.291044776119403,
+      "recall_threshold": 0.69,
+      "run_id": "faster_rcnn_rsna_seed137_full",
+      "seed": 137,
+      "throughput_fps": 19.452296093383364,
+      "total_parameters": 43256153
+    },
+    {
+      "detector": "faster_rcnn",
+      "estimated_gflops": 450.7637248,
+      "map_50_95": 0.10209005760852218,
+      "mean_latency_ms": 39.698912000130804,
+      "recall": 0.35074626865671643,
+      "recall_threshold": 0.69,
+      "run_id": "faster_rcnn_rsna_seed271_full",
+      "seed": 271,
+      "throughput_fps": 25.189607211318666,
+      "total_parameters": 43256153
+    },
+    {
+      "detector": "faster_rcnn",
+      "estimated_gflops": 450.7637248,
+      "map_50_95": 0.08845364273590539,
+      "mean_latency_ms": 41.82108299992251,
+      "recall": 0.3208955223880597,
+      "recall_threshold": 0.69,
+      "run_id": "faster_rcnn_rsna_seed314_full",
+      "seed": 314,
+      "throughput_fps": 23.911384600007917,
+      "total_parameters": 43256153
+    },
+    {
+      "detector": "yolo11s",
+      "estimated_gflops": 21.4198784,
+      "map_50_95": 0.060693096663705294,
+      "mean_latency_ms": 15.32834300014656,
+      "recall": 0.26119402985074625,
+      "recall_threshold": 0.05,
+      "run_id": "yolo11s_rsna_seed17_full",
+      "seed": 17,
+      "throughput_fps": 65.23862363925694,
+      "total_parameters": 9428179
+    },
+    {
+      "detector": "yolo11s",
+      "estimated_gflops": 21.4198784,
+      "map_50_95": 0.05832218986182618,
+      "mean_latency_ms": 21.39587199984817,
+      "recall": 0.26119402985074625,
+      "recall_threshold": 0.05,
+      "run_id": "yolo11s_rsna_seed42_full",
+      "seed": 42,
+      "throughput_fps": 46.73798758971339,
+      "total_parameters": 9428179
+    },
+    {
+      "detector": "yolo11s",
+      "estimated_gflops": 21.4198784,
+      "map_50_95": 0.045826108358026814,
+      "mean_latency_ms": 21.34177199965052,
+      "recall": 0.208955223880597,
+      "recall_threshold": 0.05,
+      "run_id": "yolo11s_rsna_seed137_full",
+      "seed": 137,
+      "throughput_fps": 46.85646534019647,
+      "total_parameters": 9428179
+    },
+    {
+      "detector": "yolo11s",
+      "estimated_gflops": 21.4198784,
+      "map_50_95": 0.05557988828743391,
+      "mean_latency_ms": 14.371215000101074,
+      "recall": 0.0,
+      "recall_threshold": 0.05,
+      "run_id": "yolo11s_rsna_seed271_full",
+      "seed": 271,
+      "throughput_fps": 69.58353903918123,
+      "total_parameters": 9428179
+    },
+    {
+      "detector": "yolo11s",
+      "estimated_gflops": 21.4198784,
+      "map_50_95": 0.05042048398189474,
+      "mean_latency_ms": 13.692535999798565,
+      "recall": 0.24253731343283583,
+      "recall_threshold": 0.05,
+      "run_id": "yolo11s_rsna_seed314_full",
+      "seed": 314,
+      "throughput_fps": 73.0324901110146,
+      "total_parameters": 9428179
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "label": "n=5 all-attempt sensitivity; recall thresholds frozen from n=3 validation selection",
+    "performs_checkpoint_loading": false,
+    "performs_model_inference": false,
+    "performs_training": false,
+    "recall_threshold_selection_run_count": {
+      "faster_rcnn": 3,
+      "yolo11s": 3
+    },
+    "recall_threshold_selection_split": "validation",
+    "runs_per_detector": 5,
+    "seeds": [
+      17,
+      42,
+      137,
+      271,
+      314
+    ]
+  },
+  "source_identity": {
+    "src/plot_pareto_frontier.py": "70ab81331475a5d13c33e8e1f6db3bc181d3012f943e76a47a3a451c98e5c993"
+  },
+  "status": "complete",
+  "upstream": {
+    "comparison_per_seed": {
+      "path": "results/tables/detector_comparison_per_seed.csv",
+      "sha256": "5d2bd5c1f2e2a6f666efbde49c9d6c30d047cb25e8326f5f90052233c14374e4",
+      "size_bytes": 6583
+    },
+    "comparison_summary": {
+      "path": "results/tables/detector_comparison.csv",
+      "sha256": "c5f3181845d1fd3ea84ce39c1b8329080a8108217e5eee13281ae75f129818a1",
+      "size_bytes": 3126
+    },
+    "compute_tables": [
+      {
+        "path": "results/tables/faster_rcnn_compute.csv",
+        "sha256": "0362d401c73e4f75c70c1a65f707ff77bf13aeee98b827f0815336e3ea2497bb",
+        "size_bytes": 791
+      },
+      {
+        "path": "results/tables/seeds/faster_rcnn_seed42_compute.csv",
+        "sha256": "9f9fa3029561241df69c1d538188a9b6195c776ed1c598c945375520e2da6a81",
+        "size_bytes": 795
+      },
+      {
+        "path": "results/tables/seeds/faster_rcnn_seed137_compute.csv",
+        "sha256": "e1ed2029563213f618d67d51985d9b9247115df887a3526ceb74a74611b968c5",
+        "size_bytes": 801
+      },
+      {
+        "path": "results/tables/seeds/faster_rcnn_seed271_compute.csv",
+        "sha256": "4a3d613669c57af2fa91964526a70842f8e67503c661990de36810ea8dee285d",
+        "size_bytes": 802
+      },
+      {
+        "path": "results/tables/seeds/faster_rcnn_seed314_compute.csv",
+        "sha256": "12ad0daa55a6e8618f0b686de6fe535dc263460b31719402e31c53f29de208a9",
+        "size_bytes": 798
+      },
+      {
+        "path": "results/tables/yolo_compute.csv",
+        "sha256": "8be0c3d8813140fa7616ef940e45a683248c193f2a13de561a58cc4b9d75e855",
+        "size_bytes": 805
+      },
+      {
+        "path": "results/tables/seeds/yolo_seed42_compute.csv",
+        "sha256": "833d220e80079c766137fc4e13bf160ad3fa0a08a8e1e3cda417ab4de45c8406",
+        "size_bytes": 803
+      },
+      {
+        "path": "results/tables/seeds/yolo_seed137_compute.csv",
+        "sha256": "b9d7c1cc24e2a2f726fc078e48f0b33bf076ee4bb1cfd1b66866a6c21ac633b5",
+        "size_bytes": 807
+      },
+      {
+        "path": "results/tables/seeds/yolo_seed271_compute.csv",
+        "sha256": "00fde393a25edd11c55528a077fbe3d9f13e8de071e71d0524097cc6a507569f",
+        "size_bytes": 806
+      },
+      {
+        "path": "results/tables/seeds/yolo_seed314_compute.csv",
+        "sha256": "3a3238d301d01a28118d609a074b4bdc7489c1b87c07e86c162a826a9e8137eb",
+        "size_bytes": 806
+      }
+    ],
+    "selected_operating_points": {
+      "path": "results/tables/selected_operating_points_n5_sensitivity.csv",
+      "sha256": "89693b860248999228f18c3fc8ede0007463b0e35378dc4894340f10ad7cb875",
+      "size_bytes": 1055
+    },
+    "selected_operating_points_per_seed": {
+      "path": "results/tables/selected_operating_points_per_seed_n5_sensitivity.csv",
+      "sha256": "ee834d9d95e24d139f9e404d3e395cab94ad57dd8782a3e32e70f8559987f13d",
+      "size_bytes": 1847
+    }
+  }
+}

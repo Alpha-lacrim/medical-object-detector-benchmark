@@ -178,8 +178,10 @@ plausible because AP uses ranked predictions retained down to 0.001. This is an
 operational confidence-score degeneracy, not classic head/loss collapse and not
 an unlucky IoU-matching event. The checkpoint-conditional YOLO precision result
 remains a fixed-threshold score-scale result rather than evidence of a superior frontier;
-the official precision-recall analysis remains the frozen three-seed Batch 10
-analysis.
+the current five-run precision-recall sensitivity instead favors Faster R-CNN
+at 97 of 101 AP@0.5 recall positions, with four ties. The original three-seed
+Batch 10 curve remains frozen as historical provenance, and the sensitivity
+does not alter the n=3 validation-selected thresholds.
 
 The checkpoint-conditional Holm-adjusted p-values are `0.0019996001`
 (precision), `0.0013997201` (recall), `0.0013997201` (F1), `0.0207958408`

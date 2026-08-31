@@ -40,12 +40,12 @@ convert the hypothesis into a prospective or confirmatory test.
 | Status | Retrospective, result-linked hypothesis; not preregistered. |
 | Operational endpoint | Three signatures together: higher YOLO11s precision but lower recall at score 0.25; Faster R-CNN higher at more official AP@0.5 recall positions with none favoring YOLO11s; Faster R-CNN higher sensitivity at each FROC budget 0.125, 0.25, 0.5, 1, and 2 FP/image. |
 | Dataset/split | Same 750-image/323-patient internal-testing split; frozen exploratory threshold/PR/FROC analyses. |
-| Seed count | Three runs per detector: 17, 42, and 137. |
-| Source artifacts | [`detector_comparison_n3_archive.csv`](../results/tables/detector_comparison_n3_archive.csv); [`precision_recall_curves.csv`](../results/tables/precision_recall_curves.csv); [`froc_operating_points.csv`](../results/tables/froc_operating_points.csv); figures [`precision_recall_curves.png`](../results/figures/precision_recall_curves.png) and [`froc_curves.png`](../results/figures/froc_curves.png). |
+| Seed count | Principal test-side sensitivity: five runs per detector, seeds 17, 42, 137, 271, and 314. Historical/prespecified provenance: three runs per detector. |
+| Source artifacts | [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv); [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv); figures [`precision_recall_curves_n5_sensitivity.png`](../results/figures/precision_recall_curves_n5_sensitivity.png) and [`froc_curves_n5_sensitivity.png`](../results/figures/froc_curves_n5_sensitivity.png); original unsuffixed n=3 artifacts retained. |
 | Manuscript section | [`paper_draft.md` §§4.2, 4.3, and 5.1](../report/paper_draft.md#42-threshold-sensitivity-and-official-precision-recall). |
-| Result status | **Supported retrospectively and descriptively:** 96/101 recall positions favor Faster R-CNN, five tie, and all five reported FROC budgets favor Faster R-CNN sensitivity. |
+| Result status | **Supported retrospectively and descriptively:** 97/101 AP@0.5 recall positions favor Faster R-CNN, four tie, and all five n=5 FROC budgets favor Faster R-CNN sensitivity. The complete n=3-versus-n=5 table reports weakened as well as strengthened margins. |
 | Multiplicity | No inferential multiplicity procedure applies to the descriptive curve-position counts and predeclared FROC budgets. The score-0.25 clean endpoint p-values are part of the separate seven-endpoint Holm family, not a test of the whole H2 pattern. |
-| Limitations | Frozen `n=3`; exploratory internal-testing threshold sweep; no probabilistic-calibration inference; YOLO11s reaches the 0.01 lower threshold boundary; no clinical operating point or external testing. |
+| Limitations | Exploratory n=5 internal-testing sensitivity of historical n=3 analysis; threshold selection remains n=3; no probabilistic-calibration inference; YOLO11s reaches the 0.01 lower threshold boundary; no clinical operating point or external testing. |
 
 ## H3 — Accuracy-compute Pareto trade-off
 
@@ -59,12 +59,12 @@ convert the hypothesis into a prospective or confirmatory test.
 | Status | Retrospective, result-linked hypothesis; not preregistered. |
 | Operational endpoint | Across AP-or-model-optimization-selected-recall versus FPS, latency, parameters, and registered-operation GFLOPs, no detector may have every seed strictly better than every competing seed on both directed axes. |
 | Dataset/split | Accuracy uses the 750-image patient-disjoint internal-testing split; thresholds were selected only on the 750-image/321-patient model-optimization split. Compute was measured on the stated RTX 4060 Laptop GPU protocol. |
-| Seed count | Frozen three-run Pareto scope per detector: 17, 42, and 137. |
-| Source artifacts | [`pareto_frontier.png`](../results/figures/pareto_frontier.png); [`detector_comparison_per_seed_n3_archive.csv`](../results/tables/detector_comparison_per_seed_n3_archive.csv); [`selected_operating_points_per_seed.csv`](../results/tables/selected_operating_points_per_seed.csv); [`faster_rcnn_compute.csv`](../results/tables/faster_rcnn_compute.csv) and [`yolo_compute.csv`](../results/tables/yolo_compute.csv). |
+| Seed count | Five-run test/compute sensitivity per detector; recall thresholds remain selected from the original three validation runs. Historical n=3 frontier retained separately. |
+| Source artifacts | [`pareto_frontier_n5_sensitivity.png`](../results/figures/pareto_frontier_n5_sensitivity.png); [`pareto_points_n5_sensitivity.csv`](../results/tables/pareto_points_n5_sensitivity.csv); [`pareto_summary_n5_sensitivity.csv`](../results/tables/pareto_summary_n5_sensitivity.csv); [`selected_operating_points_per_seed_n5_sensitivity.csv`](../results/tables/selected_operating_points_per_seed_n5_sensitivity.csv); original [`pareto_frontier.png`](../results/figures/pareto_frontier.png) retained. |
 | Manuscript section | [`paper_draft.md` §§4.5 and 5.2](../report/paper_draft.md#45-compute-profile-and-pareto-structure). |
-| Result status | **Supported retrospectively and descriptively** in all four frozen panels under the conservative all-seeds rule. |
+| Result status | **Supported retrospectively and descriptively** in all four n=5 sensitivity panels under the conservative all-runs rule; all four labels are unchanged from n=3. |
 | Multiplicity | No hypothesis-test family or multiplicity correction applies; this is a deterministic Pareto classification over the named runs and axes. |
-| Limitations | One hardware/software stack; asymmetric preprocessing inside timing regions; unsupported operations omitted from GFLOPs; `n=3`; model-optimization-selected recall rather than clinical utility; pipeline, not architecture-family, comparison. |
+| Limitations | One hardware/software stack; asymmetric preprocessing inside timing regions; unsupported operations omitted from GFLOPs; five runs remain coarse; n=3-selected recall rather than clinical utility; pipeline, not architecture-family, comparison. |
 
 ## H4 — Corruption degradation is type- and severity-specific
 

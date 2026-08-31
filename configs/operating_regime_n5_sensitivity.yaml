@@ -1,0 +1,40 @@
+schema_version: 1
+analysis_id: rsna-phase35-operating-regime-n5-sensitivity
+
+inputs:
+  decision_log: docs/DECISION_LOG.md
+  historical_selection_summary: results/logs/phase14_threshold_selection/summary.json
+  historical_selected_table: results/tables/selected_operating_points.csv
+  historical_selected_per_seed_table: results/tables/selected_operating_points_per_seed.csv
+  historical_threshold_summary: results/logs/phase10_threshold_sweep/summary.json
+  historical_threshold_table: results/tables/threshold_sweep.csv
+  historical_threshold_per_seed_table: results/tables/threshold_sweep_per_seed.csv
+  historical_pr_table: results/tables/precision_recall_curves.csv
+  historical_pr_per_seed_table: results/tables/precision_recall_curves_per_seed.csv
+  n5_threshold_config: configs/threshold_sweep_n5_sensitivity.yaml
+  n5_threshold_summary: results/logs/phase35_operating_regime_n5/threshold_summary.json
+  n5_threshold_table: results/tables/threshold_sweep_n5_sensitivity.csv
+  n5_threshold_per_seed_table: results/tables/threshold_sweep_per_seed_n5_sensitivity.csv
+  n5_pr_table: results/tables/precision_recall_curves_n5_sensitivity.csv
+  n5_pr_per_seed_table: results/tables/precision_recall_curves_per_seed_n5_sensitivity.csv
+  historical_froc_summary: results/logs/phase14_froc/summary.json
+  historical_froc_table: results/tables/froc_operating_points.csv
+  n5_froc_config: configs/froc_n5_sensitivity.yaml
+  n5_froc_summary: results/logs/phase35_operating_regime_n5/froc_summary.json
+  n5_froc_table: results/tables/froc_operating_points_n5_sensitivity.csv
+  historical_pareto_config: configs/pareto.yaml
+  n5_pareto_config: configs/pareto_n5_sensitivity.yaml
+  n5_pareto_summary: results/logs/phase35_operating_regime_n5/pareto_summary.json
+
+analysis:
+  expected_historical_seeds: [17, 42, 137]
+  expected_sensitivity_seeds: [17, 42, 137, 271, 314]
+  influence_seed: 271
+  numeric_tolerance: 1.0e-12
+
+outputs:
+  fixed_threshold_table: results/tables/selected_operating_points_n5_sensitivity.csv
+  fixed_threshold_per_seed_table: results/tables/selected_operating_points_per_seed_n5_sensitivity.csv
+  inventory_table: results/tables/operating_regime_n5_inventory.csv
+  conclusion_table: results/tables/operating_regime_n3_vs_n5_conclusions.csv
+  summary_json: results/logs/phase35_operating_regime_n5/summary.json

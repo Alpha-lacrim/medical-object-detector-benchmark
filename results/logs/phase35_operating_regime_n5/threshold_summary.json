@@ -1,0 +1,477 @@
+{
+  "analysis": {
+    "aggregation": "arithmetic mean and sample standard deviation across seeds",
+    "coco_precision_recall": "official pycocotools 101-point interpolated precision tensor; AP@0.5 and IoU-averaged AP@0.5:0.95 views",
+    "match_iou_threshold": 0.5,
+    "matcher": "src.evaluate.evaluate_operating_point, imported there from src.meddet_benchmark.evaluation",
+    "max_detections_per_image": 100,
+    "performs_inference": false,
+    "performs_training": false,
+    "precision_targets": [
+      0.5,
+      0.9
+    ],
+    "recall_targets": [
+      0.3,
+      0.5
+    ],
+    "statistics_ddof": 1,
+    "threshold_count": 99,
+    "thresholds": [
+      0.01,
+      0.02,
+      0.03,
+      0.04,
+      0.05,
+      0.06,
+      0.07,
+      0.08,
+      0.09,
+      0.1,
+      0.11,
+      0.12,
+      0.13,
+      0.14,
+      0.15,
+      0.16,
+      0.17,
+      0.18,
+      0.19,
+      0.2,
+      0.21,
+      0.22,
+      0.23,
+      0.24,
+      0.25,
+      0.26,
+      0.27,
+      0.28,
+      0.29,
+      0.3,
+      0.31,
+      0.32,
+      0.33,
+      0.34,
+      0.35,
+      0.36,
+      0.37,
+      0.38,
+      0.39,
+      0.4,
+      0.41,
+      0.42,
+      0.43,
+      0.44,
+      0.45,
+      0.46,
+      0.47,
+      0.48,
+      0.49,
+      0.5,
+      0.51,
+      0.52,
+      0.53,
+      0.54,
+      0.55,
+      0.56,
+      0.57,
+      0.58,
+      0.59,
+      0.6,
+      0.61,
+      0.62,
+      0.63,
+      0.64,
+      0.65,
+      0.66,
+      0.67,
+      0.68,
+      0.69,
+      0.7,
+      0.71,
+      0.72,
+      0.73,
+      0.74,
+      0.75,
+      0.76,
+      0.77,
+      0.78,
+      0.79,
+      0.8,
+      0.81,
+      0.82,
+      0.83,
+      0.84,
+      0.85,
+      0.86,
+      0.87,
+      0.88,
+      0.89,
+      0.9,
+      0.91,
+      0.92,
+      0.93,
+      0.94,
+      0.95,
+      0.96,
+      0.97,
+      0.98,
+      0.99
+    ]
+  },
+  "artifacts": {
+    "f1_figure": {
+      "path": "results/figures/f1_vs_threshold_n5_sensitivity.png",
+      "sha256": "f748c81806af668db39ffdb6b57d23ddda2b9722e5b7856e7fdfe1ff6d5adee2"
+    },
+    "operating_targets_table": {
+      "path": "results/tables/threshold_operating_targets_n5_sensitivity.csv",
+      "sha256": "78e77f76e6955dc7ff9482b0c1907e34f99a0d80f68d68aa4761f717b6ab2a8a"
+    },
+    "precision_recall_figure": {
+      "path": "results/figures/precision_recall_curves_n5_sensitivity.png",
+      "sha256": "30337dc86b20837ba0ac1b3432ef2cc1e43732cdde9447442dfd48a80b1da024"
+    },
+    "precision_recall_per_seed_table": {
+      "path": "results/tables/precision_recall_curves_per_seed_n5_sensitivity.csv",
+      "sha256": "3276f1328c5a1583a56b46e28c7f3cdd38fad73e0372e42c61d48708086414df"
+    },
+    "precision_recall_table": {
+      "path": "results/tables/precision_recall_curves_n5_sensitivity.csv",
+      "sha256": "c1635575ee9b135aacee4fcc1b98d4639bec66d31f6f6094b87a37c25b0feeee"
+    },
+    "threshold_per_seed_table": {
+      "path": "results/tables/threshold_sweep_per_seed_n5_sensitivity.csv",
+      "sha256": "fbc4d9d5fbf9250a906b65550ef172aef574fc88424e1d4ace19f9b918f32245"
+    },
+    "threshold_table": {
+      "path": "results/tables/threshold_sweep_n5_sensitivity.csv",
+      "sha256": "faa0df49e86e710b51668d23588e736ffac03f0508040d38c97f3f38d4ca49ac"
+    }
+  },
+  "coco_reproduction": [
+    {
+      "ap50": 0.2955726614421415,
+      "ap50_95": 0.0983562201940088,
+      "detector": "faster_rcnn",
+      "prediction_count": 18260,
+      "seed": 17
+    },
+    {
+      "ap50": 0.30954831060054333,
+      "ap50_95": 0.10538413110006555,
+      "detector": "faster_rcnn",
+      "prediction_count": 7682,
+      "seed": 42
+    },
+    {
+      "ap50": 0.3200806628353708,
+      "ap50_95": 0.1032238024790173,
+      "detector": "faster_rcnn",
+      "prediction_count": 25030,
+      "seed": 137
+    },
+    {
+      "ap50": 0.32026447410162884,
+      "ap50_95": 0.10209005760852218,
+      "detector": "faster_rcnn",
+      "prediction_count": 6588,
+      "seed": 271
+    },
+    {
+      "ap50": 0.2756529265385327,
+      "ap50_95": 0.08845364273590539,
+      "detector": "faster_rcnn",
+      "prediction_count": 3663,
+      "seed": 314
+    },
+    {
+      "ap50": 0.184171740556827,
+      "ap50_95": 0.060693096663705294,
+      "detector": "yolo11s",
+      "prediction_count": 1019,
+      "seed": 17
+    },
+    {
+      "ap50": 0.16893425232205408,
+      "ap50_95": 0.05832218986182618,
+      "detector": "yolo11s",
+      "prediction_count": 773,
+      "seed": 42
+    },
+    {
+      "ap50": 0.13969236100218996,
+      "ap50_95": 0.045826108358026814,
+      "detector": "yolo11s",
+      "prediction_count": 394,
+      "seed": 137
+    },
+    {
+      "ap50": 0.15872173755300575,
+      "ap50_95": 0.05557988828743391,
+      "detector": "yolo11s",
+      "prediction_count": 962,
+      "seed": 271
+    },
+    {
+      "ap50": 0.16153960949518734,
+      "ap50_95": 0.05042048398189474,
+      "detector": "yolo11s",
+      "prediction_count": 905,
+      "seed": 314
+    }
+  ],
+  "config_path": "configs/threshold_sweep_n5_sensitivity.yaml",
+  "config_sha256": "6e28151b576306e26abacfbddff33f56fbcf6b480723399cb86f37ba91148a3c",
+  "counts": {
+    "annotations": 268,
+    "detectors": 2,
+    "images_per_bundle": 750,
+    "precision_recall_rows_aggregate": 404,
+    "precision_recall_rows_per_seed": 2020,
+    "prediction_bundles": 10,
+    "seeds_per_detector": 5,
+    "threshold_rows_aggregate": 198,
+    "threshold_rows_per_seed": 990
+  },
+  "experiment_id": "rsna-phase35-threshold-sweep-n5-sensitivity",
+  "finding_summary": {
+    "detectors": {
+      "faster_rcnn": {
+        "maximum_mean_recall": 0.791044776119403,
+        "peak_mean_f1": 0.3562316579940893,
+        "peak_mean_f1_threshold": 0.63,
+        "reference_operating_point": {
+          "f1": 0.2845263147467961,
+          "precision": 0.19589066943662742,
+          "recall": 0.5798507462686567,
+          "threshold": 0.25
+        }
+      },
+      "yolo11s": {
+        "maximum_mean_recall": 0.29253731343283584,
+        "peak_mean_f1": 0.26571344101685773,
+        "peak_mean_f1_threshold": 0.01,
+        "reference_operating_point": {
+          "f1": 0.14266144111134127,
+          "precision": 0.298316891974181,
+          "recall": 0.0955223880597015,
+          "threshold": 0.25
+        }
+      }
+    },
+    "official_curve_comparison": {
+      "ap50": {
+        "equal_precision_points": 4,
+        "faster_higher_precision_points": 97,
+        "maximum_recall_with_positive_mean_precision": {
+          "faster_rcnn": 0.96,
+          "yolo11s": 0.54
+        },
+        "recall_grid_points": 101,
+        "yolo_higher_precision_points": 0
+      },
+      "ap50_95": {
+        "equal_precision_points": 4,
+        "faster_higher_precision_points": 96,
+        "maximum_recall_with_positive_mean_precision": {
+          "faster_rcnn": 0.96,
+          "yolo11s": 0.54
+        },
+        "recall_grid_points": 101,
+        "yolo_higher_precision_points": 1
+      }
+    }
+  },
+  "operating_targets": [
+    {
+      "detector": "faster_rcnn",
+      "response": 0.23805970149253727,
+      "response_metric": "recall",
+      "response_std": 0.11325103262742657,
+      "seed_count": 5,
+      "seeds_reaching_target": 5,
+      "selection_rule": "maximum mean recall among swept thresholds with mean precision >= target; no interpolation",
+      "status": "reachable",
+      "target_metric": "precision",
+      "target_value": 0.5,
+      "threshold": 0.79
+    },
+    {
+      "detector": "faster_rcnn",
+      "response": null,
+      "response_metric": "recall",
+      "response_std": null,
+      "seed_count": 5,
+      "seeds_reaching_target": 3,
+      "selection_rule": "maximum mean recall among swept thresholds with mean precision >= target; no interpolation",
+      "status": "not_reachable_at_any_swept_threshold",
+      "target_metric": "precision",
+      "target_value": 0.9,
+      "threshold": null
+    },
+    {
+      "detector": "faster_rcnn",
+      "response": 0.4072777422352929,
+      "response_metric": "precision",
+      "response_std": 0.10828015122494168,
+      "seed_count": 5,
+      "seeds_reaching_target": 5,
+      "selection_rule": "maximum mean precision among swept thresholds with mean recall >= target; no interpolation",
+      "status": "reachable",
+      "target_metric": "recall",
+      "target_value": 0.3,
+      "threshold": 0.73
+    },
+    {
+      "detector": "faster_rcnn",
+      "response": 0.25966067826446837,
+      "response_metric": "precision",
+      "response_std": 0.05059688871224498,
+      "seed_count": 5,
+      "seeds_reaching_target": 5,
+      "selection_rule": "maximum mean precision among swept thresholds with mean recall >= target; no interpolation",
+      "status": "reachable",
+      "target_metric": "recall",
+      "target_value": 0.5,
+      "threshold": 0.46
+    },
+    {
+      "detector": "yolo11s",
+      "response": 0.04253731343283582,
+      "response_metric": "recall",
+      "response_std": 0.05531960239775148,
+      "seed_count": 5,
+      "seeds_reaching_target": 4,
+      "selection_rule": "maximum mean recall among swept thresholds with mean precision >= target; no interpolation",
+      "status": "reachable",
+      "target_metric": "precision",
+      "target_value": 0.5,
+      "threshold": 0.46
+    },
+    {
+      "detector": "yolo11s",
+      "response": null,
+      "response_metric": "recall",
+      "response_std": null,
+      "seed_count": 5,
+      "seeds_reaching_target": 4,
+      "selection_rule": "maximum mean recall among swept thresholds with mean precision >= target; no interpolation",
+      "status": "not_reachable_at_any_swept_threshold",
+      "target_metric": "precision",
+      "target_value": 0.9,
+      "threshold": null
+    },
+    {
+      "detector": "yolo11s",
+      "response": null,
+      "response_metric": "precision",
+      "response_std": null,
+      "seed_count": 5,
+      "seeds_reaching_target": 3,
+      "selection_rule": "maximum mean precision among swept thresholds with mean recall >= target; no interpolation",
+      "status": "not_reachable_at_any_swept_threshold",
+      "target_metric": "recall",
+      "target_value": 0.3,
+      "threshold": null
+    },
+    {
+      "detector": "yolo11s",
+      "response": null,
+      "response_metric": "precision",
+      "response_std": null,
+      "seed_count": 5,
+      "seeds_reaching_target": 0,
+      "selection_rule": "maximum mean precision among swept thresholds with mean recall >= target; no interpolation",
+      "status": "not_reachable_at_any_swept_threshold",
+      "target_metric": "recall",
+      "target_value": 0.5,
+      "threshold": null
+    }
+  ],
+  "schema_version": 1,
+  "source_identity": {
+    "src/evaluate.py": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+    "src/evaluate_threshold_sweep.py": "a1c0718c03fe5fcaa761f198b5eb56b639517a55c4778b5d58d0a821a5047de3",
+    "src/meddet_benchmark/coco_evaluation.py": "05070ebb84df6f6f35ab1c711bc35dcfe0d9e478ceb8c94ecafca911811a8dd7",
+    "src/meddet_benchmark/evaluation.py": "be7bca53c50d9e1de45a686709fb303c9e389491196406978988dc2033eb933f",
+    "src/stats/run_statistics.py": "cd806244fec9932e6c5e580362e88249837f817ca75fc1d32f7c0139d20515e0"
+  },
+  "status": "complete",
+  "upstream": {
+    "phase5_config": {
+      "path": "configs/evaluation.yaml",
+      "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69"
+    },
+    "phase5_summary": {
+      "path": "results/logs/phase5_evaluation/summary.json",
+      "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130"
+    },
+    "prediction_bundles": [
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+        "seed": 271,
+        "sha256": "0f8c5d2e615f65d337b74126c0226f2bd3f5fd069660b47756d2461d22e04a44"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+        "seed": 314,
+        "sha256": "b0d11508dd7319ea3524f0c05658df95bdf81c28d169592a22eeb98ea964e316"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "seed": 271,
+        "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+        "seed": 314,
+        "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4"
+      }
+    ],
+    "test_annotations": {
+      "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+      "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc"
+    }
+  }
+}

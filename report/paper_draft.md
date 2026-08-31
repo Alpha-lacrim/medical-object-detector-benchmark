@@ -13,10 +13,11 @@ one patient-disjoint 5,000-radiograph protocol, common 640-pixel inputs, disable
 stochastic augmentation, frozen validation selection, and a model-independent
 COCO-style evaluator. The central finding was an operating-point mismatch: the
 same score threshold selected materially different regimes. At 0.25, YOLO11s
-appeared more precise but had much lower recall; across the frozen three-seed
-precision-recall curve, Faster R-CNN had higher mean precision at 96 of 101
-recall positions and higher sensitivity at all five reported false-positive
-budgets. Validation selected thresholds of 0.69 and 0.05, respectively. In the
+appeared more precise but had much lower recall; across the five-run
+all-attempt sensitivity, Faster R-CNN had higher mean precision at 97 of 101
+AP@0.5 recall positions and higher sensitivity at all five reported
+false-positive budgets. Validation selected thresholds of 0.69 and 0.05 from
+the original three runs, respectively, and those thresholds were retained. In the
 five-seed clean analysis, Faster R-CNN achieved higher recall, F1, and average
 precision, whereas YOLO11s delivered approximately threefold throughput, 78%
 fewer parameters, and about 21-fold fewer registered operations. One YOLO11s
@@ -285,10 +286,12 @@ The evidence has deliberately different scopes:
   predeclared attempts per detector. Conditional IoU and Dice use Faster R-CNN
   `n=5` and YOLO11s `n=4` descriptively, and four complete seed pairs for
   inference, because YOLO11s seed 271 had no true positive at score 0.25.
-- Threshold sweep, validation-selected operating points, official
+- The original threshold sweep, validation-selected operating points, official
   precision-recall curves, FROC, and Pareto analysis remain frozen to seeds 17,
-  42, and 137 (`n=3`). They were not retrospectively expanded after the
-  five-seed result was known.
+  42, and 137 (`n=3`) as historical/prespecified artifacts. A separately
+  versioned all-attempt sensitivity recomputes test-side threshold/PR/FROC and
+  Pareto evidence for all five runs. Threshold selection remains n=3; 0.69 and
+  0.05 are applied unchanged to the five test bundles.
 - Digital-corruption, raw-array acquisition-shift, and primary Grad-CAM analyses
   use the seed-17 checkpoint from each detector on one fixed 300-image sample.
 - Detection calibration uses all five frozen clean-test bundles. The XAI
@@ -306,18 +309,27 @@ result, not a deployment choice. A frozen n=3 exploratory analysis evaluated
 official pycocotools interpolated precision tensor at 101 recall positions,
 rather than approximating the AP curve from the threshold grid.
 
+Without changing the grid or matcher, a separately versioned sensitivity
+repeated those test-side calculations over all five frozen runs per detector.
+The same ten prediction bundles used by the clean comparison were hash-checked;
+no checkpoint was loaded and no prediction was regenerated. The n=5 curves are
+the principal operating-regime display under D-008 because they retain every
+predeclared attempt, while the original n=3 curves remain unchanged provenance.
+
 Primary single-threshold selection was performed independently on the six n=3
 validation bundles. The same 99-point grid was evaluated with the common
 matcher, and the threshold maximizing arithmetic mean validation F1 across the
 three seeds was frozen for each detector; exact ties favored the higher
 threshold. These thresholds were then applied once to the corresponding test
-bundles. Test results did not feed back into selection.
+bundles. Batch 35 additionally applied the same thresholds to seeds 271 and
+314. Test results did not feed back into selection in either scope.
 
 FROC reparameterized the exploratory test sweep as sensitivity versus false
 positives per image. At budgets of 0.125, 0.25, 0.5, 1, and 2 FP/image, each
 seed contributed its highest observed sensitivity without exceeding the
-budget. No interpolation or extrapolation was used. The FROC curves describe
-the available n=3 operating frontier; they do not select a clinical threshold.
+budget. No interpolation or extrapolation was used. Historical n=3 and
+sensitivity n=5 FROC curves use separate files and visible run-count labels;
+neither selects a clinical threshold.
 
 ### 3.5 Recall-weighted F-beta and hypothetical error-loss sensitivity
 
@@ -400,10 +412,14 @@ latency was therefore the primary deployment-efficiency measure. Faster R-CNN
 resizing occurred inside its timed forward, whereas YOLO tensor resizing
 occurred before timed forward-plus-NMS.
 
-The frozen n=3 Pareto analysis paired AP or validation-selected test recall with
-FPS, latency, parameters, or estimated GFLOPs. Strict dominance required every
-seed of one detector to be better than every seed of the other on both directed
-axes. Mean-only ordering was insufficient.
+The frozen historical n=3 Pareto analysis and a separately labeled n=5
+sensitivity paired run-specific AP or validation-selected test recall with
+same-run FPS, latency, parameters, or estimated GFLOPs. Recall thresholds in
+both scopes were selected from the original n=3 validation bundles. Strict
+dominance required every seed of one detector to be better than every seed of
+the other on both directed axes. Mean-only ordering was insufficient. The n=5
+summary used equal-run means and sample SDs with five hardware rows per
+detector; no n=3 and n=5 metric was mixed into one frontier.
 
 ### 3.8 Digital corruption and radiography-motivated synthetic sensitivity
 
@@ -550,40 +566,63 @@ are not mixed into it.
 
 ### 4.2 Precision-recall regimes, validation thresholds, and FROC
 
-The frozen n=3 threshold sweep showed why the score-0.25 comparison cannot be
-read as a general YOLO precision advantage. Lowering YOLO11s from 0.25 to 0.01
-raised mean recall from 0.1356 to 0.3321 and F1 from 0.1981 to 0.2840; its best
-observed F1 was at the lower grid boundary. Faster R-CNN's exploratory test-sweep
-peak mean F1 was 0.3549 at 0.63. These test optima were descriptive and were not
-used as final thresholds.
+The n=5 all-attempt threshold sensitivity showed why the score-0.25 comparison
+cannot be read as a general YOLO precision advantage. At 0.25, Faster R-CNN
+precision/recall/F1 was 0.1959/0.5799/0.2845 and YOLO11s was
+0.2983/0.0955/0.1427. At the lower grid boundary of 0.01, YOLO11s mean recall
+rose to 0.2925 and its best observed F1 to 0.2657. Faster R-CNN's exploratory
+peak mean F1 was 0.3562 at 0.63. These test optima were descriptive and did not
+select either final threshold.
 
-On the official AP@0.5 curve, Faster R-CNN had higher mean interpolated
-precision at 96 of 101 recall positions, with five ties and no YOLO11s-higher
-positions. For the IoU-averaged AP@0.5:0.95 curve, Faster R-CNN was higher at 96
-positions, YOLO11s at one near-zero-recall position, and four were tied. Thus
-the shared-threshold precision difference reflected score scale and
-selectivity; the underlying precision-recall frontier still favored Faster
-R-CNN in this n=3 analysis (Figure 2).
+On the five-run official AP@0.5 curve, Faster R-CNN had higher mean
+interpolated precision at 97 of 101 recall positions, with four ties and no
+YOLO11s-higher position. At AP@0.5:0.95, Faster R-CNN was higher at 96
+positions, YOLO11s at one near-zero-recall position, and four were tied. Mean
+AP@0.5 was 0.3042 +/- 0.0189 versus 0.1626 +/- 0.0162; AP@0.5:0.95 was
+0.0995 +/- 0.0067 versus 0.0542 +/- 0.0060. Thus the shared-threshold precision
+difference reflected score scale and selectivity; threshold-free ranking still
+favored Faster R-CNN (Figure 2). Seed 271 contributed its full nonzero AP curve
+and was not filtered for its zero detections at 0.25.
 
-![Figure 2a. Frozen three-seed official precision-recall curves.](../results/figures/precision_recall_curves.png)
+![Figure 2a. Five-run all-attempt sensitivity of official precision-recall curves. Lines and bands are equal-run mean +/- sample SD; the original n=3 figure is retained as provenance.](../results/figures/precision_recall_curves_n5_sensitivity.png)
 
-![Figure 2b. Exploratory three-seed F1-versus-threshold behavior. The test sweep is descriptive evidence, not threshold selection.](../results/figures/f1_vs_threshold.png)
+![Figure 2b. Five-run exploratory F1-versus-threshold sensitivity. Seed 271 is included exactly as observed; the test sweep is descriptive evidence, not threshold selection.](../results/figures/f1_vs_threshold_n5_sensitivity.png)
 
-Validation selection chose 0.69 for Faster R-CNN and 0.05 for YOLO11s. Applied
-once to the original three test bundles, Faster R-CNN achieved precision,
-recall, and F1 of 0.3543 +/- 0.0746, 0.3607 +/- 0.0608, and 0.3492 +/- 0.0135.
-YOLO11s achieved 0.3096 +/- 0.0134, 0.2438 +/- 0.0302, and 0.2718 +/- 0.0181.
-These values remain n=3. They were not recomputed after observing seed 271,
-which would emit nothing even at the historical 0.05 threshold.
+Validation selection remains n=3 and chose 0.69 for Faster R-CNN and 0.05 for
+YOLO11s. Applying those unchanged thresholds to all five test bundles gave
+precision/recall/F1 0.3624 +/- 0.0581, 0.3507 +/- 0.0463, and
+0.3511 +/- 0.0184 for Faster R-CNN, versus 0.2524 +/- 0.1418,
+0.1948 +/- 0.1110, and 0.2192 +/- 0.1233 for YOLO11s. Seed 271 contributes
+defined zeros with no detection at 0.05. These are n=5 test sensitivities of an
+n=3-selected rule, not thresholds reselected after test inspection.
 
-FROC sensitivity was higher for Faster R-CNN at each predeclared budget:
-0.2699 versus 0.1803 at 0.125 FP/image, 0.3607 versus 0.2749 at 0.25,
-0.4801 versus 0.3321 at 0.5, 0.6032 versus 0.3321 at 1, and 0.6928 versus
-0.3321 at 2 (Figure 3). YOLO11s plateaued because its least selective available
-point was threshold 0.01 at 0.36 FP/image. The plateau is a sweep boundary, not
-a global asymptote.
+Five-run FROC sensitivity was higher for Faster R-CNN at each predeclared
+budget: 0.2672 versus 0.1761 at 0.125 FP/image, 0.3642 versus 0.2455 at 0.25,
+0.4836 versus 0.2925 at 0.5, 0.5970 versus 0.2925 at 1, and 0.6873 versus
+0.2925 at 2 (Figure 3). YOLO11s plateaued from the 0.5 budget because every
+run's best available point there was the 0.01 lower sweep boundary. Seed 271
+itself retained sensitivity 0.1493 at 0.01 and zero at 0.04 and above. The
+plateau is a grid boundary, not a global asymptote.
 
-![Figure 3. Frozen three-seed FROC curves and non-interpolated operating points.](../results/figures/froc_curves.png)
+![Figure 3. Five-run all-attempt FROC sensitivity with non-interpolated per-run budget summaries. The original n=3 figure remains unchanged as provenance.](../results/figures/froc_curves_n5_sensitivity.png)
+
+The dedicated n=3-versus-n=5 audit reports unfavorable and favorable changes
+under one prespecified directional-margin rule:
+
+| Evidence statement | n=3 to n=5 classification |
+|---|---|
+| YOLO11s precision margin at shared score 0.25 | Weakened |
+| Faster R-CNN recall margin at shared score 0.25 | Weakened |
+| Faster R-CNN F1 margin at shared score 0.25 | Strengthened |
+| Faster R-CNN mean AP@0.5 and AP@0.5:0.95 gaps | Weakened (both) |
+| Faster R-CNN official-curve position lead | Strengthened at AP@0.5; unchanged at AP@0.5:0.95 |
+| Faster R-CNN FROC sensitivity gap | Strengthened at all five budgets |
+| Faster R-CNN precision/recall/F1 at frozen detector thresholds | Strengthened (all three) |
+| Neither detector dominates the four Pareto panels | Unchanged (all four) |
+| Reversed conclusions | None |
+
+The complete 19-row table, including exact old/new margins and seed-271 roles,
+is `results/tables/operating_regime_n3_vs_n5_conclusions.csv`.
 
 ### 4.3 Recall-weighted F-beta and hypothetical error-loss sensitivity
 
@@ -657,15 +696,17 @@ registered-operation GFLOPs/image, 1,148.16 versus 1,556.89 MiB peak allocated
 training memory, and 1,544.75 versus 6,661.01 seconds mean training time across
 five seeds.
 
-The n=3 Pareto panels preserved the opposing directions. Every Faster R-CNN
-seed had higher AP while every YOLO11s seed had higher throughput; the same
-trade-off appeared for AP versus parameters and validation-selected recall
-versus latency or registered operations. Under the conservative all-seeds
-dominance rule, neither detector strictly dominated in any panel (Figure 5).
-This is an accuracy-efficiency trade-off on one hardware/software stack, not a
-universal property of model families.
+The n=5 Pareto sensitivity preserved the opposing directions. Every Faster
+R-CNN run had higher AP while every YOLO11s run had higher throughput; the same
+trade-off appeared for AP versus parameters and frozen-threshold recall versus
+latency or registered operations. Recall was 0.3507 +/- 0.0463 versus
+0.1948 +/- 0.1110; YOLO11s seed 271 supplied the observed zero at threshold
+0.05 rather than being filtered. Under the conservative all-runs dominance
+rule, neither detector strictly dominated in any panel (Figure 5), unchanged
+from n=3. This is an accuracy-efficiency trade-off on one hardware/software
+stack, not a universal property of model families.
 
-![Figure 5. Frozen three-seed accuracy-efficiency Pareto panels. Recall uses validation-selected thresholds; no panel is a five-seed frontier.](../results/figures/pareto_frontier.png)
+![Figure 5. Five-run all-attempt accuracy-efficiency Pareto sensitivity. Each point joins same-run AP or test recall to same-run hardware metrics; recall uses thresholds selected from the original n=3 validation runs. The historical n=3 figure is retained separately.](../results/figures/pareto_frontier_n5_sensitivity.png)
 
 ### 4.6 Digital common-corruption robustness
 
@@ -801,7 +842,7 @@ The most informative finding is not that one detector produced a larger mAP
 value. It is that a shared numerical threshold failed to create a shared
 operating regime. At score 0.25, YOLO11s appeared more precise because it was
 far more selective, while Faster R-CNN retained much more of the target set.
-The official precision-recall and FROC analyses showed that this was not a
+The five-run official precision-recall and FROC sensitivities showed that this was not a
 hidden YOLO high-precision frontier: Faster R-CNN retained higher precision at
 almost every official recall position and higher sensitivity at every reported
 false-positive budget. Detector-specific thresholds selected on validation
@@ -951,8 +992,12 @@ pixels can remove small-opacity detail differently across pipelines.
 
 **Sampling and seed scope.** The hardware-scoped cohort excludes 21,684 source
 studies from model training/evaluation. Five clean training attempts per
-detector remain a coarse sample of seed variation. Threshold, FROC, and Pareto
-results use only the original three seeds; they are not five-seed analyses.
+detector remain a coarse sample of seed variation. The principal test-side
+threshold, PR, FROC, and Pareto displays are five-run all-attempt sensitivities;
+their original n=3 artifacts remain unchanged as provenance. Threshold
+selection itself still uses only the original three validation runs, so the
+n=5 fixed-threshold and recall-Pareto results are not n=5-selected operating
+points.
 Digital robustness, acquisition shifts, and primary Grad-CAM use one seed-17
 checkpoint per detector and 300 images from 183 patients with 111 boxes. XAI
 sanity uses 50 images from 41 patients. None of these secondary analyses
@@ -971,7 +1016,11 @@ silently removed.
 **Metrics, thresholds, and calibration.** Score-0.25 precision, recall, and F1
 are protocol-sensitivity endpoints. The primary validation-selected thresholds
 use three seeds and equal-weight F1, which does not encode an elicited
-clinical-harm function. The
+clinical-harm function. Applying those thresholds to five test runs cannot add
+missing validation evidence or justify reselection. The n=3-versus-n=5 margin
+classifications are descriptive influence summaries rather than inferential
+tests; several shared-threshold and AP gaps weakened even though no direction
+reversed. The
 F-beta extension uses beta 1, 3, 5, and 10 as recall-preference parameters, not
 clinical-harm valuations. Its near-optimal plateaus and bootstrap argmax frequencies are
 descriptive; its intervals are pointwise and its YOLO optima reach the lower
@@ -1073,7 +1122,8 @@ stochastic augmentation, frozen validation decisions, and one evaluator,
 Faster R-CNN and YOLO11s occupied different operating and resource regimes.
 The shared score threshold did not align selectivity: YOLO11s appeared more
 precise at 0.25 while retaining far fewer detections, whereas the frozen
-precision-recall and FROC frontiers favored Faster R-CNN. The five-seed clean
+five-run precision-recall and FROC sensitivities favored Faster R-CNN and the
+original three-run analyses remained as provenance. The five-seed clean
 analysis gave wholly positive primary training-procedure intervals for Faster
 R-CNN recall, F1, and average precision. YOLO11s was substantially smaller and faster, but
 one retained seed exposed severe score compression and the detector had higher

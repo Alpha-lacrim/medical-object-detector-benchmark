@@ -32,6 +32,23 @@ FROC_OPERATING_FIELDS = (
     "selected_threshold_max",
     "selection_rule",
 )
+FROC_CURVE_FIELDS = (
+    "detector",
+    "threshold",
+    "seed_count",
+    "sensitivity",
+    "sensitivity_std",
+    "fp_per_image",
+    "fp_per_image_std",
+)
+FROC_CURVE_PER_SEED_FIELDS = (
+    "detector",
+    "seed",
+    "threshold",
+    "sensitivity",
+    "false_positives",
+    "fp_per_image",
+)
 
 
 class StrictModel(BaseModel):
@@ -91,6 +108,8 @@ class PlotSettings(StrictModel):
 class OutputSettings(StrictModel):
     """Required FROC artifacts."""
 
+    curve_table: Path | None = None
+    curve_per_seed_table: Path | None = None
     operating_points_table: Path
     figure: Path
     summary_json: Path
@@ -176,25 +195,25 @@ def _sample_std(values: Sequence[float]) -> float:
 
 
 def load_froc_rows(config: FrocConfig) -> tuple[list[dict[str, Any]], int, dict[str, Any]]:
-    """Validate Batch 10 provenance and add FP/image to every seed-threshold row."""
+    """Validate threshold-sweep provenance and add FP/image to every run row."""
 
     threshold_config_path = config.resolve(config.inputs.threshold_config)
     threshold_summary_path = config.resolve(config.inputs.threshold_summary)
     table_path = config.resolve(config.inputs.threshold_per_seed_table)
     summary = _read_json(threshold_summary_path)
     if summary.get("status") != "complete":
-        raise ValueError("Batch 10 threshold summary is not complete")
+        raise ValueError("threshold-sweep summary is not complete")
     if summary.get("config_sha256") != sha256_file(threshold_config_path):
-        raise ValueError("Batch 10 config hash differs from its frozen summary")
+        raise ValueError("threshold-sweep config hash differs from its summary")
     table_artifact = summary.get("artifacts", {}).get("threshold_per_seed_table", {})
     if table_artifact.get("sha256") != sha256_file(table_path):
-        raise ValueError("Batch 10 per-seed threshold table hash mismatch")
+        raise ValueError("threshold-sweep per-seed table hash mismatch")
 
     image_count = int(summary["counts"]["images_per_bundle"])
     expected_rows = int(summary["counts"]["threshold_rows_per_seed"])
     raw_rows = _read_csv(table_path)
     if len(raw_rows) != expected_rows:
-        raise ValueError("Batch 10 per-seed threshold row count mismatch")
+        raise ValueError("threshold-sweep per-seed row count mismatch")
     converted: list[dict[str, Any]] = []
     for row in raw_rows:
         detector = row.get("detector", "")
@@ -361,9 +380,8 @@ def _atomic_json(path: Path, payload: Any) -> Path:
     os.close(descriptor)
     temporary = Path(temporary_name)
     try:
-        temporary.write_text(
-            json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
-            encoding="utf-8",
+        temporary.write_bytes(
+            (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
         )
         os.replace(temporary, path)
     finally:
@@ -403,6 +421,10 @@ def plot_froc(
         figsize=(config.plot.figure_width, config.plot.figure_height), constrained_layout=True
     )
     try:
+        run_counts = {int(row["seed_count"]) for row in curve_rows}
+        if len(run_counts) != 1:
+            raise ValueError("FROC aggregate rows do not share one explicit run count")
+        run_count = run_counts.pop()
         for detector, settings in config.detectors.items():
             selected = sorted(
                 (
@@ -449,7 +471,9 @@ def plot_froc(
         axis.xaxis.set_major_formatter(FuncFormatter(lambda value, _position: f"{value:g}"))
         axis.set_xlabel("Average false positives per image (log₂ scale)")
         axis.set_ylabel("Sensitivity (recall at IoU = 0.50)")
-        axis.set_title("Free-response ROC from the frozen test threshold sweep")
+        axis.set_title(
+            f"Free-response ROC from the frozen test threshold sweep ({run_count} runs/detector)"
+        )
         axis.grid(alpha=0.25, which="both")
         axis.legend(loc="lower right")
         axis.text(
@@ -487,6 +511,18 @@ def run_froc(config: FrocConfig) -> dict[str, Any]:
         config.analysis.fp_per_image_budgets,
         tolerance=config.analysis.numeric_tolerance,
     )
+    curve_path = None
+    if config.outputs.curve_table is not None:
+        curve_path = _atomic_csv(
+            config.resolve(config.outputs.curve_table), FROC_CURVE_FIELDS, curve_rows
+        )
+    curve_per_seed_path = None
+    if config.outputs.curve_per_seed_table is not None:
+        curve_per_seed_path = _atomic_csv(
+            config.resolve(config.outputs.curve_per_seed_table),
+            FROC_CURVE_PER_SEED_FIELDS,
+            rows,
+        )
     table_path = _atomic_csv(
         config.resolve(config.outputs.operating_points_table),
         FROC_OPERATING_FIELDS,
@@ -516,7 +552,7 @@ def run_froc(config: FrocConfig) -> dict[str, Any]:
             ),
         },
         "protocol": {
-            "source": "frozen Batch 10 test-set threshold sweep",
+            "source": "configured frozen test-set threshold sweep",
             "sensitivity": "operating-point recall at match IoU 0.50",
             "false_positives_per_image": "false-positive detections divided by all test images",
             "budgets": list(config.analysis.fp_per_image_budgets),
@@ -541,6 +577,16 @@ def run_froc(config: FrocConfig) -> dict[str, Any]:
         "operating_points": operating_rows,
         "operating_points_per_seed": per_seed_operating,
         "artifacts": {
+            **(
+                {"curve_table": _artifact(curve_path, config.project_root)}
+                if curve_path is not None
+                else {}
+            ),
+            **(
+                {"curve_per_seed_table": _artifact(curve_per_seed_path, config.project_root)}
+                if curve_per_seed_path is not None
+                else {}
+            ),
             "operating_points_table": _artifact(table_path, config.project_root),
             "figure": _artifact(figure_path, config.project_root),
         },

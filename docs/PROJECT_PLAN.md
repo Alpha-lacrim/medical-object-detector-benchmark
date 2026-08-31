@@ -118,8 +118,9 @@ as complete.
 For the current clean extension, success additionally means 10 traceable clean
 checkpoints; all five attempted seeds retained for AP and fixed-threshold
 precision/recall/F1; prominent n=5/n=4 disclosure for conditional localization;
-and no five-seed claim for the frozen n=3 threshold-selection, FROC, or Pareto
-artifacts.
+no five-seed claim for threshold *selection*; and explicitly labeled five-run
+frozen-bundle sensitivities for precision-recall, FROC, unchanged-threshold
+application, and Pareto while preserving the original n=3 artifacts.
 
 ### Outcome-first decision framework
 
@@ -341,12 +342,14 @@ Batch 14 supersedes the threshold-selection part of that V1 statement for its
 frozen n=3 research-track analysis. Maximum arithmetic mean validation F1 over
 seeds 17, 42, and 137 on the predeclared 0.01--0.99 grid selects 0.69 for Faster
 R-CNN and 0.05 for YOLO11s; each is applied once to those three frozen test
-bundles. These threshold-selection, FROC, and Pareto results are routed through
-`configs/evaluation_n3_archive.yaml` and the archived n=3 summary/tables and
-were not regenerated at n=5. Seed 271's maximum test score is 0.0412735, so it
-would emit zero detections even at the selected YOLO threshold 0.05. The
-complete test sweep remains descriptive, and the original score-0.25 table
-remains a protocol-sensitivity record rather than an n=5 threshold choice. See
+bundles. Batch 35 leaves those selections and all original n=3 artifacts
+unchanged, then applies the selected thresholds to all five frozen test bundles
+and recomputes separately labeled n=5 precision-recall, FROC, and Pareto
+sensitivities. Seed 271 is retained exactly as observed: its maximum test score
+is 0.0412735, so it emits zero detections at both 0.25 and the selected YOLO
+threshold 0.05 while retaining nonzero threshold-free AP and low-threshold FROC
+ranking. The complete test sweep remains descriptive, not a test-set threshold
+choice. See
 [THRESHOLD_ANALYSIS.md](THRESHOLD_ANALYSIS.md) and
 [FROC_ANALYSIS.md](FROC_ANALYSIS.md).
 

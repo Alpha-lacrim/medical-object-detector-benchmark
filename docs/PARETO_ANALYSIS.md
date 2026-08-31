@@ -1,6 +1,6 @@
 # Accuracy-Efficiency Pareto Analysis
 
-## Frozen three-seed scope
+## Historical n=3 scope and n=5 sensitivity
 
 This figure and every value below are frozen **n=3** results for seeds 17, 42,
 and 137; they were not regenerated for the later five-seed clean comparison.
@@ -11,6 +11,12 @@ also n=3: `configs/threshold_selection.yaml` is bound to
 `configs/evaluation_n3_archive.yaml` and
 `results/logs/phase5_evaluation/summary_n3_archive.json`. Historical output
 filenames without an `n3` suffix do not change that scope.
+
+Batch 35 preserves that figure unchanged and adds a separately labeled n=5
+all-attempt sensitivity. The new path includes seeds 17, 42, 137, 271, and 314
+for both detectors, including every available same-run compute row. It neither
+reselects the historical validation thresholds nor mixes n=3 and n=5 points in
+one frontier.
 
 ## Protocol and dominance rule
 
@@ -25,10 +31,15 @@ its seed points is better than every seed of the other detector on both directed
 mean-only ordering is not sufficient. This correction changes only the recall panels and
 their annotations: the AP data and compute axes in panels (a) and (c) are unchanged.
 
-YOLO11s seed 271 is intentionally absent from this frozen figure. Although its training
+YOLO11s seed 271 is intentionally absent from the historical figure. Although its training
 curves converged normally, its maximum test confidence is 0.0412735, so it emits zero
 detections at the n=3-selected YOLO threshold 0.05. The current Pareto figure therefore must
 not be described as an n=5 frontier or used to hide that later confidence-score degeneracy.
+
+The n=5 sensitivity includes seed 271's observed AP, throughput, latency,
+parameters, and GFLOPs. Its recall is the defined value zero because it emits
+no detection at the unchanged 0.05 threshold. This point is shown rather than
+filtered.
 
 ## (a) mAP@0.5:0.95 versus FPS
 
@@ -73,6 +84,35 @@ opacity annotations are the tighter constraint and GPU compute is available, whe
 YOLO11s is the more plausible option under a strict operation budget with mandatory human
 review.
 
+## Five-run sensitivity and aggregation definition
+
+The n=5 point table has exactly one row per detector/run. Each row joins:
+
+- that run's threshold-free AP@0.5:0.95;
+- that run's test recall at the detector threshold selected from the original
+  three validation runs (0.69 or 0.05); and
+- that same run's measured FPS/latency and recorded parameter/GFLOP values.
+
+No metric is pooled across scopes inside a point. The companion summary is an
+equal-run arithmetic mean and sample SD across five rows per detector; it is
+descriptive and is not used for the strict dominance label. Dominance retains
+the conservative cloud rule: every candidate run must be strictly better than
+every competing run on both axes.
+
+Across n=5, Faster R-CNN AP ranges 0.0885--0.1054 versus 0.0458--0.0607 for
+YOLO11s, while YOLO11s throughput ranges 46.74--73.03 FPS versus 11.00--25.19.
+Fixed-threshold recall ranges 0.2910--0.4030 and 0--0.2612, respectively;
+YOLO11s latency remains lower for every run. Mean AP/FPS is 0.0995/20.28 versus
+0.0542/60.29, and mean fixed-threshold recall/latency is 0.3507/53.93 ms versus
+0.1948/17.23 ms. Parameter and GFLOP counts remain 43.26 M/450.76 versus
+9.43 M/21.42.
+
+Neither detector strictly dominates in any of the four n=5 panels. All four
+Pareto conclusions are therefore **unchanged** from n=3. Hardware sample sizes
+are explicit: the sensitivity has five compute rows per detector; the
+historical figure has three. No incomplete hardware metric is silently carried
+into a mean.
+
 ## Reproduction
 
 The Pareto rendering itself is entirely offline: it loads no checkpoint and performs no
@@ -86,3 +126,16 @@ frozen n=3 validation-selection protocol documented in `THRESHOLD_ANALYSIS.md`.
 
 These commands reproduce only the archived three-seed Pareto analysis because the config
 is routed to the n=3 CSV inputs; they do not regenerate a five-seed figure.
+
+The separate n=5 sensitivity is reproduced with:
+
+```powershell
+& $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto_n5_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto_n5_sensitivity.yaml --mode run
+```
+
+It writes `pareto_points_n5_sensitivity.csv`,
+`pareto_summary_n5_sensitivity.csv`,
+`pareto_frontier_n5_sensitivity.png`, and the hash-bound
+`phase35_operating_regime_n5/pareto_summary.json`. The figure and provenance
+state both the five-run test scope and the three-run validation-selection scope.

@@ -1,0 +1,33 @@
+schema_version: 1
+analysis_id: rsna-phase35-test-froc-n5-sensitivity
+
+inputs:
+  threshold_config: configs/threshold_sweep_n5_sensitivity.yaml
+  threshold_summary: results/logs/phase35_operating_regime_n5/threshold_summary.json
+  threshold_per_seed_table: results/tables/threshold_sweep_per_seed_n5_sensitivity.csv
+
+analysis:
+  fp_per_image_budgets: [0.125, 0.25, 0.5, 1.0, 2.0]
+  numeric_tolerance: 1.0e-12
+
+detectors:
+  faster_rcnn:
+    label: Faster R-CNN
+    color: "#1f77b4"
+  yolo11s:
+    label: YOLO11s
+    color: "#d95f02"
+
+plot:
+  dpi: 180
+  figure_width: 9.2
+  figure_height: 6.2
+  minimum_x: 0.0625
+  maximum_x: 8.0
+
+outputs:
+  curve_table: results/tables/froc_curves_n5_sensitivity.csv
+  curve_per_seed_table: results/tables/froc_curves_per_seed_n5_sensitivity.csv
+  operating_points_table: results/tables/froc_operating_points_n5_sensitivity.csv
+  figure: results/figures/froc_curves_n5_sensitivity.png
+  summary_json: results/logs/phase35_operating_regime_n5/froc_summary.json

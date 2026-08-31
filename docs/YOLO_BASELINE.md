@@ -136,5 +136,7 @@ collapse. The clean all-attempt analysis retains seed 271's valid AP and zero
 fixed-threshold precision/recall/F1 outcomes. Matched-only IoU and Dice are undefined for
 that seed because it has no fixed-threshold true positive; their descriptive YOLO summary
 uses the four defined seeds and their paired inference uses the four complete detector seed
-pairs. The frozen threshold-selection, FROC, and Pareto artifacts remain n=3 and are not
-regenerated with this checkpoint.
+pairs. The validation threshold remains the frozen n=3 selection. Batch 35 retains the
+original n=3 threshold, FROC, precision-recall, and Pareto artifacts as provenance and adds
+separately labeled n=5 frozen-bundle sensitivities in which seed 271 is included exactly as
+observed rather than filtered for its zero detections at 0.25 or 0.05.

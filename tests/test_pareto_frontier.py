@@ -37,6 +37,20 @@ def test_config_and_frozen_inputs_join_all_three_seeds() -> None:
     assert {point.recall_threshold for point in points if point.detector == "yolo11s"} == {0.05}
 
 
+def test_n5_config_joins_all_five_runs_and_retains_seed_271_zero_recall() -> None:
+    config = load_pareto_config("configs/pareto_n5_sensitivity.yaml")
+    points = load_pareto_points(config)
+
+    assert {(point.detector, point.seed) for point in points} == {
+        (detector, seed)
+        for detector in ("faster_rcnn", "yolo11s")
+        for seed in (17, 42, 137, 271, 314)
+    }
+    yolo_271 = next(point for point in points if point.detector == "yolo11s" and point.seed == 271)
+    assert yolo_271.recall_threshold == 0.05
+    assert yolo_271.recall == 0
+
+
 def test_strict_dominance_requires_both_seed_clouds_to_be_ordered() -> None:
     points = [
         _point("a", 1, fps=20, map_value=0.8),

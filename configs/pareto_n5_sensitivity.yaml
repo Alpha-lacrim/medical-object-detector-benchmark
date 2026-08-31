@@ -1,0 +1,47 @@
+schema_version: 1
+analysis_id: rsna-phase35-pareto-n5-sensitivity
+
+inputs:
+  comparison_summary: results/tables/detector_comparison.csv
+  comparison_per_seed: results/tables/detector_comparison_per_seed.csv
+  selected_operating_points: results/tables/selected_operating_points_n5_sensitivity.csv
+  selected_operating_points_per_seed: results/tables/selected_operating_points_per_seed_n5_sensitivity.csv
+  compute_tables:
+    - results/tables/faster_rcnn_compute.csv
+    - results/tables/seeds/faster_rcnn_seed42_compute.csv
+    - results/tables/seeds/faster_rcnn_seed137_compute.csv
+    - results/tables/seeds/faster_rcnn_seed271_compute.csv
+    - results/tables/seeds/faster_rcnn_seed314_compute.csv
+    - results/tables/yolo_compute.csv
+    - results/tables/seeds/yolo_seed42_compute.csv
+    - results/tables/seeds/yolo_seed137_compute.csv
+    - results/tables/seeds/yolo_seed271_compute.csv
+    - results/tables/seeds/yolo_seed314_compute.csv
+
+analysis:
+  recall_operating_point: validation_selected_maximum_mean_f1
+  numeric_tolerance: 1.0e-12
+  expected_seeds: [17, 42, 137, 271, 314]
+  scope_label: "n=5 all-attempt sensitivity; recall thresholds frozen from n=3 validation selection"
+
+detectors:
+  faster_rcnn:
+    label: Faster R-CNN
+    summary_prefix: faster_rcnn
+    color: "#1f77b4"
+  yolo11s:
+    label: YOLO11s
+    summary_prefix: yolo11s
+    color: "#d95f02"
+
+plot:
+  dpi: 180
+  figure_width: 13.2
+  figure_height: 10.2
+  marker_size: 78
+
+outputs:
+  figure: results/figures/pareto_frontier_n5_sensitivity.png
+  points_table: results/tables/pareto_points_n5_sensitivity.csv
+  aggregate_table: results/tables/pareto_summary_n5_sensitivity.csv
+  summary_json: results/logs/phase35_operating_regime_n5/pareto_summary.json

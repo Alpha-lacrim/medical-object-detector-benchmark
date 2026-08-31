@@ -788,7 +788,7 @@ def _finding_summary(
 
 
 def preflight(config: ThresholdSweepConfig) -> dict[str, Any]:
-    """Verify all frozen inputs and the complete six-bundle grid."""
+    """Verify all frozen inputs and the complete configured bundle grid."""
 
     phase5, _summary, bundles, targets, _category_names = _validate_upstream(config)
     return {
@@ -803,7 +803,7 @@ def preflight(config: ThresholdSweepConfig) -> dict[str, Any]:
 
 
 def run_threshold_sweep(config: ThresholdSweepConfig) -> dict[str, Any]:
-    """Reprocess six frozen bundles into threshold and official COCO PR artifacts."""
+    """Reprocess frozen bundles into threshold and official COCO PR artifacts."""
 
     phase5, phase5_summary, bundles, targets, category_names = _validate_upstream(config)
     thresholds = config.sweep.thresholds()
@@ -826,7 +826,9 @@ def run_threshold_sweep(config: ThresholdSweepConfig) -> dict[str, Any]:
             max_detections=phase5.evaluation.max_detections,
         )
         original = bundle["payload"]["operating_point"]["overall"]
-        fixed = next(row for row in rows if np.isclose(row["threshold"], 0.25))
+        fixed = next(
+            row for row in rows if np.isclose(row["threshold"], phase5.evaluation.score_threshold)
+        )
         for metric in ("precision", "recall", "f1"):
             if not np.isclose(fixed[metric], original[metric], atol=5e-12, rtol=0):
                 raise ValueError(

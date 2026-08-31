@@ -29,9 +29,10 @@ treating either report document as a numerical source.
 Across seeds 17, 42, 137, 271, and 314, Faster R-CNN achieves
 mAP@0.5:0.95 of 0.0995 ± 0.0067 versus 0.0542 ± 0.0060 for YOLO11s.
 At thresholds selected by maximum mean validation F1 in the frozen original
-n=3 analysis, final test precision/recall/F1 is
-0.3543/0.3607/0.3492 versus 0.3096/0.2438/0.2718. Faster R-CNN has higher
-precision at 96 of 101 official AP@0.5 recall positions; YOLO11s' apparent
+n=3 analysis and applied unchanged to all five test bundles, sensitivity test
+precision/recall/F1 is 0.3624/0.3507/0.3511 versus
+0.2524/0.1948/0.2192. Faster R-CNN has higher precision at 97 of 101 official
+AP@0.5 recall positions in the n=5 sensitivity; YOLO11s' apparent
 precision advantage at the original shared score threshold of 0.25 is a
 score-scale/selectivity artifact, not a frontier advantage. The primary
 training-procedure bootstrap gives wholly positive Faster-R-CNN-minus-YOLO11s
@@ -53,9 +54,10 @@ All other clean endpoints retain all five attempted seeds.
 The defensible trade-off is detection quality versus implementation-specific
 computational cost. Across all five seeds, YOLO11s delivers
 60.29 ± 12.62 FPS versus 20.28 ± 5.62, with 9.43 M parameters versus
-43.26 M. The frozen n=3 FROC analysis gives Faster R-CNN higher sensitivity at
+43.26 M. The n=5 FROC sensitivity gives Faster R-CNN higher sensitivity at
 every reported false-positive budget, and neither detector strictly dominates
-the frozen n=3 accuracy-efficiency Pareto panels.
+the n=5 accuracy-efficiency Pareto panels. Original n=3 artifacts remain
+unchanged as historical/prespecified provenance.
 
 On the seed-17 300-image common-corruption sample, mean mAP@0.5:0.95 retention
 is 0.7638 for Faster R-CNN and 0.7091 for YOLO11s. Both detectors have weak
@@ -249,7 +251,7 @@ n=3 evidence remains available at:
 
 ### 5a. Reprocess the frozen bundles across confidence thresholds
 
-The research-track threshold analysis is CPU-only and remains frozen to the six
+The historical threshold analysis is CPU-only and remains frozen to the six
 original n=3 Phase 5 bundles for seeds 17, 42, and 137. Its config reads
 `configs/evaluation_n3_archive.yaml` and the archived n=3 Phase 5 summary; it is
 not an n=5 analysis. It does not load a checkpoint, train a model, or run
@@ -270,6 +272,20 @@ The run regenerates `results/tables/threshold_sweep*.csv`,
 `results/figures/f1_vs_threshold.png`, and the hashed summary under
 `results/logs/phase10_threshold_sweep/`. Definitions and interpretation are in
 `docs/THRESHOLD_ANALYSIS.md`.
+
+The Batch 35 n=5 all-attempt sensitivity reads all ten already-frozen test
+prediction bundles and writes only `*_n5_sensitivity` artifacts. It performs
+no training, checkpoint loading, or inference:
+
+```powershell
+& $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep_n5_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.evaluate_threshold_sweep --config configs/threshold_sweep_n5_sensitivity.yaml --mode run
+```
+
+This produces versioned aggregate/per-run threshold and official PR tables,
+the n=5 PR/F1 figures, and
+`results/logs/phase35_operating_regime_n5/threshold_summary.json`. It does not
+overwrite any unsuffixed n=3 artifact.
 
 ### 5b. Select final operating thresholds on validation
 
@@ -293,12 +309,23 @@ the frozen test bundles. It regenerates `validation_threshold_sweep*.csv`,
 `selected_operating_points*.csv`, and the manifest/summary under
 `results/logs/phase14_threshold_selection/`.
 
+Apply those unchanged 0.69/0.05 thresholds to the n=5 test sweep without
+reselection:
+
+```powershell
+& $benchmarkPython -m src.analyze_operating_regime_sensitivity --config configs/operating_regime_n5_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.analyze_operating_regime_sensitivity --config configs/operating_regime_n5_sensitivity.yaml --mode fixed-thresholds
+```
+
+The outputs visibly separate `threshold_selection_run_count=3` from
+`test_run_count=5` and retain seed 271's zero-detection row at 0.05.
+
 ### 5c. Reparameterize the test sweep as FROC curves
 
 This CPU-only step reads the unchanged Batch 10 per-seed table and describes the
 full test sweep as sensitivity versus false positives per image. It does not
 select a deployment threshold or perform training, checkpoint loading, or
-inference. Its inputs and outputs remain n=3-only:
+inference. The archive-safe historical reproduction remains:
 
 ```powershell
 & $benchmarkPython -m src.plot_froc_curves --config configs/froc_n3_archive.yaml --mode preflight
@@ -312,13 +339,19 @@ summary under `results/logs/phase14_froc_n3_archive_reproduction/`; it does not
 overwrite the frozen primary FROC artifacts. Definitions and interpretation
 are in `docs/FROC_ANALYSIS.md`.
 
+The separately labeled n=5 path writes aggregate and per-run FROC curves, five
+budget summaries, a figure, and provenance:
+
+```powershell
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc_n5_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.plot_froc_curves --config configs/froc_n5_sensitivity.yaml --mode run
+```
+
 ### 5d. Regenerate the accuracy-efficiency Pareto figure
 
-This CPU-only step joins the archived n=3 Phase 5 accuracy rows, all six original
-seed-specific compute tables, and the validation-selected, test-evaluated
-operating points. It performs no training or inference. The recall panels use
-the thresholds selected in section 5b, while the mAP panels remain
-threshold-independent. It must not be interpreted as a five-seed Pareto result:
+The historical CPU-only step joins the archived n=3 Phase 5 accuracy rows, all
+six original seed-specific compute tables, and validation-selected,
+test-evaluated operating points:
 
 ```powershell
 & $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto.yaml --mode preflight
@@ -327,6 +360,20 @@ threshold-independent. It must not be interpreted as a five-seed Pareto result:
 
 The run regenerates `results/figures/pareto_frontier.png`; definitions and the
 scenario-conditional interpretation are in `docs/PARETO_ANALYSIS.md`.
+
+The n=5 sensitivity joins all ten run-specific accuracy/compute rows to test
+recall at the unchanged n=3-selected thresholds. It writes a visibly labeled
+figure, exact point table, equal-run aggregate table, and provenance:
+
+```powershell
+& $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto_n5_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.plot_pareto_frontier --config configs/pareto_n5_sensitivity.yaml --mode run
+& $benchmarkPython -m src.analyze_operating_regime_sensitivity --config configs/operating_regime_n5_sensitivity.yaml --mode run
+```
+
+The final command also writes the four-analysis inventory, the complete
+19-row n=3-versus-n=5 conclusion table, and the aggregate Batch 35 provenance
+summary. No n=3 and n=5 metric is mixed into one Pareto frontier.
 
 ### 5e. Measure five-seed detection calibration
 
@@ -594,8 +641,9 @@ Any derivative paper must name the inferential target. For broad pipeline
 claims, the training-procedure intervals are primary. It must carry the
 detector-specific run counts and seed-271 role: 5/5 for unconditional clean
 endpoints and 5/4 for conditional IoU/Dice, with no replacement seed.
-Threshold selection, FROC, and Pareto remain n=3-only;
-robustness and explainability remain seed-17-only.
+Threshold selection remains n=3, while test-side threshold/PR/FROC and Pareto
+have separately versioned n=5 sensitivities; robustness and explainability
+remain seed-17-only.
 
 ## Report artifact-to-command index
 
@@ -611,10 +659,10 @@ includes every executable analysis module added in Batches 18--23.
 | Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
 | Paper §§4.1 and 4.5; report Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
 | YOLO seed-stability diagnostic | `yolo_seed_stability.csv` | `src.analyze_yolo_seed_stability` in §5 |
-| Paper §4.2 PR/F1 evidence (frozen n=3) | `threshold_sweep*.csv`; `precision_recall_curves*.csv` | offline `src.evaluate_threshold_sweep --mode run` in §5a |
-| Paper §4.2 validation-selected operating points (frozen n=3) | `validation_threshold_sweep*.csv`; `selected_operating_points*.csv` | inference-only materialization plus offline `src.evaluate_threshold_selection --mode run` in §5b |
-| Paper §4.2 FROC evidence (frozen n=3) | primary `froc_operating_points.csv` / `froc_curves.png`; archive-safe `*_n3_archive_reproduction` copies | offline `src.plot_froc_curves --mode run` in §5c |
-| Paper §4.5 Pareto evidence (frozen n=3) | `pareto_frontier.png` | offline `src.plot_pareto_frontier --mode run` in §5d |
+| Paper §4.2 PR/F1 evidence | principal `*_n5_sensitivity` threshold/PR tables and figures; unsuffixed n=3 history retained | offline `src.evaluate_threshold_sweep --mode run` in §5a |
+| Paper §4.2 validation-selected operating points | n=3 validation selection plus `selected_operating_points*_n5_sensitivity.csv` test application | `src.evaluate_threshold_selection` plus offline `src.analyze_operating_regime_sensitivity` in §5b |
+| Paper §4.2 FROC evidence | `froc_*_n5_sensitivity` aggregate/per-run tables, figure, and summary; n=3 history retained | offline `src.plot_froc_curves --mode run` in §5c |
+| Paper §4.5 Pareto evidence | `pareto_{points,summary}_n5_sensitivity.csv`; `pareto_frontier_n5_sensitivity.png`; n=3 figure retained | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Paper §4.4 five-seed detection calibration and support sensitivity (Batch 33 v2) | `calibration_summary_v2.csv`; `calibration_support_v2.csv`; `calibration_sensitivity_v2.csv`; four v2 figures; Phase 33 summary | offline `src.stats.calibration --mode run` in §5e |
 | Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Supplementary non-standard raw-score utility audit (Batch 30) | `raw_score_threshold_utility_summary.csv`; `raw_score_threshold_utility_sensitivity.png`; Phase 30 summary; exact pre-Batch-30 archives | offline `src.clinical.raw_score_utility --mode run` in §5g |

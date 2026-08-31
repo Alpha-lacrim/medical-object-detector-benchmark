@@ -1,6 +1,7 @@
 import pytest
 
 from src.evaluate_threshold_sweep import (
+    _validate_upstream,
     aggregate_threshold_rows,
     load_threshold_sweep_config,
     select_operating_targets,
@@ -18,6 +19,23 @@ def test_threshold_config_declares_requested_grid_and_outputs() -> None:
     assert thresholds[-1] == 0.99
     assert 0.25 in thresholds
     assert config.outputs.threshold_table.as_posix() == "results/tables/threshold_sweep.csv"
+
+
+def test_n5_sensitivity_config_retains_all_five_runs_and_seed_271() -> None:
+    config = load_threshold_sweep_config("configs/threshold_sweep_n5_sensitivity.yaml")
+    phase5, _summary, bundles, _targets, _categories = _validate_upstream(config)
+
+    expected = {
+        (detector, seed)
+        for detector in ("faster_rcnn", "yolo11s")
+        for seed in (17, 42, 137, 271, 314)
+    }
+    assert set(phase5.seeds) == {17, 42, 137, 271, 314}
+    assert {(bundle["detector"], bundle["seed"]) for bundle in bundles} == expected
+    yolo_271 = next(
+        bundle for bundle in bundles if bundle["detector"] == "yolo11s" and bundle["seed"] == 271
+    )
+    assert yolo_271["payload"]["operating_point"]["overall"]["prediction_count"] == 0
 
 
 def test_sweep_uses_canonical_score_ordered_matching() -> None:
