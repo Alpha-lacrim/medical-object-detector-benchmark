@@ -2,47 +2,60 @@
 title: "A Controlled Comparative Study of Faster R-CNN and YOLO11s Pipelines for Lung-Opacity Localization on Chest Radiographs"
 bibliography: references.bib
 link-citations: true
+reference-section-title: References
 ---
 
 ## Abstract
 
-Comparisons between object detectors often change the data split, preprocessing,
-augmentation, score threshold, and evaluator together with the model. We instead
-compared a two-stage Faster R-CNN pipeline and a one-stage YOLO11s pipeline under
-one patient-disjoint 5,000-radiograph protocol, common 640-pixel inputs, disabled
-stochastic augmentation, frozen validation selection, and a model-independent
-COCO-style evaluator. The central finding was an operating-point mismatch: the
-same score threshold selected materially different regimes. At 0.25, YOLO11s
-appeared more precise but had much lower recall; across the five-run
-all-attempt sensitivity, Faster R-CNN had higher mean precision at 97 of 101
-AP@0.5 recall positions and higher sensitivity at all five reported
+**Background:** Detector comparisons can confound the model with changes in
+data, preprocessing, augmentation, score thresholds, and evaluation. We
+conducted a controlled comparison of two disclosed lung-opacity detector
+pipelines and treated operating-score behavior as a primary object of study.
+
+**Methods:** This retrospective internal-testing study compared two deep-learning
+object-detection pipelines using a deterministic 5,000-radiograph cohort from
+2,136 patient groups, partitioned without patient
+overlap into 3,500 training, 750 validation, and 750 internal-testing studies.
+A two-stage Faster R-CNN pipeline and a one-stage YOLO11s pipeline used common
+640-pixel inputs, disabled stochastic augmentation, validation-frozen model and
+threshold selection, and one COCO-style evaluator. Five training attempts per
+detector were retained. The primary training-procedure estimand combined
+patient-cluster sampling with independent within-detector run resampling; a
+checkpoint-conditional patient-cluster permutation analysis was secondary.
+
+**Results:** The same raw score cutoff selected materially different operating
+regimes. At 0.25, YOLO11s appeared more precise but had much lower recall; in
+the five-run all-attempt sensitivity, Faster R-CNN had higher mean precision at
+97 of 101 AP@0.5 recall positions and higher sensitivity at all five reported
 false-positive budgets. Validation selected thresholds of 0.69 and 0.05 from
-the original three runs, respectively, and those thresholds were retained. In the
-five-seed clean analysis, Faster R-CNN achieved higher recall, F1, and average
-precision, whereas YOLO11s delivered approximately 3-fold throughput, 78%
-fewer parameters, and about 21-fold fewer registered operations. One YOLO11s
-seed retained plausible average precision but compressed all test scores below
-0.042, exposing recipe-level score instability. Detection-specific calibration
-was descriptively higher for YOLO11s (mean D-ECE 0.0990 versus 0.0320), with
-sparse-cell and protocol sensitivity reported separately. Patient-cluster
-and independent-run bootstrap intervals remained positive for Faster R-CNN
-recall, F1, and both AP endpoints. The fixed-threshold precision interval
-crossed zero under this primary training-procedure estimand, although a
-secondary permutation test conditional on the observed checkpoints favored
-YOLO11s. Conditional matched-box IoU and Dice were inconclusive.
-Digital corruptions and radiography-motivated synthetic acquisition/display
-shifts showed condition-specific degradation in both pipelines. Grad-CAM
-controls showed low
-similarity after full model-parameter randomization and severe input-pixel
-perturbation, but maps localized annotated opacities only weakly. These results
-establish a multi-axis trade-off between two disclosed
-pipelines, not a universal detector-family ranking or evidence of clinical
-readiness.
+the original three runs, respectively, and those thresholds were applied
+unchanged to all five internal-testing runs. Mean mAP@0.5:0.95 was 0.0995 for
+Faster R-CNN and 0.0542 for YOLO11s. YOLO11s delivered approximately 3-fold throughput, 78% fewer parameters, and about 21-fold fewer registered operations.
+One retained YOLO11s run had mAP@0.5:0.95 of 0.05558 but a maximum
+internal-testing score of 0.0412735, exposing score-scale instability without
+ranking collapse. Detection-specific calibration was descriptively higher for
+YOLO11s (mean D-ECE 0.0990 versus 0.0320), with sparse-cell and protocol
+sensitivity reported separately. Primary bootstrap intervals were wholly
+positive for Faster R-CNN minus YOLO11s recall, F1, and both AP endpoints. The
+fixed-threshold precision interval crossed zero, so it did not support a
+training-procedure difference; the separate checkpoint-conditional
+permutation result favored YOLO11s at that cutoff. Conditional matched-box IoU
+and Dice were inconclusive. Single-checkpoint digital corruptions,
+radiography-motivated synthetic acquisition/display shifts, and Grad-CAM
+analyses were descriptive and condition-specific; the maps localized annotated
+opacities only weakly despite low similarity after full model-parameter
+randomization.
+
+**Conclusions:** AP, raw score scale, fixed-threshold behavior, and
+detection-level calibration described different properties of these two
+pipelines. The findings support a bounded multi-axis comparison, not a
+universal detector-family ranking, a pneumonia-diagnosis claim, or clinical
+use.
 
 ## 1. Introduction
 
 Object detection on chest radiographs is not adequately characterized by one
-clean-test mean average precision (mAP) value. A model can preserve ranking
+internal-testing mean average precision (mAP) value. A model can preserve ranking
 quality while producing an unstable score scale, appear precise only because a
 shared threshold is unusually selective, localize successful detections while
 missing most annotated findings, or lose performance under small changes in
@@ -80,9 +93,9 @@ The primary research question was:
 > robustness, and Grad-CAM-observed failure patterns?
 
 The study makes three contributions. First, it constructs a controlled,
-patient-safe comparison in which both pipelines use the same images,
+patient-disjoint comparison in which both pipelines use the same images,
 annotations, input size, absence of stochastic training augmentation, seed
-grid, held-out boundary, and metric path. Second, it treats threshold behavior
+grid, internal-testing boundary, and metric path. Second, it treats threshold behavior
 as a result rather than a hidden implementation choice by combining an
 exploratory threshold sweep, official precision-recall curves,
 validation-selected operating points, free-response ROC (FROC), and a separate
@@ -196,7 +209,7 @@ permutes training labels and retrains the model; we did not perform that test.
 
 ## 3. Materials and Methods
 
-### 3.1 Dataset, target, and patient-safe split
+### 3.1 Dataset, target, and patient-disjoint split
 
 We used the Stage 2 training set from the 2018 RSNA Pneumonia Detection
 Challenge. The complete source contains 26,684 labeled radiographs and 9,555
@@ -226,15 +239,21 @@ cohort.
 |---|---:|---:|---:|---:|---:|---:|
 | Train | 3,500 | 1,492 | 798 | 1,554 | 1,148 | 1,267 |
 | Validation | 750 | 321 | 169 | 331 | 250 | 277 |
-| Test | 750 | 323 | 169 | 331 | 250 | 268 |
+| Internal testing | 750 | 323 | 169 | 331 | 250 | 268 |
 | **Total** | **5,000** | **2,136** | **1,136** | **2,216** | **1,648** | **1,812** |
 
+#### Canonical preprocessing
+
 The metadata audit found no malformed, non-positive-area, off-image, or exact
-duplicate positive boxes. DICOM conversion inverted `MONOCHROME1` images when
-needed, applied finite per-image min-max scaling, and wrote 8-bit grayscale
-PNG. Canonical COCO JSON was the sole annotation source for both detector
-adapters. The complete split manifests, source hashes, image inventory, and
-preprocessing audit are indexed in the [Supplementary Materials
+duplicate positive boxes. One deterministic conversion path served both
+pipelines: DICOM pixel arrays were checked for finite content, inverted for
+`MONOCHROME1` polarity when needed, scaled per image to the finite minimum and
+maximum, and written as 8-bit grayscale PNG. Canonical COCO JSON was the sole
+annotation source; the YOLO view was derived from those same records rather
+than from an independently prepared label set. Both pipelines received
+640-pixel inputs, and neither received stochastic training augmentation. The
+complete split manifests, source hashes, image inventory, and preprocessing
+audit are indexed in the [Supplementary Materials
 Index](../docs/SUPPLEMENTARY.md#s1-cohort-split-and-provenance-records).
 
 ### 3.2 Detector pipelines and controlled training factors
@@ -246,7 +265,7 @@ YOLO11s from Ultralytics `8.4.110`, also initialized from COCO weights. A
 hardlinked YOLO view was generated from the canonical records; it did not
 create a separate split or label source.
 
-Shared factors were the patient-safe manifests, 640-pixel inputs, one
+Shared factors were the patient-disjoint manifests, 640-pixel inputs, one
 foreground class, COCO initialization, SGD, a maximum of 30 epochs,
 validation-mAP@0.5:0.95 early stopping after at least eight epochs, and seeds
 17, 42, 137, 271, and 314. Stochastic training augmentation was disabled in
@@ -269,10 +288,14 @@ controlled, disclosed pipelines rather than architecture alone. Full optimizer,
 checkpoint, timing-gate, and environment details are delegated to the
 [supplementary implementation record](../docs/SUPPLEMENTARY.md#s8-decisions-limitations-and-reproduction).
 
-### 3.3 Unified internal testing and seed scopes
+### 3.3 Seed/run design and unified internal testing
 
 Checkpoint selection used model-optimization-split mAP only. After all
-checkpoints were frozen, internal testing used the patient-disjoint test split.
+checkpoints were frozen, evaluation used the patient-disjoint internal-testing split.
+Five attempts per detector were retained at seeds 17, 42, 137, 271, and 314;
+none was replaced after its internal-testing behavior was observed. The numeric
+seed labels provide within-program reproducibility metadata, not matched
+stochastic blocks across the two training frameworks.
 Both adapters emitted original-image `xyxy` boxes, canonical category IDs, and
 scores to one evaluator. It computed official COCO AP at IoU 0.50 and averaged
 from 0.50 to 0.95 [@lin2014coco]; global micro precision, recall, and F1 at
@@ -289,12 +312,12 @@ The evidence has deliberately different scopes:
 - The original threshold sweep, validation-selected operating points, official
   precision-recall curves, FROC, and Pareto analysis remain frozen to seeds 17,
   42, and 137 (`n=3`) as historical/prespecified artifacts. A separately
-  versioned all-attempt sensitivity recomputes test-side threshold/PR/FROC and
+  versioned all-attempt sensitivity recomputes internal-testing threshold/PR/FROC and
   Pareto evidence for all five runs. Threshold selection remains n=3; 0.69 and
-  0.05 are applied unchanged to the five test bundles.
+  0.05 are applied unchanged to the five internal-testing bundles.
 - Digital-corruption, raw-array acquisition-shift, and primary Grad-CAM analyses
   use the seed-17 checkpoint from each detector on one fixed 300-image sample.
-- Detection calibration uses all five frozen clean-test bundles. The XAI
+- Detection calibration uses all five frozen internal-testing bundles. The XAI
   sanity extension uses a nested 50-image subset and the seed-17 checkpoints.
 
 These sample-size labels travel with every result. Exhaustive seed rows and
@@ -305,12 +328,12 @@ S3](../docs/SUPPLEMENTARY.md#s2-full-clean-seed-level-comparison).
 
 The original score-0.25 comparison was retained as a protocol-sensitivity
 result, not a deployment choice. A frozen n=3 exploratory analysis evaluated
-99 thresholds from 0.01 to 0.99 on the test predictions. It also read the
+99 thresholds from 0.01 to 0.99 on the internal-testing predictions. It also read the
 official pycocotools interpolated precision tensor at 101 recall positions,
 rather than approximating the AP curve from the threshold grid.
 
 Without changing the grid or matcher, a separately versioned sensitivity
-repeated those test-side calculations over all five frozen runs per detector.
+repeated those internal-testing calculations over all five frozen runs per detector.
 The same ten prediction bundles used by the clean comparison were hash-checked;
 no checkpoint was loaded and no prediction was regenerated. The n=5 curves are
 the principal operating-regime display under D-008 because they retain every
@@ -320,11 +343,11 @@ Primary single-threshold selection was performed independently on the six n=3
 validation bundles. The same 99-point grid was evaluated with the common
 matcher, and the threshold maximizing arithmetic mean validation F1 across the
 three seeds was frozen for each detector; exact ties favored the higher
-threshold. These thresholds were then applied once to the corresponding test
+threshold. These thresholds were then applied once to the corresponding internal-testing
 bundles. Batch 35 additionally applied the same thresholds to seeds 271 and
-314. Test results did not feed back into selection in either scope.
+314. Internal-testing results did not feed back into selection in either scope.
 
-FROC reparameterized the exploratory test sweep as sensitivity versus false
+FROC reparameterized the exploratory internal-testing sweep as sensitivity versus false
 positives per image. At budgets of 0.125, 0.25, 0.5, 1, and 2 FP/image, each
 seed contributed its highest observed sensitivity without exceeding the
 budget. No interpolation or extrapolation was used. Historical n=3 and
@@ -364,7 +387,7 @@ $r\in\{1,9,25,100\}$, with $N$ the validation-image count. These are linear
 box-error penalties, not measured patient harms or deployment utilities.
 Decision D-006 keeps both analyses separate from the primary maximum-mean-F1
 thresholds. Selection and diagnostics used validation only; no sensitivity
-threshold was selected from or applied to test, FROC, Pareto, or any
+threshold was selected from or applied to internal testing, FROC, Pareto, or any
 downstream outcome analysis.
 
 ### 3.6 Detection-specific confidence calibration
@@ -400,6 +423,12 @@ was specially handled, and no recalibration map was fitted. Reliability
 diagrams were confidence-only marginal summaries, not visualizations of all
 five D-ECE dimensions. D-ECE was programmatically separate from exam-level
 outcome-probability calibration required for valid decision-curve analysis.
+Conventional decision-curve analysis was not performed: frozen validation
+predictions existed for only six of the ten retained detector runs, so a
+complete set of validation-fitted, run-specific exam-outcome probability
+mappings could not be frozen without dropping runs or using internal-testing
+outcomes. The historical raw-score calculation was therefore excluded from the
+main evidence rather than relabeled as probability-based DCA.
 
 ### 3.7 Compute and Pareto analysis
 
@@ -413,7 +442,7 @@ resizing occurred inside its timed forward, whereas YOLO tensor resizing
 occurred before timed forward-plus-NMS.
 
 The frozen historical n=3 Pareto analysis and a separately labeled n=5
-sensitivity paired run-specific AP or validation-selected test recall with
+sensitivity paired run-specific AP or validation-selected internal-testing recall with
 same-run FPS, latency, parameters, or estimated GFLOPs. Recall thresholds in
 both scopes were selected from the original n=3 validation bundles. Strict
 dominance required every seed of one detector to be better than every seed of
@@ -423,7 +452,7 @@ detector; no n=3 and n=5 metric was mixed into one frontier.
 
 ### 3.8 Digital corruption and radiography-motivated synthetic sensitivity
 
-The fixed robustness sample contained 300 test radiographs from 183 patients:
+The fixed robustness sample contained 300 internal-testing radiographs from 183 patients:
 68 opacity-positive and 232 negative images with 111 boxes. Proportional
 largest-remainder allocation preserved the three study strata and used no
 detector result. Both detectors received identical corrupted pixels.
@@ -499,7 +528,7 @@ annotation retraining and fit verification were outside scope.
 
 ### 3.10 Inferential targets and patient-cluster protocol
 
-The primary **training-procedure estimand** included held-out patient sampling
+The primary **training-procedure estimand** included internal-testing patient sampling
 and stochastic retraining variability. Clean pointwise 95% bootstrap intervals
 [@efron1993bootstrap] used
 2,000 two-stage draws: patient groups were sampled with replacement, every exam
@@ -527,11 +556,25 @@ archives. McNemar's test was omitted because multiple targets and false
 positives do not reduce to one independent binary result per image without
 discarding the detection structure.
 
+### 3.11 Retrospective hypothesis and reporting status
+
+H1--H5 were recorded after most experimental artifacts had been frozen, and H6
+was added as a later descriptive calibration question. All six are therefore
+retrospective, result-linked traceability devices rather than preregistered or
+confirmatory hypotheses. Their operational endpoints, split and run scopes,
+source artifacts, multiplicity boundaries, and limitations were mapped before
+this manuscript rewrite.
+
 ## 4. Results
 
-### 4.1 Clean held-out performance and seed instability
+Sections 4.1--4.8 report absolute and descriptive secondary results with their
+run, checkpoint, and image scopes. Section 4.9 is the inferential synthesis and
+keeps the primary training-procedure intervals separate from the secondary
+checkpoint-conditional p-values.
 
-The unified evaluator processed 750 test images and 268 reference boxes for
+### 4.1 Clean internal-testing performance (n=5 per detector; conditional localization n=5/n=4)
+
+The unified evaluator processed 750 internal-testing images and 268 reference boxes for
 each of 10 frozen checkpoints. At the original score threshold of 0.25, Faster
 R-CNN had higher recall, F1, and both AP endpoints, whereas YOLO11s had higher
 precision and slightly higher conditional localization among successfully
@@ -549,9 +592,9 @@ seeds.
 | mAP@0.5:0.95 | **0.0995 +/- 0.0067 (n=5)** | 0.0542 +/- 0.0060 (n=5) |
 
 YOLO11s seed 271 was a critical all-attempt result. Its training losses
-decreased and validation mAP converged normally, while held-out AP@0.5 and
+decreased and validation mAP converged normally, while internal-testing AP@0.5 and
 AP@0.5:0.95 were 0.15872 and 0.05558, within the other YOLO seed range. Yet its
-maximum held-out confidence was 0.0412735. It therefore emitted no detection at
+maximum internal-testing confidence was 0.0412735. It therefore emitted no detection at
 0.25 and contributed observed zeros to precision, recall, and F1; matched-box
 IoU and Dice were mathematically undefined. This was operational confidence-
 score degeneracy, not classic loss/head collapse or a failure of otherwise
@@ -564,14 +607,14 @@ are not mixed into it.
 
 ![Figure 1. Five-attempt clean predictive and compute distributions. Conditional YOLO11s IoU and Dice use four finite seeds; every other endpoint uses five seeds per detector.](../results/figures/raincloud_metrics.png)
 
-### 4.2 Precision-recall regimes, validation thresholds, and FROC
+### 4.2 Operating-regime sensitivity (internal-testing n=5; threshold selection n=3)
 
 The n=5 all-attempt threshold sensitivity showed why the score-0.25 comparison
 cannot be read as a general YOLO precision advantage. At 0.25, Faster R-CNN
 precision/recall/F1 was 0.1959/0.5799/0.2845 and YOLO11s was
 0.2983/0.0955/0.1427. At the lower grid boundary of 0.01, YOLO11s mean recall
 rose to 0.2925 and its best observed F1 to 0.2657. Faster R-CNN's exploratory
-peak mean F1 was 0.3562 at 0.63. These test optima were descriptive and did not
+peak mean F1 was 0.3562 at 0.63. These internal-testing optima were descriptive and did not
 select either final threshold.
 
 On the five-run official AP@0.5 curve, Faster R-CNN had higher mean
@@ -586,15 +629,15 @@ and was not filtered for its zero detections at 0.25.
 
 ![Figure 2a. Five-run all-attempt sensitivity of official precision-recall curves. Lines and bands are equal-run mean +/- sample SD; the original n=3 figure is retained as provenance.](../results/figures/precision_recall_curves_n5_sensitivity.png)
 
-![Figure 2b. Five-run exploratory F1-versus-threshold sensitivity. Seed 271 is included exactly as observed; the test sweep is descriptive evidence, not threshold selection.](../results/figures/f1_vs_threshold_n5_sensitivity.png)
+![Figure 2b. Five-run exploratory F1-versus-threshold sensitivity. Seed 271 is included exactly as observed; the internal-testing sweep is descriptive evidence, not threshold selection.](../results/figures/f1_vs_threshold_n5_sensitivity.png)
 
 Validation selection remains n=3 and chose 0.69 for Faster R-CNN and 0.05 for
-YOLO11s. Applying those unchanged thresholds to all five test bundles gave
+YOLO11s. Applying those unchanged thresholds to all five internal-testing bundles gave
 precision/recall/F1 0.3624 +/- 0.0581, 0.3507 +/- 0.0463, and
 0.3511 +/- 0.0184 for Faster R-CNN, versus 0.2524 +/- 0.1418,
 0.1948 +/- 0.1110, and 0.2192 +/- 0.1233 for YOLO11s. Seed 271 contributes
-defined zeros with no detection at 0.05. These are n=5 test sensitivities of an
-n=3-selected rule, not thresholds reselected after test inspection.
+defined zeros with no detection at 0.05. These are n=5 internal-testing sensitivities of an
+n=3-selected rule, not thresholds reselected after internal-testing outcome inspection.
 
 Five-run FROC sensitivity was higher for Faster R-CNN at each predeclared
 budget: 0.2672 versus 0.1761 at 0.125 FP/image, 0.3642 versus 0.2455 at 0.25,
@@ -624,7 +667,7 @@ under one prespecified directional-margin rule:
 The complete 19-row table, including exact old/new margins and seed-271 roles,
 is `results/tables/operating_regime_n3_vs_n5_conclusions.csv`.
 
-### 4.3 Recall-weighted F-beta and hypothetical error-loss sensitivity
+### 4.3 Recall-preference and hypothetical-loss sensitivity (validation n=3)
 
 When the lower pointwise bootstrap bound of $F_\beta$ was optimized on
 validation, Faster R-CNN shifted monotonically toward less selective thresholds
@@ -638,7 +681,7 @@ reached the 0.01 lower boundary at beta 3, 5, and 10, with precision 0.3025 and
 recall 0.3971. Those three rows are best observed values within the grid, not
 global optima. The beta settings are preference weights rather than empirical
 clinical-harm measurements, the intervals are pointwise, and no selected F-beta threshold
-was applied to test. Per D-006, these results did not replace the primary
+was applied to internal testing. Per D-006, these results did not replace the primary
 0.69/0.05 thresholds.
 
 The 0.01-near-optimal plateaus were 0.64--0.70, 0.27--0.39, 0.07--0.16, and
@@ -655,9 +698,9 @@ and 0.04 for assumed $r=1,9,25,100$; YOLO11s selected 0.35, 0.01, 0.01, and
 detectors, directly demonstrating that F-beta optimization was not equivalent
 to the declared linear error-loss minimization. These assumed ratios were not
 clinical valuations, and none of the loss-selected thresholds was applied to
-test.
+internal testing.
 
-### 4.4 Calibration and reliability
+### 4.4 Detection calibration and reliability (descriptive n=5 per detector)
 
 Across five seeds, Faster R-CNN mean D-ECE was 0.0320 +/- 0.0058, compared with
 0.0990 +/- 0.0232 for YOLO11s. The seed ranges did not overlap: 0.0266--0.0403
@@ -681,12 +724,13 @@ population.
 
 Figure 4 is a confidence-only marginal reliability summary. It does not
 visualize the full class/location/scale-conditioned D-ECE. Calibration remained
-conditional on emitted detections and was evaluated, not fitted, on the test
-set; missed targets and clinical/exam risk were outside the population.
+conditional on emitted detections and was evaluated, not fitted, on the
+internal-testing set; missed targets and clinical/exam risk were outside the
+population.
 
 ![Figure 4. Confidence-only marginal reliability diagrams for all five runs per detector. This one-dimensional visual is not a visualization of all five D-ECE dimensions.](../results/figures/reliability_diagrams_confidence_marginal_v2.png)
 
-### 4.5 Compute and the Pareto frontier
+### 4.5 Compute and Pareto sensitivity (n=5 per detector)
 
 YOLO11s was the computationally lighter pipeline on the measured laptop. Mean
 throughput was 60.29 +/- 12.62 FPS versus 20.28 +/- 5.62 for Faster R-CNN; mean
@@ -706,9 +750,9 @@ rule, neither detector strictly dominated in any panel (Figure 5), unchanged
 from n=3. This is an accuracy-efficiency trade-off on one hardware/software
 stack, not a universal property of model families.
 
-![Figure 5. Five-run all-attempt accuracy-efficiency Pareto sensitivity. Each point joins same-run AP or test recall to same-run hardware metrics; recall uses thresholds selected from the original n=3 validation runs. The historical n=3 figure is retained separately.](../results/figures/pareto_frontier_n5_sensitivity.png)
+![Figure 5. Five-run all-attempt accuracy-efficiency Pareto sensitivity. Each point joins same-run AP or internal-testing recall to same-run hardware metrics; recall uses thresholds selected from the original n=3 validation runs. The historical n=3 figure is retained separately.](../results/figures/pareto_frontier_n5_sensitivity.png)
 
-### 4.6 Digital common-corruption robustness
+### 4.6 Digital common-corruption sensitivity (single checkpoint per detector; 300 images)
 
 On the 300-image clean robustness sample, mAP@0.5:0.95 was 0.147802 for Faster
 R-CNN and 0.076295 for YOLO11s. Averaged equally across all 35 corrupted
@@ -738,7 +782,7 @@ led to different conclusions.
 
 ![Figure 6. Seed-17 clean-relative mAP@0.5:0.95 under seven post-conversion digital corruptions and five severities.](../results/figures/robustness_map_50_95_relative.png)
 
-### 4.7 Radiography-motivated synthetic acquisition/display sensitivity
+### 4.7 Radiography-motivated synthetic acquisition/display sensitivity (single checkpoint per detector; 300 images)
 
 The signal-dependent Poisson-like and Gaussian series produced ordered mAP
 degradation. Under the strongest Poisson-like condition (relative count budget
@@ -760,7 +804,7 @@ No display result establishes scanner-setting invariance, and DSI does not
 estimate site transportability. The full seven-metric, 20-row table remains in
 [Supplementary Section S5](../docs/SUPPLEMENTARY.md#s5-complete-digital-corruption-and-acquisition-shift-grids).
 
-### 4.8 Explainability and XAI sanity findings
+### 4.8 Explainability and XAI controls (single checkpoint; 300-image localization and 50-image sanity scopes)
 
 Grad-CAM localization was weak for both detectors. Faster R-CNN had 110 valid
 maps from 111 boxes, mean energy-in-box 0.0869 versus a 0.0713 box-area
@@ -791,11 +835,12 @@ data-label relationship; randomized-label retraining was not performed
 
 ![Figure 7. Nested 50-image Grad-CAM input-pixel control and six-stage cascading model-parameter randomization panel.](../results/figures/gradcam_sanity_v2_panel.png)
 
-### 4.9 Estimand-separated statistical synthesis
+### 4.9 Estimand-separated statistical synthesis (n=5/5 or n=5/4 runs)
 
 The table reports the primary training-procedure differences and separately the
 secondary checkpoint-conditional p-values. Differences are Faster R-CNN minus
-YOLO11s; every row contains 750 images from 323 patient clusters. `Runs A/B`
+YOLO11s; the corresponding absolute endpoint estimates are reported in Section
+4.1. Every row contains 750 images from 323 patient clusters. `Runs A/B`
 gives the eligible Faster R-CNN/YOLO11s trained-run counts.
 
 | Endpoint | Runs A/B | Conditioning | Difference (95% training-procedure CI) | Seed 271 | Holm p, conditional on observed checkpoints |
@@ -848,13 +893,19 @@ almost every official recall position and higher sensitivity at every reported
 false-positive budget. Detector-specific thresholds selected on validation
 also differed sharply, 0.69 versus 0.05.
 
-Calibration supplied a complementary result. Threshold selectivity concerns
-which ranked boxes survive a cutoff; D-ECE concerns whether the scores describe
-empirical correctness conditional on class, location, and scale among emitted
-detections. In the observed YOLO11s seed-271 run, AP remained within the
-sibling-seed range even as all scores compressed below 0.042 and mean
-confidence was below the matched fraction. That result was not anticipated or
-handled specially. The sparse-cell and floor sensitivity also showed that
+These measurements are related but not interchangeable. AP summarizes ranking
+over the frozen prediction set. Raw score scale determines where a numerical
+cutoff falls. Fixed-threshold precision and recall describe the resulting
+operating point. D-ECE asks whether emitted scores agree with empirical
+correctness conditional on class, location, and scale under a specified
+binning and support rule. A favorable result for one object does not imply a
+favorable result for another.
+
+The observed YOLO11s seed-271 run makes that distinction concrete: AP remained
+within the sibling-seed range even as all scores compressed below 0.042 and
+mean confidence was below the matched fraction. The run is evidence of
+score-scale instability under this disclosed recipe, not a failed attempt to
+hide or replace. The sparse-cell and floor sensitivity also showed that
 absolute D-ECE depends materially on histogram support and which detections
 enter the population. The evidence argues for reporting curves,
 detector-specific validation selection, occupancy, sensitivity, and all
@@ -933,37 +984,30 @@ models frequently highlighted extra-box anatomy, markers, devices, and borders.
 The maps therefore identify suspicious associations and failure patterns, not
 clinically validated reasoning.
 
-### 5.6 Scenario-specific trade-offs, not a winner
+### 5.6 Scope-correct synthesis
 
-For GPU-backed retrospective screening or server-side case prioritization in
-which detection coverage is the binding criterion, Faster R-CNN is the more
-defensible of these two measured pipelines. It has stronger AP, FROC
-sensitivity, and raw digital-corruption performance. Its mean throughput of
-20.28 FPS is slower but remains
-well above the rate of a human radiograph-reading workflow on the tested GPU.
+The study supports a measured trade-off, not a recommendation for a clinical
+scenario. Within this internal comparison, Faster R-CNN had higher coverage,
+ranking accuracy, and FROC sensitivity, while YOLO11s had lower latency,
+parameter count, registered-operation estimates, training memory, and training
+time. The Pareto analysis preserves both directions and therefore does not
+identify one dominant pipeline.
 
-For resource-constrained point-of-care assistance in which every image still
-receives human review, YOLO11s is the conditional compute-oriented option. Its
-9.43-million-parameter model, 21.42 registered-operation GFLOP estimate, and
-60.29 FPS profile are substantially lighter. That preference is based on
-footprint and latency, not superior precision-recall behavior. Its low measured
-coverage, calibration error, and seed-level score instability preclude use as a
-sole triage gate or rule-out system.
+No result establishes suitability for screening, prioritization, diagnosis,
+rule-out, treatment guidance, or point-of-care use. Such judgments would
+require an intended-use specification, representative prevalence, calibrated
+exam-level risk, external and prospective evaluation, subgroup assessment,
+workflow evidence, and safety analysis that are absent here.
 
-For autonomous diagnosis, disease exclusion, or treatment guidance, neither
-pipeline is suitable. Absolute performance is modest, calibration is not
-clinical-risk calibration, explanations localize weakly, robustness is
-synthetic and internal, and no prospective or external evaluation exists.
-
-These statements apply only to the two disclosed pipelines. Decisions D-002
-and D-003 explicitly descoped a second, equal-opportunity architecture-specific
+The claims apply only to these two disclosed pipelines. Decisions D-002 and
+D-003 explicitly descoped a second, equal-opportunity architecture-specific
 tuning track. YOLO's full native augmentation recipe and a correspondingly
 tuned Faster R-CNN recipe were not compared. The present evidence therefore
-cannot support "two-stage detectors are better" or "YOLO is faster by nature"
-as architecture-family claims. It supports a narrower, reproducible statement:
-under this controlled data and evaluation protocol, the Faster R-CNN pipeline
-was accuracy-oriented and the YOLO11s pipeline was efficiency-oriented, with a
-material score-scale and calibration mismatch.
+cannot support "two-stage detectors are better," "all Faster R-CNN models are
+more accurate," "all YOLO models are faster," or any other detector-family
+law. It supports the narrower statement that these implementations occupied
+different accuracy, efficiency, score-scale, fixed-threshold, and calibration
+regimes under the stated controls.
 
 ## 6. Limitations
 
@@ -981,7 +1025,7 @@ settings, contemporary equipment, other institutions, modalities, or
 multi-class tasks. No external testing dataset or demographic subgroup/fairness
 analysis was available. Source accrual dates, full acquisition-device and
 exposure details, participant demographics, and several reference-standard
-details are absent.
+details are absent. No prospective evaluation was performed.
 
 **Reference standard and preprocessing.** Boxes are coarse rectangles rather
 than pixel-accurate opacity masks; reader disagreement and ambiguous boundaries
@@ -992,7 +1036,7 @@ pixels can remove small-opacity detail differently across pipelines.
 
 **Sampling and seed scope.** The hardware-scoped cohort excludes 21,684 source
 studies from model training/evaluation. Five clean training attempts per
-detector remain a coarse sample of seed variation. The principal test-side
+detector remain a coarse sample of seed variation. The principal internal-testing
 threshold, PR, FROC, and Pareto displays are five-run all-attempt sensitivities;
 their original n=3 artifacts remain unchanged as provenance. Threshold
 selection itself still uses only the original three validation runs, so the
@@ -1008,15 +1052,16 @@ controls the data distribution but may understate YOLO11s performance under its
 conventional recipe. Precision type, batch behavior, BatchNorm handling,
 learning rate, warmup, and scheduling differ because the more closely matched
 YOLO diagnostics collapsed. Detector-intrinsic losses, assignment, proposal
-handling, and NMS also differ. This is a comparison of two working pipelines,
-not a causal architecture-family effect. YOLO11s seed 271's operational
+handling, and NMS also differ. Only these two working pipelines were studied;
+this is not a causal architecture-family effect or a survey of detector
+variants. YOLO11s seed 271's operational
 confidence-score degeneracy is retained as a recipe-level instability and not
 silently removed.
 
 **Metrics, thresholds, and calibration.** Score-0.25 precision, recall, and F1
 are protocol-sensitivity endpoints. The primary validation-selected thresholds
 use three seeds and equal-weight F1, which does not encode an elicited
-clinical-harm function. Applying those thresholds to five test runs cannot add
+clinical-harm function. Applying those thresholds to five internal-testing runs cannot add
 missing validation evidence or justify reselection. The n=3-versus-n=5 margin
 classifications are descriptive influence summaries rather than inferential
 tests; several shared-threshold and AP gaps weakened even though no direction
@@ -1027,7 +1072,7 @@ descriptive; its intervals are pointwise and its YOLO optima reach the lower
 grid boundary. The separate linear loss assumes FN:FP penalties 1, 9, 25, and
 100 without outcome-based valuation. None of these thresholds was tested
 downstream. Conditional IoU and Dice exclude misses and
-have asymmetric descriptive n. D-ECE is evaluated on the same held-out test
+have asymmetric descriptive n. D-ECE is evaluated on the same internal-testing
 bundles, conditions only on emitted predictions at the 0.001 floor, depends on
 the chosen IoU/binning/minimum-cell protocol, and has only 68--354 occupied of
 3,125 possible cells per run. Its comparison is descriptive; the reported
@@ -1045,9 +1090,9 @@ therefore classified the calculation as non-standard, removed it from the main
 Results, and retained its exact arithmetic only as a relabeled supplementary
 raw-score utility/sensitivity artifact. Probability-based salvage was not
 forced because frozen validation predictions were available for only six of
-ten retained runs; no calibrator was selected or fitted. The enriched internal
-test subset (169/750 positives; 323 patient groups) is not a deployment-
-prevalence sample. The preserved calculation supplies no conventional
+ten retained runs; no calibrator was selected or fitted. The enriched
+internal-testing subset (169/750 positives; 323 patient groups) is not a
+deployment-prevalence sample. The preserved calculation supplies no conventional
 net-benefit, clinical-utility, beneficial-range, or deployment-readiness
 evidence. Detection-level D-ECE was not used as an exam-level probability and
 is programmatically separate from the validation-frozen outcome-probability
@@ -1090,14 +1135,24 @@ defined Faster R-CNN runs and four defined YOLO11s runs. This is still coarse
 training-variability evidence. Bootstrap intervals are pointwise; secondary
 permutation tests condition on the observed checkpoints; corruption inference
 is single-checkpoint; and Holm correction does not make corruption conditions
-independent cohorts or guarantee transportability.
+independent cohorts or guarantee transportability. H1--H5 and the H6
+calibration question were recorded retrospectively; they organize frozen
+evidence but do not provide preregistered, confirmatory hypothesis tests.
 
 **Compute and reproducibility.** Timing and registered-operation estimates
 describe one RTX 4060 Laptop GPU, pinned environment, and implementation path.
 The FLOP counter omits unsupported operations, and the two frameworks place
 resizing differently relative to timing. These values are deployment-oriented
 measurements of the documented pipelines, not hardware-independent architecture
-constants.
+constants. At the Batch 36 audit, all ten exact best-checkpoint files remained
+available locally and matched the Phase 5 hashes, but the binaries were
+Git-ignored, had not been publicly released, and had no public download URL.
+A clean checkout can verify and replay committed frozen-prediction evidence but
+cannot reproduce exact inference without separately supplied licensed data and
+matching checkpoint assets. Exact retraining is also not promised to be
+bitwise identical: the recorded CUDA ROI Align backward path is
+nondeterministic under the pinned Torchvision stack, and hardware, scheduling,
+and floating-point reductions can alter training trajectories.
 
 **Reporting and governance gaps.** The reporting crosswalk is an evidence
 audit, not certification of CLAIM, TRIPOD+AI, or STARD-AI compliance. The
@@ -1117,34 +1172,65 @@ process.
 
 ## 7. Conclusion
 
-Under one patient-disjoint dataset, common canonical inputs, disabled
-stochastic augmentation, frozen validation decisions, and one evaluator,
-Faster R-CNN and YOLO11s occupied different operating and resource regimes.
-The shared score threshold did not align selectivity: YOLO11s appeared more
-precise at 0.25 while retaining far fewer detections, whereas the frozen
-five-run precision-recall and FROC sensitivities favored Faster R-CNN and the
-original three-run analyses remained as provenance. The five-seed clean
-analysis gave wholly positive primary training-procedure intervals for Faster
-R-CNN recall, F1, and average precision. YOLO11s was substantially smaller and faster, but
-one retained seed exposed severe score compression and the detector had higher
-detection-specific calibration error.
+Under one patient-disjoint internal protocol, common canonical inputs,
+disabled stochastic augmentation, validation-frozen decisions, and one
+evaluator, Faster R-CNN and YOLO11s occupied different operating and resource
+regimes. A shared score threshold did not align selectivity. The five-run
+precision-recall and FROC sensitivities favored Faster R-CNN, and the primary
+training-procedure intervals were wholly positive for Faster R-CNN minus
+YOLO11s recall, F1, and both AP endpoints. Fixed-threshold precision was not a
+robust training-procedure difference. YOLO11s was substantially smaller and
+faster, while seed 271 exposed score compression without corresponding AP
+collapse.
 
-Neither result defines a single winner. Faster R-CNN was the more defensible
-accuracy-oriented pipeline for internal, GPU-backed research scenarios;
-YOLO11s was the more attractive compute-oriented pipeline only where mandatory
-human review and a lower resource footprint outweighed its coverage and score
-limitations. Both were vulnerable to digital and radiography-motivated
-synthetic acquisition/display shifts,
-and both produced weakly localized Grad-CAM maps despite showing sensitivity to
-full model-parameter randomization. Threshold-sensitivity analyses clarified
-conditional regimes but did
-not validate clinical utility; the historical raw-score utility calculation
-was excluded from the evidentiary synthesis because it was not standard DCA.
+The analyses also show why AP, raw score scale, fixed-threshold behavior, and
+detection-level calibration must be reported separately. Detection D-ECE was
+descriptive and support-sensitive; it was not exam-level risk calibration.
+Digital corruptions and radiography-motivated synthetic transformations were
+internal stress tests, and Grad-CAM maps localized opacities weakly despite
+parameter sensitivity. The invalid raw-score decision-curve interpretation was
+removed rather than used as evidence.
 
-The contribution is therefore a controlled, multi-axis characterization of two
-disclosed pipelines and an empirical demonstration that threshold and score
-scale can materially distort detector comparisons. It is not a universal
-one-stage-versus-two-stage conclusion and not evidence that either system can
-support clinical care. Complete seed-level tables, exhaustive stress-test
-grids, archives, provenance, and exact reproduction routes are maintained in
-the [Supplementary Materials Index](../docs/SUPPLEMENTARY.md).
+The contribution is a controlled, multi-axis characterization of two disclosed
+pipelines and an empirical demonstration that nominally identical raw
+confidence thresholds can select very different operating regimes. It is not a
+universal one-stage-versus-two-stage law, a comparison of all Faster R-CNN or
+YOLO implementations, or evidence about clinical populations or use. Complete
+seed-level tables, stress-test grids, archives, provenance, and reproduction
+routes are maintained in the [Supplementary Materials
+Index](../docs/SUPPLEMENTARY.md).
+
+## 8. Declarations
+
+The following fields are intentionally unresolved placeholders. They are not
+statements of absence, approval, exemption, or applicability.
+
+**Funding and support — AUTHOR ACTION REQUIRED:** Identify every funding or
+support source, grant and recipient where applicable, and the funder's role, or
+insert an author-confirmed journal-appropriate no-funding statement.
+
+**Competing interests — AUTHOR ACTION REQUIRED:** Provide an author-by-author
+declaration under the target journal's policy, including an explicit
+author-confirmed none statement where appropriate.
+
+**Ethics and data use — AUTHOR ACTION REQUIRED:** Insert the responsible
+institution's determination for this retrospective secondary analysis,
+including the body, determination type, identifier, and date where applicable;
+separately confirm compliance with the RSNA/Kaggle and NIH data-use terms.
+
+**Consent — AUTHOR ACTION REQUIRED:** State whether consent was required,
+waived, or not applicable under the documented ethics determination and give
+the responsible rationale required by the journal.
+
+**Author contributions — AUTHOR ACTION REQUIRED:** Insert the final author list
+and author-approved contribution statement, preferably using CRediT roles where
+accepted.
+
+**Data, code, and model availability — AUTHOR ACTION REQUIRED:** Provide the
+actual public repository/archive identifier, release or commit, license,
+source-data access instructions, artifact scope, and exact checkpoint-release
+status at submission. Do not insert a speculative checkpoint URL.
+
+**Patient and public involvement — AUTHOR ACTION REQUIRED:** Confirm whether
+patients or members of the public were involved and insert the journal-required
+statement; do not infer non-involvement from the repository.

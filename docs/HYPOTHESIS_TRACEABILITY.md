@@ -1,6 +1,6 @@
 # Hypothesis Traceability
 
-Audit date: 2026-08-31
+Audit date: 2026-09-01
 
 This register preserves the exact wording in [`HYPOTHESES.md`](HYPOTHESES.md)
 and maps it to the current manuscript, [`paper_draft.md`](../report/paper_draft.md).
@@ -22,7 +22,7 @@ convert the hypothesis into a prospective or confirmatory test.
 | Dataset/split | Patient-disjoint internal-testing split: 750 radiographs, 323 NIH patient groups, 169 opacity-positive images, and 268 boxes. |
 | Seed count | Five attempted runs per detector: 17, 42, 137, 271, and 314. |
 | Source artifacts | [`detector_comparison.csv`](../results/tables/detector_comparison.csv); [`statistical_clean_comparison.csv`](../results/tables/statistical_clean_comparison.csv); per-run endpoint inputs in [`statistical_clean_per_run_metrics.csv`](../results/tables/statistical_clean_per_run_metrics.csv). |
-| Manuscript section | [`paper_draft.md` §§4.1 and 4.9](../report/paper_draft.md#41-clean-held-out-performance-and-seed-instability). |
+| Manuscript section | [`paper_draft.md` §§4.1 and 4.9](../report/paper_draft.md#41-clean-internal-testing-performance-n5-per-detector-conditional-localization-n5n4). |
 | Result status | **Supported retrospectively** for all four named endpoints under the frozen operational rule. This is not a preregistered confirmatory finding. |
 | Multiplicity | The primary 95% intervals are pointwise; no simultaneous multiplicity adjustment was applied to the four-part H1 claim. The separate checkpoint-conditional permutation p-values belong to one Holm family across seven clean endpoints and do not replace the primary training-procedure intervals. |
 | Limitations | Compound retrospective hypothesis; five runs coarsely represent retraining variability; one internal dataset; no external testing; shared-threshold precision and conditional IoU/Dice are outside H1; no architecture-family causal claim. |
@@ -40,9 +40,9 @@ convert the hypothesis into a prospective or confirmatory test.
 | Status | Retrospective, result-linked hypothesis; not preregistered. |
 | Operational endpoint | Three signatures together: higher YOLO11s precision but lower recall at score 0.25; Faster R-CNN higher at more official AP@0.5 recall positions with none favoring YOLO11s; Faster R-CNN higher sensitivity at each FROC budget 0.125, 0.25, 0.5, 1, and 2 FP/image. |
 | Dataset/split | Same 750-image/323-patient internal-testing split; frozen exploratory threshold/PR/FROC analyses. |
-| Seed count | Principal test-side sensitivity: five runs per detector, seeds 17, 42, 137, 271, and 314. Historical/prespecified provenance: three runs per detector. |
+| Seed count | Principal internal-testing sensitivity: five runs per detector, seeds 17, 42, 137, 271, and 314. Historical/prespecified provenance: three runs per detector. |
 | Source artifacts | [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv); [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv); figures [`precision_recall_curves_n5_sensitivity.png`](../results/figures/precision_recall_curves_n5_sensitivity.png) and [`froc_curves_n5_sensitivity.png`](../results/figures/froc_curves_n5_sensitivity.png); original unsuffixed n=3 artifacts retained. |
-| Manuscript section | [`paper_draft.md` §§4.2, 4.3, and 5.1](../report/paper_draft.md#42-threshold-sensitivity-and-official-precision-recall). |
+| Manuscript section | [`paper_draft.md` §§4.2 and 5.1](../report/paper_draft.md#42-operating-regime-sensitivity-internal-testing-n5-threshold-selection-n3). |
 | Result status | **Supported retrospectively and descriptively:** 97/101 AP@0.5 recall positions favor Faster R-CNN, four tie, and all five n=5 FROC budgets favor Faster R-CNN sensitivity. The complete n=3-versus-n=5 table reports weakened as well as strengthened margins. |
 | Multiplicity | No inferential multiplicity procedure applies to the descriptive curve-position counts and predeclared FROC budgets. The score-0.25 clean endpoint p-values are part of the separate seven-endpoint Holm family, not a test of the whole H2 pattern. |
 | Limitations | Exploratory n=5 internal-testing sensitivity of historical n=3 analysis; threshold selection remains n=3; no probabilistic-calibration inference; YOLO11s reaches the 0.01 lower threshold boundary; no clinical operating point or external testing. |
@@ -59,9 +59,9 @@ convert the hypothesis into a prospective or confirmatory test.
 | Status | Retrospective, result-linked hypothesis; not preregistered. |
 | Operational endpoint | Across AP-or-model-optimization-selected-recall versus FPS, latency, parameters, and registered-operation GFLOPs, no detector may have every seed strictly better than every competing seed on both directed axes. |
 | Dataset/split | Accuracy uses the 750-image patient-disjoint internal-testing split; thresholds were selected only on the 750-image/321-patient model-optimization split. Compute was measured on the stated RTX 4060 Laptop GPU protocol. |
-| Seed count | Five-run test/compute sensitivity per detector; recall thresholds remain selected from the original three validation runs. Historical n=3 frontier retained separately. |
+| Seed count | Five-run internal-testing/compute sensitivity per detector; recall thresholds remain selected from the original three validation runs. Historical n=3 frontier retained separately. |
 | Source artifacts | [`pareto_frontier_n5_sensitivity.png`](../results/figures/pareto_frontier_n5_sensitivity.png); [`pareto_points_n5_sensitivity.csv`](../results/tables/pareto_points_n5_sensitivity.csv); [`pareto_summary_n5_sensitivity.csv`](../results/tables/pareto_summary_n5_sensitivity.csv); [`selected_operating_points_per_seed_n5_sensitivity.csv`](../results/tables/selected_operating_points_per_seed_n5_sensitivity.csv); original [`pareto_frontier.png`](../results/figures/pareto_frontier.png) retained. |
-| Manuscript section | [`paper_draft.md` §§4.5 and 5.2](../report/paper_draft.md#45-compute-profile-and-pareto-structure). |
+| Manuscript section | [`paper_draft.md` §§4.5 and 5.2](../report/paper_draft.md#45-compute-and-pareto-sensitivity-n5-per-detector). |
 | Result status | **Supported retrospectively and descriptively** in all four n=5 sensitivity panels under the conservative all-runs rule; all four labels are unchanged from n=3. |
 | Multiplicity | No hypothesis-test family or multiplicity correction applies; this is a deterministic Pareto classification over the named runs and axes. |
 | Limitations | One hardware/software stack; asymmetric preprocessing inside timing regions; unsupported operations omitted from GFLOPs; five runs remain coarse; n=3-selected recall rather than clinical utility; pipeline, not architecture-family, comparison. |
@@ -80,7 +80,7 @@ convert the hypothesis into a prospective or confirmatory test.
 | Dataset/split | Fixed stratified sample of 300 internal-testing radiographs from 183 NIH patient groups, including 68 positive images and 111 boxes. |
 | Seed count | One frozen checkpoint per detector, seed 17. |
 | Source artifacts | [`robustness_curves.csv`](../results/tables/robustness_curves.csv); [`robustness_map_50_95_relative.png`](../results/figures/robustness_map_50_95_relative.png); [`statistical_robustness_comparison.csv`](../results/tables/statistical_robustness_comparison.csv). |
-| Manuscript section | [`paper_draft.md` §§4.6 and 5.4](../report/paper_draft.md#46-common-corruption-robustness). |
+| Manuscript section | [`paper_draft.md` §§4.6 and 5.4](../report/paper_draft.md#46-digital-common-corruption-sensitivity-single-checkpoint-per-detector-300-images). |
 | Result status | **Supported retrospectively** for the descriptive pattern; only selected individual contrasts receive multiplicity-controlled inferential support. |
 | Multiplicity | Yes for formal corruption contrasts: Holm correction is applied separately within the 35-condition raw-performance and clean-relative-retention metric/estimand families. The broad qualitative curve pattern itself is not one adjusted omnibus test. |
 | Limitations | Single checkpoint per detector; modest internal sample; deterministic digital perturbations; no acquisition physics, scanner/site/population shift, severity prevalence, or external testing; dependence among severity conditions remains. |
@@ -99,7 +99,7 @@ convert the hypothesis into a prospective or confirmatory test.
 | Dataset/split | Primary localization: fixed 300-image/183-patient internal-testing sample with 111 boxes. Sanity controls: nested stratified 50-image/41-patient subset. |
 | Seed count | One frozen checkpoint per detector, seed 17. |
 | Source artifacts | [`gradcam_localization_summary.csv`](../results/tables/gradcam_localization_summary.csv); [`gradcam_good_predictions.png`](../results/figures/gradcam_good_predictions.png); [`gradcam_bad_predictions.png`](../results/figures/gradcam_bad_predictions.png); [`gradcam_failure_cases.png`](../results/figures/gradcam_failure_cases.png); [`gradcam_sanity_v2_summary.csv`](../results/tables/gradcam_sanity_v2_summary.csv). |
-| Manuscript section | [`paper_draft.md` §§4.8 and 5.5](../report/paper_draft.md#48-grad-cam-localization-and-parameter-sensitivity). |
+| Manuscript section | [`paper_draft.md` §§4.8 and 5.5](../report/paper_draft.md#48-explainability-and-xai-controls-single-checkpoint-300-image-localization-and-50-image-sanity-scopes). |
 | Result status | **Supported retrospectively and descriptively:** localization is weak/heterogeneous, and low full-model-randomization similarity shows parameter sensitivity without validating causal or clinical reasoning. |
 | Multiplicity | No multiplicity-controlled inferential hypothesis test was performed for localization or map-similarity measures. |
 | Limitations | One seed and selected layers/targets; false negatives use annotation-guided proxy candidates; fixed-region pre-activation sanity target differs from the primary target; severe pixel permutation is out of distribution; no randomized-label retraining, causal test, expert explanation reference, or external testing. |

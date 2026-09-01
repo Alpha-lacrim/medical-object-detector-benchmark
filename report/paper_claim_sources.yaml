@@ -55,10 +55,10 @@ claims:
     rounding: integer
 
   - id: test_image_count
-    description: Clean held-out evaluation image count.
+    description: Clean internal-testing evaluation image count.
     manuscript:
       section: Clean performance
-      regex: 'unified evaluator processed (?P<value>[\d,]+) test images and 268'
+      regex: 'unified evaluator processed (?P<value>[\d,]+) internal-testing images and 268'
     source:
       kind: csv_cell
       path: results/tables/detector_comparison_per_seed.csv
@@ -68,10 +68,10 @@ claims:
     rounding: integer
 
   - id: test_reference_box_count
-    description: Clean held-out reference-box count.
+    description: Clean internal-testing reference-box count.
     manuscript:
       section: Clean performance
-      regex: 'processed 750 test images and (?P<value>[\d,]+) reference boxes'
+      regex: 'processed 750 internal-testing images and (?P<value>[\d,]+) reference boxes'
     source:
       kind: csv_cell
       path: results/tables/detector_comparison_per_seed.csv
@@ -133,10 +133,10 @@ claims:
     rounding: 4 decimal places
 
   - id: yolo_seed271_maximum_score
-    description: Maximum held-out confidence of the zero-detection YOLO11s run.
+    description: Maximum internal-testing confidence of the zero-detection YOLO11s run.
     manuscript:
       section: Clean performance
-      regex: 'maximum held-out confidence was (?P<value>\d+\.\d+)'
+      regex: 'maximum internal-testing confidence was (?P<value>\d+\.\d+)'
     source:
       kind: csv_cell
       path: results/tables/detector_comparison_per_seed.csv
