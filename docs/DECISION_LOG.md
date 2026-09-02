@@ -363,3 +363,49 @@ sensitivity evaluations of those frozen rules, not n=5 threshold selection.
   weakened, or reversed finding. It records weakened shared-threshold
   precision/recall margins and AP gaps as well as strengthened F1,
   fixed-threshold, FROC, and AP@0.5 position-count results; no reversal occurs.
+
+## D-009 — Use one version for software and research-artifact releases
+
+- **Date:** 2026-09-02
+- **Status:** Accepted for the v2.0.0 release candidate; publication and tagging
+  remain owner-reviewed actions
+
+### Context
+
+The historical public research release is `v1.0.0`, while the Python project,
+importable package, and root entry in `uv.lock` remained at the bootstrap value
+`0.1.0`. No repository policy documented a separate package-version line or a
+different lifecycle for research releases. The research-artifact candidate is a
+material expansion of the first stable baseline: it adds five-run and
+estimand-corrected analysis, calibration/robustness/XAI sensitivity work,
+artifact/claim verification, and a cross-platform locked CI boundary. The
+tracked `report/paper_draft.md` is the current working manuscript, not a
+separately versioned release artifact.
+
+### Decision
+
+From release 2.0.0 onward, `pyproject.toml`,
+`meddet_benchmark.__version__`, the editable project entry in `uv.lock`, and the
+research release use the same semantic version. Public Git tags use the
+`v<version>` form. Version 2.0.0 communicates a materially expanded
+research-artifact release rather than a compatible patch to the original
+research baseline.
+
+The version labels the repository release snapshot; it does not replace the
+per-artifact hashes, study phases, generator/config bindings, or checkpoint
+identities in the scientific manifests. A tag retains the manuscript text at
+that commit for historical traceability, but it does not make the manuscript
+final, frozen, or version 2.0.0. Future manuscript edits on `main` do not by
+themselves require a new repository release.
+
+### Consequences
+
+- The v2.0.0 candidate aligns all three package declarations at `2.0.0` and
+  proposes tag `v2.0.0`.
+- Historical tag `v1.0.0` remains immutable at commit
+  `3a3808841795938a296d48ae3b379b0d10ef3d48`; its historical internal package
+  value is documented by history rather than rewritten.
+- Release metadata changes do not trigger a mechanical refresh of frozen
+  scientific/checkpoint hashes.
+- The final tag and GitHub release may be created only after owner review of an
+  exact committed candidate and successful CI for that SHA.

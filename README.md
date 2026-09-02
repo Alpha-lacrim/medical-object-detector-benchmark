@@ -5,14 +5,36 @@ RSNA Pneumonia Detection Challenge. It measures clean detection performance,
 compute, common-corruption robustness, Grad-CAM localization, and paired
 statistical uncertainty under one patient-safe data and evaluation protocol.
 
-The project is complete. This is a retrospective benchmark, not a clinical
-device or diagnostic system.
+The documented benchmark experiments are complete, while the manuscript remains
+a living document. This is a retrospective benchmark, not a clinical device or
+diagnostic system.
+
+## Research artifact release
+
+This tree declares release version `2.0.0`. The Python project, importable
+package, and research artifact release use one version; the corresponding Git
+tag is `v2.0.0`. The release is identified by the exact reviewed repository
+commit named by that tag. Until the tag is created by the release owner, an
+untagged worktree is only a release candidate.
+
+The tag preserves a historical snapshot of every tracked file at that commit,
+including [`report/paper_draft.md`](report/paper_draft.md). That file is the
+current, living manuscript: release 2.0.0 does not declare it final, frozen, or
+separately versioned, and later manuscript edits on `main` do not by themselves
+require another repository release. The release-controlled scientific boundary
+is the frozen artifact and provenance inventory described below.
+
+The release includes repository source and the Git-tracked frozen evidence
+described below. It excludes raw/processed patient images and model binaries.
+See [`RELEASE_NOTES_v2.0.0.md`](RELEASE_NOTES_v2.0.0.md) for the release scope
+and delta from `v1.0.0`, [`CHANGELOG.md`](CHANGELOG.md) for release history, and
+[`CITATION.cff`](CITATION.cff) for the available software citation metadata.
 
 ## Canonical document hierarchy
 
 | Location | Canonical role |
 |---|---|
-| [`report/paper_draft.md`](report/paper_draft.md) | **Current manuscript.** Reporting audits, hypothesis links, and submission preparation must be assessed against this file. |
+| [`report/paper_draft.md`](report/paper_draft.md) | **Current, living manuscript.** Reporting audits, hypothesis links, and submission preparation must be assessed against this file. A tag records its historical state but does not freeze or version the manuscript as a publication. |
 | [`report/report.md`](report/report.md) | **Historical/full technical report.** It is preserved as a detailed project record and is not the current paper. Do not rewrite it merely to mirror the manuscript. |
 | [`docs/`](docs/) | **Analysis, methodology, decision, and audit record.** These files explain provenance and scope but do not replace the manuscript. |
 | [`results/`](results/) | **Numerical source of truth.** Manuscript prose and tables are rounded views of these generated artifacts. |
@@ -747,21 +769,39 @@ Every item in the benchmark's Definition of Done is satisfied:
 
 ## Repository verification
 
-After a reproduction or code change, run:
+The release-candidate software and committed-evidence checks are:
 
 ```powershell
-& $benchmarkPython -m pytest -q
-& $benchmarkPython -m ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py scripts/build_scientific_artifact_manifest.py
-& $benchmarkPython scripts/verify_scientific_artifacts.py
-& $benchmarkPython scripts/verify_paper_claims.py
+uv lock --check
+uv sync --locked --group dev --extra cpu
+uv run --locked --extra cpu ruff format --check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
+uv run --locked --extra cpu ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
+uv run --locked --extra cpu python -m pytest -q
+uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py
+uv run --locked --extra cpu python scripts/verify_paper_claims.py
+uv run --locked --extra cpu python -m meddet_benchmark smoke configs/smoke.yaml
 git diff --check
 ```
 
-The two verifier commands are lightweight integrity/consistency checks over
-committed evidence; they do not regenerate models or predictions. See
-`docs/REPRODUCIBILITY.md` for the complete four-level boundary and the
-phase-specific documents under `docs/` for metric, corruption, Grad-CAM, and
-inference definitions.
+Foundation CI runs these checks on Ubuntu and Windows and also applies Ruff to
+`scripts/build_scientific_artifact_manifest.py`. The two verifier commands are
+lightweight integrity/consistency checks over committed evidence; they do not
+regenerate models or predictions. Green CI therefore verifies the repository's
+declared software/evidence boundary, not full training or end-to-end scientific
+regeneration. See `docs/REPRODUCIBILITY.md` for the complete four-level boundary
+and the phase-specific documents under `docs/` for metric, corruption,
+Grad-CAM, and inference definitions.
+
+## Citation
+
+Use [`CITATION.cff`](CITATION.cff) for the software citation metadata available
+for release 2.0.0. No DOI, ORCID, venue, acceptance/publication status, final
+paper citation, or release date is asserted there because those fields are not
+yet established in authoritative project sources. This repository citation is
+not evidence that the manuscript has been submitted, accepted, or published.
+The current manuscript is [`report/paper_draft.md`](report/paper_draft.md);
+its eventual authorship and submission declarations are independent of the
+software/research-artifact release metadata.
 
 ## License
 
