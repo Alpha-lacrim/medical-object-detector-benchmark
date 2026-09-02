@@ -118,7 +118,7 @@
         },
         {
           "path": "data/splits/rsna-pneumonia-5000/test.csv",
-          "sha256": "9c9b1a71fb1340b96b7ae8f93bfa8e281ddb7ab2b9f5edcd4d1cdbd314646a6f",
+          "sha256": "6b5890343e34ae568b97d7034c29fb8fa75df43517cc3691a5f912292c2f4534",
           "availability": "committed"
         },
         {
@@ -2731,7 +2731,7 @@
     },
     {
       "path": "results/tables/gradcam_localization_summary.csv",
-      "sha256": "dbdf9869737a71d64d3d0e540ca1def2a31b5bbe2992d51e7288ae11119f9c7b",
+      "sha256": "65888889b2e2789e809d24952706947849955293079c9771e4372b5a63fcfa3e",
       "generating_script": "src/explainability/run_explainability.py",
       "generating_script_sha256": "35e0519f715b0f54a07c3fcd586db21562254d4f335639becf2c1675e9f5c297",
       "config": {
@@ -3000,7 +3000,7 @@
         },
         {
           "path": "data/splits/rsna-pneumonia-5000/test.csv",
-          "sha256": "9c9b1a71fb1340b96b7ae8f93bfa8e281ddb7ab2b9f5edcd4d1cdbd314646a6f",
+          "sha256": "6b5890343e34ae568b97d7034c29fb8fa75df43517cc3691a5f912292c2f4534",
           "availability": "committed"
         }
       ],
