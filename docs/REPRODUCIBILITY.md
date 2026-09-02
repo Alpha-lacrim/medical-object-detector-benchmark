@@ -15,6 +15,40 @@ the committed evidence snapshot. It does not train ten models, download the
 RSNA data, rerun GPU inference, or prove that every published scientific result
 has been regenerated from raw data.
 
+## Release-candidate verification
+
+Release 2.0.0 uses one version for the Python project/package and the research
+release; the immutable release identity is the exact reviewed commit referenced
+by tag `v2.0.0`. Before that tag exists, the prepared worktree is a candidate,
+not a published release.
+
+The tag also records the then-current text of the tracked
+`report/paper_draft.md`, but the manuscript is a living document rather than a
+separately versioned or release-frozen publication. It may continue to change on
+`main` after v2.0.0. The frozen scientific boundary is the artifact/provenance
+inventory verified below; `verify_paper_claims.py` checks the current manuscript
+against those sources without making the manuscript itself a frozen artifact.
+
+Run the review gate from the repository root:
+
+```powershell
+uv lock --check
+uv sync --locked --group dev --extra cpu
+uv run --locked --extra cpu ruff format --check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
+uv run --locked --extra cpu ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
+uv run --locked --extra cpu python -m pytest -q
+uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py
+uv run --locked --extra cpu python scripts/verify_paper_claims.py
+uv run --locked --extra cpu python -m meddet_benchmark smoke configs/smoke.yaml
+git diff --check
+```
+
+Foundation CI additionally checks the artifact-manifest builder with Ruff. A
+release owner must confirm that the final tag points to the exact commit for
+which CI passed. These commands prove the software/integrity boundary in the
+table above; they do not promote the run to committed-analysis, exact-inference,
+or exact-retraining reproduction.
+
 ## Machine-checkable committed evidence
 
 `results/scientific_artifact_manifest.json` is the reviewed inventory of
@@ -22,6 +56,11 @@ manuscript-critical artifacts. Each record binds the artifact SHA256 to its
 generating script and hash, config and hash, input artifact hashes, frozen
 schema, study phase, reproduction tier, and GPU/training requirements. It also
 lists result files referenced by the corresponding provenance summary.
+
+The manifest's `canonical_manuscript` field identifies the current manuscript
+used by the verification machinery. It does not assign that manuscript a
+release version or make its future prose state part of the frozen artifact
+inventory.
 
 `report/paper_claim_sources.yaml` binds central numerical manuscript claims to
 an exact CSV cell, CSV row count, JSON value, or allow-listed deterministic
