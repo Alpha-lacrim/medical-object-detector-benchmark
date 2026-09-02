@@ -55,7 +55,7 @@
   "artifacts": [
     {
       "path": "data/manifests/rsna-pneumonia-5000-audit.json",
-      "sha256": "75f08b27d4a1f1414e0a05cdbbb3d16daa0f60d844fedaa6fb3628840a473e9b",
+      "sha256": "a39c847f30bc0a499f1d7a5fe3c7a204650b77cdadc690ba78251518e9e45a40",
       "generating_script": "src/data/prepare.py",
       "generating_script_sha256": "928d619e63b43b73dfb7d43648eb4fc1acdb9f8457056a858e862d780af23cbc",
       "config": {
