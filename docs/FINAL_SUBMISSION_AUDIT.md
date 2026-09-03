@@ -4,7 +4,7 @@
 
 **Audited commit:** `9aaf414bdbab337a7c45283d4b32fe58b1e1700d` (`main`, aligned with `origin/main`)
 
-**Current manuscript:** `report/paper_draft.md`
+**Manuscript audited at that commit:** `report/paper_draft.md`
 
 **Historical technical report:** `report/report.md`
 **Audit disposition:** **NOT READY FOR SUBMISSION**
@@ -135,11 +135,12 @@ submission-ready conclusion.
   are no duplicate BibTeX keys. The audit contains no unsupported or
   wrong-attribution verdict. A fresh primary-source scope check also confirmed
   the roles of CLAIM 2024, STARD-AI, TRIPOD+AI, and DICOM Secondary Capture.
-- **Reporting hierarchy:** the reporting checklist binds to manuscript SHA-256
+- **Reporting hierarchy:** at the audited commit, the reporting checklist bound
+  to manuscript SHA-256
   `0b4cbb4e9effb1c055f0da885ba23636e7adbfd1b885504d20b9a2715943f0f5`, which
-  exactly matches `report/paper_draft.md`; it does not point to the historical
-  report. CLAIM 2024 is the primary crosswalk. STARD-AI and TRIPOD+AI are used
-  only by analogy and no compliance claim is made.
+  exactly matched `report/paper_draft.md` at that commit; it did not point to
+  the historical report. CLAIM 2024 was the primary crosswalk. STARD-AI and
+  TRIPOD+AI were used only by analogy and no compliance claim was made.
 - **README/document hierarchy:** README explicitly identifies
   `report/paper_draft.md` as the current manuscript and `report/report.md` as the
   historical technical report. All 30 referenced config files and all 21

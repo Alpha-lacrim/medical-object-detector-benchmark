@@ -42,9 +42,11 @@ clinically validated operating point.
 
 ## Protocol
 
-This is a threshold-free comparison in the operating-point-selection sense: it does not use
-the test set to choose one deployment threshold. It reparameterizes every existing Batch 10
-test threshold by two quantities already produced by the canonical matcher:
+This comparison does not use the test set to choose one deployment operating
+threshold. It reparameterizes every existing Batch 10 test threshold by two
+quantities already produced by the canonical matcher. The comparison remains
+conditional on the retained predictions, the evaluated 0.01--0.99 grid, and
+the common matching/post-processing protocol:
 
 - sensitivity is micro-aggregated recall at match IoU 0.50; and
 - average false positives per image is the total false-positive detection count divided by

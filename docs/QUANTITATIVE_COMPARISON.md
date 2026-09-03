@@ -48,7 +48,7 @@ run-level provenance and checkpoint hash. The full-test prediction pass also
 records synchronized inference seconds and FPS as an audit measure.
 
 FLOPs are implementation estimates rather than hardware timings. Unsupported
-operations differ by architecture, so latency/FPS are the deployment-relevant
+operations differ by architecture, so latency/FPS are the runtime-relevant
 efficiency measures. Faster R-CNN preprocessing/resizing remains inside its
 model forward, while the YOLO profile performs resize/tensor conversion before
 the timed forward-plus-NMS interval; this inherited framework asymmetry is
@@ -199,15 +199,19 @@ convergence**. The run remains in every unconditional all-attempt endpoint;
 only its mathematically undefined matched-only IoU/Dice are omitted.
 
 The defensible trade-off is detection quality versus computational cost.
-YOLO11s has about 3.0 times the measured throughput, 78% fewer parameters, and
-about 21 times fewer estimated registered operations, while Faster R-CNN has
-the stronger precision-recall frontier and higher sensitivity at every
-reported FROC budget. The accuracy-efficiency Pareto analysis therefore finds
-no strict cross-objective dominance. Phase 8's five-attempt patient-cluster
-tests retain Holm-corrected evidence for precision, recall, F1, and both AP
-differences. Conditional IoU/Dice remain non-significant and use four complete
-seed pairs. The fixed-threshold precision result does not establish a frontier
-advantage. See `THRESHOLD_ANALYSIS.md`, `PARETO_ANALYSIS.md`,
+Under the documented detector-specific profiling procedure on the measured
+laptop, YOLO11s has about 3.0 times the measured throughput, 78% fewer
+parameters, and about 21 times fewer estimated registered operations. Faster
+R-CNN has the stronger precision-recall result over the retained predictions
+and, within the evaluated 0.01--0.99 score sweep, higher observed sensitivity
+at every reported FROC budget. The accuracy-efficiency Pareto analysis
+therefore finds no strict cross-objective dominance. Phase 8's five-attempt
+primary training-procedure intervals were wholly positive for recall, F1, and
+both AP differences but crossed zero for precision. Separately, the
+checkpoint-conditional Holm-adjusted permutation result favored YOLO11s for
+precision at 0.25; conditional IoU/Dice were inconclusive and used four
+complete seed pairs. The fixed-threshold precision result does not establish a
+frontier advantage. See `THRESHOLD_ANALYSIS.md`, `PARETO_ANALYSIS.md`,
 `FROC_ANALYSIS.md`, and `STATISTICAL_ANALYSIS.md`; the first three preserve the
 pre-specified n=3 artifacts and separately label their n=5 sensitivities.
 

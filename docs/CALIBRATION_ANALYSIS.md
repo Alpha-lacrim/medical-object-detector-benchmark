@@ -8,6 +8,10 @@ The run ranges were `0.0266--0.0403` and `0.0714--0.1313`, respectively. This
 is a descriptive comparison of ten frozen runs; no patient- or run-level
 inferential analysis was added for D-ECE.
 
+D-ECE is a calibration-error measure: under the same binning, support,
+matching, and prediction-floor protocol, a lower value denotes lower observed
+calibration error. It is not a score for which a larger value is better.
+
 All configured runs went through the same code path. No run was excluded or
 handled specially. The largest observed YOLO11s value was `0.13130` for the run
 with seed 271. That run contributed all 962 detections available at the 0.001

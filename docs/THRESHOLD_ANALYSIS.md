@@ -43,7 +43,10 @@ mean AP is 0.3042 +/- 0.0189 versus 0.1626 +/- 0.0162 at IoU 0.50 and
 0.0995 +/- 0.0067 versus 0.0542 +/- 0.0060 across IoU 0.50:0.95. The AP gaps
 are slightly smaller than at n=3, so those quantitative margins are classified
 as **weakened**, even though the AP@0.5 recall-position count strengthens from
-96 to 97 and the threshold-free ordering remains unchanged.
+96 to 97 and the COCO AP ordering remains unchanged. COCO AP does not depend
+on the selected single operating threshold, but it remains conditional on the
+frozen 0.001 retained-prediction floor and common evaluation/post-processing
+protocol.
 
 The defensible conclusion is therefore narrower than "distinct operating regimes." The two
 models have a score-scale/selectivity mismatch at the same nominal threshold, and YOLO11s

@@ -131,3 +131,36 @@ def test_verify_claims_requires_one_unique_manuscript_match(tmp_path: Path) -> N
 
     with pytest.raises(PaperClaimVerificationError, match="expected one match"):
         verify_claims(manifest_path, project_root=tmp_path)
+
+
+def test_verify_claims_enforces_required_and_forbidden_semantic_guards(tmp_path: Path) -> None:
+    manifest_path, manifest = _claim_fixture(tmp_path)
+    manifest["manuscript_semantic_guards"] = [
+        {
+            "id": "required_context",
+            "required_regex": r"Mean corrupted value:\s+3",
+        },
+        {
+            "id": "forbidden_overclaim",
+            "forbidden_regex": r"(?i:threshold-free\s+ranking)",
+        },
+    ]
+    _write(manifest_path, yaml.safe_dump(manifest, sort_keys=False))
+
+    assert verify_claims(manifest_path, project_root=tmp_path) == 3
+
+    paper = tmp_path / "report/paper.md"
+    _write(paper, paper.read_text(encoding="utf-8") + "Threshold-free ranking.\n")
+    with pytest.raises(PaperClaimVerificationError, match="forbidden_overclaim"):
+        verify_claims(manifest_path, project_root=tmp_path)
+
+
+def test_verify_claims_rejects_missing_required_semantic_guard(tmp_path: Path) -> None:
+    manifest_path, manifest = _claim_fixture(tmp_path)
+    manifest["manuscript_semantic_guards"] = [
+        {"id": "missing_context", "required_regex": r"external validation cohort"}
+    ]
+    _write(manifest_path, yaml.safe_dump(manifest, sort_keys=False))
+
+    with pytest.raises(PaperClaimVerificationError, match="missing_context"):
+        verify_claims(manifest_path, project_root=tmp_path)

@@ -353,9 +353,10 @@ sensitivity evaluations of those frozen rules, not n=5 threshold selection.
 - Historical filenames without an n=5 suffix remain n=3 and are never
   overwritten or relabeled. Their values remain available for direct
   n=3-versus-n=5 comparison.
-- Seed 271 contributes nonzero threshold-free AP and low-threshold FROC points,
-  but defined zero precision/recall/F1 at score 0.25 and at the frozen YOLO11s
-  threshold 0.05. It is not filtered because of those zeros.
+- Seed 271 contributes nonzero COCO AP from predictions retained down to the
+  frozen 0.001 floor and low-threshold FROC points, but defined zero
+  precision/recall/F1 at score 0.25 and at the frozen YOLO11s threshold 0.05.
+  It is not filtered because of those zeros.
 - The threshold-selection sample size remains n=3 even where test evaluation
   uses n=5. No later F-beta or hypothetical-loss threshold enters these
   analyses, consistent with D-004 and D-006.

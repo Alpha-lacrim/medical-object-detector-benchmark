@@ -39,6 +39,36 @@ def test_froc_n5_path_contains_all_runs_including_seed_271() -> None:
     assert all(row["sensitivity"] == 0 for row in yolo_271 if row["threshold"] >= 0.05)
 
 
+def test_yolo_high_budget_plateau_is_the_observed_lower_grid_boundary() -> None:
+    config = load_froc_config("configs/froc_n5_sensitivity.yaml")
+    rows, _image_count, _summary = load_froc_rows(config)
+
+    aggregate, per_seed = select_froc_operating_points(
+        rows,
+        config.analysis.fp_per_image_budgets,
+        tolerance=config.analysis.numeric_tolerance,
+    )
+
+    high_budgets = {0.5, 1.0, 2.0}
+    yolo_seed_rows = [
+        row
+        for row in per_seed
+        if row["detector"] == "yolo11s" and row["fp_per_image_budget"] in high_budgets
+    ]
+    yolo_aggregate_rows = [
+        row
+        for row in aggregate
+        if row["detector"] == "yolo11s" and row["fp_per_image_budget"] in high_budgets
+    ]
+
+    assert len(yolo_seed_rows) == 15
+    assert {row["selected_threshold"] for row in yolo_seed_rows} == {0.01}
+    assert len(yolo_aggregate_rows) == 3
+    assert {row["selected_threshold_min"] for row in yolo_aggregate_rows} == {0.01}
+    assert {row["selected_threshold_max"] for row in yolo_aggregate_rows} == {0.01}
+    assert len({row["sensitivity"] for row in yolo_aggregate_rows}) == 1
+
+
 def test_froc_budget_selection_is_non_interpolated_and_seed_specific() -> None:
     rows = [
         {

@@ -206,6 +206,56 @@ def _artifact_paths(manifest_path: Path) -> set[str]:
     }
 
 
+def _verify_manuscript_semantic_guards(
+    guards: Any, manuscript_text: str, *, errors: list[str]
+) -> None:
+    """Apply declarative required/forbidden regex guards to manuscript prose."""
+
+    if guards is None:
+        return
+    if not isinstance(guards, list):
+        errors.append("manuscript_semantic_guards must be a list")
+        return
+
+    guard_ids: list[str] = []
+    for index, guard in enumerate(guards):
+        label = f"manuscript_semantic_guards[{index}]"
+        if not isinstance(guard, dict):
+            errors.append(f"{label} must be an object")
+            continue
+        guard_id = guard.get("id")
+        if not isinstance(guard_id, str) or not guard_id:
+            errors.append(f"{label}.id must be a non-empty string")
+            guard_id = label
+        guard_ids.append(guard_id)
+
+        required = guard.get("required_regex")
+        forbidden = guard.get("forbidden_regex")
+        if (required is None) == (forbidden is None):
+            errors.append(
+                f"manuscript guard {guard_id} must define exactly one of "
+                "required_regex or forbidden_regex"
+            )
+            continue
+        pattern = required if required is not None else forbidden
+        if not isinstance(pattern, str) or not pattern:
+            errors.append(f"manuscript guard {guard_id} regex must be a non-empty string")
+            continue
+        try:
+            matched = re.search(pattern, manuscript_text, flags=re.MULTILINE | re.DOTALL)
+        except re.error as error:
+            errors.append(f"manuscript guard {guard_id} has invalid regex: {error}")
+            continue
+        if required is not None and matched is None:
+            errors.append(f"manuscript guard {guard_id} required pattern was not found")
+        if forbidden is not None and matched is not None:
+            errors.append(f"manuscript guard {guard_id} forbidden pattern was found")
+
+    duplicates = sorted({guard_id for guard_id in guard_ids if guard_ids.count(guard_id) > 1})
+    if duplicates:
+        errors.append(f"duplicate manuscript semantic guard ids: {', '.join(duplicates)}")
+
+
 def verify_claims(manifest_path: Path, *, project_root: Path | None = None) -> int:
     """Verify one claim manifest and return its checked claim count."""
 
@@ -226,6 +276,9 @@ def verify_claims(manifest_path: Path, *, project_root: Path | None = None) -> i
     except (ValueError, OSError, UnicodeError) as error:
         errors.append(f"cannot load manuscript: {error}")
         manuscript_text = ""
+    _verify_manuscript_semantic_guards(
+        manifest.get("manuscript_semantic_guards"), manuscript_text, errors=errors
+    )
     scientific_manifest_value = manifest.get("scientific_artifact_manifest")
     try:
         scientific_manifest_path = _relative_path(
@@ -337,7 +390,10 @@ def main(argv: list[str] | None = None) -> int:
         for item in error.errors:
             print(f"- {item}", file=sys.stderr)
         return 1
-    print(f"Paper claim verification passed: {count} numerical claims.")
+    print(
+        f"Paper claim verification passed: {count} numerical claims and all configured "
+        "semantic guards."
+    )
     return 0
 
 

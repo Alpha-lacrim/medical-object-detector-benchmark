@@ -68,6 +68,41 @@ def test_unified_metrics_include_conditional_iou_and_dice() -> None:
     assert first["coco"]["ap50"] == pytest.approx(1)
 
 
+def test_coco_ap_uses_retained_predictions_below_the_operating_threshold() -> None:
+    targets = [
+        ImageTarget(
+            image_id="case.png",
+            image_size=(10, 10),
+            boxes_xyxy=[[0, 0, 4, 4]],
+            labels=[1],
+        )
+    ]
+    predictions = [
+        ImagePrediction(
+            image_id="case.png",
+            image_size=(10, 10),
+            boxes_xyxy=[[0, 0, 4, 4]],
+            labels=[1],
+            scores=[0.01],
+        )
+    ]
+    settings = EvaluationSettings(
+        score_threshold=0.25,
+        match_iou_threshold=0.5,
+        coco_minimum_score=0.001,
+        nms_iou_threshold=0.5,
+        max_detections=100,
+    )
+
+    metrics = evaluate_prediction_records(
+        predictions, targets, category_names={1: "opacity"}, settings=settings
+    )
+
+    assert metrics["operating_point"]["overall"]["prediction_count"] == 0
+    assert metrics["coco"]["prediction_count"] == 1
+    assert metrics["coco"]["ap50"] == pytest.approx(1)
+
+
 def test_aggregation_uses_sample_standard_deviation() -> None:
     rows = []
     for detector, values in (

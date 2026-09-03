@@ -352,8 +352,8 @@ The secondary permutation analysis swaps detector labels once per patient
 group and conditions on the observed checkpoints. Its Holm-adjusted p-values
 do not test training-procedure variability. In particular, fixed-threshold
 precision has a primary interval crossing zero despite a small
-checkpoint-conditional p-value; the latter cannot be used as robust evidence
-of a training-procedure difference. The historical paired-seed and superseded
+checkpoint-conditional p-value; the latter cannot be used to support a
+training-procedure difference. The historical paired-seed and superseded
 image-level outputs remain explicit sensitivity/audit archives. All seven
 checkpoint-conditional clean p-values remain in one Holm family; the primary
 95% intervals are pointwise rather than simultaneous. Patient clustering handles

@@ -47,8 +47,7 @@ crosses zero when observed checkpoints differ consistently across patients but
 trained-run variability is appreciable. That is exactly the precision result:
 the primary interval is `[-0.2423, 0.0553]`, while the secondary
 checkpoint-conditional Holm p-value is `0.0020`. Neither arithmetic result is
-wrong, but the p-value is not evidence that the training-procedure difference
-is robust.
+wrong, but the p-value does not establish a training-procedure difference.
 
 ## Seed-block audit
 
@@ -165,7 +164,7 @@ the secondary inferential target.
 
 Under the primary training-procedure estimand, Faster R-CNN's recall, F1, and
 both AP differences remain wholly above zero. Precision does not: its interval
-crosses zero and is not robust evidence of a training-procedure difference,
+crosses zero and does not support a training-procedure difference,
 even though the observed-checkpoint permutation favors YOLO11s at the fixed
 threshold. Conditional IoU and Dice also cross zero and remain descriptive
 matched-detection comparisons.

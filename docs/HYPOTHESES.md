@@ -38,11 +38,11 @@ This question concerns two disclosed implementations under one controlled protoc
 
 ## H2 - A shared threshold does not define a shared operating regime
 
-**Hypothesis.** Applying the same nominal score threshold to both detectors will not align their selectivity. YOLO11s can appear more precise at the shared score threshold 0.25 while Faster R-CNN retains the stronger common-evaluator precision-recall frontier and higher sensitivity at each reported false-positive-per-image budget.
+**Hypothesis.** Applying the same nominal score threshold to both detectors will not align their selectivity. YOLO11s can appear more precise at the shared score threshold 0.25 while Faster R-CNN retains the stronger common-evaluator precision-recall result over the retained predictions and higher observed sensitivity at each reported false-positive-per-image budget within the evaluated 0.01--0.99 score sweep.
 
-**Operational check.** Three signatures must occur together: (1) the frozen score-0.25 comparison shows higher YOLO11s precision but lower YOLO11s recall; (2) the official AP@0.5 precision-recall curve favors Faster R-CNN at more recall positions, with no position favoring YOLO11s; and (3) Faster R-CNN sensitivity is higher at every predeclared FROC budget of 0.125, 0.25, 0.5, 1, and 2 false positives per image.
+**Operational check.** Three signatures must occur together: (1) the frozen score-0.25 comparison shows higher YOLO11s precision but lower YOLO11s recall; (2) the official AP@0.5 precision-recall curve favors Faster R-CNN at more recall positions, with no position favoring YOLO11s; and (3) within the evaluated score sweep, Faster R-CNN sensitivity is higher at every predeclared FROC budget of 0.125, 0.25, 0.5, 1, and 2 false positives per image.
 
-**Existing evidence.** Check [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv), [the n=5 precision-recall figure](../results/figures/precision_recall_curves_n5_sensitivity.png), [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv), and [the n=5 FROC figure](../results/figures/froc_curves_n5_sensitivity.png), with the original unsuffixed n=3 files retained as provenance. The sensitivity supports H2: Faster R-CNN is higher at 97 of 101 AP@0.5 recall positions, four are tied, and it has higher sensitivity at all five reported FROC budgets.
+**Existing evidence.** Check [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv), [the n=5 precision-recall figure](../results/figures/precision_recall_curves_n5_sensitivity.png), [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv), and [the n=5 FROC figure](../results/figures/froc_curves_n5_sensitivity.png), with the original unsuffixed n=3 files retained as provenance. The sensitivity supports H2: Faster R-CNN is higher at 97 of 101 AP@0.5 recall positions, four are tied, and within the evaluated 0.01--0.99 score sweep it has higher observed sensitivity at all five reported FROC budgets.
 
 **Boundary.** This is a five-run test-side sensitivity of a historical n=3 analysis, not evidence of probabilistic miscalibration or n=5 validation selection. The YOLO11s test-sweep FROC curve reaches the lower threshold boundary at 0.01, so its plateau is not a claimed global asymptote. Seed 271 is retained exactly as observed.
 
@@ -98,7 +98,9 @@ the [support table](../results/tables/calibration_support_v2.csv), and the
 The equal-run descriptive means are `0.0320 +/- 0.0058` for Faster R-CNN and
 `0.0990 +/- 0.0232` for YOLO11s. The largest observed YOLO11s value is `0.1313` for seed
 271; its mean score is `0.00538` while `0.15073` of its 962 retained detections are matched
-true positives. That observation is reported after analysis, not encoded as a special case.
+true positives. D-ECE is an error measure, so the lower Faster R-CNN value
+denotes lower descriptive calibration error under this fixed protocol. That
+observation is reported after analysis, not encoded as a special case.
 
 **Boundary.** D-ECE measures precision calibration conditional on the emitted prediction
 population; missed targets have no confidence and therefore do not enter this black-box

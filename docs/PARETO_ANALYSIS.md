@@ -21,15 +21,22 @@ one frontier.
 ## Protocol and dominance rule
 
 The figure joins the six frozen seed-level accuracy rows to their corresponding compute
-CSVs and cross-checks mAP@0.5:0.95 means against `detector_comparison.csv`. Because mAP is
-threshold-independent, panels (a) and (c) use the Phase 5 seed values directly; panels (b)
-and (d) use `selected_operating_points_per_seed.csv`. The selection rule maximizes mean F1
-over the three validation seeds, selecting 0.69 for Faster R-CNN and 0.05 for YOLO11s; each
-frozen threshold is then evaluated once on the test bundles. Test results do not influence
-the threshold choice. A detector is marked strictly Pareto-dominant only when every one of
-its seed points is better than every seed of the other detector on both directed axes;
+CSVs and cross-checks mAP@0.5:0.95 means against `detector_comparison.csv`. Because mAP does
+not depend on the selected single operating threshold, panels (a) and (c) use the Phase 5
+seed values directly; AP nevertheless remains conditional on the retained predictions and
+common evaluation/post-processing protocol. Panels (b) and (d) use
+`selected_operating_points_per_seed.csv`. The selection rule maximizes mean F1 over the
+three validation seeds, selecting 0.69 for Faster R-CNN and 0.05 for YOLO11s; each frozen
+threshold is then evaluated once on the test bundles. Test results do not influence the
+threshold choice. A detector is marked strictly Pareto-dominant only when every one of its
+seed points is better than every seed of the other detector on both directed axes;
 mean-only ordering is not sufficient. This correction changes only the recall panels and
 their annotations: the AP data and compute axes in panels (a) and (c) are unchanged.
+
+FPS and latency are implementation-specific measurements on the stated laptop/software
+stack. Faster R-CNN resizing occurs inside its timed model forward, whereas YOLO tensor
+resizing occurs before the timed forward-plus-NMS region; the compute axes therefore do not
+define an architecture-family throughput law.
 
 YOLO11s seed 271 is intentionally absent from the historical figure. Although its training
 curves converged normally, its maximum test confidence is 0.0412735, so it emits zero
@@ -88,7 +95,8 @@ review.
 
 The n=5 point table has exactly one row per detector/run. Each row joins:
 
-- that run's threshold-free AP@0.5:0.95;
+- that run's COCO AP@0.5:0.95 from the retained prediction population and
+  common evaluation protocol;
 - that run's test recall at the detector threshold selected from the original
   three validation runs (0.69 or 0.05); and
 - that same run's measured FPS/latency and recorded parameter/GFLOP values.

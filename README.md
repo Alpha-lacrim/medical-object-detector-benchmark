@@ -1,9 +1,10 @@
 # Medical Object Detector Benchmark
 
-This repository is a controlled comparison of Faster R-CNN and YOLO11s on the
-RSNA Pneumonia Detection Challenge. It measures clean detection performance,
-compute, common-corruption robustness, Grad-CAM localization, and paired
-statistical uncertainty under one patient-safe data and evaluation protocol.
+This repository is a controlled, multi-axis benchmark of two disclosed Faster
+R-CNN and YOLO11s pipelines on a patient-disjoint internal subset of the RSNA
+Pneumonia Detection Challenge. It characterizes clean detection performance,
+operating points, calibration, compute, common-corruption robustness, Grad-CAM
+localization, and statistical uncertainty under one common evaluator.
 
 The documented benchmark experiments are complete, while the manuscript remains
 a living document. This is a retrospective benchmark, not a clinical device or
@@ -76,12 +77,13 @@ localization inference uses the four complete seed pairs 17, 42, 137, and 314.
 All other clean endpoints retain all five attempted seeds.
 
 The defensible trade-off is detection quality versus implementation-specific
-computational cost. Across all five seeds, YOLO11s delivers
-60.29 ± 12.62 FPS versus 20.28 ± 5.62, with 9.43 M parameters versus
-43.26 M. The n=5 FROC sensitivity gives Faster R-CNN higher sensitivity at
-every reported false-positive budget, and neither detector strictly dominates
-the n=5 accuracy-efficiency Pareto panels. Original n=3 artifacts remain
-unchanged as historical/prespecified provenance.
+computational cost. Under the documented detector-specific profiling procedure
+on the measured laptop, YOLO11s achieved 60.29 ± 12.62 FPS versus
+20.28 ± 5.62, with 9.43 M parameters versus 43.26 M. Within the evaluated
+0.01--0.99 score sweep, the n=5 FROC sensitivity gives Faster R-CNN higher
+observed sensitivity at every reported false-positive budget, and neither
+detector strictly dominates the n=5 accuracy-efficiency Pareto panels. Original
+n=3 artifacts remain unchanged as historical/prespecified provenance.
 
 On the seed-17 300-image common-corruption sample, mean mAP@0.5:0.95 retention
 is 0.7638 for Faster R-CNN and 0.7091 for YOLO11s. Both detectors have weak
@@ -334,13 +336,13 @@ the n=5 PR/F1 figures, and
 `results/logs/phase35_operating_regime_n5/threshold_summary.json`. It does not
 overwrite any unsuffixed n=3 artifact.
 
-### 5b. Select final operating thresholds on validation
+### 5b. Select primary single operating thresholds on validation
 
 The original training runs retained validation aggregates but not the raw scored
 detections needed for a threshold sweep. The frozen n=3 workflow materializes
 those records from the six immutable best checkpoints for seeds 17, 42, and 137
-on the 750-image validation split, then performs selection and the final test
-application offline:
+on the 750-image validation split, then performs selection and the one-shot
+test application offline:
 
 ```powershell
 & $benchmarkPython -m src.evaluate_threshold_selection --config configs/threshold_selection.yaml --mode preflight
@@ -750,10 +752,11 @@ Every item in the benchmark's Definition of Done is satisfied:
   permutation p-values condition on the observed checkpoints. Raw-difference
   effects, Holm correction, non-estimable rows, and the reason McNemar is
   inapplicable are explicit.
-- [x] **Scenario-grounded discussion.** Report Section 11 weighs measured
-  accuracy, robustness, interpretability, and compute for high-sensitivity
-  retrospective screening, constrained point-of-care assistance, and
-  autonomous use.
+- [x] **Scope-grounded discussion.** Historical report Section 11 addresses
+  the course brief's hypothetical screening and constrained-assistance
+  scenarios while rejecting autonomous use. The current paper limits its
+  interpretation to the measured benchmark dimensions and makes no
+  clinical-utility recommendation.
 - [x] **Honest consolidated limitations.** `docs/LIMITATIONS.md` covers the
   single dataset, five-seed clean headline scope with four complete conditional
   localization pairs, seed-271 confidence/output-score instability,

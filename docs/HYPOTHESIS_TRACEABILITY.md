@@ -32,18 +32,19 @@ convert the hypothesis into a prospective or confirmatory test.
 > **Exact wording:** Applying the same nominal score threshold to both
 > detectors will not align their selectivity. YOLO11s can appear more precise
 > at the shared score threshold 0.25 while Faster R-CNN retains the stronger
-> common-evaluator precision-recall frontier and higher sensitivity at each
-> reported false-positive-per-image budget.
+> common-evaluator precision-recall result over the retained predictions and
+> higher observed sensitivity at each reported false-positive-per-image budget
+> within the evaluated 0.01--0.99 score sweep.
 
 | Field | Trace |
 |---|---|
 | Status | Retrospective, result-linked hypothesis; not preregistered. |
-| Operational endpoint | Three signatures together: higher YOLO11s precision but lower recall at score 0.25; Faster R-CNN higher at more official AP@0.5 recall positions with none favoring YOLO11s; Faster R-CNN higher sensitivity at each FROC budget 0.125, 0.25, 0.5, 1, and 2 FP/image. |
+| Operational endpoint | Three signatures together: higher YOLO11s precision but lower recall at score 0.25; Faster R-CNN higher at more official AP@0.5 recall positions with none favoring YOLO11s; within the evaluated 0.01--0.99 score sweep, Faster R-CNN higher sensitivity at each FROC budget 0.125, 0.25, 0.5, 1, and 2 FP/image. |
 | Dataset/split | Same 750-image/323-patient internal-testing split; frozen exploratory threshold/PR/FROC analyses. |
 | Seed count | Principal internal-testing sensitivity: five runs per detector, seeds 17, 42, 137, 271, and 314. Historical/prespecified provenance: three runs per detector. |
 | Source artifacts | [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv); [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv); figures [`precision_recall_curves_n5_sensitivity.png`](../results/figures/precision_recall_curves_n5_sensitivity.png) and [`froc_curves_n5_sensitivity.png`](../results/figures/froc_curves_n5_sensitivity.png); original unsuffixed n=3 artifacts retained. |
 | Manuscript section | [`paper_draft.md` §§4.2 and 5.1](../report/paper_draft.md#42-operating-regime-sensitivity-internal-testing-n5-threshold-selection-n3). |
-| Result status | **Supported retrospectively and descriptively:** 97/101 AP@0.5 recall positions favor Faster R-CNN, four tie, and all five n=5 FROC budgets favor Faster R-CNN sensitivity. The complete n=3-versus-n=5 table reports weakened as well as strengthened margins. |
+| Result status | **Supported retrospectively and descriptively:** 97/101 AP@0.5 recall positions favor Faster R-CNN, four tie, and within the evaluated score sweep all five n=5 FROC budgets favor Faster R-CNN sensitivity. The complete n=3-versus-n=5 table reports weakened as well as strengthened margins. |
 | Multiplicity | No inferential multiplicity procedure applies to the descriptive curve-position counts and predeclared FROC budgets. The score-0.25 clean endpoint p-values are part of the separate seven-endpoint Holm family, not a test of the whole H2 pattern. |
 | Limitations | Exploratory n=5 internal-testing sensitivity of historical n=3 analysis; threshold selection remains n=3; no probabilistic-calibration inference; YOLO11s reaches the 0.01 lower threshold boundary; no clinical operating point or external testing. |
 

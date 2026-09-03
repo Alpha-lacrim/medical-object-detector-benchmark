@@ -2,6 +2,25 @@ schema_version: 1
 manuscript: report/paper_draft.md
 scientific_artifact_manifest: results/scientific_artifact_manifest.json
 
+# These bounded prose guards complement the numerical claim bindings below.
+# They protect implementation-sensitive qualifications without freezing whole
+# sentences or historical documentation outside the current manuscript.
+manuscript_semantic_guards:
+  - id: no_threshold_free_ranking
+    forbidden_regex: '(?i:\bthreshold-free\s+ranking\b)'
+
+  - id: ap_is_bounded_by_retained_predictions
+    required_regex: 'COCO AP ranking,[^.]{0,120}does\s+not depend on the selected single operating threshold[^.]{0,180}retained prediction floor[^.]{0,120}common evaluation/post-processing'
+
+  - id: d_ece_is_named_calibration_error
+    required_regex: 'Detection-specific calibration error was descriptively\s+higher for YOLO11s\s+\(mean D-ECE'
+
+  - id: froc_plateau_is_not_a_global_asymptote
+    required_regex: 'YOLO11s\s+plateaued.{0,400}0\.01 lower sweep boundary.{0,400}plateau is a grid boundary, not a\s+global asymptote'
+
+  - id: detector_specific_timer_boundary_is_disclosed
+    required_regex: 'Faster R-CNN\s+resizing occurred inside its timed forward, whereas YOLO tensor resizing\s+occurred before timed forward-plus-NMS'
+
 # Every regex must select exactly one manuscript value. Absolute tolerances encode
 # the stated decimal rounding; approximate prose claims use a deliberately wider
 # tolerance and a calculation over frozen source rows.
@@ -254,7 +273,7 @@ claims:
     description: Five-run descriptive Faster R-CNN detection ECE.
     manuscript:
       section: Calibration
-      regex: 'Faster R-CNN mean D-ECE was (?P<value>\d+\.\d+) \+/- 0\.0058'
+      regex: 'mean D-ECE \(calibration error; lower is better under the\s+fixed protocol\) was (?P<value>\d+\.\d+) \+/- 0\.0058 for Faster R-CNN'
     source:
       kind: csv_cell
       path: results/tables/calibration_summary_v2.csv
@@ -267,7 +286,7 @@ claims:
     description: Five-run descriptive YOLO11s detection ECE.
     manuscript:
       section: Calibration
-      regex: 'compared with\s+(?P<value>\d+\.\d+) \+/- 0\.0232 for YOLO11s'
+      regex: 'for Faster R-CNN and\s+(?P<value>\d+\.\d+) \+/- 0\.0232 for YOLO11s'
     source:
       kind: csv_cell
       path: results/tables/calibration_summary_v2.csv
@@ -280,7 +299,7 @@ claims:
     description: YOLO11s-to-Faster R-CNN five-run throughput ratio.
     manuscript:
       section: Abstract
-      regex: 'YOLO11s delivered approximately (?P<value>\d+)-fold throughput'
+      regex: 'profiling procedure on the\s+measured laptop,\s+YOLO11s achieved approximately\s+(?P<value>\d+)-fold higher measured\s+throughput'
     source:
       kind: calculation
       operation: divide
@@ -300,7 +319,7 @@ claims:
     description: YOLO11s parameter reduction relative to Faster R-CNN.
     manuscript:
       section: Abstract
-      regex: '3-fold throughput, (?P<value>\d+)%\s+fewer parameters'
+      regex: '3-fold higher measured\s+throughput,\s+(?P<value>\d+)%\s+fewer parameters'
     source:
       kind: calculation
       operation: percent_reduction
@@ -320,7 +339,7 @@ claims:
     description: Faster R-CNN-to-YOLO11s registered-operation ratio.
     manuscript:
       section: Abstract
-      regex: 'about (?P<value>\d+)-fold fewer registered operations'
+      regex: 'about (?P<value>\d+)-fold\s+fewer estimated registered\s+operations'
     source:
       kind: calculation
       operation: divide

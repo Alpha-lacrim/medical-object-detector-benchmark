@@ -114,7 +114,7 @@ the immutable `results.csv`. The summary records the benchmark-approved
 training source identity separately from the corrected reporting-source
 identity.
 
-## Research-track seed expansion and seed-271 failure analysis
+## Research-track seed expansion and seed-271 score-scale analysis
 
 Batch 16 later repeated the frozen, augmentation-disabled training recipe for seeds 271 and
 314, in addition to the accepted seeds 17, 42, and 137. This produced five completed YOLO11s

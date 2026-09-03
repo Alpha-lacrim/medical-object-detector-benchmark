@@ -347,9 +347,9 @@ unchanged, then applies the selected thresholds to all five frozen test bundles
 and recomputes separately labeled n=5 precision-recall, FROC, and Pareto
 sensitivities. Seed 271 is retained exactly as observed: its maximum test score
 is 0.0412735, so it emits zero detections at both 0.25 and the selected YOLO
-threshold 0.05 while retaining nonzero threshold-free AP and low-threshold FROC
-ranking. The complete test sweep remains descriptive, not a test-set threshold
-choice. See
+threshold 0.05 while retaining nonzero COCO AP from predictions retained down
+to the frozen 0.001 floor and low-threshold FROC ranking. The complete test
+sweep remains descriptive, not a test-set threshold choice. See
 [THRESHOLD_ANALYSIS.md](THRESHOLD_ANALYSIS.md) and
 [FROC_ANALYSIS.md](FROC_ANALYSIS.md).
 
