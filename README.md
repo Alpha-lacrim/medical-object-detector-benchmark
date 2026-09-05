@@ -808,7 +808,7 @@ software/research-artifact release metadata.
 
 ## License
 
-Copyright (C) 2026 Pouyan Delivandani.
+Copyright (C) 2026 Pouyan Delivandani, Mohammadamin Haji-Alirezaei.
 
 Except where otherwise noted, repository-authored software and documentation
 are licensed under the [GNU Affero General Public License, version 3.0
