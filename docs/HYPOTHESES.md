@@ -13,8 +13,9 @@ The evidence has four distinct scopes that must not be merged:
 
 - The clean unified comparison uses all five predeclared attempts for precision, recall, F1, AP@0.5, and AP@0.5:0.95. Conditional IoU and Dice use four complete seed pairs (`n=4`) for inference because YOLO11s seed 271 has no fixed-threshold true positive.
 - The validation-selected thresholds remain the frozen three-seed choices. Precision-recall,
-  FROC, fixed-threshold application, and Pareto now also have a five-run frozen-bundle
-  sensitivity; the original unsuffixed n=3 artifacts remain unchanged as provenance.
+  fixed-threshold application, and Pareto have five-run frozen-bundle sensitivities; FROC
+  now uses a five-run observed exact-score frontier. The historical n=3 and n=5 grid
+  artifacts remain unchanged as provenance.
 - Robustness and Grad-CAM artifacts use only the primary seed-17 checkpoints on the fixed 300-image sample.
 - Detection calibration uses all five seeds per detector and every frozen post-NMS test
   prediction retained at the 0.001 bundle floor. It remains distinct from both the historical
@@ -38,13 +39,13 @@ This question concerns two disclosed implementations under one controlled protoc
 
 ## H2 - A shared threshold does not define a shared operating regime
 
-**Hypothesis.** Applying the same nominal score threshold to both detectors will not align their selectivity. YOLO11s can appear more precise at the shared score threshold 0.25 while Faster R-CNN retains the stronger common-evaluator precision-recall result over the retained predictions and higher observed sensitivity at each reported false-positive-per-image budget within the evaluated 0.01--0.99 score sweep.
+**Hypothesis.** Applying the same nominal score threshold to both detectors will not align their selectivity. YOLO11s can appear more precise at the shared score threshold 0.25 while Faster R-CNN retains the stronger common-evaluator precision-recall result over the retained predictions and higher observed sensitivity at each prespecified false-positive-per-image operating budget on the observed exact-score frontier.
 
-**Operational check.** Three signatures must occur together: (1) the frozen score-0.25 comparison shows higher YOLO11s precision but lower YOLO11s recall; (2) the official AP@0.5 precision-recall curve favors Faster R-CNN at more recall positions, with no position favoring YOLO11s; and (3) within the evaluated score sweep, Faster R-CNN sensitivity is higher at every predeclared FROC budget of 0.125, 0.25, 0.5, 1, and 2 false positives per image.
+**Operational check.** Three signatures must occur together: (1) the frozen score-0.25 comparison shows higher YOLO11s precision but lower YOLO11s recall; (2) the official AP@0.5 precision-recall curve favors Faster R-CNN at more recall positions, with no position favoring YOLO11s; and (3) on the observed exact-score frontier, Faster R-CNN sensitivity is higher at every prespecified FROC budget of 0.125, 0.25, 0.5, 1, and 2 false positives per image.
 
-**Existing evidence.** Check [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv), [the n=5 precision-recall figure](../results/figures/precision_recall_curves_n5_sensitivity.png), [`froc_operating_points_n5_sensitivity.csv`](../results/tables/froc_operating_points_n5_sensitivity.csv), and [the n=5 FROC figure](../results/figures/froc_curves_n5_sensitivity.png), with the original unsuffixed n=3 files retained as provenance. The sensitivity supports H2: Faster R-CNN is higher at 97 of 101 AP@0.5 recall positions, four are tied, and within the evaluated 0.01--0.99 score sweep it has higher observed sensitivity at all five reported FROC budgets.
+**Existing evidence.** Check [`precision_recall_curves_n5_sensitivity.csv`](../results/tables/precision_recall_curves_n5_sensitivity.csv), [the n=5 precision-recall figure](../results/figures/precision_recall_curves_n5_sensitivity.png), [`froc_operating_points_exact_score_v4.csv`](../results/tables/froc_operating_points_exact_score_v4.csv), and [the exact-score FROC figure](../results/figures/froc_exact_score_v4.png), with historical-grid and v2/v3 exact-score files retained as provenance. The evidence supports H2: Faster R-CNN is higher at 97 of 101 AP@0.5 recall positions, four are tied, and it has higher observed exact-score sensitivity at all five prespecified FROC budgets. Scores below 0.01 weaken four grid-based gaps but reverse none.
 
-**Boundary.** This is a five-run test-side sensitivity of a historical n=3 analysis, not evidence of probabilistic miscalibration or n=5 validation selection. The YOLO11s test-sweep FROC curve reaches the lower threshold boundary at 0.01, so its plateau is not a claimed global asymptote. Seed 271 is retained exactly as observed.
+**Boundary.** This is five-run test-side analysis, not evidence of probabilistic miscalibration or n=5 validation selection. The exact-score frontier is conditional on the approved 0.00001 candidate floor. YOLO11s seed 137 remains floor-limited only at 2 FP/image, so that aggregate is a lower-bound observation; its conservative upper bound still cannot reverse the detector ordering. Seed 271 is retained exactly as observed.
 
 ## H3 - Accuracy-compute Pareto trade-off
 

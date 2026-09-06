@@ -150,6 +150,21 @@ observed nonzero AP and low-score FROC behavior but defined zeros at 0.25 and
 still specific to one laptop/software state, and strict cloud dominance is a
 deterministic descriptive rule rather than uncertainty quantification.
 
+Batch 42 repairs the historical FROC grid boundary by evaluating every unique
+score retained in each bundle. User-approved inference-only collection lowered
+the candidate floor from 0.001 to 0.0001 and then 0.00001 without retraining or changing images,
+annotations, checkpoints, class, matching, NMS, or maximum detections. This
+**observed exact-score frontier** raises YOLO11s sensitivity below score 0.01
+and weakens four of the five grid-based detector gaps, although Faster R-CNN
+remains higher at every prespecified FP/image operating budget. The lower
+floor removes every prior boundary through 1 FP/image. YOLO11s seed 137 still
+ends at 1.9907 FP/image, so its 2-FP/image contribution and the corresponding
+aggregate remain a lower-bound observation. Even assigning that unobserved
+portion sensitivity 1.0 gives a YOLO11s aggregate upper bound of 0.6963, below
+Faster R-CNN's observed 0.6978; the qualitative ordering cannot reverse. A
+still-lower run could complete the numeric frontier but has limited scientific
+value for the detector-order conclusion and was not authorized.
+
 The n=3-to-n=5 audit is not uniformly favorable. Shared-threshold YOLO11s
 precision and Faster R-CNN recall margins weaken, as do the mean AP gaps; the
 shared-threshold F1, all five FROC, and all three frozen-threshold gaps

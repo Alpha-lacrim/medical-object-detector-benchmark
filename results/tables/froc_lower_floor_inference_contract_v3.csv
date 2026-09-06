@@ -1,0 +1,2 @@
+experiment_id,source_experiment_id,approved_candidate_score_floor,source_candidate_score_floor,score_threshold,match_iou_threshold,nms_iou_threshold,max_detections,seed_count,model_count,images_per_model,model_image_evaluations,training_performed
+rsna-phase42-froc-lower-floor-inference-v3,rsna-phase5-five-seed-comparison,0.0001,0.001,0.25,0.5,0.5,100,5,10,750,7500,False

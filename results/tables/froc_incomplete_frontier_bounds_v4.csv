@@ -1,0 +1,11 @@
+detector,fp_per_image_budget,observed_aggregate_sensitivity,conservative_upper_aggregate_sensitivity,maximum_possible_increase,candidate_floor_limited_run_count,candidate_floor_limited_seeds,observed_higher_detector,ordering_can_theoretically_reverse
+faster_rcnn,0.125,0.27761194029850744,0.27761194029850744,0.0,0,,faster_rcnn,False
+yolo11s,0.125,0.1798507462686567,0.1798507462686567,0.0,0,,faster_rcnn,False
+faster_rcnn,0.25,0.36641791044776123,0.36641791044776123,0.0,0,,faster_rcnn,False
+yolo11s,0.25,0.2664179104477612,0.2664179104477612,0.0,0,,faster_rcnn,False
+faster_rcnn,0.5,0.48582089552238805,0.48582089552238805,0.0,0,,faster_rcnn,False
+yolo11s,0.5,0.382089552238806,0.382089552238806,0.0,0,,faster_rcnn,False
+faster_rcnn,1.0,0.5999999999999999,0.5999999999999999,0.0,0,,faster_rcnn,False
+yolo11s,1.0,0.5074626865671641,0.5074626865671641,0.0,0,,faster_rcnn,False
+faster_rcnn,2.0,0.6977611940298508,0.6977611940298508,0.0,0,,faster_rcnn,False
+yolo11s,2.0,0.608955223880597,0.6962686567164178,0.08731343283582083,1,137,faster_rcnn,False

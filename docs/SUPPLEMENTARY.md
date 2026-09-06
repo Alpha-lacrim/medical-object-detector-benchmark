@@ -65,9 +65,16 @@ part of the evidence and must travel with any reused number.
   FROC, or Pareto artifacts.
 - Historical [FROC operating points](../results/tables/froc_operating_points.csv)
   and the [Pareto figure](../results/figures/pareto_frontier.png) retain their
-  frozen `n=3` scope. Separate n=5 sensitivity artifacts provide
-  [FROC operating points](../results/tables/froc_operating_points_n5_sensitivity.csv),
-  [per-run FROC curves](../results/tables/froc_curves_per_seed_n5_sensitivity.csv),
+  frozen `n=3` scope. Separate n=5 grid-sensitivity artifacts retain the
+  historical [FROC operating points](../results/tables/froc_operating_points_n5_sensitivity.csv)
+  and [per-run FROC curves](../results/tables/froc_curves_per_seed_n5_sensitivity.csv).
+  The current FROC evidence is the [approved lower-floor observed exact-score operating-point table](../results/tables/froc_operating_points_exact_score_v4.csv),
+  [grid comparison](../results/tables/froc_grid_vs_exact_score_comparison_v4.csv),
+  [conservative bound](../results/tables/froc_incomplete_frontier_bounds_v4.csv),
+  and [exact-score figure](../results/figures/froc_exact_score_v4.png); it remains
+  bounded by 0.00001 for YOLO11s seed 137 only at 2 FP/image, where even the
+  mathematical-maximum bound cannot reverse detector ordering. The v2/v3
+  exact-score outputs remain provenance. Separate n=5 sensitivity artifacts provide
   [Pareto points](../results/tables/pareto_points_n5_sensitivity.csv), and the
   [n=5 Pareto figure](../results/figures/pareto_frontier_n5_sensitivity.png).
   The [complete conclusion audit](../results/tables/operating_regime_n3_vs_n5_conclusions.csv)

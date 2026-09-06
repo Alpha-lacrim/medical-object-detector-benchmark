@@ -410,3 +410,176 @@ themselves require a new repository release.
   scientific/checkpoint hashes.
 - The final tag and GitHub release may be created only after owner review of an
   exact committed candidate and successful CI for that SHA.
+
+## D-010 — Keep `paper_draft.md` as the canonical editable journal manuscript
+
+- **Date:** 2026-09-05
+- **Status:** Accepted for the V7 baseline; manuscript content remains
+  provisional pending later focused editing and human declarations
+
+### Context
+
+After V5, the repository gained a longer alternate Markdown manuscript and a
+25-page rendered article PDF. Their additional length and polish do not by
+themselves establish scientific or editorial authority. The current README,
+scientific-artifact manifest, claim-source manifest, reporting checklist, and
+final-submission audit all bind the verified manuscript workflow to
+`report/paper_draft.md`. The historical `report/report.md` has a separate,
+preserved role.
+
+The long manuscript and its rendered PDF reproduce much of the current
+numerical evidence but add unsupported declaration assertions, stronger causal/
+superiority rhetoric, stale internal process terms, and a less complete
+limitations boundary. Text-level and visual audit show that the PDF represents
+the long manuscript line rather than `report/paper_draft.md`; its exact LaTeX
+source/build recipe is not committed.
+
+### Decision
+
+`report/paper_draft.md` remains the sole canonical editable journal manuscript.
+`report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md` is a noncanonical long
+alternate draft that may be consulted, but nothing migrates from it without
+later evidence review. `report/A_Controlled_Comparative_Study___article.pdf` is
+a noncanonical read-only rendering of that alternate line and must not be
+manually edited. `report/report.md` remains the historical/full technical
+report.
+
+### Consequences
+
+- Scientific-claim binding and manuscript verification continue to target only
+  `report/paper_draft.md` unless a later explicit decision changes the hierarchy
+  and updates all bindings atomically.
+- The long manuscript and PDF cannot supply or resolve funding, interest,
+  ethics, consent, contribution, availability, or PPI declarations.
+- Potential Methods/Supplement detail from the alternate drafts may be migrated
+  only in a later manuscript batch after source checking; greater length is not
+  a promotion criterion.
+- Batch 41 changes no scientific result, threshold, artifact, or manuscript
+  claim. Its complete baseline evidence is recorded in
+  `docs/V7_Q2_VINDR_BASELINE_AUDIT.md`.
+
+## D-011 — Use the observed exact-score frontier and retain the candidate-floor boundary
+
+- **Date:** 2026-09-05
+- **Status:** Accepted for current frozen-bundle reporting; lower-floor
+  inference remains proposed only and requires user approval
+
+### Context
+
+The historical FROC analysis sampled 99 thresholds from 0.01 through 0.99,
+while the frozen Phase 5 prediction bundles retained candidates down to 0.001.
+YOLO11s reached the grid's lower boundary, so treating the grid as the complete
+low-score frontier understated observable sensitivity and overstated several
+between-detector margins.
+
+### Decision
+
+The current FROC display and manuscript claims use the **observed exact-score
+frontier**: every unique score emitted into each of the ten frozen prediction
+bundles, plus explicit empty and candidate-floor endpoints. The prespecified
+FP/image operating budgets, all five seeds, images, annotations, class, IoU
+0.50 matching, native NMS IoU 0.50, and maximum 100 detections/image remain
+unchanged. Historical n=3 and n=5 grid artifacts remain immutable provenance.
+
+The observed detector ordering does not reverse. Faster R-CNN remains higher
+at all five budgets, but the exact-score gap strengthens only at 0.125 and
+weakens at 0.25, 0.5, 1, and 2 FP/image relative to the historical n=5 grid.
+The 0.001 candidate floor still limits YOLO11s in one run at 0.5, two runs at
+1, and all five runs at 2 FP/image; affected aggregate values are lower-bound
+observations.
+
+### Consequences
+
+- `configs/froc_exact_score_v2.yaml` and
+  `src/analyze_exact_score_froc.py` define the current offline analysis; no
+  publication parameter is embedded in the script.
+- The historical grid is a comparison/provenance artifact, not a complete or
+  threshold-independent frontier.
+- A detector-neutral 0.0001 candidate floor is technically accepted by both
+  inference adapters and is proposed for a ten-checkpoint, 750-image-per-model
+  inference-only sensitivity. It was selected as a one-decade reduction, not
+  for detector advantage.
+- That lower-floor inference was not run. It requires explicit user approval
+  and must write new versioned bundles and provenance rather than replace the
+  current Phase 5 predictions.
+
+## D-012 — Adopt the approved 0.0001 FROC sensitivity and retain the residual boundary
+
+- **Date:** 2026-09-06
+- **Status:** Accepted for current reporting; a further 0.00001 inference-only
+  proposal requires new explicit user approval
+
+### Context
+
+The user approved D-011's detector-neutral 0.0001 checkpoint-inference
+sensitivity. All ten frozen checkpoints were therefore evaluated on the same
+750 internal-test images with the same annotations, class, preprocessing,
+matching, native NMS, maximum detections, and seed scope. No training or weight
+update occurred, and all outputs were written to a new v3 namespace.
+
+### Decision
+
+Use the v3 0.0001 bundles and exact-score artifacts as the current FROC
+evidence. Faster R-CNN remains more sensitive at every prespecified budget.
+YOLO11s changes relative to the 0.001 exact-score analysis by 0.0000, 0.0000,
++0.0052, +0.0246, and +0.1082 at ascending budgets. No conclusion reverses.
+
+The v3 frontier is still not called exhaustive. YOLO11s seed 137 reaches only
+0.7427 FP/image at the bundle boundary and therefore remains floor-limited at
+1 and 2 FP/image. Those two YOLO11s aggregate values remain lower-bound
+observations.
+
+### Consequences
+
+- `configs/evaluation_froc_lower_floor_v3.yaml`,
+  `src/collect_froc_lower_floor_predictions.py`, and
+  `configs/froc_exact_score_v3.yaml` define the current reproducible path.
+- The original Phase 5, historical grid, and 0.001 exact-score artifacts remain
+  preserved as provenance.
+- A next floor of 0.00001 is technically supported by both adapters and was
+  selected by the same one-decade, detector-neutral rule. The executable
+  proposal is `configs/evaluation_froc_lower_floor_v4_proposal.yaml`.
+- No v4 inference has been run. Its exact scope is the same ten models and 750
+  images per model; it must create new v4 bundles and downstream artifacts only
+  after a new explicit user approval.
+
+## D-013 — Adopt the approved 0.00001 FROC sensitivity and stop at the residual bound
+
+- **Date:** 2026-09-06
+- **Status:** Accepted for current reporting; no still-lower inference is authorized
+
+### Context
+
+The user approved D-012's detector-neutral 0.00001 inference-only sensitivity
+under the same ten checkpoint hashes, five seeds per detector, 750-image test
+set, preprocessing, adapters, NMS, maximum detections, IoU matching, and
+prespecified budgets. The only inference change from v3 was the candidate floor
+from 0.0001 to 0.00001. No training, model selection, test-label threshold
+tuning, or overwrite of v2/v3 evidence occurred.
+
+### Decision
+
+Use v4 as the current observed exact-score FROC evidence. Faster R-CNN remains
+higher at all five budgets. Relative to v3, both detectors are unchanged
+through 0.5 FP/image; YOLO11s increases from 0.4985 to 0.5075 at 1 and from
+0.5881 to 0.6090 at 2, weakening but not reversing the detector gap.
+
+The frontier is still technically incomplete only for YOLO11s seed 137 at
+2 FP/image: its candidate-floor endpoint is sensitivity 0.5634 at 1.9907
+FP/image. A conservative bound assigns sensitivity 1.0 to the entire
+unobserved contribution. The resulting maximum YOLO11s aggregate is 0.6963,
+still below Faster R-CNN's observed 0.6978. Therefore the missing frontier
+cannot theoretically reverse the detector ordering at 1 or 2 FP/image.
+
+### Consequences
+
+- `configs/evaluation_froc_lower_floor_v4.yaml` and
+  `configs/froc_exact_score_v4.yaml` define the current reproducible path.
+- Historical grids and v2/v3 bundles, tables, figures, and summaries remain
+  preserved provenance.
+- A still-lower inference pass could complete the numeric curve near 2
+  FP/image, but has limited scientific value for the qualitative detector
+  ordering. It must not run without separate review and approval.
+- Current prose uses “observed exact-score frontier” and “prespecified
+  FP/image operating budgets”; it does not call the frontier exhaustive or
+  threshold-independent.

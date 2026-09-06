@@ -1,0 +1,3 @@
+detector,seed_count,candidate_score_floor,prediction_count_mean,prediction_count_std,minimum_emitted_score_min,maximum_emitted_score_max
+faster_rcnn,5,1e-05,71988.6,5673.074457470128,1.0011975064116996e-05,0.9749884009361267
+yolo11s,5,1e-05,7715.4,5346.495983352087,1.0000560905609746e-05,0.8757928013801575

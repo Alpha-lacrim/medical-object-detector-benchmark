@@ -79,11 +79,15 @@ All other clean endpoints retain all five attempted seeds.
 The defensible trade-off is detection quality versus implementation-specific
 computational cost. Under the documented detector-specific profiling procedure
 on the measured laptop, YOLO11s achieved 60.29 ± 12.62 FPS versus
-20.28 ± 5.62, with 9.43 M parameters versus 43.26 M. Within the evaluated
-0.01--0.99 score sweep, the n=5 FROC sensitivity gives Faster R-CNN higher
-observed sensitivity at every reported false-positive budget, and neither
-detector strictly dominates the n=5 accuracy-efficiency Pareto panels. Original
-n=3 artifacts remain unchanged as historical/prespecified provenance.
+20.28 ± 5.62, with 9.43 M parameters versus 43.26 M. On the observed exact-
+score FROC frontier, Faster R-CNN has higher sensitivity at all five
+prespecified FP/image operating budgets. User-approved inference at a 0.0001
+candidate floor and then 0.00001 materially narrows the higher-budget gap.
+YOLO11s seed 137 still ends just below 2 FP/image, but even a mathematical-
+maximum bound for its missing sensitivity cannot reverse the detector ordering.
+Neither detector strictly
+dominates the n=5 accuracy-efficiency Pareto panels. Original n=3 and n=5 grid
+artifacts remain unchanged as historical provenance.
 
 On the seed-17 300-image common-corruption sample, mean mAP@0.5:0.95 retention
 is 0.7638 for Faster R-CNN and 0.7091 for YOLO11s. Both detectors have weak
@@ -396,6 +400,25 @@ budget summaries, a figure, and provenance:
 & $benchmarkPython -m src.plot_froc_curves --config configs/froc_n5_sensitivity.yaml --mode run
 ```
 
+The current exact-score repair uses user-approved inference-only bundles at a
+0.00001 candidate floor, evaluates every unique retained score, adds explicit
+empty and candidate-floor endpoints, and compares the observed frontier with
+the historical grid. The first two commands require the pinned CUDA runtime;
+the final exact-score analysis is CPU-only:
+
+```powershell
+& $benchmarkPython -m src.collect_froc_lower_floor_predictions --config configs/evaluation_froc_lower_floor_v4.yaml --source-config configs/evaluation.yaml --prior-config configs/evaluation_froc_lower_floor_v3.yaml --checkpoint-manifest results/checkpoint_release_manifest.json --mode preflight
+& $benchmarkPython -m src.collect_froc_lower_floor_predictions --config configs/evaluation_froc_lower_floor_v4.yaml --source-config configs/evaluation.yaml --prior-config configs/evaluation_froc_lower_floor_v3.yaml --checkpoint-manifest results/checkpoint_release_manifest.json --mode run
+& $benchmarkPython -m src.analyze_exact_score_froc --config configs/froc_exact_score_v4.yaml --mode preflight
+& $benchmarkPython -m src.analyze_exact_score_froc --config configs/froc_exact_score_v4.yaml --mode run
+```
+
+The 0.00001 result removes the previous 1-FP/image boundary, but YOLO11s seed
+137 reaches only 1.9907 FP/image and remains floor-limited at 2. The observed
+YOLO11s aggregate is 0.6090; its conservative maximum is 0.6963 versus Faster
+R-CNN's observed 0.6978, so the qualitative ordering cannot reverse. No still-
+lower inference is authorized; see `docs/FROC_ANALYSIS.md`.
+
 ### 5d. Regenerate the accuracy-efficiency Pareto figure
 
 The historical CPU-only step joins the archived n=3 Phase 5 accuracy rows, all
@@ -690,9 +713,9 @@ Any derivative paper must name the inferential target. For broad pipeline
 claims, the training-procedure intervals are primary. It must carry the
 detector-specific run counts and seed-271 role: 5/5 for unconditional clean
 endpoints and 5/4 for conditional IoU/Dice, with no replacement seed.
-Threshold selection remains n=3, while test-side threshold/PR/FROC and Pareto
-have separately versioned n=5 sensitivities; robustness and explainability
-remain seed-17-only.
+Threshold selection remains n=3, while test-side threshold/PR and Pareto have
+separately versioned n=5 sensitivities and FROC now uses the five-run observed
+exact-score frontier; robustness and explainability remain seed-17-only.
 
 ## Report artifact-to-command index
 
@@ -713,7 +736,7 @@ adds exact bindings for central numerical prose and table claims.
 | YOLO seed-stability diagnostic | `yolo_seed_stability.csv` | `src.analyze_yolo_seed_stability` in §5 |
 | Paper §4.2 PR/F1 evidence | principal `*_n5_sensitivity` threshold/PR tables and figures; unsuffixed n=3 history retained | offline `src.evaluate_threshold_sweep --mode run` in §5a |
 | Paper §4.2 validation-selected operating points | n=3 validation selection plus `selected_operating_points*_n5_sensitivity.csv` test application | `src.evaluate_threshold_selection` plus offline `src.analyze_operating_regime_sensitivity` in §5b |
-| Paper §4.2 FROC evidence | `froc_*_n5_sensitivity` aggregate/per-run tables, figure, and summary; n=3 history retained | offline `src.plot_froc_curves --mode run` in §5c |
+| Paper §4.2 FROC evidence | approved lower-floor bundles and `froc_exact_score_*_v4` curves, prespecified-budget tables, comparisons, bound, figure, and summary; v2/v3 and historical grids retained | inference-only collection plus offline `src.analyze_exact_score_froc --mode run` in §5c |
 | Paper §4.5 Pareto evidence | `pareto_{points,summary}_n5_sensitivity.csv`; `pareto_frontier_n5_sensitivity.png`; n=3 figure retained | offline `src.plot_pareto_frontier --mode run` in §5d |
 | Paper §4.4 five-seed detection calibration and support sensitivity (Batch 33 v2) | `calibration_summary_v2.csv`; `calibration_support_v2.csv`; `calibration_sensitivity_v2.csv`; four v2 figures; Phase 33 summary | offline `src.stats.calibration --mode run` in §5e |
 | Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |

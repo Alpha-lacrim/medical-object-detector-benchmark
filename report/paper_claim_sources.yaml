@@ -15,8 +15,8 @@ manuscript_semantic_guards:
   - id: d_ece_is_named_calibration_error
     required_regex: 'Detection-specific calibration error was descriptively\s+higher for YOLO11s\s+\(mean D-ECE'
 
-  - id: froc_plateau_is_not_a_global_asymptote
-    required_regex: 'YOLO11s\s+plateaued.{0,400}0\.01 lower sweep boundary.{0,400}plateau is a grid boundary, not a\s+global asymptote'
+  - id: froc_exact_score_frontier_is_floor_bounded
+    required_regex: 'The approved 0\.00001\s+floor removes.{0,500}YOLO11s seed 137.{0,300}lower-bound observation.{0,500}ordering therefore cannot reverse'
 
   - id: detector_specific_timer_boundary_is_disclosed
     required_regex: 'Faster R-CNN\s+resizing occurred inside its timed forward, whereas YOLO tensor resizing\s+occurred before timed forward-plus-NMS'
@@ -244,28 +244,54 @@ claims:
     rounding: 4 decimal places
 
   - id: faster_froc_sensitivity_at_2
-    description: Faster R-CNN sensitivity at 2 false positives per image.
+    description: Faster R-CNN observed exact-score sensitivity at 2 false positives per image.
     manuscript:
       section: Operating regime
-      regex: 'and (?P<value>\d+\.\d+) versus\s+0\.2925 at 2 \(Figure 3\)'
+      regex: 'and (?P<value>\d+\.\d+) versus 0\.6090 at 2 \(Figure 3\)'
     source:
       kind: csv_cell
-      path: results/tables/froc_operating_points_n5_sensitivity.csv
+      path: results/tables/froc_operating_points_exact_score_v4.csv
       filters: {detector: faster_rcnn, fp_per_image_budget: 2.0}
       column: sensitivity
     absolute_tolerance: 0.00005
     rounding: 4 decimal places
 
   - id: yolo_froc_sensitivity_at_2
-    description: YOLO11s sensitivity at 2 false positives per image.
+    description: YOLO11s observed exact-score sensitivity at 2 false positives per image.
     manuscript:
       section: Operating regime
-      regex: '0\.6873 versus\s+(?P<value>\d+\.\d+) at 2 \(Figure 3\)'
+      regex: '0\.6978 versus (?P<value>\d+\.\d+) at 2 \(Figure 3\)'
     source:
       kind: csv_cell
-      path: results/tables/froc_operating_points_n5_sensitivity.csv
+      path: results/tables/froc_operating_points_exact_score_v4.csv
       filters: {detector: yolo11s, fp_per_image_budget: 2.0}
       column: sensitivity
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_seed137_froc_floor_endpoint_fp_per_image
+    description: Maximum reachable YOLO11s seed-137 FP/image at the approved floor.
+    manuscript:
+      section: Operating regime
+      regex: 'YOLO11s seed 137 nevertheless ends at (?P<value>\d+\.\d+) FP/image'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_per_seed_exact_score_v4.csv
+      filters: {detector: yolo11s, seed: 137, fp_per_image_budget: 2.0}
+      column: candidate_floor_endpoint_fp_per_image
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_froc_conservative_upper_at_2
+    description: Mathematical-maximum YOLO11s aggregate sensitivity bound at 2 FP/image.
+    manuscript:
+      section: Operating regime
+      regex: 'YOLO11s aggregate upper bound of (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_incomplete_frontier_bounds_v4.csv
+      filters: {detector: yolo11s, fp_per_image_budget: 2.0}
+      column: conservative_upper_aggregate_sensitivity
     absolute_tolerance: 0.00005
     rounding: 4 decimal places
 

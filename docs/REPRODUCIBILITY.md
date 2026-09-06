@@ -90,6 +90,28 @@ change, rebuild it locally and inspect the diff:
 git diff -- results/scientific_artifact_manifest.json
 ```
 
+## Exact-score FROC committed-analysis reproduction
+
+The current FROC result uses ten versioned prediction bundles collected at the
+user-approved 0.00001 candidate floor from the frozen checkpoints. It evaluates
+every unique retained score, uses explicit empty and candidate-floor
+endpoints, and reports the prespecified FP/image operating budgets. The
+collector requires the pinned CUDA runtime; the exact-score analysis is
+offline:
+
+```powershell
+& $benchmarkPython -m src.collect_froc_lower_floor_predictions --config configs/evaluation_froc_lower_floor_v4.yaml --source-config configs/evaluation.yaml --prior-config configs/evaluation_froc_lower_floor_v3.yaml --checkpoint-manifest results/checkpoint_release_manifest.json --mode preflight
+& $benchmarkPython -m src.collect_froc_lower_floor_predictions --config configs/evaluation_froc_lower_floor_v4.yaml --source-config configs/evaluation.yaml --prior-config configs/evaluation_froc_lower_floor_v3.yaml --checkpoint-manifest results/checkpoint_release_manifest.json --mode run
+& $benchmarkPython -m src.analyze_exact_score_froc --config configs/froc_exact_score_v4.yaml --mode preflight
+& $benchmarkPython -m src.analyze_exact_score_froc --config configs/froc_exact_score_v4.yaml --mode run
+```
+
+The collector changes only the candidate floor and never trains or updates
+weights. The resulting observed exact-score frontier remains conditional on
+0.00001 because YOLO11s seed 137 ends at 1.9907 FP/image. Only its 2-FP/image
+contribution remains a lower bound; the conservative maximum cannot reverse
+the Faster-R-CNN-versus-YOLO11s ordering. No 0.000001 run is authorized.
+
 ## Environment and dependency locks
 
 The adopted single-GPU environment is:

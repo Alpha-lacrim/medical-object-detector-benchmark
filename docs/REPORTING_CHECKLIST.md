@@ -1,12 +1,13 @@
 # Reporting Checklist Crosswalk
 
-Audit date: 2026-09-03
+Audit date: 2026-09-06
 
 Regenerated after the Batch 37 evidence-alignment rewrite of
 [`report/paper_draft.md`](../report/paper_draft.md) and refreshed after the
-2026-09-02 surgical correction and final submission-readiness wording audit
+2026-09-02 surgical correction, final submission-readiness wording audit, and
+Batch 42 exact-score FROC lower-bound repair and approved inference sensitivity
 (SHA-256
-`dbd7f97b959a436ecbbee543e9a45cc67cad75bd6479f9ed1e23a97e508c7432`).
+`1fdc88325aa018591d3a329f177c948fdcd4726dc0f49f0312b9740178d313a4`).
 
 This audit is against the **current manuscript**,
 [`report/paper_draft.md`](../report/paper_draft.md). It is not an audit of the

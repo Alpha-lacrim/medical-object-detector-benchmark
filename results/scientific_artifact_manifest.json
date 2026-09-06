@@ -17,6 +17,18 @@
     "results/logs/phase35_operating_regime_n5/froc_summary.json",
     "results/tables/froc_operating_points_n5_sensitivity.csv",
     "results/figures/froc_curves_n5_sensitivity.png",
+    "results/logs/phase42_froc_exact_score_v2/summary.json",
+    "results/tables/froc_operating_points_exact_score_v2.csv",
+    "results/tables/froc_grid_vs_exact_score_comparison_v2.csv",
+    "results/figures/froc_exact_score_v2.png",
+    "results/logs/phase42_froc_lower_floor_v4/summary.json",
+    "results/tables/froc_lower_floor_prediction_inventory_v4.csv",
+    "results/logs/phase42_froc_exact_score_v4/summary.json",
+    "results/tables/froc_operating_points_exact_score_v4.csv",
+    "results/tables/froc_operating_points_per_seed_exact_score_v4.csv",
+    "results/tables/froc_incomplete_frontier_bounds_v4.csv",
+    "results/tables/froc_grid_vs_exact_score_comparison_v4.csv",
+    "results/figures/froc_exact_score_v4.png",
     "results/logs/phase35_operating_regime_n5/pareto_summary.json",
     "results/tables/pareto_summary_n5_sensitivity.csv",
     "results/figures/pareto_frontier_n5_sensitivity.png",
@@ -728,6 +740,878 @@
         "height": 1136
       },
       "study_phase": "Phase 35 - five-run FROC sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase42_froc_exact_score_v2/summary.json",
+      "sha256": "9ae062790b4d6419ec96dd469f4d24d7230dfa797b29ada50a04e1bd12fb5f69",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v2.yaml",
+        "sha256": "6e2b9697fbc347d516147f745b441dbbe178c320294e8f21b8112ff68aeef8dc"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+          "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+          "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+          "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+          "sha256": "0f8c5d2e615f65d337b74126c0226f2bd3f5fd069660b47756d2461d22e04a44",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+          "sha256": "b0d11508dd7319ea3524f0c05658df95bdf81c28d169592a22eeb98ea964e316",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4",
+          "availability": "committed"
+        },
+        {
+          "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+          "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "configs/froc_n5_sensitivity.yaml",
+          "sha256": "c70c394fb9bc5ed45bf1de3241af3ebaf6ff0bcfec449952681e471cb3d2cc73",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase35_operating_regime_n5/froc_summary.json",
+          "sha256": "66e67246e58262205fda67c6aeeb94ce723ed3b17dc4b51f8a6bfd3672c45b8e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/froc_curves_n5_sensitivity.csv",
+          "sha256": "796c948edcfe971d5cf417846faa3cd11bf8fa218fc6e520b6531a8e1f20ddc0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/froc_operating_points_n5_sensitivity.csv",
+          "sha256": "069b3d13f4c8e677506e8e9667debcda2c1b702539574c6715b1815a81c3d231",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "artifacts",
+          "candidate_floor_assessment",
+          "canonical_matcher_crosscheck",
+          "config_path",
+          "config_sha256",
+          "counts",
+          "historical_comparison",
+          "historical_grid",
+          "inference_only_sensitivity_proposal",
+          "monotonicity_audit",
+          "operating_points",
+          "operating_points_per_seed",
+          "protocol",
+          "run_score_boundaries",
+          "schema_version",
+          "source_identity",
+          "status",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 42 - exact-score FROC lower-bound audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/froc_exact_score_per_seed_v2.csv",
+        "results/tables/froc_exact_score_aggregate_v2.csv",
+        "results/tables/froc_operating_points_per_seed_exact_score_v2.csv",
+        "results/tables/froc_operating_points_exact_score_v2.csv",
+        "results/tables/froc_grid_vs_exact_score_comparison_v2.csv",
+        "results/figures/froc_exact_score_v2.png"
+      ]
+    },
+    {
+      "path": "results/tables/froc_operating_points_exact_score_v2.csv",
+      "sha256": "d771b27736d590dfd321b447f7d6fae0ae545de5be94da6e8a097d20aa5027dc",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v2.yaml",
+        "sha256": "6e2b9697fbc347d516147f745b441dbbe178c320294e8f21b8112ff68aeef8dc"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_exact_score_v2/summary.json",
+          "sha256": "9ae062790b4d6419ec96dd469f4d24d7230dfa797b29ada50a04e1bd12fb5f69",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "seed_count",
+          "sensitivity",
+          "sensitivity_std",
+          "sensitivity_mean_plus_minus_std",
+          "achieved_fp_per_image",
+          "achieved_fp_per_image_std",
+          "selected_threshold_mean",
+          "selected_threshold_min",
+          "selected_threshold_max",
+          "selected_at_candidate_floor_count",
+          "candidate_floor_limited_run_count",
+          "candidate_floor_limited_seeds",
+          "selection_rule"
+        ],
+        "exact_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "seed_count",
+          "sensitivity",
+          "sensitivity_std",
+          "sensitivity_mean_plus_minus_std",
+          "achieved_fp_per_image",
+          "achieved_fp_per_image_std",
+          "selected_threshold_mean",
+          "selected_threshold_min",
+          "selected_threshold_max",
+          "selected_at_candidate_floor_count",
+          "candidate_floor_limited_run_count",
+          "candidate_floor_limited_seeds",
+          "selection_rule"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 42 - exact-score FROC operating budgets",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/froc_grid_vs_exact_score_comparison_v2.csv",
+      "sha256": "8f5d148d49ef042bbfc05a8ca91d16e425be2a93e1b07b10f7e066721900dd49",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v2.yaml",
+        "sha256": "6e2b9697fbc347d516147f745b441dbbe178c320294e8f21b8112ff68aeef8dc"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_exact_score_v2/summary.json",
+          "sha256": "9ae062790b4d6419ec96dd469f4d24d7230dfa797b29ada50a04e1bd12fb5f69",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "fp_per_image_budget",
+          "historical_faster_sensitivity",
+          "historical_yolo_sensitivity",
+          "historical_faster_minus_yolo_gap",
+          "exact_faster_sensitivity",
+          "exact_yolo_sensitivity",
+          "exact_faster_minus_yolo_gap",
+          "gap_change_exact_minus_historical",
+          "gap_change_classification",
+          "direction_status",
+          "faster_candidate_floor_limited_run_count",
+          "faster_candidate_floor_limited_seeds",
+          "yolo_candidate_floor_limited_run_count",
+          "yolo_candidate_floor_limited_seeds"
+        ],
+        "exact_columns": [
+          "fp_per_image_budget",
+          "historical_faster_sensitivity",
+          "historical_yolo_sensitivity",
+          "historical_faster_minus_yolo_gap",
+          "exact_faster_sensitivity",
+          "exact_yolo_sensitivity",
+          "exact_faster_minus_yolo_gap",
+          "gap_change_exact_minus_historical",
+          "gap_change_classification",
+          "direction_status",
+          "faster_candidate_floor_limited_run_count",
+          "faster_candidate_floor_limited_seeds",
+          "yolo_candidate_floor_limited_run_count",
+          "yolo_candidate_floor_limited_seeds"
+        ],
+        "row_count": 5
+      },
+      "study_phase": "Phase 42 - historical-grid versus exact-score FROC",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/froc_exact_score_v2.png",
+      "sha256": "3d93021bf11d4714112d83db650c6a34b148227f5b0e8ac5c0141c6e2ed8883b",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v2.yaml",
+        "sha256": "6e2b9697fbc347d516147f745b441dbbe178c320294e8f21b8112ff68aeef8dc"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/froc_exact_score_aggregate_v2.csv",
+          "sha256": "3c1ed292f57200f7ef7314c6b220dfa38c51088d6a04ec4d57aa5231c6be0ba3",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 1748,
+        "height": 1172
+      },
+      "study_phase": "Phase 42 - exact-score FROC lower-bound audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase42_froc_lower_floor_v4/summary.json",
+      "sha256": "02e5ba07fcd656e5917f6815b92ecb83d5a37f90dd88a2ba0e53e6e2c4e5a0d1",
+      "generating_script": "src/collect_froc_lower_floor_predictions.py",
+      "generating_script_sha256": "0bce59c553de96a89a7cf6c36b751dfbbafa422419d968176068e46df79d1917",
+      "config": {
+        "path": "configs/evaluation_froc_lower_floor_v4.yaml",
+        "sha256": "969f1a707adbdcf591ace64d12b5944ebb7ba02ec9b3026d074f138ef66188f2"
+      },
+      "input_artifacts": [
+        {
+          "path": "configs/evaluation.yaml",
+          "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/evaluation_froc_lower_floor_v3.yaml",
+          "sha256": "f24f48b1195090f3d5e56e4c7c6ee4e5c89f49f123dc4c07541c669b0cb792ad",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v3/summary.json",
+          "sha256": "e0fa6e0835a5d8ac740a068a4d1e2b83d00d22227e4c3c893cddff9f96bb6562",
+          "availability": "committed"
+        },
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        },
+        {
+          "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+          "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt",
+          "sha256": "9ec35c5d761f8e4bf7a43f7999f388ac1ffc0d533f62746409db280706dffab4",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed42_full/best_model.pt",
+          "sha256": "c97813cf5dfe50b6eb074fe50cd4a870bb24e5a667bfaf8b94b37a844fd2b83d",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt",
+          "sha256": "0d651d620c4106de296648960424326980ff13dd631a9baa120997590abc2a78",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt",
+          "sha256": "fa7ef259b30d5ce19c954e3e30ddecf3c6d74d05e82c5d525eb499a2db2c998f",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt",
+          "sha256": "e2147d0c45b1c7e369270a2d737e08b564fedd37cd88e2456ec13df03e4591a7",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt",
+          "sha256": "65909164e82c1ef53c0d38e0d898d37bbbec5f46cb9f5cd029e76ba486c0371c",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt",
+          "sha256": "7710372489e96c547aebd4c868663c33a8cf62f8ec48557049b7de8b2a6ab1c0",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt",
+          "sha256": "b7677b5343b5d3930616f1b5a530f6005ded88dfc54f7e8fdecbe93e3a04fa19",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+          "sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+          "sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+          "availability": "external_or_ignored"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "annotation_count",
+          "approval",
+          "artifacts",
+          "category_names",
+          "checkpoint_release_manifest",
+          "config_path",
+          "config_sha256",
+          "evaluation",
+          "experiment_id",
+          "image_count",
+          "preflight",
+          "prior_candidate_collection",
+          "protocol",
+          "runs",
+          "schema_version",
+          "score_boundaries",
+          "source_identity",
+          "source_phase5",
+          "source_test_split_accessed",
+          "split",
+          "statistics",
+          "status",
+          "test_annotation_path",
+          "test_annotation_sha256",
+          "test_split_accessed"
+        ]
+      },
+      "study_phase": "Phase 42 - approved lower-floor FROC inference sensitivity",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/froc_lower_floor_prediction_inventory_v4.csv",
+        "results/tables/froc_lower_floor_score_boundaries_v4.csv",
+        "results/tables/froc_lower_floor_inference_contract_v4.csv",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed314_test_predictions.json.gz"
+      ]
+    },
+    {
+      "path": "results/tables/froc_lower_floor_prediction_inventory_v4.csv",
+      "sha256": "1a4eabface69436e8fe5a7dddaa9aad6bc2f8cf95858e0aa39d082fc2a97b565",
+      "generating_script": "src/collect_froc_lower_floor_predictions.py",
+      "generating_script_sha256": "0bce59c553de96a89a7cf6c36b751dfbbafa422419d968176068e46df79d1917",
+      "config": {
+        "path": "configs/evaluation_froc_lower_floor_v4.yaml",
+        "sha256": "969f1a707adbdcf591ace64d12b5944ebb7ba02ec9b3026d074f138ef66188f2"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/summary.json",
+          "sha256": "02e5ba07fcd656e5917f6815b92ecb83d5a37f90dd88a2ba0e53e6e2c4e5a0d1",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "seed",
+          "candidate_score_floor",
+          "image_count",
+          "prediction_count",
+          "images_with_predictions",
+          "unique_score_count",
+          "minimum_emitted_score",
+          "maximum_emitted_score",
+          "checkpoint",
+          "checkpoint_sha256",
+          "prediction_bundle",
+          "prediction_bundle_sha256"
+        ],
+        "exact_columns": [
+          "detector",
+          "seed",
+          "candidate_score_floor",
+          "image_count",
+          "prediction_count",
+          "images_with_predictions",
+          "unique_score_count",
+          "minimum_emitted_score",
+          "maximum_emitted_score",
+          "checkpoint",
+          "checkpoint_sha256",
+          "prediction_bundle",
+          "prediction_bundle_sha256"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 42 - approved lower-floor FROC inference sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+      "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v4.yaml",
+        "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/summary.json",
+          "sha256": "02e5ba07fcd656e5917f6815b92ecb83d5a37f90dd88a2ba0e53e6e2c4e5a0d1",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+          "sha256": "e55dc0f59233c697db0a5a64dd71220f3d9a25a5fdd0fdbea8cbe2d919c934d9",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+          "sha256": "4b20c1ef0e56b9043aa5e7f5e4dbb3de8b0b608dc55c0a31ea73c3f7778a2030",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+          "sha256": "7b9f43f8cdac04e7ae42544e9799f080fbbb93d47ac33078d0f4091ea03c50cc",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+          "sha256": "efb377f6ef7d9efaa64341e658f4f984ffaa2bd8546b0c844c75cab36991e1a2",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+          "sha256": "5ba7c7f031ef5143ac0f43d65507bb019f59ecfe4bdef4886e3d25f64c9f7518",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "6d005316d9fbb8d0084178e5b6bead3a13ec2ac6d232af99308912bdabadf234",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "d0540e93e222d6f91b9366ef2c726bb9a025193ccc894d019c3055eae071c4b0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "a11fb858cd36522f3cc4e96489934a04b4745d3eb171ff3f8699fcf4e085d406",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "d02bc3bea95d161e002fcb8ef952fbd028395f89851498a526e3588681b453bf",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "8fafe6c0efc342af5f00b730beb2f08b73b1384fe6466f46b45d1fce20e86e88",
+          "availability": "committed"
+        },
+        {
+          "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+          "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "configs/froc_n5_sensitivity.yaml",
+          "sha256": "c70c394fb9bc5ed45bf1de3241af3ebaf6ff0bcfec449952681e471cb3d2cc73",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase35_operating_regime_n5/froc_summary.json",
+          "sha256": "66e67246e58262205fda67c6aeeb94ce723ed3b17dc4b51f8a6bfd3672c45b8e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/froc_curves_n5_sensitivity.csv",
+          "sha256": "796c948edcfe971d5cf417846faa3cd11bf8fa218fc6e520b6531a8e1f20ddc0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/froc_operating_points_n5_sensitivity.csv",
+          "sha256": "069b3d13f4c8e677506e8e9667debcda2c1b702539574c6715b1815a81c3d231",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_exact_score_v3/summary.json",
+          "sha256": "443355228ad491ee2c31e8ea7f7154509827241fb372dbc7913060cea2e85cff",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/froc_operating_points_per_seed_exact_score_v3.csv",
+          "sha256": "ab3515a087a5a0a9687d73e0047bc0b0ad601e468ecf0a5bc00856f0f3e5dadd",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/froc_operating_points_exact_score_v3.csv",
+          "sha256": "79f3b1cd668af6e222ce7c8c279a7ad19479f0575a6ec8708e8f07a8ae34e034",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "artifacts",
+          "candidate_floor_assessment",
+          "canonical_matcher_crosscheck",
+          "config_path",
+          "config_sha256",
+          "conservative_missing_frontier_bounds",
+          "counts",
+          "detector_ordering_bounds",
+          "historical_comparison",
+          "historical_grid",
+          "inference_only_sensitivity_proposal",
+          "monotonicity_audit",
+          "operating_points",
+          "operating_points_per_seed",
+          "prior_exact_analysis_id",
+          "prior_exact_comparison",
+          "prior_exact_run_comparison",
+          "protocol",
+          "run_reachability",
+          "run_score_boundaries",
+          "schema_version",
+          "source_identity",
+          "status",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 42 - approved lower-floor exact-score FROC audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/froc_exact_score_per_seed_v4.csv",
+        "results/tables/froc_exact_score_aggregate_v4.csv",
+        "results/tables/froc_operating_points_per_seed_exact_score_v4.csv",
+        "results/tables/froc_operating_points_exact_score_v4.csv",
+        "results/tables/froc_grid_vs_exact_score_comparison_v4.csv",
+        "results/tables/froc_exact_score_v3_vs_v4_comparison_v4.csv",
+        "results/tables/froc_exact_score_v3_vs_v4_per_run_v4.csv",
+        "results/tables/froc_incomplete_frontier_bounds_v4.csv",
+        "results/figures/froc_exact_score_v4.png"
+      ]
+    },
+    {
+      "path": "results/tables/froc_operating_points_exact_score_v4.csv",
+      "sha256": "745f7a4b7c9d7d8c9e6b18d17ef72158301f299ad58def323b8083696b2012da",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v4.yaml",
+        "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+          "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "seed_count",
+          "sensitivity",
+          "sensitivity_std",
+          "sensitivity_mean_plus_minus_std",
+          "achieved_fp_per_image",
+          "achieved_fp_per_image_std",
+          "selected_threshold_mean",
+          "selected_threshold_min",
+          "selected_threshold_max",
+          "selected_at_candidate_floor_count",
+          "candidate_floor_limited_run_count",
+          "candidate_floor_limited_seeds",
+          "selection_rule"
+        ],
+        "exact_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "seed_count",
+          "sensitivity",
+          "sensitivity_std",
+          "sensitivity_mean_plus_minus_std",
+          "achieved_fp_per_image",
+          "achieved_fp_per_image_std",
+          "selected_threshold_mean",
+          "selected_threshold_min",
+          "selected_threshold_max",
+          "selected_at_candidate_floor_count",
+          "candidate_floor_limited_run_count",
+          "candidate_floor_limited_seeds",
+          "selection_rule"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 42 - approved lower-floor exact-score FROC operating budgets",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/froc_operating_points_per_seed_exact_score_v4.csv",
+      "sha256": "402f48e4dace38b3bb1dc33058a3ccad62c20c64163bf52d0a6da63e119f5913",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v4.yaml",
+        "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+          "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "seed",
+          "fp_per_image_budget",
+          "sensitivity",
+          "achieved_fp_per_image",
+          "selected_threshold",
+          "selected_threshold_kind",
+          "selected_at_candidate_floor_boundary",
+          "candidate_score_floor",
+          "candidate_floor_endpoint_sensitivity",
+          "candidate_floor_endpoint_fp_per_image",
+          "candidate_floor_limited"
+        ],
+        "exact_columns": [
+          "detector",
+          "seed",
+          "fp_per_image_budget",
+          "sensitivity",
+          "achieved_fp_per_image",
+          "selected_threshold",
+          "selected_threshold_kind",
+          "selected_at_candidate_floor_boundary",
+          "candidate_score_floor",
+          "candidate_floor_endpoint_sensitivity",
+          "candidate_floor_endpoint_fp_per_image",
+          "candidate_floor_limited"
+        ],
+        "row_count": 50
+      },
+      "study_phase": "Phase 42 - approved exact-score FROC per-run operating budgets",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/froc_incomplete_frontier_bounds_v4.csv",
+      "sha256": "c4d677dd86e1ef129c3b3451839f52cfc67974c32080040540b07a2237ff81e2",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v4.yaml",
+        "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+          "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "observed_aggregate_sensitivity",
+          "conservative_upper_aggregate_sensitivity",
+          "maximum_possible_increase",
+          "candidate_floor_limited_run_count",
+          "candidate_floor_limited_seeds",
+          "observed_higher_detector",
+          "ordering_can_theoretically_reverse"
+        ],
+        "exact_columns": [
+          "detector",
+          "fp_per_image_budget",
+          "observed_aggregate_sensitivity",
+          "conservative_upper_aggregate_sensitivity",
+          "maximum_possible_increase",
+          "candidate_floor_limited_run_count",
+          "candidate_floor_limited_seeds",
+          "observed_higher_detector",
+          "ordering_can_theoretically_reverse"
+        ],
+        "row_count": 10
+      },
+      "study_phase": "Phase 42 - conservative incomplete-frontier sensitivity bound",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/froc_grid_vs_exact_score_comparison_v4.csv",
+      "sha256": "be22e84555a74f71f72c88e622ffb69d905b101adaa19a8006833ec67a97e6e5",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v4.yaml",
+        "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+          "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "fp_per_image_budget",
+          "historical_faster_sensitivity",
+          "historical_yolo_sensitivity",
+          "historical_faster_minus_yolo_gap",
+          "exact_faster_sensitivity",
+          "exact_yolo_sensitivity",
+          "exact_faster_minus_yolo_gap",
+          "gap_change_exact_minus_historical",
+          "gap_change_classification",
+          "direction_status",
+          "faster_candidate_floor_limited_run_count",
+          "faster_candidate_floor_limited_seeds",
+          "yolo_candidate_floor_limited_run_count",
+          "yolo_candidate_floor_limited_seeds"
+        ],
+        "exact_columns": [
+          "fp_per_image_budget",
+          "historical_faster_sensitivity",
+          "historical_yolo_sensitivity",
+          "historical_faster_minus_yolo_gap",
+          "exact_faster_sensitivity",
+          "exact_yolo_sensitivity",
+          "exact_faster_minus_yolo_gap",
+          "gap_change_exact_minus_historical",
+          "gap_change_classification",
+          "direction_status",
+          "faster_candidate_floor_limited_run_count",
+          "faster_candidate_floor_limited_seeds",
+          "yolo_candidate_floor_limited_run_count",
+          "yolo_candidate_floor_limited_seeds"
+        ],
+        "row_count": 5
+      },
+      "study_phase": "Phase 42 - historical-grid versus approved exact-score FROC",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/figures/froc_exact_score_v4.png",
+      "sha256": "1a6971cae443634053514764d5979b2983d61b6da0f34532650d493b6b89d64d",
+      "generating_script": "src/analyze_exact_score_froc.py",
+      "generating_script_sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+      "config": {
+        "path": "configs/froc_exact_score_v4.yaml",
+        "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/tables/froc_exact_score_aggregate_v4.csv",
+          "sha256": "ea0fd9e70a817b9b090ee616e68cc9d0ba7e2379250b0ba2fbf7f5771723d1ea",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "png",
+        "width": 1748,
+        "height": 1172
+      },
+      "study_phase": "Phase 42 - approved lower-floor exact-score FROC audit",
       "reproduction_tier": "committed_analysis",
       "gpu_required": false,
       "training_required": false,

@@ -62,6 +62,12 @@ PHASE5_BUNDLES = tuple(
     for detector in ("faster_rcnn", "yolo11s")
     for seed in (17, 42, 137, 271, 314)
 )
+LOWER_FLOOR_V4_BUNDLES = tuple(
+    "results/logs/phase42_froc_lower_floor_v4/predictions/"
+    f"{detector}_seed{seed}_test_predictions.json.gz"
+    for detector in ("faster_rcnn", "yolo11s")
+    for seed in (17, 42, 137, 271, 314)
+)
 VALIDATION_BUNDLES = tuple(
     "results/logs/phase14_threshold_selection/validation_predictions/"
     f"{detector}_seed{seed}_validation_predictions.json.gz"
@@ -101,6 +107,14 @@ PHASE5_INPUTS = (
         "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
         "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
     ),
+)
+
+_CHECKPOINT_RELEASE = json.loads(
+    (ROOT / "results/checkpoint_release_manifest.json").read_text(encoding="utf-8")
+)
+CHECKPOINT_INPUTS = tuple(
+    external(str(record["source_path"]), str(record["sha256"]))
+    for record in _CHECKPOINT_RELEASE["checkpoints"]
 )
 
 
@@ -254,6 +268,155 @@ SPECS = (
         "configs/froc_n5_sensitivity.yaml",
         (committed("results/tables/froc_curves_n5_sensitivity.csv"),),
         "Phase 35 - five-run FROC sensitivity",
+        "committed_analysis",
+    ),
+    spec(
+        "results/logs/phase42_froc_exact_score_v2/summary.json",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v2.yaml",
+        (
+            committed("results/logs/phase5_evaluation/summary.json"),
+            *(committed(path) for path in PHASE5_BUNDLES),
+            PHASE5_INPUTS[2],
+            committed("configs/froc_n5_sensitivity.yaml"),
+            committed("results/logs/phase35_operating_regime_n5/froc_summary.json"),
+            committed("results/tables/froc_curves_n5_sensitivity.csv"),
+            committed("results/tables/froc_operating_points_n5_sensitivity.csv"),
+        ),
+        "Phase 42 - exact-score FROC lower-bound audit",
+        "committed_analysis",
+        references=(
+            "results/tables/froc_exact_score_per_seed_v2.csv",
+            "results/tables/froc_exact_score_aggregate_v2.csv",
+            "results/tables/froc_operating_points_per_seed_exact_score_v2.csv",
+            "results/tables/froc_operating_points_exact_score_v2.csv",
+            "results/tables/froc_grid_vs_exact_score_comparison_v2.csv",
+            "results/figures/froc_exact_score_v2.png",
+        ),
+    ),
+    spec(
+        "results/tables/froc_operating_points_exact_score_v2.csv",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v2.yaml",
+        (committed("results/logs/phase42_froc_exact_score_v2/summary.json"),),
+        "Phase 42 - exact-score FROC operating budgets",
+        "committed_analysis",
+    ),
+    spec(
+        "results/tables/froc_grid_vs_exact_score_comparison_v2.csv",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v2.yaml",
+        (committed("results/logs/phase42_froc_exact_score_v2/summary.json"),),
+        "Phase 42 - historical-grid versus exact-score FROC",
+        "committed_analysis",
+    ),
+    spec(
+        "results/figures/froc_exact_score_v2.png",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v2.yaml",
+        (committed("results/tables/froc_exact_score_aggregate_v2.csv"),),
+        "Phase 42 - exact-score FROC lower-bound audit",
+        "committed_analysis",
+    ),
+    spec(
+        "results/logs/phase42_froc_lower_floor_v4/summary.json",
+        "src/collect_froc_lower_floor_predictions.py",
+        "configs/evaluation_froc_lower_floor_v4.yaml",
+        (
+            committed("configs/evaluation.yaml"),
+            committed("results/logs/phase5_evaluation/summary.json"),
+            committed("configs/evaluation_froc_lower_floor_v3.yaml"),
+            committed("results/logs/phase42_froc_lower_floor_v3/summary.json"),
+            committed("results/checkpoint_release_manifest.json"),
+            PHASE5_INPUTS[2],
+            *CHECKPOINT_INPUTS,
+        ),
+        "Phase 42 - approved lower-floor FROC inference sensitivity",
+        "checkpoint_inference",
+        gpu=True,
+        references=(
+            "results/tables/froc_lower_floor_prediction_inventory_v4.csv",
+            "results/tables/froc_lower_floor_score_boundaries_v4.csv",
+            "results/tables/froc_lower_floor_inference_contract_v4.csv",
+            *LOWER_FLOOR_V4_BUNDLES,
+        ),
+    ),
+    spec(
+        "results/tables/froc_lower_floor_prediction_inventory_v4.csv",
+        "src/collect_froc_lower_floor_predictions.py",
+        "configs/evaluation_froc_lower_floor_v4.yaml",
+        (committed("results/logs/phase42_froc_lower_floor_v4/summary.json"),),
+        "Phase 42 - approved lower-floor FROC inference sensitivity",
+        "committed_analysis",
+    ),
+    spec(
+        "results/logs/phase42_froc_exact_score_v4/summary.json",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v4.yaml",
+        (
+            committed("results/logs/phase42_froc_lower_floor_v4/summary.json"),
+            *(committed(path) for path in LOWER_FLOOR_V4_BUNDLES),
+            PHASE5_INPUTS[2],
+            committed("configs/froc_n5_sensitivity.yaml"),
+            committed("results/logs/phase35_operating_regime_n5/froc_summary.json"),
+            committed("results/tables/froc_curves_n5_sensitivity.csv"),
+            committed("results/tables/froc_operating_points_n5_sensitivity.csv"),
+            committed("results/logs/phase42_froc_exact_score_v3/summary.json"),
+            committed("results/tables/froc_operating_points_per_seed_exact_score_v3.csv"),
+            committed("results/tables/froc_operating_points_exact_score_v3.csv"),
+        ),
+        "Phase 42 - approved lower-floor exact-score FROC audit",
+        "committed_analysis",
+        references=(
+            "results/tables/froc_exact_score_per_seed_v4.csv",
+            "results/tables/froc_exact_score_aggregate_v4.csv",
+            "results/tables/froc_operating_points_per_seed_exact_score_v4.csv",
+            "results/tables/froc_operating_points_exact_score_v4.csv",
+            "results/tables/froc_grid_vs_exact_score_comparison_v4.csv",
+            "results/tables/froc_exact_score_v3_vs_v4_comparison_v4.csv",
+            "results/tables/froc_exact_score_v3_vs_v4_per_run_v4.csv",
+            "results/tables/froc_incomplete_frontier_bounds_v4.csv",
+            "results/figures/froc_exact_score_v4.png",
+        ),
+    ),
+    spec(
+        "results/tables/froc_operating_points_exact_score_v4.csv",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v4.yaml",
+        (committed("results/logs/phase42_froc_exact_score_v4/summary.json"),),
+        "Phase 42 - approved lower-floor exact-score FROC operating budgets",
+        "committed_analysis",
+    ),
+    spec(
+        "results/tables/froc_operating_points_per_seed_exact_score_v4.csv",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v4.yaml",
+        (committed("results/logs/phase42_froc_exact_score_v4/summary.json"),),
+        "Phase 42 - approved exact-score FROC per-run operating budgets",
+        "committed_analysis",
+    ),
+    spec(
+        "results/tables/froc_incomplete_frontier_bounds_v4.csv",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v4.yaml",
+        (committed("results/logs/phase42_froc_exact_score_v4/summary.json"),),
+        "Phase 42 - conservative incomplete-frontier sensitivity bound",
+        "committed_analysis",
+    ),
+    spec(
+        "results/tables/froc_grid_vs_exact_score_comparison_v4.csv",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v4.yaml",
+        (committed("results/logs/phase42_froc_exact_score_v4/summary.json"),),
+        "Phase 42 - historical-grid versus approved exact-score FROC",
+        "committed_analysis",
+    ),
+    spec(
+        "results/figures/froc_exact_score_v4.png",
+        "src/analyze_exact_score_froc.py",
+        "configs/froc_exact_score_v4.yaml",
+        (committed("results/tables/froc_exact_score_aggregate_v4.csv"),),
+        "Phase 42 - approved lower-floor exact-score FROC audit",
         "committed_analysis",
     ),
     spec(

@@ -1,0 +1,56 @@
+schema_version: 4
+analysis_id: rsna-phase42-exact-score-froc-n5-lower-floor-v4
+
+inputs:
+  phase5_config: configs/evaluation_froc_lower_floor_v4.yaml
+  phase5_summary: results/logs/phase42_froc_lower_floor_v4/summary.json
+  test_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_test.json
+  historical_froc_config: configs/froc_n5_sensitivity.yaml
+  historical_froc_summary: results/logs/phase35_operating_regime_n5/froc_summary.json
+  historical_curve_table: results/tables/froc_curves_n5_sensitivity.csv
+  historical_operating_points_table: results/tables/froc_operating_points_n5_sensitivity.csv
+  prior_exact_summary: results/logs/phase42_froc_exact_score_v3/summary.json
+  prior_operating_points_per_seed_table: results/tables/froc_operating_points_per_seed_exact_score_v3.csv
+  prior_operating_points_table: results/tables/froc_operating_points_exact_score_v3.csv
+
+analysis:
+  expected_seeds: [17, 42, 137, 271, 314]
+  class_names:
+    1: Lung Opacity
+  candidate_score_floor: 0.00001
+  historical_candidate_score_floor: 0.001
+  match_iou_threshold: 0.5
+  nms_iou_threshold: 0.5
+  max_detections_per_image: 100
+  fp_per_image_budgets: [0.125, 0.25, 0.5, 1.0, 2.0]
+  numeric_tolerance: 1.0e-12
+  score_comparison: greater_than_or_equal
+  include_upper_empty_sentinel: true
+  include_candidate_floor_endpoint: true
+
+detectors:
+  faster_rcnn:
+    label: Faster R-CNN
+    color: "#1f77b4"
+  yolo11s:
+    label: YOLO11s
+    color: "#d95f02"
+
+plot:
+  dpi: 180
+  figure_width: 9.6
+  figure_height: 6.4
+  minimum_x: 0.0625
+  maximum_x: 4.0
+
+outputs:
+  exact_per_seed_table: results/tables/froc_exact_score_per_seed_v4.csv
+  exact_aggregate_curve_table: results/tables/froc_exact_score_aggregate_v4.csv
+  operating_points_per_seed_table: results/tables/froc_operating_points_per_seed_exact_score_v4.csv
+  operating_points_table: results/tables/froc_operating_points_exact_score_v4.csv
+  historical_comparison_table: results/tables/froc_grid_vs_exact_score_comparison_v4.csv
+  figure: results/figures/froc_exact_score_v4.png
+  summary_json: results/logs/phase42_froc_exact_score_v4/summary.json
+  prior_comparison_table: results/tables/froc_exact_score_v3_vs_v4_comparison_v4.csv
+  prior_run_comparison_table: results/tables/froc_exact_score_v3_vs_v4_per_run_v4.csv
+  frontier_bounds_table: results/tables/froc_incomplete_frontier_bounds_v4.csv

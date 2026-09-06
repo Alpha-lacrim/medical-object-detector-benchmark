@@ -1,0 +1,94 @@
+# Approval-gated only. Do not run --mode run without a new explicit user approval.
+schema_version: 1
+experiment_id: rsna-phase42-froc-lower-floor-inference-v4-proposal
+
+seeds: [17, 42, 137, 271, 314]
+split: test
+
+evaluation:
+  score_threshold: 0.25
+  match_iou_threshold: 0.5
+  coco_minimum_score: 0.00001
+  nms_iou_threshold: 0.5
+  max_detections: 100
+
+runtime:
+  device: cuda
+  inference_batch_size: 1
+  num_workers: 0
+  pin_memory: true
+  statistics_ddof: 1
+
+timing_sources:
+  faster_rcnn: results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json
+  yolo11s: results/logs/yolo11s_rsna_seed17_benchmark/benchmark_estimate.json
+
+runs:
+  - detector: faster_rcnn
+    seed: 17
+    training_config: configs/faster_rcnn.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed17_full/summary.json
+    compute_table: results/tables/faster_rcnn_compute.csv
+  - detector: faster_rcnn
+    seed: 42
+    training_config: configs/faster_rcnn_seed42.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed42_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed42_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed42_compute.csv
+  - detector: faster_rcnn
+    seed: 137
+    training_config: configs/faster_rcnn_seed137.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed137_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed137_compute.csv
+  - detector: faster_rcnn
+    seed: 271
+    training_config: configs/faster_rcnn_seed271.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed271_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed271_compute.csv
+  - detector: faster_rcnn
+    seed: 314
+    training_config: configs/faster_rcnn_seed314.yaml
+    checkpoint: results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt
+    training_summary: results/logs/faster_rcnn_rsna_seed314_full/summary.json
+    compute_table: results/tables/seeds/faster_rcnn_seed314_compute.csv
+  - detector: yolo11s
+    seed: 17
+    training_config: configs/yolo.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed17_full/summary.json
+    compute_table: results/tables/yolo_compute.csv
+  - detector: yolo11s
+    seed: 42
+    training_config: configs/yolo_seed42.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed42_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed42_compute.csv
+  - detector: yolo11s
+    seed: 137
+    training_config: configs/yolo_seed137.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed137_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed137_compute.csv
+  - detector: yolo11s
+    seed: 271
+    training_config: configs/yolo_seed271.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed271_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed271_compute.csv
+  - detector: yolo11s
+    seed: 314
+    training_config: configs/yolo_seed314.yaml
+    checkpoint: results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt
+    training_summary: results/logs/yolo11s_rsna_seed314_full/summary.json
+    compute_table: results/tables/seeds/yolo_seed314_compute.csv
+
+outputs:
+  log_dir: results/logs/phase42_froc_lower_floor_v4
+  prediction_bundles_dir: results/logs/phase42_froc_lower_floor_v4/predictions
+  summary_json: results/logs/phase42_froc_lower_floor_v4/summary.json
+  per_seed_table: results/tables/froc_lower_floor_prediction_inventory_v4.csv
+  mean_std_table: results/tables/froc_lower_floor_score_boundaries_v4.csv
+  publication_table: results/tables/froc_lower_floor_inference_contract_v4.csv

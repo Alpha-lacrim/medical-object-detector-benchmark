@@ -1,0 +1,380 @@
+{
+  "annotation_count": 268,
+  "approval": {
+    "approved_candidate_score_floor": 1e-05,
+    "scope": "Batch 42 inference-only sensitivity protocol",
+    "status": "user_approved"
+  },
+  "artifacts": {
+    "inference_contract": {
+      "path": "results/tables/froc_lower_floor_inference_contract_v4.csv",
+      "sha256": "15b16979d03f754268991f2a0d1dcdfddff87beea71e7ca39816d29ebbc30a80",
+      "size_bytes": 383
+    },
+    "prediction_bundles": [
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "e55dc0f59233c697db0a5a64dd71220f3d9a25a5fdd0fdbea8cbe2d919c934d9"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "4b20c1ef0e56b9043aa5e7f5e4dbb3de8b0b608dc55c0a31ea73c3f7778a2030"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "7b9f43f8cdac04e7ae42544e9799f080fbbb93d47ac33078d0f4091ea03c50cc"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+        "seed": 271,
+        "sha256": "efb377f6ef7d9efaa64341e658f4f984ffaa2bd8546b0c844c75cab36991e1a2"
+      },
+      {
+        "detector": "faster_rcnn",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+        "seed": 314,
+        "sha256": "5ba7c7f031ef5143ac0f43d65507bb019f59ecfe4bdef4886e3d25f64c9f7518"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "seed": 17,
+        "sha256": "6d005316d9fbb8d0084178e5b6bead3a13ec2ac6d232af99308912bdabadf234"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "seed": 42,
+        "sha256": "d0540e93e222d6f91b9366ef2c726bb9a025193ccc894d019c3055eae071c4b0"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "seed": 137,
+        "sha256": "a11fb858cd36522f3cc4e96489934a04b4745d3eb171ff3f8699fcf4e085d406"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "seed": 271,
+        "sha256": "d02bc3bea95d161e002fcb8ef952fbd028395f89851498a526e3588681b453bf"
+      },
+      {
+        "detector": "yolo11s",
+        "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed314_test_predictions.json.gz",
+        "seed": 314,
+        "sha256": "8fafe6c0efc342af5f00b730beb2f08b73b1384fe6466f46b45d1fce20e86e88"
+      }
+    ],
+    "prediction_inventory": {
+      "path": "results/tables/froc_lower_floor_prediction_inventory_v4.csv",
+      "sha256": "1a4eabface69436e8fe5a7dddaa9aad6bc2f8cf95858e0aa39d082fc2a97b565",
+      "size_bytes": 3898
+    },
+    "score_boundaries": {
+      "path": "results/tables/froc_lower_floor_score_boundaries_v4.csv",
+      "sha256": "c05e19cad8d6cd7bc2bf44b531173607f2c060aadeba5438027dd08a279c04c9",
+      "size_bytes": 308
+    }
+  },
+  "category_names": {
+    "1": "Lung Opacity"
+  },
+  "checkpoint_release_manifest": {
+    "path": "results/checkpoint_release_manifest.json",
+    "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+    "size_bytes": 8732
+  },
+  "config_path": "configs/evaluation_froc_lower_floor_v4.yaml",
+  "config_sha256": "969f1a707adbdcf591ace64d12b5944ebb7ba02ec9b3026d074f138ef66188f2",
+  "evaluation": {
+    "coco_minimum_score": 1e-05,
+    "match_iou_threshold": 0.5,
+    "max_detections": 100,
+    "nms_iou_threshold": 0.5,
+    "score_threshold": 0.25
+  },
+  "experiment_id": "rsna-phase42-froc-lower-floor-inference-v4",
+  "image_count": 750,
+  "preflight": {
+    "annotation_sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+    "annotations": 268,
+    "candidate_score_floor": 1e-05,
+    "checkpoint_bytes_verified": 962924817,
+    "checkpoint_manifest_sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+    "checkpoints_verified": 10,
+    "cuda_device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "experiment_id": "rsna-phase42-froc-lower-floor-inference-v4",
+    "images_per_model": 750,
+    "model_image_evaluations": 7500,
+    "models": 10,
+    "performs_checkpoint_loading": false,
+    "performs_model_inference": false,
+    "performs_training": false,
+    "prior_config_sha256": "f24f48b1195090f3d5e56e4c7c6ee4e5c89f49f123dc4c07541c669b0cb792ad",
+    "prior_summary_sha256": "e0fa6e0835a5d8ac740a068a4d1e2b83d00d22227e4c3c893cddff9f96bb6562",
+    "seeds": [
+      17,
+      42,
+      137,
+      271,
+      314
+    ],
+    "source_candidate_score_floor": 0.0001,
+    "source_config_sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69",
+    "source_experiment_id": "rsna-phase5-five-seed-comparison",
+    "source_summary_sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+    "status": "ready"
+  },
+  "prior_candidate_collection": {
+    "candidate_score_floor": 0.0001,
+    "config": {
+      "path": "configs/evaluation_froc_lower_floor_v3.yaml",
+      "sha256": "f24f48b1195090f3d5e56e4c7c6ee4e5c89f49f123dc4c07541c669b0cb792ad",
+      "size_bytes": 4048
+    },
+    "experiment_id": "rsna-phase42-froc-lower-floor-inference-v3",
+    "summary": {
+      "path": "results/logs/phase42_froc_lower_floor_v3/summary.json",
+      "sha256": "e0fa6e0835a5d8ac740a068a4d1e2b83d00d22227e4c3c893cddff9f96bb6562",
+      "size_bytes": 14877
+    }
+  },
+  "protocol": {
+    "approved_candidate_score_floor": 1e-05,
+    "changed_parameter": "candidate score floor only",
+    "faster_rcnn_adapter": "model emits its configured top 100 post-NMS detections; the shared bundle filter changed from the immediately prior floor to the approved floor",
+    "performs_checkpoint_loading": true,
+    "performs_model_inference": true,
+    "performs_training": false,
+    "source_candidate_score_floor": 0.0001,
+    "unchanged": [
+      "test images and annotations",
+      "Lung Opacity class",
+      "trained checkpoint bytes",
+      "image preprocessing and detector input resolution",
+      "IoU 0.50 matching",
+      "class-aware native NMS at IoU 0.50",
+      "maximum 100 detections per image",
+      "five predeclared seeds including 271"
+    ],
+    "yolo11s_adapter": "Ultralytics predict conf changed from the immediately prior floor to the approved floor"
+  },
+  "runs": [
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt",
+        "checkpoint_sha256": "9ec35c5d761f8e4bf7a43f7999f388ac1ffc0d533f62746409db280706dffab4",
+        "detector": "faster_rcnn",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+        "prediction_count": 75000,
+        "seed": 17
+      },
+      "detector": "faster_rcnn",
+      "prediction_bundle_sha256": "e55dc0f59233c697db0a5a64dd71220f3d9a25a5fdd0fdbea8cbe2d919c934d9",
+      "seed": 17
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/faster_rcnn_rsna_seed42_full/best_model.pt",
+        "checkpoint_sha256": "c97813cf5dfe50b6eb074fe50cd4a870bb24e5a667bfaf8b94b37a844fd2b83d",
+        "detector": "faster_rcnn",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+        "prediction_count": 72991,
+        "seed": 42
+      },
+      "detector": "faster_rcnn",
+      "prediction_bundle_sha256": "4b20c1ef0e56b9043aa5e7f5e4dbb3de8b0b608dc55c0a31ea73c3f7778a2030",
+      "seed": 42
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt",
+        "checkpoint_sha256": "0d651d620c4106de296648960424326980ff13dd631a9baa120997590abc2a78",
+        "detector": "faster_rcnn",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+        "prediction_count": 75000,
+        "seed": 137
+      },
+      "detector": "faster_rcnn",
+      "prediction_bundle_sha256": "7b9f43f8cdac04e7ae42544e9799f080fbbb93d47ac33078d0f4091ea03c50cc",
+      "seed": 137
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt",
+        "checkpoint_sha256": "fa7ef259b30d5ce19c954e3e30ddecf3c6d74d05e82c5d525eb499a2db2c998f",
+        "detector": "faster_rcnn",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+        "prediction_count": 74992,
+        "seed": 271
+      },
+      "detector": "faster_rcnn",
+      "prediction_bundle_sha256": "efb377f6ef7d9efaa64341e658f4f984ffaa2bd8546b0c844c75cab36991e1a2",
+      "seed": 271
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt",
+        "checkpoint_sha256": "e2147d0c45b1c7e369270a2d737e08b564fedd37cd88e2456ec13df03e4591a7",
+        "detector": "faster_rcnn",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+        "prediction_count": 61960,
+        "seed": 314
+      },
+      "detector": "faster_rcnn",
+      "prediction_bundle_sha256": "5ba7c7f031ef5143ac0f43d65507bb019f59ecfe4bdef4886e3d25f64c9f7518",
+      "seed": 314
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt",
+        "checkpoint_sha256": "65909164e82c1ef53c0d38e0d898d37bbbec5f46cb9f5cd029e76ba486c0371c",
+        "detector": "yolo11s",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "prediction_count": 6557,
+        "seed": 17
+      },
+      "detector": "yolo11s",
+      "prediction_bundle_sha256": "6d005316d9fbb8d0084178e5b6bead3a13ec2ac6d232af99308912bdabadf234",
+      "seed": 17
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt",
+        "checkpoint_sha256": "7710372489e96c547aebd4c868663c33a8cf62f8ec48557049b7de8b2a6ab1c0",
+        "detector": "yolo11s",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "prediction_count": 5499,
+        "seed": 42
+      },
+      "detector": "yolo11s",
+      "prediction_bundle_sha256": "d0540e93e222d6f91b9366ef2c726bb9a025193ccc894d019c3055eae071c4b0",
+      "seed": 42
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt",
+        "checkpoint_sha256": "b7677b5343b5d3930616f1b5a530f6005ded88dfc54f7e8fdecbe93e3a04fa19",
+        "detector": "yolo11s",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "prediction_count": 1644,
+        "seed": 137
+      },
+      "detector": "yolo11s",
+      "prediction_bundle_sha256": "a11fb858cd36522f3cc4e96489934a04b4745d3eb171ff3f8699fcf4e085d406",
+      "seed": 137
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+        "checkpoint_sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+        "detector": "yolo11s",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "prediction_count": 16086,
+        "seed": 271
+      },
+      "detector": "yolo11s",
+      "prediction_bundle_sha256": "d02bc3bea95d161e002fcb8ef952fbd028395f89851498a526e3588681b453bf",
+      "seed": 271
+    },
+    {
+      "comparison_row": {
+        "candidate_score_floor": 1e-05,
+        "checkpoint": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+        "checkpoint_sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+        "detector": "yolo11s",
+        "image_count": 750,
+        "prediction_bundle": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed314_test_predictions.json.gz",
+        "prediction_count": 8791,
+        "seed": 314
+      },
+      "detector": "yolo11s",
+      "prediction_bundle_sha256": "8fafe6c0efc342af5f00b730beb2f08b73b1384fe6466f46b45d1fce20e86e88",
+      "seed": 314
+    }
+  ],
+  "schema_version": 1,
+  "score_boundaries": [
+    {
+      "candidate_score_floor": 1e-05,
+      "detector": "faster_rcnn",
+      "maximum_emitted_score_max": 0.9749884009361267,
+      "minimum_emitted_score_min": 1.0011975064116996e-05,
+      "prediction_count_mean": 71988.6,
+      "prediction_count_std": 5673.074457470128,
+      "seed_count": 5
+    },
+    {
+      "candidate_score_floor": 1e-05,
+      "detector": "yolo11s",
+      "maximum_emitted_score_max": 0.8757928013801575,
+      "minimum_emitted_score_min": 1.0000560905609746e-05,
+      "prediction_count_mean": 7715.4,
+      "prediction_count_std": 5346.495983352087,
+      "seed_count": 5
+    }
+  ],
+  "source_identity": {
+    "src/collect_froc_lower_floor_predictions.py": "0bce59c553de96a89a7cf6c36b751dfbbafa422419d968176068e46df79d1917",
+    "src/evaluate.py": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a"
+  },
+  "source_phase5": {
+    "candidate_score_floor": 0.001,
+    "config": {
+      "path": "configs/evaluation.yaml",
+      "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69",
+      "size_bytes": 6497
+    },
+    "experiment_id": "rsna-phase5-five-seed-comparison",
+    "summary": {
+      "path": "results/logs/phase5_evaluation/summary.json",
+      "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+      "size_bytes": 3162269
+    }
+  },
+  "source_test_split_accessed": true,
+  "split": "test",
+  "statistics": {
+    "ddof": 1,
+    "n": 5,
+    "n_definition": "same predeclared attempted training seeds",
+    "seeds": [
+      17,
+      42,
+      137,
+      271,
+      314
+    ],
+    "standard_deviation": "sample"
+  },
+  "status": "complete",
+  "test_annotation_path": "C:/Users/Pouyan/PycharmProjects/Uni/Deep Learning/DP_Final_Project/data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+  "test_annotation_sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+  "test_split_accessed": true
+}

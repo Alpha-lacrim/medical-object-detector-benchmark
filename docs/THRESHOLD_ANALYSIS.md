@@ -191,6 +191,18 @@ is a sensitivity of test performance to the all-attempt run set, not a new
 threshold-selection analysis: validation evidence remains n=3, test evidence
 is n=5, and seed 271 contributes 0/0/0 with zero emitted detections at 0.05.
 
+The separate Batch 42 FROC repair does not alter this threshold selection or
+the 0.01--0.99 threshold/PR sensitivity. Following user approval, inference-
+only collection at 0.0001 and then 0.00001 generated versioned bundles from the same ten
+checkpoints, images, annotations, and post-processing contract. The resulting
+**observed exact-score frontier** reports the same prespecified FP/image
+operating budgets. Scores below 0.01 weaken four of the five historical FROC
+detector gaps without reversing their direction. YOLO11s seed 137 still ends
+below 2 FP/image at the 0.00001 boundary, so only that aggregate remains a
+lower-bound observation rather than a selected deployment threshold. Its
+mathematical-maximum bound cannot reverse the detector ordering. See
+`docs/FROC_ANALYSIS.md` for the fixed protocol and bound.
+
 ## Artifacts and reproduction
 
 The immutable Phase 5 sources for every artifact below are
@@ -258,3 +270,18 @@ suffix. `results/logs/phase35_operating_regime_n5/threshold_summary.json`
 hashes the config, annotations, all ten bundles, source code, and outputs. The
 final Batch 35 summary additionally binds these files to FROC, Pareto, the
 inventory, and the complete n=3-versus-n=5 conclusion table.
+
+The current approved lower-floor FROC reproduction is separately versioned:
+
+```powershell
+& $benchmarkPython -m src.collect_froc_lower_floor_predictions --config configs/evaluation_froc_lower_floor_v4.yaml --source-config configs/evaluation.yaml --prior-config configs/evaluation_froc_lower_floor_v3.yaml --checkpoint-manifest results/checkpoint_release_manifest.json --mode preflight
+& $benchmarkPython -m src.collect_froc_lower_floor_predictions --config configs/evaluation_froc_lower_floor_v4.yaml --source-config configs/evaluation.yaml --prior-config configs/evaluation_froc_lower_floor_v3.yaml --checkpoint-manifest results/checkpoint_release_manifest.json --mode run
+& $benchmarkPython -m src.analyze_exact_score_froc --config configs/froc_exact_score_v4.yaml --mode preflight
+& $benchmarkPython -m src.analyze_exact_score_froc --config configs/froc_exact_score_v4.yaml --mode run
+```
+
+The collector performs inference but never training or weight updates, and it
+changes only the candidate floor. The subsequent exact-score analysis is
+offline. Neither step replaces or reselects the validation-derived 0.69/0.05
+operating thresholds. The original 0.001-bundle analysis remains reproducible
+with `configs/froc_exact_score_v2.yaml`.
