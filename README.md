@@ -77,10 +77,12 @@ localization inference uses the four complete seed pairs 17, 42, 137, and 314.
 All other clean endpoints retain all five attempted seeds.
 
 The defensible trade-off is detection quality versus implementation-specific
-computational cost. Under the documented detector-specific profiling procedure
-on the measured laptop, YOLO11s achieved 60.29 ± 12.62 FPS versus
-20.28 ± 5.62, with 9.43 M parameters versus 43.26 M. On the observed exact-
-score FROC frontier, Faster R-CNN has higher sensitivity at all five
+computational cost. Under the matched decoded-host v1 boundary on the reporting
+laptop, YOLO11s achieved 57.56 FPS versus 20.91 FPS and median latency
+17.29 ms versus 47.20 ms, using the same 100 images and three technical repeats
+of the primary frozen checkpoints. Parameter counts are 9.43 M versus 43.26 M.
+The historical five-run asymmetric profiles remain preserved separately. On the
+observed exact-score FROC frontier, Faster R-CNN has higher sensitivity at all five
 prespecified FP/image operating budgets. User-approved inference at a 0.0001
 candidate floor and then 0.00001 materially narrows the higher-budget gap.
 YOLO11s seed 137 still ends just below 2 FP/image, but even a mathematical-
@@ -269,6 +271,33 @@ If reporting was interrupted after training, use:
 ```powershell
 & $benchmarkPython -m src.models.train_yolo --config configs/yolo.yaml --mode finalize
 ```
+
+## Standardized end-to-end inference timing (Batch 45)
+
+The [v1 protocol](docs/COMPUTE_TIMING.md) starts from decoded host images and
+includes preprocessing, transfer, forward, NMS, coordinate restoration and CPU
+outputs for both detectors, excluding disk I/O. It uses the identical 100-image
+subset, batch 1, 10 warm-up images per detector/repetition, and three complete
+technical repetitions of the seed-17 checkpoints. No training runs.
+
+The exact command used for publication timing on the project's verified laptop
+uses its existing CUDA interpreter (the current repository `.venv` is CPU-only):
+
+```powershell
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.benchmark_inference --config configs/inference_timing_v1.yaml --mode preflight
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.benchmark_inference --config configs/inference_timing_v1.yaml --mode run
+& .\.venv\Scripts\python.exe -m src.benchmark_inference --config configs/inference_timing_v1.yaml --mode verify
+& .\.venv\Scripts\python.exe -m pytest tests/test_inference_timing.py -q --basetemp=tmp/pytest-timing -p no:cacheprovider
+```
+
+`run` refuses to overwrite accepted outputs and refuses non-reporting hardware
+or a mismatched CUDA/framework stack. Use `--mode report` to regenerate tables
+and the figure from verified saved intervals. Full inference reproduction
+requires the hash-matched checkpoints and licensed processed images. For a new
+timing campaign preserve this version and review a new output/protocol version.
+Primary outputs are `results/tables/inference_timing_v1{,_repetitions,_images}.csv`,
+`results/figures/inference_timing_v1.png`, and the summary/environment/historical
+preservation manifest in `results/logs/phase45_inference_timing_v1/`.
 
 ## 5. Train the additional seeds and run the five-seed unified test evaluator
 
@@ -782,11 +811,12 @@ adds exact bindings for central numerical prose and table claims.
 | Paper §4.2 PR/F1 evidence | principal `*_n5_sensitivity` threshold/PR tables and figures; unsuffixed n=3 history retained | offline `src.evaluate_threshold_sweep --mode run` in §5a |
 | Paper §4.2 validation-selected operating points | n=3 validation selection plus `selected_operating_points*_n5_sensitivity.csv` test application | `src.evaluate_threshold_selection` plus offline `src.analyze_operating_regime_sensitivity` in §5b |
 | Paper §4.2 FROC evidence | approved lower-floor bundles and `froc_exact_score_*_v4` curves, prespecified-budget tables, comparisons, bound, figure, and summary; v2/v3 and historical grids retained | inference-only collection plus offline `src.analyze_exact_score_froc --mode run` in §5c |
-| Paper §4.5 Pareto evidence | `pareto_{points,summary}_n5_sensitivity.csv`; `pareto_frontier_n5_sensitivity.png`; n=3 figure retained | offline `src.plot_pareto_frontier --mode run` in §5d |
+| Paper §4.5 table and Figure 5: primary matched timing (Batch 45) | `inference_timing_v1{,_repetitions,_images}.csv`; `inference_timing_v1.png`; Phase 45 summary and preservation manifest | `src.benchmark_inference --mode run` and offline `--mode report`; exact commands in the Batch 45 section above |
+| Paper §4.5 historical Pareto evidence | `pareto_{points,summary}_n5_sensitivity.csv`; `pareto_frontier_n5_sensitivity.png`; n=3 figure retained | offline `src.plot_pareto_frontier --mode run` in §5d; historical asymmetric timing axes |
 | Paper §4.4 five-seed detection calibration and support sensitivity (Batch 33 v2) | `calibration_summary_v2.csv`; `calibration_support_v2.csv`; `calibration_sensitivity_v2.csv`; four v2 figures; Phase 33 summary | offline `src.stats.calibration --mode run` in §5e |
 | Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Supplementary non-standard raw-score utility audit (Batch 30) | `raw_score_threshold_utility_summary.csv`; `raw_score_threshold_utility_sensitivity.png`; Phase 30 summary; exact pre-Batch-30 archives | offline `src.clinical.raw_score_utility --mode run` in §5g |
-| Paper Figure 1 seed-level predictive/compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
+| Paper Figure 1 seed-level predictive/historical-compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
 | Paper §4.6; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
 | Paper §4.7 radiography-motivated synthetic acquisition/display sensitivity (Batch 32) | per-image DICOM audit; pre/post-min-max diagnostics; `radiography_synthetic_shift_results.csv`; Phase 32 summary; unchanged historical bundles | CPU-only `src.robustness.radiography_shifts --mode audit` in §6a |
 | Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
@@ -806,7 +836,9 @@ Every item in the benchmark's Definition of Done is satisfied:
 - [x] **Standardized predictive and compute benchmark.** `src/evaluate.py`
   routes both adapters through the same operating-point matcher and
   pycocotools evaluator; comparison artifacts include accuracy, latency/FPS,
-  parameters, GFLOPs, memory, and training time.
+  parameters, incomplete profiler-registered GFLOPs, memory, and training time.
+  Batch 45 separately replaces primary asymmetric timing with the matched
+  decoded-host v1 protocol, verified on the intended reporting laptop.
 - [x] **Multi-family, multi-severity robustness.** Seven corruption types in
   four families are evaluated at five severities, with raw and clean-relative
   curves and complete result tables.

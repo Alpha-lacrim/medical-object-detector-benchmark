@@ -1,5 +1,12 @@
 # Faster R-CNN Baseline Protocol
 
+**Timing scope update (Batch 45):** This document preserves the original
+baseline compute/training profile. Its inference timer is historical and
+asymmetric across detectors. Primary matched inference timing is now
+[`COMPUTE_TIMING.md`](COMPUTE_TIMING.md); parameter counts and historical
+training measurements below remain unchanged.
+
+
 ## Scope and review gate
 
 Batch 2 trains one seed of the Faster R-CNN baseline. It does not evaluate the

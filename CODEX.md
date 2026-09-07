@@ -19,6 +19,41 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 Newest entries appear first; superseded decisions remain recorded.
 
+- **Matched decoded-host inference timing v1 is primary runtime evidence:**
+  Batch 45 verified the actual ASUS ROG Strix G16/i7-13650HX/16 GB/RTX 4060
+  Laptop GPU reporting machine and the existing Python 3.11.15, Torch
+  2.6.0+cu124, Torchvision 0.21.0+cu124, Ultralytics 8.4.110, CUDA 12.4,
+  cuDNN 90100, driver 610.47 Windows runtime. The repository `.venv` is CPU;
+  publication timing used `C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe`.
+  New `configs/inference_timing_v1.yaml` and `src/benchmark_inference.py` start
+  both detectors from the identical decoded uint8 RGB host image and include
+  resize/letterbox, conversion, transfer, native forward/NMS, source-coordinate
+  restoration and CPU output extraction, excluding disk I/O/decoding. Each
+  frozen seed-17 checkpoint uses the identical hash-ranked 100-image test
+  subset, batch 1, 10 warm-up images per repetition, and three full technical
+  repetitions with alternate model order. Actual convolution dtypes verify
+  float16/bfloat16 AMP; all 600 timed outputs exactly match ordinary file
+  inference under the same explicit AMP, including all counts, labels, boxes
+  and scores. This does not claim parity with historical FP32 YOLO bundles.
+  Accepted Faster R-CNN / YOLO11s totals over 300 calls are 14.3465654 /
+  5.2123790 seconds, FPS 20.91093 / 57.55529, median latency 47.20395 /
+  17.28700 ms, and IQR 1.22010 / 1.19335 ms. Repetitions are technical,
+  not biological/patient/training replicates; no new inferential interval or
+  standardized five-run Pareto frontier is asserted. D-016 and
+  `docs/COMPUTE_TIMING.md` preserve 46 hash-bound historical files in place,
+  keep parameter/training profiles, and retain GFLOPs only as incomplete
+  profiler-registered operations, removing the approximate 21-fold ratio as
+  a headline architecture fact. An initial development trial was excluded
+  because deprecated `half=False` emitted warnings inside each YOLO timer;
+  it remains in ignored `tmp/inference_timing_trial_deprecated_half/`. The
+  corrected `quantize=None` run supplies all publication values. Primary
+  table/Figure 5, manuscript, limitations, README command, claim bindings,
+  scientific manifest and crosswalk are aligned. Verification passes: 357
+  tests plus one declared skip, repository-wide Ruff, 72 scientific artifacts/
+  346 present inputs/201 references, 64 manuscript claims/guards, exact
+  historical preservation, and deterministic offline table/figure rendering.
+  No training, frozen-prediction replacement, commit or push occurred
+  (Session 93 / Batch 45).
 - **RSNA cohort characteristics reported from immutable-split DICOM headers:**
   Batch 44 verified the unchanged 5,000-study train/validation/internal-test
   split (3,500/750/750 studies; 1,492/321/323 NIH patient groups; zero group
@@ -1703,6 +1738,8 @@ Newest entries appear first; superseded decisions remain recorded.
 | `.python-version`, `requirements.txt`, `pyproject.toml`, `uv.lock`, `src/meddet_benchmark/__init__.py` | Exact Python 3.11 / CUDA 12.4 phased-workflow dependency pins, SPDX package-license metadata, and release/package version | D-009 aligns project, package, and lock root at candidate version 2.0.0 |
 | `configs/dataset.yaml` | RSNA paths, class/stratum map, conversion, subset, split, and EDA settings | done |
 | `configs/cohort_characteristics.yaml`, `src/data/cohort_characteristics.py`, `tests/test_cohort_characteristics.py` | Hash- and count-gated aggregate DICOM-header cohort extraction with optional `RSNA_DICOM_ROOT`, explicit age-unit/range policy, privacy guards, and regression tests | Batch 44 complete; reads no pixels, retains no row-level identifiers, and performs no training or inference |
+| `configs/inference_timing_v1.yaml`, `src/benchmark_inference.py`, `tests/test_inference_timing.py` | Matched decoded-host timing protocol, reporting-hardware gate, ordinary-inference parity and offline verifier | Batch 45 complete; inference only, strict batch 1, three technical repeats |
+| `docs/COMPUTE_TIMING.md`, `results/tables/inference_timing_v1*.csv`, `results/figures/inference_timing_v1.png`, `results/logs/phase45_inference_timing_v1/` | Primary timing docs/table/Figure 5, raw intervals, repetition rows, environment and historical preservation manifest | Batch 45 complete on intended RTX 4060 Laptop GPU; 46 historical files unchanged |
 | `configs/yolo.yaml` | Strict YOLO11s data/model/runtime/training/evaluation/profile/artifact config | implemented; smoke, timing gate, full run, and profiling complete |
 | `configs/faster_rcnn.yaml` | Strict Faster R-CNN model/runtime/training/evaluation/profile/artifact config | implemented; timing gate and full run complete |
 | `configs/{faster_rcnn,yolo}_seed{42,137,271,314}.yaml`, `configs/evaluation.yaml` | Seed-only rerun identities and the ten-run Phase 5 evaluation contract | all five seeds per detector trained and evaluated in Batch 16 |
@@ -1792,25 +1829,34 @@ Newest entries appear first; superseded decisions remain recorded.
 
 ## Current phase
 
-**Batch 44 is complete locally on `main`, built on the Batch 42 base
-`8f5c3508ccba3502287709a0848af14040349422`.** The immutable
-5,000-study split and patient mapping remain exact at 3,500/750/750 studies,
-2,136 disjoint NIH patient groups, 1,136 opacity-positive studies, and 1,812
-boxes. Header-only extraction reports 4,999 usable nominal-year ages (median
-49, IQR 36--60; one out-of-range exclusion), 2,362 female/2,638 male studies,
-and 2,363 AP/2,637 PA studies. All age tags lack encoded units, so D-015 and the
-manuscript constrain age interpretation to explicitly caveated aggregate
-description; no fairness or subgroup claim is made. The canonical manuscript,
-supporting docs, six new numerical claim bindings plus a semantic guard,
-67-artifact manifest, and reproduction commands are aligned. All 333 tests
-pass with one declared skip. No training, inference, or split mutation
-occurred. The user authorized one consolidated Batch 43--44 commit in Session
-92; no push was requested. Batch 45 or any later batch, external testing,
-human declarations, checkpoint publication, and the still-unauthorized
-0.000001 FROC run remain out of scope.
+**Batch 45 is complete locally on `main`, based on Batch 43--44 commit
+`21defcfe6a2c25cb7cfbaada0fb255755b9c111d`.** Primary manuscript runtime
+now uses the versioned matched decoded-host boundary, measured on the intended
+reporting laptop without training. The two primary checkpoints were timed on
+100 identical images for three full technical repetitions at batch 1 after
+10 warm-up images per repetition. Faster R-CNN / YOLO11s give 20.91 / 57.56
+FPS and 47.20 / 17.29 ms median latency (IQR 1.22 / 1.19 ms). Every one of
+600 timed outputs exactly agrees with ordinary file inference under the same
+explicit AMP. All 46 protected historical files remain unchanged; old timing
+and Pareto/raincloud panels are labeled historical. The 72-artifact manifest,
+64 numerical claims/semantic guards, 357-test suite plus one declared skip,
+Ruff and timing verifier pass. The exact command, hardware/software and raw
+per-image/repetition provenance are recorded in README and COMPUTE_TIMING.
+No retraining or change to frozen accuracy bundles occurred. The user
+explicitly requested the scoped Batch 45 local commit with the exact message
+`Standardized End-to-End Inference Timing` in Session 94; no push was requested.
+Narrow `.gitattributes` exceptions preserve the new timing artifacts' exact
+bytes so Git normalization cannot invalidate their recorded SHA256 hashes.
+Batch 46 and later work, external testing, author declarations, checkpoint
+publication and further FROC inference remain outside this session.
 
 ## Residual limitations / reproducibility risks
 
+- Batch 45 standardizes timing boundaries but remains one primary checkpoint
+  per detector and one hardware/software state. Three technical timing repeats
+  do not extend training-replicate uncertainty. Different AMP dtypes, native
+  transforms/API overhead, and excluded disk/clinical workflow costs remain
+  explicit. Historical timing/Pareto axes cannot be relabeled as matched v1.
 - Kaggle API/OAuth remains denied on the current route, but it no longer blocks
   Batch 2 because the complete official aggregate archive was acquired manually
   and verified. Future clean acquisitions may still need manual browser download

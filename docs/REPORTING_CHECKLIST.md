@@ -7,9 +7,10 @@ Regenerated after the Batch 37 evidence-alignment rewrite of
 2026-09-02 surgical correction, final submission-readiness wording audit, and
 Batch 42 exact-score FROC lower-bound repair and approved inference
 sensitivity, Batch 43 post-hoc five-run validation threshold sensitivity, and
-Batch 44 aggregate DICOM-header cohort characterization
+Batch 44 aggregate DICOM-header cohort characterization, and Batch 45 matched
++decoded-host inference timing with historical profiling preservation
 (SHA-256
-`5a89a0deb51fa98368662f0e39d242c41e959569ae45c2a7243ef430506a7936`).
+`07efa9df4db8378dfbcf1139dee6739e0cc4bcd44c6b5dec33848702163255d4`).
 
 This audit is against the **current manuscript**,
 [`report/paper_draft.md`](../report/paper_draft.md). It is not an audit of the
@@ -63,7 +64,7 @@ patient-disjoint held-out split is **internal testing**; this study has no
 | 20 | Disjointness level between partitions | Yes | [`paper_draft.md` §3.1](../report/paper_draft.md#31-dataset-target-and-patient-disjoint-split) reports empty NIH patient-key intersections; [`data/manifests/rsna-pneumonia-5000-audit.json`](../data/manifests/rsna-pneumonia-5000-audit.json) is the exact audit artifact. |
 | 21 | Internal-testing sample size and how it was determined | Yes | [`paper_draft.md` §3.1](../report/paper_draft.md#31-dataset-target-and-patient-disjoint-split) reports 750 internal-testing studies/323 patient groups and explicitly states that the 5,000-study cohort was hardware-scoped with no formal sample-size or power calculation. The dedicated row below gives the complete interpretation. |
 | 22 | Sufficient model detail to reconstruct inputs, outputs, and architecture | Yes | [`paper_draft.md` §3.2](../report/paper_draft.md#32-detector-pipelines-and-controlled-training-factors), [`src/models/faster_rcnn_model.py`](../src/models/faster_rcnn_model.py), [`src/models/yolo_training.py`](../src/models/yolo_training.py), and [`configs/`](../configs/) identify the implemented pipelines and configuration-derived outputs. |
-| 23 | Software versions and hardware | Yes | [`paper_draft.md` §§3.2 and 3.7](../report/paper_draft.md#37-compute-and-pareto-analysis), [`uv.lock`](../uv.lock), and [`results/logs/phase5_evaluation/summary.json`](../results/logs/phase5_evaluation/summary.json) record versions and the measured system. |
+| 23 | Software versions and hardware | Yes | [`paper_draft.md` §§3.2 and 3.7](../report/paper_draft.md#37-compute-and-pareto-analysis), [`uv.lock`](../uv.lock), the [matched v1 timing summary](../results/logs/phase45_inference_timing_v1/summary.json), and the [historical evaluation summary](../results/logs/phase5_evaluation/summary.json) record versions and the measured system. Batch 45 verifies the intended reporting hardware and distinguishes technical repeats from training runs. |
 | 24 | Parameter initialization | Yes | [`paper_draft.md` §3.2](../report/paper_draft.md#32-detector-pipelines-and-controlled-training-factors), [`configs/faster_rcnn.yaml`](../configs/faster_rcnn.yaml), and [`configs/yolo.yaml`](../configs/yolo.yaml) record COCO initialization and the canonical seed; seed-specific configs and model-loader code record the remaining seeds and head adaptation. |
 | 25 | Training, augmentation, stopping, hyperparameters, objectives, and frozen parameters | Yes | [`paper_draft.md` §3.2](../report/paper_draft.md#32-detector-pipelines-and-controlled-training-factors), [`configs/faster_rcnn.yaml`](../configs/faster_rcnn.yaml), [`configs/yolo.yaml`](../configs/yolo.yaml), and per-run `resolved_config.json` files indexed in [`SUPPLEMENTARY.md` S2](SUPPLEMENTARY.md#s2-full-clean-seed-level-comparison) provide the exact record. |
 | 26 | Final-model selection | Yes | [`paper_draft.md` §§3.2--3.3](../report/paper_draft.md#33-seedrun-design-and-unified-internal-testing) reports model-optimization-split mAP selection before frozen internal testing; per-run checkpoint metadata are indexed in [`SUPPLEMENTARY.md` S2](SUPPLEMENTARY.md#s2-full-clean-seed-level-comparison). |

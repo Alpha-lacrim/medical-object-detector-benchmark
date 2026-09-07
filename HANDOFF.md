@@ -25,6 +25,131 @@
 
 ---
 
+## Session 94 - 2026-09-07 - Commit completed Batch 45 work
+
+**What I did:**
+- At the user's explicit request, prepared one scoped commit of the completed
+  Batch 45 implementation, tests, publication timing artifacts, documentation,
+  manuscript/provenance updates, and session state on top of
+  `21defcfe6a2c25cb7cfbaada0fb255755b9c111d`.
+- Used the user's exact commit message:
+  `Standardized End-to-End Inference Timing`.
+- Included the 29 Batch 45 paths enumerated by Session 93 and narrow
+  `.gitattributes` rules preserving exact generated timing CSV/JSON/environment
+  bytes. The repository's default LF normalization would otherwise change
+  these new artifacts in the commit and invalidate their recorded SHA256s.
+  Unrelated
+  untracked specifications, review notes, orchestration records, historical
+  aborted/smoke logs, and the ignored development timing trial stay outside
+  the commit. No push was requested or performed.
+- Rechecked the staged inventory and Git whitespace. The final commit hash is
+  reported in the session response because a commit cannot contain its own
+  resulting hash. Batch 45 verification remains as recorded in Session 93;
+  no code, timing values, or scientific conclusions changed in this operation.
+
+**What's still incomplete / next step:**
+- No push. Batch 46 and later work remain outside this session.
+- A broader read-only index check exposed a pre-existing serialization issue:
+  the scientific manifest's `train.csv` hash matches its working-tree bytes
+  but differs from the Git-stored LF blob. Both that binding and blob predate
+  this commit and were left unchanged. Audit this separately; all new Batch 45
+  inputs/outputs and their index hashes are checked within this commit's scope.
+
+**Needs the user's review before proceeding:**
+- None for this explicitly requested Git operation; Session 93 records the
+  remaining scientific interpretation and scope limitations.
+
+**Files touched:**
+- `CODEX.md`, `HANDOFF.md`, and `.gitattributes`; the other committed Batch 45
+  files are those listed in Session 93.
+
+## Session 93 - 2026-09-07 - Batch 45 standardized end-to-end inference timing
+
+**What I did:**
+- Passed the prerequisite gate by auditing both historical profiling functions,
+  all ten compute CSVs/training summaries, immutable checkpoint hashes and the
+  intended reporting hardware. The real ASUS ROG Strix G16/i7-13650HX/16 GB/
+  RTX 4060 Laptop GPU environment is available. Publication timing used its
+  existing `C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe`; the repository
+  `.venv` has CPU Torch and was used for tests/offline verification only.
+- Documented the exact historical asymmetric boundary and algebraically
+  reconstructed its available elapsed totals from mean latency and image
+  count. Preserved 46 historical files by SHA256, including all compute tables,
+  summary/config sources, split/annotations, timing code, comparison tables,
+  and old Pareto/raincloud figures. No historical value was overwritten.
+- Implemented strict versioned `decoded-host-to-source-detections-v1` with
+  config-driven 100-image deterministic SHA256-ranked test subset, batch 1,
+  10 warm-up images per detector/repetition, and three full repetitions with
+  alternating model order. Both start from the same decoded uint8 RGB host
+  source and include native resize/letterbox, tensor conversion, H2D, forward,
+  postprocessing/NMS, source-box restoration and CPU detection extraction.
+  Explicit CUDA synchronization brackets every timer; disk I/O/decoding,
+  model setup/fusion, references and result checks/writes are outside timing.
+- Verified actual float16/bfloat16 convolution AMP dtypes. Ordinary reference
+  inference independently reads source files under identical explicit AMP and
+  postprocessing. All 600 timed-image comparisons pass with exactly equal
+  detection counts, category labels, box coordinates and scores; each repeat
+  checks 2,471 Faster R-CNN and 165 YOLO11s detections. Historical FP32 YOLO
+  evaluation bundles are unchanged and are not claimed as the AMP reference.
+- Accepted totals over 300 calls per detector are Faster R-CNN 14.3465654 s and
+  YOLO11s 5.2123790 s; FPS 20.91093 / 57.55529; median latency 47.20395 /
+  17.28700 ms; image-latency IQR 1.22010 / 1.19335 ms. Recorded raw per-image
+  times/agreement, each repetition, aggregate table, figure, source/image/
+  checkpoint/environment hashes, hardware/CUDA/framework versions, and GPU
+  telemetry. Three repetitions are technical timing repeats, not biological,
+  patient or training replicates, and supply no inferential confidence interval.
+- Excluded a first development trial because deprecated `half=False` printed
+  warnings inside every YOLO timed call. Preserved that diagnostic in ignored
+  `tmp/inference_timing_trial_deprecated_half/`, corrected to `quantize=None`,
+  and reran the complete protocol; the accepted artifact uses only that clean
+  run, without selecting repetitions based on speed.
+- Updated the primary manuscript timing table/Figure 5, abstract, methods,
+  discussion, limitations, D-016, compute/baseline/Pareto documentation,
+  supplementary/reproducibility/checklist/traceability, README exact command,
+  claim sources and scientific manifest. Parameter counts and training
+  profiles remain; GFLOPs are explicitly incomplete profiler-registered
+  operations and the approximate 21-fold ratio is no longer a headline fact.
+- Verification passes: 24 timing tests and full 357-test suite with one expected
+  metadata-only-environment skip; repository-wide Ruff format/lint; 72
+  scientific artifacts, 346 present inputs and 201 referenced results; 64
+  numerical paper claims and all semantic guards; historical SHA preservation;
+  raw timing/statistics verifier; visually inspected figure; identical hashes
+  after offline table/figure regeneration; and Git whitespace. No training,
+  checkpoint/prediction replacement, staging, commit or push occurred.
+
+**What's still incomplete / next step:**
+- Batch 45 is complete and stops here. Review the new primary matched timing
+  and the explicit same-AMP ordinary-reference scope. No local user timing
+  action remains because the intended reporting machine was available and
+  measured successfully in this session.
+- Run only the next separately requested batch after review. Five-run matched
+  timing, a standardized five-run Pareto frontier, external work, human author
+  declarations, checkpoint release, and later FROC work remain out of scope.
+
+**Needs the user's review before proceeding:**
+- Review D-016 and the manuscript's replacement of the asymmetric main runtime
+  comparison by one-checkpoint matched timing with technical repetitions.
+  YOLO11s remains faster (2.75-fold aggregate FPS here); incomplete operation
+  counts are supplementary. Different AMP dtypes and native API costs remain
+  explicit measurement limits.
+
+**Files touched:**
+- `configs/inference_timing_v1.yaml`, `src/benchmark_inference.py`,
+  `tests/test_inference_timing.py`, and `docs/COMPUTE_TIMING.md`
+- `results/tables/inference_timing_v1.csv`,
+  `results/tables/inference_timing_v1_images.csv`,
+  `results/tables/inference_timing_v1_repetitions.csv`,
+  `results/figures/inference_timing_v1.png`, and
+  `results/logs/phase45_inference_timing_v1/`
+- `README.md`, `docs/DECISION_LOG.md`, `docs/FASTER_RCNN_BASELINE.md`,
+  `docs/YOLO_BASELINE.md`, `docs/QUANTITATIVE_COMPARISON.md`,
+  `docs/PARETO_ANALYSIS.md`, `docs/HYPOTHESIS_TRACEABILITY.md`,
+  `docs/LIMITATIONS.md`, `docs/REPORTING_CHECKLIST.md`,
+  `docs/REPRODUCIBILITY.md`, and `docs/SUPPLEMENTARY.md`
+- `report/paper_draft.md`, `report/paper_claim_sources.yaml`,
+  `scripts/build_scientific_artifact_manifest.py`,
+  `results/scientific_artifact_manifest.json`, `CODEX.md`, and `HANDOFF.md`
+
 ## Session 92 - 2026-09-07 - Commit completed Batch 43--44 work
 
 **What I did:**

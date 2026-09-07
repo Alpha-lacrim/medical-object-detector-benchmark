@@ -261,16 +261,30 @@ negative, 323 patient groups; 22.533% image-level prevalence), not a deployment
 prevalence sample. Full classification and archive provenance are in
 [`DCA_ANALYSIS.md`](DCA_ANALYSIS.md).
 
-Registered-operation GFLOPs omit unsupported operations and are estimates, not
-direct hardware timings. Synchronized batch-1 speed profiles include each
-framework's native detector forward and postprocessing, but Faster R-CNN
-resizing occurs inside its timed model forward while YOLO tensor resizing occurs
-before timing. FPS is therefore an implementation-specific deployment
-comparison between these documented pipelines on the measured laptop, not an
-architecture-general claim or a pure kernel benchmark. The external Anaconda
-environment used for the measured runs is captured by run-level package and
-hardware snapshots, but exact timing can still vary with GPU power state,
-driver, and system load.
+Batch 45's matched v1 boundary includes resize/letterbox, tensor conversion,
+host-to-device transfer, forward, native postprocessing/NMS, coordinate
+restoration, and CPU detection extraction for both models, starting from the
+same decoded source image in host memory and excluding disk I/O/decoding.
+The preserved historical profiles place resize differently and omit YOLO
+source-coordinate restoration; those timings and old Pareto/raincloud timing
+axes are historical, not the new primary runtime evidence.
+
+Matched timing still conditions on one frozen seed-17 checkpoint per detector,
+the same 100 selected test images, batch 1, different configured AMP dtypes,
+native transforms/API overhead, one Torch CPU thread, and one laptop/software
+stack. Three technical repetitions are not independent biological, patient,
+or training replicates and provide no between-training/hardware uncertainty.
+Identical same-AMP ordinary-reference predictions verify the boundary change;
+they do not assert equivalence to historical FP32 YOLO evaluation bundles.
+Power state, thermals, driver, and system load can change latency. Disk/DICOM
+decoding, networking, PACS and clinical workflow remain outside measurement.
+
+Parameter counts and historical training profiles remain valid with their
+original scope. GFLOPs are only incomplete profiler-registered operations,
+omitting unsupported work such as RoIAlign, NMS and bookkeeping; the historical
+approximate 21-fold count ratio is not an architecture-level efficiency fact.
+Details, raw timings and reproduction commands are in
+[`COMPUTE_TIMING.md`](COMPUTE_TIMING.md).
 
 ## Robustness scope
 

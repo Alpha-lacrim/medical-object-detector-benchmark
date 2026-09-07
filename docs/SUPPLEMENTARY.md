@@ -1,5 +1,16 @@
 # Supplementary Materials Index
 
+**Primary runtime update (Batch 45):** [Matched v1 timing protocol](COMPUTE_TIMING.md),
+[aggregate table](../results/tables/inference_timing_v1.csv),
+[complete repetitions](../results/tables/inference_timing_v1_repetitions.csv),
+[raw per-image times/agreement](../results/tables/inference_timing_v1_images.csv),
+and [provenance summary](../results/logs/phase45_inference_timing_v1/summary.json)
+replace the main asymmetric timing comparison. Three technical repeats are not
+training replicates. Compute timing panels in the older seed-level/raincloud
+and Pareto artifacts below are historical; profiler GFLOPs are incomplete
+registered-operation counts only.
+
+
 This index keeps exhaustive machine-readable evidence outside the narrative
 report. It is pointer-style by design: values should be quoted from the linked
 artifacts, not copied into another manually maintained table. Scope labels are

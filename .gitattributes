@@ -1,2 +1,7 @@
 * text=auto eol=lf
 *.pdf binary
+
+# Batch 45 timing provenance hashes bind the exact generated artifact bytes.
+results/tables/inference_timing_v1*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+results/logs/phase45_inference_timing_v1/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+results/logs/phase45_inference_timing_v1/pip_freeze.txt -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

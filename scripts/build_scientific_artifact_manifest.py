@@ -123,6 +123,16 @@ CHECKPOINT_INPUTS = tuple(
     for record in _CHECKPOINT_RELEASE["checkpoints"]
 )
 
+_TIMING_V1 = json.loads(
+    (ROOT / "results/logs/phase45_inference_timing_v1/summary.json").read_text(encoding="utf-8")
+)
+TIMING_V1_INPUTS = tuple(
+    external(path, digest)
+    if path.startswith(("data/processed/", "results/checkpoints/"))
+    else InputSpec(path, sha256=digest)
+    for path, digest in _TIMING_V1["source_sha256"].items()
+) + tuple(external(row["source_path"], row["sha256"]) for row in _TIMING_V1["subset"])
+
 
 def spec(
     path: str,
@@ -150,6 +160,28 @@ def spec(
 
 
 SPECS = (
+    spec(
+        "results/logs/phase45_inference_timing_v1/summary.json",
+        "src/benchmark_inference.py",
+        "configs/inference_timing_v1.yaml",
+        TIMING_V1_INPUTS,
+        "Phase 45 - matched decoded-host inference timing v1",
+        "checkpoint_inference",
+        gpu=True,
+        references=tuple(_TIMING_V1["output_sha256"]),
+    ),
+    *(
+        spec(
+            path,
+            "src/benchmark_inference.py",
+            "configs/inference_timing_v1.yaml",
+            (committed("results/logs/phase45_inference_timing_v1/summary.json"),),
+            "Phase 45 - matched decoded-host inference timing v1",
+            "checkpoint_inference" if path.endswith("_images.csv") else "committed_analysis",
+            gpu=path.endswith("_images.csv"),
+        )
+        for path in _TIMING_V1["output_sha256"]
+    ),
     spec(
         "data/manifests/rsna-pneumonia-5000-audit.json",
         "src/data/prepare.py",

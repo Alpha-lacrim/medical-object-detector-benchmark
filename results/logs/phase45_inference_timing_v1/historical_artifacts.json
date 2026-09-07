@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "status": "preserved in place; SHA256 checked before and after v1",
+  "files": {
+    "configs/dataset.yaml": "419ed20987cce95c61f7806d0913f09b9d3452df5e0b1ac2c091f8e6ff109693",
+    "configs/evaluation.yaml": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69",
+    "configs/faster_rcnn.yaml": "ef1e3ebe1fbe3cf1a6e27bf8b9c12f61719c2ea8771c9758f64dc278dd0e2633",
+    "configs/faster_rcnn_seed137.yaml": "77dd468667f86ae34b48718f2fd9197a2334f9eec09eed75184ac9557e3d8279",
+    "configs/faster_rcnn_seed271.yaml": "1374056522f088d22609d5ea0da490de880f48e0e4841ace0f0a6ee6861fbaa7",
+    "configs/faster_rcnn_seed314.yaml": "b20dfe1ebc6355cf6921fc59d86271f0abd74e9046d359930e2d5bb76c106eb7",
+    "configs/faster_rcnn_seed42.yaml": "c632ca100199787bb681e23fb8f3ac4426cfcd288537b1256bcef201e0af7464",
+    "configs/yolo.yaml": "5a9bd54c730a42db166d8e5c7075f863f914b5be7c66567f5bc91a70b50ef8d2",
+    "configs/yolo_seed137.yaml": "f726b54408681308eb149d7bb11eec17ed1c33f5f5c93233425b11cbf9bf38e5",
+    "configs/yolo_seed271.yaml": "15f40539b0091892a6d3f168b0c2813b903ee87123cba4725b14889963b0c41b",
+    "configs/yolo_seed314.yaml": "d436f4f635bbbaa6a0719eab1f158de1c81a744749a684f171b29c81da43cdbb",
+    "configs/yolo_seed42.yaml": "303a26c5debb26cadfc703d2d571d2f9507d5da636d1829e46a2d35dc9fb18b3",
+    "data/processed/rsna-pneumonia-5000/annotations/instances_test.json": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+    "data/splits/rsna-pneumonia-5000/test.csv": "6b5890343e34ae568b97d7034c29fb8fa75df43517cc3691a5f912292c2f4534",
+    "results/figures/pareto_frontier_n5_sensitivity.png": "05bd7041c38829ebc7836f51fafa347a0cff5dc23874616bfba62ac46030c3c7",
+    "results/figures/raincloud_metrics.png": "0ffdfcf0667c752dfe43bac413caf0202991b5466bc7c322b9e6d33f1128ea4c",
+    "results/logs/faster_rcnn_rsna_seed137_full/summary.json": "0fcc29abbfdf83209cb1011846c980d0fd22dcef1b515fe54abb6085c1e3402b",
+    "results/logs/faster_rcnn_rsna_seed17_benchmark/benchmark_estimate.json": "232460ae09827dfb780b0f5c6506bf9f545bbdc0e1483082c2c440035e8e8e8b",
+    "results/logs/faster_rcnn_rsna_seed17_full/summary.json": "737445617ea01b3f2843ff7b01feadf31af689a023b41e817aeb37a27bf24934",
+    "results/logs/faster_rcnn_rsna_seed271_full/summary.json": "9058968e0c8df21bf9e0c6cfd4113ec0b1b07f3b61da2f8b9b2ab386bf3d712b",
+    "results/logs/faster_rcnn_rsna_seed314_full/summary.json": "2065a3d4bd3446959cde5ab7f8b27353005502fe02c2e6c8b9ebdfaa3b12c8eb",
+    "results/logs/faster_rcnn_rsna_seed42_full/summary.json": "7c0f47b4c54141ea2775cc642118c84097ba06a2c538d49c6cbdd7eac1ad6bd0",
+    "results/logs/yolo11s_rsna_seed137_full/summary.json": "0c7da6351399d2a3a55f852108a382d1c916351e5ee6a2cefb1b659c622414f3",
+    "results/logs/yolo11s_rsna_seed17_benchmark/benchmark_estimate.json": "c339db91c05b1c8a1398dbbdcc7470ef1fd1932ddf1c374a87529faca45e1587",
+    "results/logs/yolo11s_rsna_seed17_full/summary.json": "41ff2eb32c00599320164346ec65e4ca38e6953ce2c70654111522cbaf7ac910",
+    "results/logs/yolo11s_rsna_seed271_full/summary.json": "349d7d8a9998a78c8fc866741ded96cb6f3501ceb6a1c5824b117e78b63584e3",
+    "results/logs/yolo11s_rsna_seed314_full/summary.json": "d9380547070c429383e4cfaae93dcdff5a6e92a6bf329fa210594abc435d903b",
+    "results/logs/yolo11s_rsna_seed42_full/summary.json": "8edc715bf3ac26d9c5da69c85e338bb5027082f96a6a3c151bc5d30e0abd31db",
+    "results/tables/detector_comparison.csv": "c5f3181845d1fd3ea84ce39c1b8329080a8108217e5eee13281ae75f129818a1",
+    "results/tables/detector_comparison_mean_std.csv": "1f40b5da4894d4b24cc2332423a7f229ba2d14c695cc7e481011fac27701081c",
+    "results/tables/detector_comparison_per_seed.csv": "5d2bd5c1f2e2a6f666efbde49c9d6c30d047cb25e8326f5f90052233c14374e4",
+    "results/tables/faster_rcnn_compute.csv": "0362d401c73e4f75c70c1a65f707ff77bf13aeee98b827f0815336e3ea2497bb",
+    "results/tables/pareto_summary_n5_sensitivity.csv": "495a166cc974c31ebc1c8ceb5fdbafe3c659b4429b440d02063310c326944261",
+    "results/tables/seeds/faster_rcnn_seed137_compute.csv": "e1ed2029563213f618d67d51985d9b9247115df887a3526ceb74a74611b968c5",
+    "results/tables/seeds/faster_rcnn_seed271_compute.csv": "4a3d613669c57af2fa91964526a70842f8e67503c661990de36810ea8dee285d",
+    "results/tables/seeds/faster_rcnn_seed314_compute.csv": "12ad0daa55a6e8618f0b686de6fe535dc263460b31719402e31c53f29de208a9",
+    "results/tables/seeds/faster_rcnn_seed42_compute.csv": "9f9fa3029561241df69c1d538188a9b6195c776ed1c598c945375520e2da6a81",
+    "results/tables/seeds/yolo_seed137_compute.csv": "b9d7c1cc24e2a2f726fc078e48f0b33bf076ee4bb1cfd1b66866a6c21ac633b5",
+    "results/tables/seeds/yolo_seed271_compute.csv": "00fde393a25edd11c55528a077fbe3d9f13e8de071e71d0524097cc6a507569f",
+    "results/tables/seeds/yolo_seed314_compute.csv": "3a3238d301d01a28118d609a074b4bdc7489c1b87c07e86c162a826a9e8137eb",
+    "results/tables/seeds/yolo_seed42_compute.csv": "833d220e80079c766137fc4e13bf160ad3fa0a08a8e1e3cda417ab4de45c8406",
+    "results/tables/yolo_compute.csv": "8be0c3d8813140fa7616ef940e45a683248c193f2a13de561a58cc4b9d75e855",
+    "src/evaluate.py": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+    "src/models/faster_rcnn_data.py": "29be9d6bcbb88ffc325627be8277a1e58c4e682cab25cbc653b155e2b6284ce2",
+    "src/models/train_faster_rcnn.py": "c52cb9b9b34b6756ba44e922f5ef1acf1e0b4de9155925e2728e44fcbc46be54",
+    "src/models/yolo_reporting.py": "ae55037edd443980ba9f804984b500c1beec7761aad6e600fca91b825585acb3"
+  },
+  "historical_rows": [
+    {
+      "detector": "faster_rcnn",
+      "seed": 17,
+      "table": "results/tables/faster_rcnn_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 10.99924161328444,
+      "historical_mean_latency_ms": 90.91535900004601,
+      "total_elapsed_seconds_reconstructed": 9.091535900004601
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 42,
+      "table": "results/tables/seeds/faster_rcnn_seed42_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 21.82265379586596,
+      "historical_mean_latency_ms": 45.82394099976227,
+      "total_elapsed_seconds_reconstructed": 4.582394099976227
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 137,
+      "table": "results/tables/seeds/faster_rcnn_seed137_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 19.452296093383364,
+      "historical_mean_latency_ms": 51.40781300055096,
+      "total_elapsed_seconds_reconstructed": 5.140781300055096
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 271,
+      "table": "results/tables/seeds/faster_rcnn_seed271_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 25.189607211318666,
+      "historical_mean_latency_ms": 39.698912000130804,
+      "total_elapsed_seconds_reconstructed": 3.9698912000130804
+    },
+    {
+      "detector": "faster_rcnn",
+      "seed": 314,
+      "table": "results/tables/seeds/faster_rcnn_seed314_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 23.911384600007917,
+      "historical_mean_latency_ms": 41.82108299992251,
+      "total_elapsed_seconds_reconstructed": 4.182108299992251
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 17,
+      "table": "results/tables/yolo_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 65.23862363925694,
+      "historical_mean_latency_ms": 15.32834300014656,
+      "total_elapsed_seconds_reconstructed": 1.532834300014656
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 42,
+      "table": "results/tables/seeds/yolo_seed42_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 46.73798758971339,
+      "historical_mean_latency_ms": 21.39587199984817,
+      "total_elapsed_seconds_reconstructed": 2.139587199984817
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 137,
+      "table": "results/tables/seeds/yolo_seed137_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 46.85646534019647,
+      "historical_mean_latency_ms": 21.34177199965052,
+      "total_elapsed_seconds_reconstructed": 2.134177199965052
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 271,
+      "table": "results/tables/seeds/yolo_seed271_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 69.58353903918123,
+      "historical_mean_latency_ms": 14.371215000101074,
+      "total_elapsed_seconds_reconstructed": 1.4371215000101074
+    },
+    {
+      "detector": "yolo11s",
+      "seed": 314,
+      "table": "results/tables/seeds/yolo_seed314_compute.csv",
+      "timed_images": 100,
+      "historical_fps": 73.0324901110146,
+      "historical_mean_latency_ms": 13.692535999798565,
+      "total_elapsed_seconds_reconstructed": 1.3692535999798565
+    }
+  ],
+  "raw_timing_note": "Per-image historical timing vectors are not stored in the compute CSVs. Total elapsed is algebraically reconstructed from mean latency and timed-image count, not a new measurement. YOLO seed-17 summary also records total_seconds=1.532834300014656.",
+  "boundaries": {
+    "faster_rcnn": "Decoded RGB float tensor already on GPU; timed complete Torchvision transform including resize/normalize, forward, RPN/final NMS and restoration to source size. Decode, tensor conversion, H2D and CPU output extraction excluded.",
+    "yolo11s": "Decoded RGB float tensor already resized to 640 square and on GPU; timed fused bfloat16 model forward and native NMS. Decode, resize, tensor conversion, H2D, coordinate restoration and CPU output extraction excluded."
+  },
+  "ordinary_evaluator_timing": "Phase 5 evaluation_fps is a separate audit: Faster starts after tensor H2D; YOLO file-based predict includes disk decode. Neither replaces matched timing."
+}

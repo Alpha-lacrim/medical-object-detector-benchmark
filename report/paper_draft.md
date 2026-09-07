@@ -30,10 +30,9 @@ positions, and mean mAP@0.5:0.95 was 0.0995 versus 0.0542. On the observed
 exact-score frontier, Faster R-CNN had higher sensitivity at all five
 prespecified FP/image operating budgets. One YOLO11s run ended just below
 2 FP/image at the 0.00001 floor, but a mathematical-maximum bound could not
-reverse the detector ordering. Under the documented detector-specific
-profiling procedure on the measured laptop, YOLO11s achieved approximately
-3-fold higher measured throughput, 78% fewer parameters, and about 21-fold
-fewer estimated registered operations. One retained YOLO11s run emitted no
+reverse the detector ordering. Matched decoded-host timing on the reporting laptop, using one frozen
+checkpoint per detector and three technical repetitions, yielded
+2.75-fold higher throughput for YOLO11s; it retained 78% fewer parameters. One retained YOLO11s run emitted no
 detections at its frozen 0.05 threshold, giving zero precision, recall, and F1,
 yet had mAP@0.5:0.95 of 0.05558 from lower-score retained predictions.
 Detection-specific calibration error was descriptively higher for YOLO11s
@@ -472,14 +471,52 @@ did not fit a calibrator, freeze an outcome-probability mapping, or rerun DCA.
 
 ### 3.7 Compute and Pareto analysis
 
-Compute profiles used batch-1 mixed-precision inference, 10 warm-up images, 100
-timed images, and CUDA synchronization on an RTX 4060 Laptop GPU. We recorded
-FPS, latency, parameters, training time, peak allocated memory, and estimated
-registered-operation GFLOPs. The FLOP counter included registered convolution,
-matrix, and batch-matrix operations but omitted unsupported work; measured
-latency was therefore the primary runtime-efficiency measure. Faster R-CNN
+The primary runtime protocol, `decoded-host-to-source-detections-v1`, starts
+with the same decoded uint8 RGB source image in host memory for both detectors.
+It includes resize/letterbox, tensor conversion, host-to-device transfer, model
+forward, native postprocessing/NMS, source-coordinate restoration, and CPU
+extraction of boxes, scores, and labels. It excludes disk I/O and decoding.
+CUDA synchronization immediately precedes the start clock and the stop clock.
+The fixed, label-independent subset contains 100 internal-test images ranked
+by SHA256 of seed 17 and filename; both models see the identical ordered images.
+Each frozen seed-17 checkpoint is measured at batch 1 for three complete
+repetitions, with 10 warm-up images per detector before each repetition and
+alternating detector order. Model loading/fusion and ordinary-reference
+inference are excluded. The common candidate floor is 0.001, NMS IoU is 0.50,
+and the cap is 100 detections. This runtime floor does not change any frozen
+accuracy analysis or detector-specific operating threshold.
+
+The verified reporting hardware is an ASUS ROG Strix G16, i7-13650HX, 16 GB
+RAM, and RTX 4060 Laptop GPU with 8 GB VRAM. The pinned stack is Python
+3.11.15, Torch 2.6.0+cu124, Torchvision 0.21.0+cu124, Ultralytics 8.4.110,
+CUDA build 12.4, cuDNN 90100, and driver 610.47 on Windows. Explicit AMP uses
+float16 for Faster R-CNN and bfloat16 for YOLO11s; convolution hooks verify
+the active dtypes. Both models are resident, Torch uses one CPU thread, TF32
+and cuDNN benchmarking are disabled, and deterministic algorithms are enabled.
+The native transforms and Python prediction API overhead remain included.
+
+Every timed output is checked against ordinary file-based native inference
+under identical explicit AMP and postprocessing: detection counts and labels
+must match exactly, with box/score absolute tolerances of 0.01 source pixels
+and 0.00001, respectively, and relative tolerance 0.00001. Ultralytics'
+`amp=True` prediction argument alone does not enable inference autocast; v1
+therefore explicitly wraps both its timed and ordinary-reference calls in
+bfloat16 autocast. Agreement is not claimed against the historical FP32 YOLO
+evaluation bundles, which remain unchanged. Total elapsed sums timed image
+intervals, FPS divides calls by that sum, and median/Q1/Q3/IQR describe pooled
+image latencies; each repetition is also reported separately. Timing
+repetitions are technical repeats, not independent biological or training
+replicates, and do not supply inferential confidence intervals.
+
+Historical profiles are preserved separately. Faster R-CNN
 resizing occurred inside its timed forward, whereas YOLO tensor resizing
-occurred before timed forward-plus-NMS.
+occurred before timed forward-plus-NMS. Both excluded tensor conversion and
+host-to-device transfer; the historical YOLO profile also omitted source-box
+restoration. Those asymmetric speeds are superseded as primary runtime
+evidence. Parameter counts and historical training profiles remain available.
+The frozen GFLOP values describe incomplete profiler-registered operations:
+registered convolution/matrix work omits unsupported work such as RoIAlign,
+NMS, and much bookkeeping. Their ratio is not an architecture-level claim.
 
 The frozen historical n=3 Pareto analysis and a separately labeled n=5
 sensitivity paired run-specific AP or validation-selected internal-testing recall with
@@ -654,7 +691,7 @@ The raincloud summary in Figure 1 visualizes the full clean seed distributions
 and labels the actual finite n in each panel. The n=3 historical threshold data
 are not mixed into it.
 
-![Figure 1. Five-attempt clean predictive and compute distributions. Conditional YOLO11s IoU and Dice use four finite seeds; every other endpoint uses five seeds per detector.](../results/figures/raincloud_metrics.png)
+![Figure 1. Five-attempt clean predictive distributions with preserved historical compute panels. Conditional YOLO11s IoU and Dice use four finite seeds; other endpoints use five. The timing panels retain the historical asymmetric profiles; primary matched runtime evidence is in Figure 5, and the operation panels are incomplete profiler-registered counts.](../results/figures/raincloud_metrics.png)
 
 ### 4.2 Operating-regime sensitivity (internal-testing n=5; historical selection n=3)
 
@@ -797,27 +834,51 @@ population.
 
 ![Figure 4. Confidence-only marginal reliability diagrams for all five runs per detector. This one-dimensional visual is not a visualization of all five D-ECE dimensions.](../results/figures/reliability_diagrams_confidence_marginal_v2.png)
 
-### 4.5 Compute and Pareto sensitivity (n=5 per detector)
+### 4.5 Standardized inference timing and historical Pareto sensitivity
 
-YOLO11s was the computationally lighter pipeline on the measured laptop. Mean
-throughput was 60.29 +/- 12.62 FPS versus 20.28 +/- 5.62 for Faster R-CNN; mean
-latency was 17.23 +/- 3.83 versus 53.93 +/- 21.15 ms/image. YOLO11s had 9.43
-million parameters versus 43.26 million, 21.42 versus 450.76 estimated
-registered-operation GFLOPs/image, 1,148.16 versus 1,556.89 MiB peak allocated
-training memory, and 1,544.75 versus 6,661.01 seconds mean training time across
-five seeds.
+The matched v1 protocol measured Faster R-CNN at 20.91 FPS and YOLO11s at
+57.56 FPS. Pooled median image latencies were 47.20 and 17.29 ms, respectively
+(Figure 5). The table pools three complete 100-image repetitions per frozen
+checkpoint; dispersion is image-latency IQR, not training-run SD.
 
-The n=5 Pareto sensitivity preserved the opposing directions. Every Faster
-R-CNN run had higher AP while every YOLO11s run had higher throughput; the same
+| Matched v1 metric | Faster R-CNN | YOLO11s |
+|---|---:|---:|
+| Total timed elapsed, 300 calls (s) | 14.3466 | 5.2124 |
+| FPS (300 / total elapsed) | 20.91 | 57.56 |
+| Median image latency (ms) | 47.20 | 17.29 |
+| Q1--Q3 image latency (ms) | 46.78--48.00 | 16.68--17.88 |
+| IQR image latency (ms) | 1.22 | 1.19 |
+| Total parameters | 43,256,153 | 9,428,179 |
+| Training-trainable parameters | 43,030,809 | 9,428,163 |
+
+All 600 timed-image checks agreed exactly with ordinary inference in counts,
+category labels, boxes, and scores; per repetition this covered 2,471 Faster
+R-CNN and 165 YOLO11s detections. Per-repetition FPS was
+21.18/20.58/20.99 for Faster R-CNN and 58.55/57.60/56.55 for YOLO11s.
+These are technical repetitions of one checkpoint per detector, not a new
+training-replicate analysis. The machine-readable source is
+`results/tables/inference_timing_v1.csv`; full protocol, individual repetitions,
+raw intervals, and provenance are indexed in `docs/COMPUTE_TIMING.md`.
+
+Historical five-run training profiles remain 1,556.89 versus 1,148.16 MiB peak
+allocated training memory and 6,661.01 versus 1,544.75 seconds mean training
+time, Faster R-CNN versus YOLO11s. The historical 450.76 and 21.42 GFLOPs/image
+are incomplete profiler-registered operations, retained as supplementary
+profiling evidence rather than a headline architecture-efficiency ratio.
+
+The historical n=5 Pareto sensitivity preserved opposing directions under
+its original asymmetric timers. Every Faster R-CNN run had higher AP while
+every YOLO11s run had higher historically measured throughput; the same
 trade-off appeared for AP versus parameters and frozen-threshold recall versus
-latency or registered operations. Recall was 0.3507 +/- 0.0463 versus
-0.1948 +/- 0.1110; YOLO11s seed 271 supplied the observed zero at threshold
+historical latency or incomplete registered operations. Recall was
+0.3507 +/- 0.0463 versus 0.1948 +/- 0.1110; YOLO11s seed 271 supplied the observed zero at threshold
 0.05 rather than being filtered. Under the conservative all-runs dominance
-rule, neither detector strictly dominated in any panel (Figure 5), unchanged
-from n=3. This is an accuracy-efficiency trade-off on one hardware/software
-stack, not a universal property of model families.
+rule, neither detector strictly dominated in the historical panels, unchanged
+from n=3. The [historical five-run Pareto figure](../results/figures/pareto_frontier_n5_sensitivity.png)
+is preserved separately. Three timing repetitions of one checkpoint are not
+joined to five training runs or promoted to a standardized n=5 Pareto frontier.
 
-![Figure 5. Five-run all-attempt accuracy-efficiency Pareto sensitivity. Each point joins same-run AP or internal-testing recall to same-run hardware metrics; recall uses thresholds selected from the original n=3 validation runs. The historical n=3 figure is retained separately.](../results/figures/pareto_frontier_n5_sensitivity.png)
+![Figure 5. Standardized decoded-host inference timing on the RTX 4060 Laptop GPU. Circles show pooled median latency and bars show image-latency IQR; crosses show the three technical-repetition medians. Both detectors use the identical 100 images, batch 1, 10 warm-up images per repetition, and native AMP inference. These are not biological or training replicates or inferential intervals.](../results/figures/inference_timing_v1.png)
 
 ### 4.6 Digital common-corruption sensitivity (single checkpoint per detector; 300 images)
 
@@ -991,13 +1052,13 @@ Faster R-CNN provided the stronger coverage and ranking evidence. Its recall,
 F1, and both AP training-procedure intervals remained wholly above zero, and
 its FROC sensitivity was higher across the prespecified budgets on the
 observed exact-score frontier, subject to the frozen candidate-floor boundary.
-Under the documented detector-specific profiling
-procedure on the measured laptop, YOLO11s provided the stronger measured
-implementation-efficiency evidence: approximately three times the throughput,
-about one fifth the parameters, one twenty-first the estimated registered
-operations, lower training memory, and shorter training time. The Pareto result
-formalized this opposition; neither pipeline dominated when an accuracy
-endpoint and a compute endpoint were optimized together.
+The matched decoded-host protocol on the reporting laptop retained YOLO11s'
+runtime advantage (2.75 times the throughput for the two frozen seed-17
+checkpoints). It also has about one fifth the parameters; historical training
+profiles show lower memory use and shorter training time. Incomplete
+profiler-registered operations remain supplementary. Historical Pareto
+panels formalized an opposing accuracy/resource ordering, but their original
+asymmetric timing axes were not recomputed as a standardized five-run frontier.
 
 Conditional matched-box IoU and Dice do not create a third conclusion in favor
 of YOLO11s. They describe localization only after a true-positive match,
@@ -1066,10 +1127,10 @@ clinically validated reasoning.
 The study supports a measured trade-off, not a recommendation for a clinical
 scenario. Within this internal comparison, Faster R-CNN had higher coverage,
 ranking accuracy, and observed exact-score FROC sensitivity, while
-YOLO11s had lower latency, parameter count, registered-operation estimates,
-training memory, and training time on the measured hardware/software stack.
-The Pareto analysis preserves both directions and therefore does not identify
-one dominant pipeline.
+YOLO11s had lower matched-boundary latency for the primary checkpoints and
+fewer parameters. Historical profiles retain lower training memory and training
+time. The historical Pareto analysis preserves opposing directions, while the
+new technical timing repetitions do not establish a five-run frontier.
 
 No result establishes suitability for screening, prioritization, diagnosis,
 rule-out, treatment guidance, or point-of-care use. Such judgments would
@@ -1239,10 +1300,19 @@ evidence but do not provide preregistered, confirmatory hypothesis tests.
 
 **Compute and reproducibility.** Timing and registered-operation estimates
 describe one RTX 4060 Laptop GPU, pinned environment, and implementation path.
-The FLOP counter omits unsupported operations, and the two frameworks place
-resizing differently relative to timing. These values are pipeline-runtime
-measurements on the documented stack, not hardware-independent architecture
-constants. At the Batch 36 audit, all ten exact best-checkpoint files remained
+The primary v1 timing now includes resize/letterbox, conversion, transfer,
+forward, native NMS, source-coordinate restoration and host output for both
+models, excluding disk I/O/decoding. It remains conditional on one checkpoint
+per detector, 100 selected images, different AMP dtypes, native transforms/API
+overhead, and one machine's power/thermal/system state. Three technical
+repetitions are not biological or training replicates and cannot establish
+between-training or between-hardware uncertainty. Historical asymmetric
+profiles and Pareto timing axes are preserved with their original scope.
+The GFLOP counter records incomplete profiler-registered operations and omits
+unsupported work; no approximate operation-count ratio is an architecture
+constant. Ordinary-reference parity uses the same explicit AMP as v1 and does
+not assert identity with historical FP32 YOLO prediction bundles. At the Batch
+36 audit, all ten exact best-checkpoint files remained
 available locally and matched the Phase 5 hashes, but the binaries were
 Git-ignored, had not been publicly released, and had no public download URL.
 A clean checkout can verify and replay committed frozen-prediction evidence but
@@ -1282,10 +1352,9 @@ reverse that ordering under a mathematical-maximum bound. The primary training-p
 were wholly positive for Faster R-CNN minus YOLO11s recall, F1, and both AP
 endpoints. The primary interval did not support a fixed-threshold precision
 difference at the training-procedure level. YOLO11s was substantially smaller
-and had higher measured
-throughput under the documented detector-specific profiling procedure on the
-stated laptop, while seed 271 exposed score compression without corresponding
-AP collapse.
+and had higher measured throughput under the matched decoded-host timing
+boundary for the two primary checkpoints on the stated laptop, while seed 271
+exposed score compression without corresponding AP collapse.
 
 The analyses also show why AP, raw score scale, fixed-threshold behavior, and
 detection-level calibration must be reported separately. Detection D-ECE was

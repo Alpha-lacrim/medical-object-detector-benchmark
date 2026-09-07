@@ -661,3 +661,29 @@ demographics, subgroup performance, or fairness evidence.
   DICOM, or pixel output is created.
 - No model training, inference, subgroup comparison, or fairness claim is part
   of this decision.
+
+
+## D-016 — Matched decoded-host timing v1 supersedes primary asymmetric timing
+
+Date: 2026-09-07. Batch 45 verified the historical timing code/results and the
+intended RTX 4060 Laptop GPU/i7-13650HX/16 GB reporting machine. Adopt
+`decoded-host-to-source-detections-v1` as the canonical manuscript's primary
+runtime comparison. Both detectors include resize/letterbox, conversion,
+transfer, forward, native NMS, source-coordinate restoration and CPU outputs,
+starting from the same decoded host image and excluding disk I/O/decoding.
+
+Use the two exact primary seed-17 checkpoints, identical deterministic 100-image
+test subset, batch 1, 10 warm-up images per detector/repetition, and three
+complete technical repetitions. Explicit float16/bfloat16 AMP is checked
+against active convolution dtypes. All 600 timed predictions agree exactly
+with ordinary file inference under the same AMP. This is not a claim that
+historical FP32 YOLO bundles are identical to the v1 AMP path.
+
+Accepted Faster R-CNN / YOLO11s throughput is 20.91 / 57.56 FPS, median latency
+47.20 / 17.29 ms, and image-latency IQR 1.22 / 1.19 ms. No training, test-label
+selection, or training-replicate inference is introduced. Preserve the 46
+hash-bound historical files and existing Pareto/raincloud timing axes with
+their original labels. Keep parameters and incomplete profiler-registered
+operation counts; remove the approximate 21-fold ratio as a headline fact.
+Detailed provenance and an excluded warning-emitting development trial are
+documented in `docs/COMPUTE_TIMING.md`. No later batch is authorized here.

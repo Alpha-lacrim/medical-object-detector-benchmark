@@ -1,0 +1,3 @@
+detector,checkpoint_seed,protocol,subset_size,repetitions,warmup_images_per_repetition,batch_size,amp_dtype,timed_images,total_elapsed_seconds,fps,median_latency_ms,q1_latency_ms,q3_latency_ms,iqr_latency_ms,total_parameters,training_trainable_parameters,historical_incomplete_registered_gflops
+faster_rcnn,17,decoded-host-to-source-detections-v1,100,3,10,1,float16,300,14.346565400075633,20.91092826987137,47.203950001858175,46.77602500305511,47.99612502392847,1.2201000208733603,43256153,43030809,450.7637248
+yolo11s,17,decoded-host-to-source-detections-v1,100,3,10,1,bfloat16,300,5.2123790011391975,57.55529287767316,17.286999995121732,16.684825022821315,17.87817498552613,1.193349962704815,9428179,9428163,21.4198784

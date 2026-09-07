@@ -62,10 +62,10 @@ convert the hypothesis into a prospective or confirmatory test.
 | Dataset/split | Accuracy uses the 750-image patient-disjoint internal-testing split; thresholds were selected only on the 750-image/321-patient model-optimization split. Compute was measured on the stated RTX 4060 Laptop GPU protocol. |
 | Seed count | Five-run internal-testing/compute sensitivity per detector; recall thresholds remain selected from the original three validation runs. Historical n=3 frontier retained separately. |
 | Source artifacts | [`pareto_frontier_n5_sensitivity.png`](../results/figures/pareto_frontier_n5_sensitivity.png); [`pareto_points_n5_sensitivity.csv`](../results/tables/pareto_points_n5_sensitivity.csv); [`pareto_summary_n5_sensitivity.csv`](../results/tables/pareto_summary_n5_sensitivity.csv); [`selected_operating_points_per_seed_n5_sensitivity.csv`](../results/tables/selected_operating_points_per_seed_n5_sensitivity.csv); original [`pareto_frontier.png`](../results/figures/pareto_frontier.png) retained. |
-| Manuscript section | [`paper_draft.md` §§4.5 and 5.2](../report/paper_draft.md#45-compute-and-pareto-sensitivity-n5-per-detector). |
+| Manuscript section | [`paper_draft.md` §§4.5 and 5.2](../report/paper_draft.md#45-standardized-inference-timing-and-historical-pareto-sensitivity). |
 | Result status | **Supported retrospectively and descriptively** in all four n=5 sensitivity panels under the conservative all-runs rule; all four labels are unchanged from n=3. |
 | Multiplicity | No hypothesis-test family or multiplicity correction applies; this is a deterministic Pareto classification over the named runs and axes. |
-| Limitations | One hardware/software stack; asymmetric preprocessing inside timing regions; unsupported operations omitted from GFLOPs; five runs remain coarse; n=3-selected recall rather than clinical utility; pipeline, not architecture-family, comparison. |
+| Limitations | Preserved Pareto axes use historical asymmetric timers and incomplete profiler-registered operations. Batch 45 provides a separate matched boundary for one checkpoint per detector with three technical repeats, not a standardized n=5 frontier. One hardware/software stack; five training runs remain coarse; n=3-selected recall rather than clinical utility. |
 
 ## H4 — Corruption degradation is type- and severity-specific
 

@@ -39,25 +39,35 @@ as frozen input evidence for the paired analysis in
 
 ## Compute measurements
 
-The comparison table joins each test result to its completed training summary
-and synchronized batch-1 compute profile. FPS and mean/p50/p95 inference time
-use 10 warm-up and 100 timed images with CUDA synchronization. Parameter count,
-trainable parameter count, registered-operation GFLOPs, checkpoint size,
-epoch-loop training time, and peak allocated training GPU memory retain their
-run-level provenance and checkpoint hash. The full-test prediction pass also
-records synchronized inference seconds and FPS as an audit measure.
+**Batch 45 primary runtime evidence** is the matched decoded-host protocol in
+[`COMPUTE_TIMING.md`](COMPUTE_TIMING.md),
+[`inference_timing_v1.csv`](../results/tables/inference_timing_v1.csv), and
+[`inference_timing_v1.png`](../results/figures/inference_timing_v1.png).
+On the verified reporting laptop, it measures 20.91 FPS / 47.20 ms median
+(IQR 1.22 ms) for Faster R-CNN and 57.56 FPS / 17.29 ms median (IQR 1.19 ms)
+for YOLO11s. Three full repetitions use the identical 100-image subset, batch
+1, and 10 warm-up images per repetition. Both start with a decoded source
+image in host memory and end with source-coordinate CPU detections, including
+resize/letterbox, conversion, transfer, forward, native postprocessing/NMS and
+restoration, excluding disk I/O. All 600 output comparisons are exact under
+the same explicit AMP as ordinary inference. These are technical repetitions
+of the primary seed-17 checkpoints, not training or biological replicates.
 
-FLOPs are implementation estimates rather than hardware timings. Unsupported
-operations differ by architecture, so latency/FPS are the runtime-relevant
-efficiency measures. Faster R-CNN preprocessing/resizing remains inside its
-model forward, while the YOLO profile performs resize/tensor conversion before
-the timed forward-plus-NMS interval; this inherited framework asymmetry is
-reported rather than treated as an architecture-only difference.
+The original five-run comparison/compute tables below are preserved historical
+profiles. Their 10-warm-up/100-image synchronized timers exclude tensor
+conversion and transfer for both detectors, but include resize only for Faster
+R-CNN; the YOLO profile does not restore boxes to the source image. They are
+superseded as primary runtime evidence. Full-test `evaluation_fps` is another
+asymmetric audit and is not used as matched timing. Parameter counts, training
+time, peak training allocation and the historical incomplete operation profile
+retain their original provenance and checkpoint hashes.
 
 ### GFLOP counting contract and sanity check
 
 The frozen values are 450.7637248 GFLOPs/image for Faster R-CNN and
-21.4198784 GFLOPs/image for YOLO11s, a 21.04-fold registered-operation gap.
+21.4198784 GFLOPs/image for YOLO11s. These are incomplete profiler-registered
+operations; their approximate 21-fold ratio is historical accounting only,
+not an architecture-level fact or headline efficiency result.
 They were produced under the locked PyTorch 2.6.0+cu124 environment by
 `torch.utils.flop_counter.FlopCounterMode`, in evaluation and inference mode,
 on batch 1 and the first validation image. Both model inputs become 640 x 640;
@@ -82,8 +92,8 @@ Consequently, these totals exclude work such as image decoding and transfer,
 elementwise activations, normalization, ordinary pooling, box clipping and
 decoding, thresholding, sorting/top-k, softmax/sigmoid, RoIAlign, and NMS except
 where an operation happens to decompose into one of the registered operators.
-The synchronized latency/FPS profiles do include much of that runtime work and
-remain the primary deployment-efficiency evidence.
+The historical latency/FPS profiles include some of that uncounted runtime
+work, but the matched v1 boundary is now the primary runtime evidence.
 
 **Faster R-CNN scope and proposals.** The counter encloses the complete
 Torchvision model call, so it includes registered convolution/linear work in
@@ -124,10 +134,9 @@ sound; the FLOP totals are not directly interchangeable because the published
 metadata does not establish the same image, proposal realization, class head,
 or operator-counting convention. For reference, the local two-FLOPs-per-MAC
 total is 225.3818624 GMAC-equivalent before accounting for those other
-differences. The defensible claim is therefore the internally consistent
-21.04-fold registered-op gap under this documented profiler, supported by the
-separately measured latency/FPS gap—not that every paper using the label
-"GFLOPs" should reproduce either absolute value.
+differences. These observations explain the historical incomplete registered
+counts; they do not establish a total-operation ratio between architectures.
+The standardized v1 measurement supplies the primary runtime comparison.
 
 ## Across-seed summary
 
@@ -163,13 +172,13 @@ formatting footnote.** Faster R-CNN has defined IoU/Dice for all five seeds;
 YOLO11s seed 271 has no matched true positive at score 0.25, so its IoU/Dice
 are undefined and excluded only from those conditional summaries.
 
-| Compute metric | Faster R-CNN mean ± SD (n=5) | YOLO11s mean ± SD (n=5) |
+| Historical compute metric (asymmetric timing) | Faster R-CNN mean ± SD (n=5) | YOLO11s mean ± SD (n=5) |
 |---|---:|---:|
 | FPS, batch 1 | 20.28 ± 5.62 | **60.29 ± 12.62** |
 | Mean inference time (ms/image) | 53.93 ± 21.15 | **17.23 ± 3.83** |
 | Total parameters | 43,256,153 ± 0 | **9,428,179 ± 0** |
 | Trainable parameters | 43,030,809 ± 0 | **9,428,163 ± 0** |
-| Estimated GFLOPs/image | 450.764 ± 0 | **21.420 ± 0** |
+| Incomplete profiler-registered GFLOPs/image | 450.764 ± 0 | **21.420 ± 0** |
 | Peak training GPU memory (MiB) | 1,556.89 ± 0.26 | **1,148.16 ± 0.00** |
 | Training time (seconds) | 6,661.01 ± 2,127.72 | **1,544.75 ± 425.40** |
 
@@ -199,10 +208,10 @@ convergence**. The run remains in every unconditional all-attempt endpoint;
 only its mathematically undefined matched-only IoU/Dice are omitted.
 
 The defensible trade-off is detection quality versus computational cost.
-Under the documented detector-specific profiling procedure on the measured
-laptop, YOLO11s has about 3.0 times the measured throughput, 78% fewer
-parameters, and about 21 times fewer estimated registered operations. Faster
-R-CNN has the stronger precision-recall result over the retained predictions
+The matched v1 protocol measures 2.75 times higher YOLO11s throughput on
+the reporting laptop for the primary frozen checkpoints; it has 78% fewer
+parameters. Historical incomplete operation counts are supplementary only.
+Faster R-CNN has the stronger precision-recall result over the retained predictions
 and, within the evaluated 0.01--0.99 score sweep, higher observed sensitivity
 at every reported FROC budget. The accuracy-efficiency Pareto analysis
 therefore finds no strict cross-objective dominance. Phase 8's five-attempt

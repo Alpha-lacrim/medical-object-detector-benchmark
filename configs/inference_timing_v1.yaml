@@ -1,0 +1,41 @@
+schema_version: 1
+protocol: decoded-host-to-source-detections-v1
+evaluation_config: configs/evaluation.yaml
+checkpoint_manifest: results/checkpoint_release_manifest.json
+historical_manifest: results/logs/phase45_inference_timing_v1/historical_artifacts.json
+checkpoint_seed: 17
+subset:
+  size: 100
+  seed: 17
+  selection: sha256-ranked-file-name
+batch_size: 1
+warmup_images: 10
+repetitions: 3
+device: cuda:0
+deterministic: true
+allow_tf32: false
+torch_threads: 1
+agreement:
+  box_atol_pixels: 0.01
+  score_atol: 0.00001
+  rtol: 0.00001
+hardware:
+  gpu_name: NVIDIA GeForce RTX 4060 Laptop GPU
+  cpu_contains: i7-13650HX
+  system_contains: ROG Strix G614JV
+  ram_gib_min: 15
+  ram_gib_max: 17
+  vram_gib_min: 7.5
+  vram_gib_max: 8.5
+versions:
+  torch: 2.6.0+cu124
+  torchvision: 0.21.0+cu124
+  ultralytics: 8.4.110
+  cuda: '12.4'
+outputs:
+  log_dir: results/logs/phase45_inference_timing_v1
+  summary: results/logs/phase45_inference_timing_v1/summary.json
+  latencies: results/tables/inference_timing_v1_images.csv
+  repetitions: results/tables/inference_timing_v1_repetitions.csv
+  table: results/tables/inference_timing_v1.csv
+  figure: results/figures/inference_timing_v1.png

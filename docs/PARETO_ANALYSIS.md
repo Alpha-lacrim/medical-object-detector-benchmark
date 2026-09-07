@@ -1,5 +1,12 @@
 # Accuracy-Efficiency Pareto Analysis
 
+**Batch 45 scope:** All timing axes in the preserved n=3/n=5 Pareto artifacts
+use historical asymmetric profiles. The primary matched runtime comparison
+is [`COMPUTE_TIMING.md`](COMPUTE_TIMING.md), based on three technical repeats
+of one checkpoint per detector. Those repetitions are not joined to five
+training runs, and no standardized n=5 Pareto frontier is claimed.
+
+
 ## Historical n=3 scope and n=5 sensitivity
 
 This figure and every value below are frozen **n=3** results for seeds 17, 42,

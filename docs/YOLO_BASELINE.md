@@ -1,5 +1,12 @@
 # YOLO11s Baseline Protocol
 
+**Timing scope update (Batch 45):** This document preserves the original
+baseline compute/training profile. Its inference timer is historical and
+asymmetric across detectors. Primary matched inference timing is now
+[`COMPUTE_TIMING.md`](COMPUTE_TIMING.md); parameter counts and historical
+training measurements below remain unchanged.
+
+
 ## Scope
 
 Batch 3 replaces only the detector with Ultralytics YOLO11s. It uses the same

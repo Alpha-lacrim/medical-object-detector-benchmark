@@ -21,6 +21,18 @@ manuscript_semantic_guards:
   - id: detector_specific_timer_boundary_is_disclosed
     required_regex: 'Faster R-CNN\s+resizing occurred inside its timed forward, whereas YOLO tensor resizing\s+occurred before timed forward-plus-NMS'
 
+  - id: standardized_timing_boundary_is_complete
+    required_regex: 'includes resize/letterbox, tensor conversion, host-to-device transfer, model\s+forward, native postprocessing/NMS, source-coordinate restoration, and CPU\s+extraction of boxes, scores, and labels\. It excludes disk I/O and decoding'
+
+  - id: timing_repetitions_are_technical
+    required_regex: 'repetitions are technical repeats, not independent biological or training\s+replicates'
+
+  - id: no_headline_architecture_operation_ratio
+    forbidden_regex: '(?i:about\s+21-fold|approximately\s+21-fold|one twenty-first)'
+
+  - id: same_amp_reference_scope_is_explicit
+    required_regex: 'Agreement is not claimed against the historical FP32 YOLO\s+evaluation bundles, which remain unchanged'
+
   - id: posthoc_threshold_is_not_prospectively_frozen
     required_regex: 'This is post-hoc validation sensitivity, not a prospectively frozen\s+operating point'
 
@@ -484,30 +496,30 @@ claims:
     rounding: 4 decimal places
 
   - id: approximate_throughput_ratio
-    description: YOLO11s-to-Faster R-CNN five-run throughput ratio.
+    description: Matched v1 aggregate throughput ratio for two primary frozen checkpoints.
     manuscript:
       section: Abstract
-      regex: 'profiling procedure on the\s+measured laptop,\s+YOLO11s achieved approximately\s+(?P<value>\d+)-fold higher measured\s+throughput'
+      regex: 'three technical repetitions, yielded\s+(?P<value>\d+\.\d+)-fold higher throughput for YOLO11s'
     source:
       kind: calculation
       operation: divide
       operands:
         - kind: csv_cell
-          path: results/tables/pareto_summary_n5_sensitivity.csv
-          filters: {detector: yolo11s, metric: throughput_fps}
-          column: mean
+          path: results/tables/inference_timing_v1.csv
+          filters: {detector: yolo11s}
+          column: fps
         - kind: csv_cell
-          path: results/tables/pareto_summary_n5_sensitivity.csv
-          filters: {detector: faster_rcnn, metric: throughput_fps}
-          column: mean
-    absolute_tolerance: 0.1
-    rounding: nearest integer, explicitly approximate
+          path: results/tables/inference_timing_v1.csv
+          filters: {detector: faster_rcnn}
+          column: fps
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
 
   - id: approximate_parameter_reduction_percent
     description: YOLO11s parameter reduction relative to Faster R-CNN.
     manuscript:
       section: Abstract
-      regex: '3-fold higher measured\s+throughput,\s+(?P<value>\d+)%\s+fewer parameters'
+      regex: 'YOLO11s; it retained (?P<value>\d+)% fewer parameters'
     source:
       kind: calculation
       operation: percent_reduction
@@ -522,26 +534,6 @@ claims:
           column: mean
     absolute_tolerance: 0.5
     rounding: nearest whole percent
-
-  - id: approximate_operation_ratio
-    description: Faster R-CNN-to-YOLO11s registered-operation ratio.
-    manuscript:
-      section: Abstract
-      regex: 'about (?P<value>\d+)-fold\s+fewer estimated registered\s+operations'
-    source:
-      kind: calculation
-      operation: divide
-      operands:
-        - kind: csv_cell
-          path: results/tables/pareto_summary_n5_sensitivity.csv
-          filters: {detector: faster_rcnn, metric: estimated_gflops}
-          column: mean
-        - kind: csv_cell
-          path: results/tables/pareto_summary_n5_sensitivity.csv
-          filters: {detector: yolo11s, metric: estimated_gflops}
-          column: mean
-    absolute_tolerance: 0.5
-    rounding: nearest integer, explicitly approximate
 
   - id: faster_corruption_retention
     description: Faster R-CNN mean clean-relative mAP retention across 35 corruptions.
@@ -693,3 +685,223 @@ claims:
       column: difference_a_minus_b
     absolute_tolerance: 0.00005
     rounding: 4 decimal places
+
+  - id: timing_v1_faster_rcnn_total_elapsed_seconds
+    description: 'Matched v1 primary-checkpoint timing table: total_elapsed_seconds'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total timed elapsed, 300 calls \(s\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: total_elapsed_seconds
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+
+  - id: timing_v1_yolo11s_total_elapsed_seconds
+    description: 'Matched v1 primary-checkpoint timing table: total_elapsed_seconds'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total timed elapsed, 300 calls \(s\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: total_elapsed_seconds
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+
+  - id: timing_v1_faster_rcnn_fps
+    description: 'Matched v1 primary-checkpoint timing table: fps'
+    manuscript:
+      section: Standardized timing
+      regex: \| FPS \(300 / total elapsed\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: fps
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_fps
+    description: 'Matched v1 primary-checkpoint timing table: fps'
+    manuscript:
+      section: Standardized timing
+      regex: \| FPS \(300 / total elapsed\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: fps
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_median_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: median_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| Median image latency \(ms\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: median_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_median_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: median_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| Median image latency \(ms\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: median_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_iqr_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: iqr_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| IQR image latency \(ms\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: iqr_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_iqr_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: iqr_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| IQR image latency \(ms\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: iqr_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_total_parameters
+    description: 'Matched v1 primary-checkpoint timing table: total_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total parameters \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: total_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_yolo11s_total_parameters
+    description: 'Matched v1 primary-checkpoint timing table: total_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total parameters \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: total_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_faster_rcnn_training_trainable_parameters
+    description: 'Matched v1 primary-checkpoint timing table: training_trainable_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Training-trainable parameters \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: training_trainable_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_yolo11s_training_trainable_parameters
+    description: 'Matched v1 primary-checkpoint timing table: training_trainable_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Training-trainable parameters \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: training_trainable_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_faster_rcnn_q1
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| (?P<value>\d+\.\d+)--\d+\.\d+ \| \d+\.\d+--\d+\.\d+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: q1_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_q3
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| \d+\.\d+--(?P<value>\d+\.\d+) \| \d+\.\d+--\d+\.\d+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: q3_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_q1
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| \d+\.\d+--\d+\.\d+ \| (?P<value>\d+\.\d+)--\d+\.\d+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: q1_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_q3
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| \d+\.\d+--\d+\.\d+ \| \d+\.\d+--(?P<value>\d+\.\d+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: q3_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places

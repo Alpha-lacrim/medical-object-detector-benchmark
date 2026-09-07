@@ -1,5 +1,16 @@
 # Reproducibility contract
 
+**Batch 45 timing:** The primary matched runtime evidence uses
+`configs/inference_timing_v1.yaml` and `src.benchmark_inference`; exact commands
+are in [README](../README.md#standardized-end-to-end-inference-timing-batch-45)
+and [COMPUTE_TIMING.md](COMPUTE_TIMING.md). Publication timing is gated to the
+recorded RTX 4060 Laptop/i7-13650HX/16 GB Windows machine and pinned CUDA stack.
+The saved aggregate/per-repetition/per-image tables and figure can be verified
+without re-timing. Three technical repeats of the two primary checkpoints do
+not extend the five-training-run uncertainty analysis. Historical artifacts are
+preserved and hash-checked; no training or frozen-prediction replacement occurs.
+
+
 This project distinguishes four different reproducibility claims. Passing a
 lower tier does not establish a higher one.
 
