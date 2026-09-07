@@ -19,6 +19,52 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 Newest entries appear first; superseded decisions remain recorded.
 
+- **RSNA cohort characteristics reported from immutable-split DICOM headers:**
+  Batch 44 verified the unchanged 5,000-study train/validation/internal-test
+  split (3,500/750/750 studies; 1,492/321/323 NIH patient groups; zero group
+  overlap) and every study-to-patient/stratum/label/box mapping against the
+  hash-bound official CSVs and committed audit. The configured raw DICOM root
+  contains all 26,684 Stage 2 files. Aggregate-only extraction reads
+  `PatientAge`, `PatientSex`, and `ViewPosition` without pixel data. All 5,000
+  age values are numeric `AS` strings lacking D/W/M/Y units, so D-015 treats
+  them transparently as nominal years for descriptive reporting only and
+  excludes one value above the configured 0--120-year range; the remaining
+  4,999 have median 49 years (IQR 36--60). Sex is 2,362 female and 2,638 male;
+  projection is 2,363 AP and 2,637 PA; neither tag is missing or outside those
+  observed categories. These are limited header descriptors, not clinically
+  verified demographics and not subgroup, fairness, transportability, or
+  causal evidence. Only aggregate CSV/JSON outputs are retained. Verification
+  passes: 333 tests plus one declared skip, repository-wide Ruff, 67 scientific
+  artifacts/224 inputs/197 references, 49 manuscript claims/guards, and Git
+  whitespace. No training, inference, split mutation, staging, commit, or push
+  occurred (Session 91 / Batch 44).
+- **Five-run validation threshold-selection sensitivity complete; historical
+  n=3 provenance retained:** Batch 43 verified the frozen Phase 14 selection
+  rule and independently reproduced thresholds 0.69/0.05 from validation seeds
+  17/42/137. It also verified the Batch 35 five-run test analysis, all ten
+  checkpoint hashes (962,924,817 bytes), the 750-image/277-box validation
+  source, and Batch 41's four-bundle gap. Inference-only collection generated
+  Faster R-CNN and YOLO11s validation bundles for seeds 271/314 under the
+  original split, preprocessing, adapters, candidate floor 0.001, NMS 0.50,
+  100-detection cap, coordinates, and frozen checkpoints. Three score-0.25
+  count checks are exact; deterministic Faster seed 314 preserves TP/FN but
+  has one fewer FP/prediction than its training-time row, recorded under a
+  config-bounded audit. The unchanged 99-point maximum equal-run mean-F1 rule
+  selects 0.70 for Faster R-CNN and 0.01 for YOLO11s across all five validation
+  runs. Applied unchanged to all five test bundles, Faster R-CNN versus
+  YOLO11s mean precision is 0.3686 versus 0.2631, recall 0.3388 versus 0.2925,
+  F1 0.3458 versus 0.2657, FP/image 0.2205 versus 0.3104, and detections/run
+  256.2 versus 311.2. Threshold separation strengthens; mean precision,
+  recall, and F1 advantages weaken; FP/image and detection-count orderings
+  reverse. Run-level precision-SD ordering reverses, recall/F1 stability
+  advantages weaken, and FP/image/count stability advantages strengthen.
+  D-014 keeps 0.69/0.05 as historical provenance and labels 0.70/0.01 only
+  **post-hoc validation sensitivity**, never prospectively frozen. Historical
+  artifacts remain hash-identical. Verification passes: 325 tests plus one
+  declared skip, repository-wide Ruff, 65 scientific artifacts/216 inputs/196
+  references, 43 manuscript claims/guards, GPU preflight, and Git whitespace.
+  No training, historical overwrite, staging, commit, or push occurred
+  (Session 90 / Batch 43).
 - **Approved 0.00001 FROC inference complete; residual cannot reverse the
   ordering:** the user approved the detector-neutral v4 continuation under the
   same ten immutable checkpoint hashes, five seeds/detector, 750-image/268-box
@@ -1656,6 +1702,7 @@ Newest entries appear first; superseded decisions remain recorded.
 | `README.md`, `data/README.md` | Release landing page, exact setup, four-level reproducibility boundary, complete experiment sequence, artifact-command index, headline result, Definition of Done audit, and license/third-party scope | v2.0.0 candidate identifies the version/tag relationship, distribution boundary, CI scope, release notes, and citation metadata |
 | `.python-version`, `requirements.txt`, `pyproject.toml`, `uv.lock`, `src/meddet_benchmark/__init__.py` | Exact Python 3.11 / CUDA 12.4 phased-workflow dependency pins, SPDX package-license metadata, and release/package version | D-009 aligns project, package, and lock root at candidate version 2.0.0 |
 | `configs/dataset.yaml` | RSNA paths, class/stratum map, conversion, subset, split, and EDA settings | done |
+| `configs/cohort_characteristics.yaml`, `src/data/cohort_characteristics.py`, `tests/test_cohort_characteristics.py` | Hash- and count-gated aggregate DICOM-header cohort extraction with optional `RSNA_DICOM_ROOT`, explicit age-unit/range policy, privacy guards, and regression tests | Batch 44 complete; reads no pixels, retains no row-level identifiers, and performs no training or inference |
 | `configs/yolo.yaml` | Strict YOLO11s data/model/runtime/training/evaluation/profile/artifact config | implemented; smoke, timing gate, full run, and profiling complete |
 | `configs/faster_rcnn.yaml` | Strict Faster R-CNN model/runtime/training/evaluation/profile/artifact config | implemented; timing gate and full run complete |
 | `configs/{faster_rcnn,yolo}_seed{42,137,271,314}.yaml`, `configs/evaluation.yaml` | Seed-only rerun identities and the ten-run Phase 5 evaluation contract | all five seeds per detector trained and evaluated in Batch 16 |
@@ -1673,20 +1720,21 @@ Newest entries appear first; superseded decisions remain recorded.
 | `results/figures/rsna_class_distribution.png` | Selected split class/stratum distribution | done |
 | `results/figures/rsna_annotation_samples.png` | Twelve real radiographs with labels/boxes | done |
 | `docs/DATASET_CHOICE.md` | Three-candidate inspection and selection rationale | done |
-| `docs/DATASHEET.md` | Collection, composition, patient split, audit, processing, terms, bias | done |
-| `docs/DECISION_LOG.md` | Append-only project decisions through D-013 | D-013 adopts the 0.00001 v4 frontier, retains its lone 2-FP/image lower bound, and records the no-reversal proof |
+| `docs/DATASHEET.md` | Collection, composition, patient split, audit, aggregate header cohort characteristics, processing, terms, and bias | Batch 44 adds age/sex/projection totals with explicit age-unit and no-fairness caveats |
+| `docs/DECISION_LOG.md` | Append-only project decisions through D-015 | D-015 permits explicitly caveated nominal-year interpretation of unitless numeric `PatientAge` solely for aggregate cohort description and prohibits fairness/subgroup inference from these tags |
 | `docs/PROJECT_PLAN.md` | Reconciled pre-implementation plan preserving superseded proposals while distinguishing frozen historical analyses from research-track corrections | Batch 28 records independent within-detector run resampling and estimand separation |
 | `docs/LITERATURE_REVIEW.md` | YOLO11, detector paradigms, Grad-CAM/XAI, related work, robustness, and the controlled-comparison/operating-regime gap | Batch 42 aligns the FROC contribution with the approved 0.00001 boundary and conservative bound; existing BibTeX citations unchanged |
 | `docs/HYPOTHESES.md` | Primary question plus six retrospective, artifact-checkable hypotheses with endpoint-specific evidence scopes | Batch 42 routes H2 FROC evidence to the observed exact-score frontier while retaining historical grids |
-| `report/paper_draft.md`, `report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md`, `report/A_Controlled_Comparative_Study___article.pdf`, `report/report.md`, `report/references.bib` | Canonical editable manuscript, noncanonical long alternate, its rendered PDF derivative, preserved historical/full technical report, and resolving bibliography | D-010 hierarchy retained; Batch 42 updates only factually stale FROC sentences in the Markdown manuscripts, not the noncanonical PDF or historical report |
-| `docs/LIMITATIONS.md` | Consolidated dataset, compute, comparison, calibration, decision analysis, robustness, explainability, statistics, reporting, deployment, and regulatory limitations | Batch 42 records the approved 0.00001 sensitivity, residual seed-137 2-FP/image lower bound, and no-reversal proof |
+| `report/paper_draft.md`, `report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md`, `report/A_Controlled_Comparative_Study___article.pdf`, `report/report.md`, `report/references.bib` | Canonical editable manuscript, noncanonical long alternate, its rendered PDF derivative, preserved historical/full technical report, and resolving bibliography | D-010 hierarchy retained; Batch 44 adds limited aggregate cohort characteristics only to the canonical manuscript; alternate/PDF/historical report remain unchanged |
+| `docs/LIMITATIONS.md` | Consolidated dataset, cohort-header, compute, comparison, calibration, decision analysis, robustness, explainability, statistics, reporting, deployment, and regulatory limitations | Batch 44 adds unitless-age, limited-sex/projection, and no-subgroup/fairness caveats while retaining Batch 43 threshold scope |
 | `docs/FASTER_RCNN_BASELINE.md` | Batch 2 architecture, optimization, metrics, timing, and profiling protocol | complete with final measurements |
 | `docs/YOLO_BASELINE.md` | Batch 3 architecture, parity/stability decisions, timing, metrics, and profiling | complete with final measurements |
 | `docs/QUANTITATIVE_COMPARISON.md` | Unified metric definitions, compute caveats, commands, five-seed held-out results, and exact GFLOP counting/sanity-check record | Batch 16 n=5/n=4 clean comparison complete; n=3 analyses explicitly historical |
 | `docs/ROBUSTNESS.md`, `docs/LIMITATIONS.md` | Phase 6 sampling, corruption grid, raw/relative results, interpretation, and scope | Batch 15 reconciled to patient-cluster inference and digital-not-clinical robustness wording |
-| `src/utils/seed.py`, `docs/REPRODUCIBILITY.md` | Reproducibility utilities plus software/committed-analysis/inference/retraining contract, lock roles, RNG/nondeterminism, release-candidate gate, and checkpoint release procedure | Batch 42 adds the exact GPU collection and offline v4 FROC reproduction commands |
-| `results/scientific_artifact_manifest.json`, `scripts/{build_scientific_artifact_manifest,verify_scientific_artifacts}.py` | Fixed 58-artifact manuscript-critical inventory plus maintenance builder and CI-safe hash/schema/reference verifier | Batch 42 binds the approved v4 inference, exact-score evidence, and conservative bound; builder never runs in CI, so evidence changes require reviewed manifest diffs |
-| `report/paper_claim_sources.yaml`, `scripts/verify_paper_claims.py` | Exact claim-to-source bindings with deterministic calculations, unique manuscript matching, and explicit rounding tolerance | Batch 42 binds v4 FROC-at-2 values, seed-137 reachability, the conservative upper bound, and bounded wording |
+| `src/utils/seed.py`, `docs/REPRODUCIBILITY.md` | Reproducibility utilities plus software/committed-analysis/inference/retraining contract, lock roles, RNG/nondeterminism, release-candidate gate, checkpoint release procedure, and aggregate cohort command | Batch 44 adds the header-only cohort reproduction route and root override contract |
+| `results/tables/rsna_cohort_characteristics.csv`, `results/logs/phase44_cohort_characteristics/summary.json` | Aggregate train/validation/internal-test/all-study cohort descriptors plus immutable-input, metadata-policy, and output provenance | Batch 44 complete; 5,000-study totals reconcile exactly and no row-level identifier is emitted |
+| `results/scientific_artifact_manifest.json`, `scripts/{build_scientific_artifact_manifest,verify_scientific_artifacts}.py` | Fixed 67-artifact manuscript-critical inventory plus maintenance builder and CI-safe hash/schema/reference verifier | Batch 44 binds the aggregate cohort CSV and provenance summary; builder never runs in CI, so evidence changes require reviewed manifest diffs |
+| `report/paper_claim_sources.yaml`, `scripts/verify_paper_claims.py` | Exact claim-to-source bindings with deterministic calculations, unique manuscript matching, and explicit rounding tolerance | Batch 44 binds six cohort claims plus the descriptive/no-fairness semantic guard; 49 claims/guards pass |
 | `results/checkpoint_release_manifest.json` | Ten Phase 5 best-checkpoint paths, names, sizes, SHA-256/config bindings, local audit, conditional release assessment, and null public URL | Batch 36 audit: all ten local and matching, 962,924,817 bytes; binaries not committed or uploaded |
 | `tests/test_{download,prepare,visualize}.py` | Batch 1 acquisition/conversion/split/EDA tests | done |
 | `src/models/faster_rcnn_*.py`, `src/models/train_faster_rcnn.py` | Strict data adapter, model, AMP trainer, unified validation, reporting, profiling, and gates | implemented; smoke, benchmark, full run, and profiling complete |
@@ -1698,7 +1746,9 @@ Newest entries appear first; superseded decisions remain recorded.
 | `results/tables/{threshold_sweep,threshold_sweep_per_seed,threshold_operating_targets,precision_recall_curves,precision_recall_curves_per_seed}_n5_sensitivity.csv`, `results/figures/{precision_recall_curves,f1_vs_threshold}_n5_sensitivity.png` | Five-run exploratory threshold and threshold-free PR sensitivity with per-run and aggregate outputs | Batch 35 complete; seed 271 retained exactly as observed |
 | `configs/threshold_selection.yaml`, `src/evaluate_threshold_selection.py`, `tests/test_threshold_selection.py` | Inference-only validation bundle materialization, validation mean-F1 selection, one-shot frozen-test application, tables, and provenance | Batch 14 thresholds frozen at 0.69/0.05 over n=3; archive-routed after Batch 16 |
 | `results/tables/{validation_threshold_sweep*,selected_operating_points*}.csv`, `results/logs/phase14_threshold_selection/` | Six validation bundles, 99-point validation sweeps, selected thresholds, final test precision/recall/F1, hashes, and environment | Batch 14 complete; primary single-threshold source |
-| `docs/THRESHOLD_ANALYSIS.md` | Historical n=3 and five-run sensitivity PR/threshold results, unchanged n=3 validation selection, fixed-threshold application, comparison audit, and reproduction | Batch 35 complete |
+| `configs/threshold_selection_n5_validation_sensitivity.yaml`, `src/analyze_validation_threshold_sensitivity.py`, `tests/test_validation_threshold_sensitivity.py` | Hash-gated completion of four missing validation bundles, exact historical-selector reproduction, five-run post-hoc validation selection, unchanged five-run test application, classification, and overwrite/test-selection/seed-271 guards | Batch 43 complete; selects 0.70/0.01 as post-hoc sensitivity only; 0.69/0.05 historical provenance unchanged |
+| `results/logs/phase43_threshold_selection_n5_validation_sensitivity/`, `results/tables/*n5_validation_sensitivity.csv`, `results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv` | Four new hash-bound validation bundles, 990 per-run and 198 aggregate validation-sweep rows, 20 test rows, four aggregate operating rows, 11 classified conclusions, and end-to-end provenance | Batch 43 complete; no training or test-label selection; Faster seed-314 one-FP validation re-inference drift explicitly bounded and recorded |
+| `docs/THRESHOLD_ANALYSIS.md` | Historical n=3 and five-run test/validation sensitivity results, frozen n=3 precedence, post-hoc n=5 selection, fixed-threshold application, comparison audit, and reproduction | Batch 43 complete; 0.70/0.01 never called prospectively frozen |
 | `src/analyze_operating_regime_sensitivity.py`, `tests/test_operating_regime_sensitivity.py`, `results/tables/{operating_regime_n5_inventory,operating_regime_n3_vs_n5_conclusions,selected_operating_points_n5_sensitivity,selected_operating_points_per_seed_n5_sensitivity}.csv`, `results/logs/phase35_operating_regime_n5/` | Frozen-input inventory, unchanged-threshold application, 19-row n=3-versus-n=5 conclusion classification, and end-to-end provenance | Batch 35 complete; regression guards require all five runs and seed 271 |
 | `configs/threshold_calibration.yaml`, `src/stats/threshold_calibration.py`, `tests/test_threshold_calibration.py` | Validation-only recall-weighted F-beta sweep, hierarchical intervals, lower-bound selection, stability diagnostics, separate hypothetical linear loss, plotting, provenance, and isolation regressions | Batch 29 complete; no training, inference, test-label selection, or threshold propagation |
 | `results/tables/recall_weighted_fbeta_threshold_{summary,stability}.csv`, `results/tables/hypothetical_detection_error_loss_summary.csv`, `results/figures/recall_weighted_fbeta_threshold_sensitivity.png`, `results/logs/phase29_threshold_sensitivity/summary.json`, `docs/THRESHOLD_CALIBRATION.md` | Eight F-beta selections, 792 candidate stability rows, eight separate loss selections, full curves/hashes, D-006 method, findings, and scope | Batch 29 canonical; frozen F-beta thresholds unchanged and YOLO beta 3--10 boundary status explicit |
@@ -1720,14 +1770,14 @@ Newest entries appear first; superseded decisions remain recorded.
 | `results/tables/{acquisition_shift_dicom_metadata_audit,acquisition_shift_preprocessing_per_image,acquisition_shift_preprocessing_summary,radiography_synthetic_shift_results}.csv`, `results/logs/phase32_acquisition_shift_audit/`, `docs/ACQUISITION_SHIFTS.md` | 300 header rows, 3,000 per-image diagnostics, ten transformation summaries, corrected 20-row labels, current-standard interpretation, and SHA-256 provenance over unchanged Phase 22 bundles | Batch 32 complete; internal synthetic sensitivity only; Phase 22 outputs preserved as superseded history |
 | `configs/raincloud_metrics.yaml`, `src/plot_raincloud_metrics.py`, `tests/test_raincloud_metrics.py` | Strict 14-metric layout, aggregate-to-seed mean/SD/n audit, conditional-null preservation, deterministic Seaborn cloud/box/rain rendering, provenance, and regression tests | Batch 23 complete; no model inference or metric recomputation |
 | `results/figures/raincloud_metrics.png`, `results/logs/phase23_reporting/raincloud_metrics_summary.json` | Seven predictive and seven compute/hardware seed distributions with actual finite n in every panel, input hashes, counts, undefined reasons, and figure hash | Batch 23 complete; 138 finite observations and no n=3 mixing |
-| `docs/REPORTING_CHECKLIST.md`, `docs/SUPPLEMENTARY.md` | Current-paper CLAIM 2024 primary crosswalk plus explicitly analogical STARD-AI 2025/TRIPOD+AI 2024 mappings and routes to exhaustive evidence | Batch 42 refreshes the manuscript hash and routes supplementary FROC evidence to v4; it is not an official compliance claim |
-| `docs/HYPOTHESIS_TRACEABILITY.md` | Exact H1--H6 wording, retrospective status, operational endpoints, split/seed scope, artifacts, manuscript sections, results, multiplicity, and limitations | Batch 42 refreshes H2 to v4 exact-score FROC and its conservative residual bound; no hypothesis is labeled preregistered |
+| `docs/REPORTING_CHECKLIST.md`, `docs/SUPPLEMENTARY.md` | Current-paper CLAIM 2024 primary crosswalk plus explicitly analogical STARD-AI 2025/TRIPOD+AI 2024 mappings and routes to exhaustive evidence | Batch 44 refreshes the manuscript hash and routes the aggregate cohort artifacts; it is not an official compliance claim |
+| `docs/HYPOTHESIS_TRACEABILITY.md` | Exact H1--H6 wording, retrospective status, operational endpoints, split/seed scope, artifacts, manuscript sections, results, multiplicity, and limitations | Batch 43 distinguishes historical n=3 threshold precedence from post-hoc n=5 validation sensitivity; no hypothesis is labeled preregistered |
 | `docs/CITATION_AUDIT.md` | Exhaustive method/standards/dataset/DICOM/statistics/calibration/DCA/XAI source verification and exact claim mapping | Batch 34 complete; all 29 manuscript keys audited, no unsupported or wrong-attribution row remains after corrections |
 | `docs/AUTHOR_DECLARATIONS_TODO.md` | Human-only funding, interests, ethics/data-use, consent, contributions, availability, and PPI actions | Batch 34 complete as an unresolved action register; no declaration fact is invented |
 | `docs/REVIEW_REMEDIATION_AUDIT.md` | Independent repository-first adjudication of 17 external-review findings, 18 numerical claims, H1--H6 coverage, citation support, Git/CI state, and submission priorities | Historical Session 60 audit plus Batch 33 R6/R15 calibration-remediation addendum |
 | `docs/FINAL_SUBMISSION_AUDIT.md` | Batch 38 adversarial final gate: blockers, should-fix items, verified areas, 29-number traceability, analysis scopes, language/citation/artifact checks, and exact rerun commands | Complete; software/evidence checks are clean, but unresolved author declarations and the public-release decision make the disposition NOT READY FOR SUBMISSION |
 | `docs/V7_Q2_VINDR_BASELINE_AUDIT.md` | Batch 41 repository/manuscript adjudication, checkpoint and prediction inventories, n=3/n=5/FROC baseline, and V7 work classification | Complete for owner review; no scientific or manuscript content changed |
-| `report/paper_draft.md`, `report/report.md`, `report/references.bib` | Current controlled-comparison manuscript, preserved historical/full technical report, and resolving bibliography | Batch 37 aligns the current manuscript with all Batch 27--36 decisions; Batch 33 calibration, Batch 31 XAI, Batch 28 statistics, and the audited references remain in force |
+| `report/paper_draft.md`, `report/report.md`, `report/references.bib` | Current controlled-comparison manuscript, preserved historical/full technical report, and resolving bibliography | Batch 44 adds aggregate cohort characteristics to the current manuscript; prior calibration, XAI, statistical, threshold, and citation decisions remain in force |
 | `configs/explainability.yaml`, `src/explainability/`, `tests/test_{gradcam,pointing_game,explainability}.py` | Strict paired Grad-CAM targets, stride-matched hooks, localization metrics, case selection, figures, and regression tests | complete |
 | `results/tables/gradcam*.csv`, `results/figures/gradcam*.png`, `results/logs/phase7_explainability/` | All 222 per-target records, six aggregate rows, 18 paired qualitative records, three figures, hashes, and full Phase 7 summary | complete; incorporated in report |
 | `docs/EXPLAINABILITY.md` | Exact target/layer/metric protocol, results, explicit interpretation, reproduction, and caveats | Batch 31 keeps localization descriptive and rejects strong-localization wording from small absolute overlaps |
@@ -1736,26 +1786,28 @@ Newest entries appear first; superseded decisions remain recorded.
 | `configs/statistics.yaml`, `src/stats/`, `tests/test_statistics.py` | Independent within-detector trained-run/patient-cluster bootstrap, checkpoint-conditional permutation sensitivity, nonlinear prediction-level reconstruction, endpoint eligibility, Holm correction, archives, diagnostics, and regressions | Batch 28 estimand-separated implementation complete |
 | `results/tables/statistical_*.csv`, `results/logs/phase8_statistics/` | Seven clean primary intervals plus checkpoint-conditional p-values, 497 frozen robustness rows, run-influence diagnostics, and paired-seed/n=3/image-level archives | Batch 28 clean n=5/5 or 5/4 primary complete; robustness byte-identical |
 | `docs/STATISTICAL_ANALYSIS.md` | Named inferential targets, seed-coupling audit, independent-run bootstrap, endpoint-level results, CI/p-value explanation, diagnostics, archives, reproduction, and caveats | Batch 28 canonical statistical interpretation |
-| `tests/` | Data, model, evaluator, threshold/Pareto/FROC/calibration/DCA scale guard/raw-score audit, corruption/acquisition shifts, explainability/sanity, statistics, reproducibility, artifact/claim verification, stability, raincloud, and reporting regressions | 320 passing; one declared environment-conditional skip after the approved Batch 42 v4 sensitivity |
+| `tests/` | Data/cohort, model, evaluator, threshold/Pareto/FROC/calibration/DCA scale guard/raw-score audit, corruption/acquisition shifts, explainability/sanity, statistics, reproducibility, artifact/claim verification, stability, raincloud, and reporting regressions | 333 passing; one declared environment-conditional skip after Batch 44 |
 | older tests/configs | Pre-workflow legacy implementation | non-authoritative; reconcile before use |
 | `src/meddet_benchmark/` | Shared tested operating-point and COCO evaluator used by both detector baselines | package version aligned at 2.0.0; package smoke passes |
 
 ## Current phase
 
-**Batch 42's user-approved 0.00001 inference sensitivity is complete locally
-and stopped for review on `main` at the unchanged base
-`42826df37468a1c0b28439a7120cc5f3d83f9168`.** The current FROC result is the
-five-run observed exact-score frontier from ten hash-bound v4 bundles generated
-from the frozen Phase 5 checkpoints. Faster R-CNN remains higher at every
-prespecified FP/image budget. The new floor resolves the 1-FP/image boundary;
-YOLO11s seed 137 still ends at 1.9907 FP/image and limits only the 2-FP/image
-aggregate. Its conservative maximum remains below Faster R-CNN, so the missing
-frontier cannot reverse the qualitative ordering. No 0.000001 run is
-authorized. The canonical manuscript, supporting docs, claim bindings,
-58-artifact manifest, and reproduction commands are aligned. Nothing was
-staged, committed, pushed, or retrained. Later Batch 43 validation-bundle work,
-external testing, human declarations, and checkpoint publication remain out
-of scope.
+**Batch 44 is complete locally on `main`, built on the Batch 42 base
+`8f5c3508ccba3502287709a0848af14040349422`.** The immutable
+5,000-study split and patient mapping remain exact at 3,500/750/750 studies,
+2,136 disjoint NIH patient groups, 1,136 opacity-positive studies, and 1,812
+boxes. Header-only extraction reports 4,999 usable nominal-year ages (median
+49, IQR 36--60; one out-of-range exclusion), 2,362 female/2,638 male studies,
+and 2,363 AP/2,637 PA studies. All age tags lack encoded units, so D-015 and the
+manuscript constrain age interpretation to explicitly caveated aggregate
+description; no fairness or subgroup claim is made. The canonical manuscript,
+supporting docs, six new numerical claim bindings plus a semantic guard,
+67-artifact manifest, and reproduction commands are aligned. All 333 tests
+pass with one declared skip. No training, inference, or split mutation
+occurred. The user authorized one consolidated Batch 43--44 commit in Session
+92; no push was requested. Batch 45 or any later batch, external testing,
+human declarations, checkpoint publication, and the still-unauthorized
+0.000001 FROC run remain out of scope.
 
 ## Residual limitations / reproducibility risks
 
@@ -1769,6 +1821,12 @@ of scope.
   identity; changing it after the timing benchmark invalidates approval.
 - The official Kaggle CSV hashes reproduce the values recorded in the committed
   audit; the earlier mirror-provenance uncertainty for metadata is resolved.
+- Batch 44 adds limited aggregate `PatientAge`, `PatientSex`, and
+  `ViewPosition` descriptions from DICOM headers. Every selected age value is a
+  numeric `AS` string without an encoded unit; the nominal-year interpretation
+  is disclosed, and one value above 120 is excluded. These tags are not
+  clinically verified demographics, contain no race/ethnicity or other social
+  variables, and support neither subgroup performance nor fairness inference.
 - Per-image min–max DICOM conversion is deterministic and config-declared but
   does not reproduce vendor-specific window/VOI display processing. This remains
   a preprocessing limitation.
@@ -1828,8 +1886,12 @@ of scope.
   that transparent rule does not encode an elicited clinical-harm function and
   uses only three validation seeds. Batch 35 applies 0.69/0.05 unchanged to all
   five test runs, so its fixed-threshold and recall-Pareto values are five-run
-  test sensitivities but not five-run threshold selections. The selected YOLO
-  threshold still produces no seed-271 detection. The strict Pareto labels
+  test sensitivities but not five-run threshold selections. Batch 43 separately
+  repeats the identical rule on all five validation runs and selects 0.70/0.01,
+  but this is post-hoc validation sensitivity and does not replace the frozen
+  n=3 provenance. Five validation runs still provide only coarse threshold
+  stability evidence. The historical YOLO threshold produces no seed-271
+  detection. The strict Pareto labels
   describe complete ordering of the visibly labeled n=3 or n=5 run clouds, not
   statistical uncertainty, deployment utility, or unmeasured hardware.
 - Batch 29's corrected F-beta alternatives use only the three frozen
@@ -1848,11 +1910,12 @@ of scope.
   not conventional DCA: maximum detector confidence defined action and the
   same raw cutoff supplied the `tau/(1-tau)` weight without a validation-fitted
   exam-outcome probability mapping. It is excluded from the main Results and
-  retained only as a non-standard supplementary sensitivity artifact. Four of
-  ten retained detector/runs (both detectors at seeds 271 and 314) lack frozen
-  validation predictions, so complete run-specific probability calibration
-  cannot be fitted and frozen retrospectively. No calibrator was chosen or
-  fitted. The historical 750-image subset is enriched and internal (169
+  retained only as a non-standard supplementary sensitivity artifact. Four
+  validation bundles were absent when that decision was made; Batch 43 later
+  generated them solely for post-hoc threshold sensitivity. Their availability
+  does not retroactively specify an outcome-probability calibration protocol:
+  no calibrator was chosen or fitted and no DCA was rerun. The historical
+  750-image subset is enriched and internal (169
   positive, 581 negative, 323 patient groups; 22.533% image-level prevalence),
   not a deployment-prevalence sample. Neither the archived nor relabeled curve
   supplies standard net-benefit, clinical-utility, beneficial-range, threshold-
@@ -1899,8 +1962,11 @@ of scope.
   D-007's exclusion of non-standard raw-score curves throughout the abstract,
   Methods, Results, Discussion, and Limitations. Batch 42 adds the approved
   0.00001 observed exact-score FROC result, residual seed-137 lower-bound, and
-  conservative no-reversal proof, but the manuscript
-  still awaits the user's
+  conservative no-reversal proof. Batch 43 adds the separately labeled
+  five-run post-hoc validation selection and its weakened/reversed operating-
+  point comparisons. Batch 44 adds limited aggregate DICOM-header age, sex,
+  and projection characteristics with explicit unit and fairness boundaries,
+  but the manuscript still awaits the user's
   substantive review and author completion of the declaration placeholders; it
   is not yet a submission-ready journal artifact.
 - The Batch 34 crosswalk audits the current paper but is not an official CLAIM
@@ -1910,9 +1976,10 @@ of scope.
   individualized clinical prediction-model study. The Batch 37 structured
   abstract now covers design, partitions, estimand, outcomes, and implications
   but remains incomplete against CLAIM item 2 because release-ready software,
-  data, and model availability is unresolved. Source accrual dates,
-  demographic subgroup/fairness evidence, a participant-flow diagram,
-  external testing, and human-author declarations for ethics/consent, funding,
+  data, and model availability is unresolved. Source accrual dates, broader
+  clinical/demographic variables, demographic subgroup/fairness evaluation, a
+  participant-flow diagram, external testing, and human-author declarations
+  for ethics/consent, funding,
   competing interests, contributions, availability, and patient/public
   involvement remain unresolved. `docs/AUTHOR_DECLARATIONS_TODO.md` prevents
   those facts from being invented.

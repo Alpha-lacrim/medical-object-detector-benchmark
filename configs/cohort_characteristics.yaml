@@ -1,0 +1,81 @@
+schema_version: 1
+analysis_id: rsna-cohort-characteristics
+
+inputs:
+  dataset_config: configs/dataset.yaml
+  expected_dataset_config_sha256: 419ed20987cce95c61f7806d0913f09b9d3452df5e0b1ac2c091f8e6ff109693
+  audit_json: data/manifests/rsna-pneumonia-5000-audit.json
+  expected_audit_sha256: a39c847f30bc0a499f1d7a5fe3c7a204650b77cdadc690ba78251518e9e45a40
+  dicom_root_environment_variable: RSNA_DICOM_ROOT
+  split_manifests:
+    train: data/splits/rsna-pneumonia-5000/train.csv
+    val: data/splits/rsna-pneumonia-5000/val.csv
+    test: data/splits/rsna-pneumonia-5000/test.csv
+  expected_split_sha256:
+    train: a904345ce56c5753a49c1cc7d375b6730699c9cd60533fd3daa281b9e2760676
+    val: c185656d0ff3dc1918effdf1726e0030ee723254d8b7ef9e1b9187291ffc7ea4
+    test: 6b5890343e34ae568b97d7034c29fb8fa75df43517cc3691a5f912292c2f4534
+  output_split_names:
+    train: train
+    val: validation
+    test: internal_test
+
+manifest_columns:
+  split: split
+  image_id: image_id
+  patient_group: nih_patient_id
+  study_stratum: study_stratum
+  positive: is_positive
+  source_file: source_file
+  box_count: box_count
+
+expected_cohort:
+  total:
+    studies: 5000
+    patient_groups: 2136
+    opacity_positive_studies: 1136
+    bounding_boxes: 1812
+  splits:
+    train:
+      studies: 3500
+      patient_groups: 1492
+      opacity_positive_studies: 798
+      bounding_boxes: 1267
+    val:
+      studies: 750
+      patient_groups: 321
+      opacity_positive_studies: 169
+      bounding_boxes: 277
+    test:
+      studies: 750
+      patient_groups: 323
+      opacity_positive_studies: 169
+      bounding_boxes: 268
+
+metadata:
+  age:
+    tag: PatientAge
+    expected_vr: AS
+    conformant_pattern: '^(?P<value>[0-9]{3})(?P<unit>[DWMY])$'
+    numeric_without_unit_pattern: '^[0-9]{1,3}$'
+    numeric_without_unit_policy: assume_years_with_caveat
+    minimum_years: 0.0
+    maximum_years: 120.0
+    unit_denominators_per_year:
+      D: 365.2425
+      W: 52.1775
+      M: 12.0
+      Y: 1.0
+    percentile_method: linear
+  sex:
+    tag: PatientSex
+    expected_vr: CS
+    categories: [F, M, O]
+  projection:
+    tag: ViewPosition
+    expected_vr: CS
+    categories: [AP, PA]
+
+outputs:
+  aggregate_table: results/tables/rsna_cohort_characteristics.csv
+  summary_json: results/logs/phase44_cohort_characteristics/summary.json

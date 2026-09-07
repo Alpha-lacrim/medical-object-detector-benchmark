@@ -1,0 +1,108 @@
+schema_version: 1
+analysis_id: rsna-phase43-post-hoc-n5-validation-threshold-selection-sensitivity
+
+scope:
+  label: post-hoc n=5 validation threshold-selection sensitivity
+  selection_split: validation
+  test_role: evaluation_only
+  expected_detectors: [faster_rcnn, yolo11s]
+  historical_seeds: [17, 42, 137]
+  sensitivity_seeds: [17, 42, 137, 271, 314]
+  inference_seeds: [271, 314]
+  influence_seed: 271
+  validation_images: 750
+  validation_annotations: 277
+
+inputs:
+  phase5_config: configs/evaluation.yaml
+  phase5_summary: results/logs/phase5_evaluation/summary.json
+  checkpoint_manifest: results/checkpoint_release_manifest.json
+  validation_split: val
+  validation_annotations: data/processed/rsna-pneumonia-5000/annotations/instances_val.json
+  historical_config: configs/threshold_selection_n3_frozen.yaml
+  historical_manifest: results/logs/phase14_threshold_selection/validation_prediction_manifest.json
+  historical_summary: results/logs/phase14_threshold_selection/summary.json
+  historical_validation_table: results/tables/validation_threshold_sweep.csv
+  historical_validation_per_seed_table: results/tables/validation_threshold_sweep_per_seed.csv
+  historical_selected_table: results/tables/selected_operating_points.csv
+  historical_selected_per_seed_table: results/tables/selected_operating_points_per_seed.csv
+  n5_test_threshold_config: configs/threshold_sweep_n5_sensitivity.yaml
+  historical_n5_test_summary: results/logs/phase35_operating_regime_n5/summary.json
+  historical_n5_test_table: results/tables/selected_operating_points_n5_sensitivity.csv
+  historical_n5_test_per_seed_table: results/tables/selected_operating_points_per_seed_n5_sensitivity.csv
+
+frozen_evaluation:
+  score_threshold: 0.25
+  match_iou_threshold: 0.5
+  coco_minimum_score: 0.001
+  nms_iou_threshold: 0.5
+  max_detections: 100
+
+reference_check:
+  max_true_positive_delta: 0
+  max_false_positive_delta: 1
+  max_false_negative_delta: 0
+  max_prediction_count_delta: 1
+
+selection:
+  start: 0.01
+  stop: 0.99
+  steps: 99
+  rule: maximum_mean_f1
+  averaging: equal_run_arithmetic_mean
+  standard_deviation: sample
+  tie_breaker: highest_threshold
+
+comparison:
+  mean_metrics: [precision, recall, f1, fp_per_image, prediction_count]
+  variability_metrics: [precision, recall, f1, fp_per_image, prediction_count]
+  lower_is_preferred: [fp_per_image]
+  numeric_tolerance: 1.0e-12
+
+protection:
+  protected_roots:
+    - results/logs/phase14_threshold_selection
+  historical_artifacts:
+    - path: configs/threshold_selection.yaml
+      sha256: 273e0cf22ad7732421738459b68eed6b5cb38546dae58bd8537f7451a37244a6
+    - path: configs/threshold_selection_n3_frozen.yaml
+      sha256: f7ba5bae4d206f4081fe94546823867a2d6c554a03156ad03b9da9c7463e0a60
+    - path: results/logs/phase14_threshold_selection/pip_freeze.txt
+      sha256: f8e9e7ffa3a2e2152240f9c64480bbf333ea252ec3a797b0929d7a8ac32a46d6
+    - path: results/logs/phase14_threshold_selection/run_environment.json
+      sha256: eb6f956cb4badee6ce65e391472de32f115da37106db051ebff36ede88de04af
+    - path: results/logs/phase14_threshold_selection/summary.json
+      sha256: 4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50
+    - path: results/logs/phase14_threshold_selection/validation_prediction_manifest.json
+      sha256: d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e
+    - path: results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed17_validation_predictions.json.gz
+      sha256: 355413196476a14d87865ea20edc946f1e1b56e8320200d072a516d622160763
+    - path: results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed42_validation_predictions.json.gz
+      sha256: 6cc4b57a1cf7a789b5bb1a0af7d726db6417a024b65c1dea3b7bb1e69653afde
+    - path: results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed137_validation_predictions.json.gz
+      sha256: 14142327d8482e5cb8700d02bc293011c43a6191755d72db729bea3170467966
+    - path: results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed17_validation_predictions.json.gz
+      sha256: 7e42737d2d664acfb47a1bbb3552e4a21d0c44f44bde4b571e97d5e6b91cdab3
+    - path: results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed42_validation_predictions.json.gz
+      sha256: 2b3431029e208040f9e41c5a2865f260cf987e03f1424e289e0adc96a2e91478
+    - path: results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed137_validation_predictions.json.gz
+      sha256: 8d2caef6eb29cec81788ca3b9facf48c7bd6e44776074601a87df3dbcca38b89
+    - path: results/tables/validation_threshold_sweep.csv
+      sha256: c95665ad0c66e999f948e371153b6f8b826eb1d0cb83df9712420e53f93fcb98
+    - path: results/tables/validation_threshold_sweep_per_seed.csv
+      sha256: 611b50fb79f493fca66ff72c2f0bdc2ca6c00a8ac000b4e82df8f5282b8e4b38
+    - path: results/tables/selected_operating_points.csv
+      sha256: 1b0c9fe80b5867f7e8f60fdd9af3489bd779c0a2f124029a6c5b1b8c13d7d58d
+    - path: results/tables/selected_operating_points_per_seed.csv
+      sha256: cebedc9ced0d9bab1840bd8319d03865dc8d7e2cf9da53db7eff5eaa1f86b393
+
+outputs:
+  log_dir: results/logs/phase43_threshold_selection_n5_validation_sensitivity
+  new_validation_bundles_dir: results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions
+  new_validation_manifest: results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_prediction_manifest.json
+  validation_threshold_table: results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv
+  validation_threshold_per_seed_table: results/tables/validation_threshold_sweep_per_seed_n5_validation_sensitivity.csv
+  test_operating_points_table: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+  test_operating_points_per_seed_table: results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv
+  conclusion_table: results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv
+  summary_json: results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json

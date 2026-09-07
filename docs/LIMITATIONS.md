@@ -14,6 +14,17 @@ acquisition practices. Results may not transport to pediatric patients,
 portable-care settings, newer equipment, other institutions, other modalities,
 or multi-class localization tasks.
 
+The original DICOM headers support limited partition-wise description of age,
+sex, and AP/PA projection. These are study-level header values rather than
+independently verified clinical records. All 5,000 `PatientAge` elements are
+numeric-only despite VR `AS`, so the reported nominal-year summaries assume the
+missing unit is years; one value outside the configured 0--120 range is
+excluded. Sex and projection are complete and restricted to F/M and AP/PA in
+the selected cohort, but race, ethnicity, socioeconomic, comorbidity, and other
+clinical variables remain unavailable. No model-performance subgroup or
+inferential fairness analysis was performed, so aggregate representation must
+not be interpreted as evidence of equitable performance.
+
 The challenge cohort was enriched using existing labels and is not a
 prevalence-representative clinical sample. Reported precision and false-positive
 behavior are therefore benchmark operating characteristics, not deployment
@@ -132,17 +143,21 @@ detector-specific thresholds on validation by maximum mean F1 (0.69 for Faster
 R-CNN and 0.05 for YOLO11s) and applies them once to test; these are the primary
 single-threshold operating points for the historical three-seed Batch 14
 analysis. Equal-weight F1 is transparent but does not encode an empirically
-elicited clinical-harm function, and only three validation seeds
-informed that frozen selection. It was not reselected after the additional
-seeds, and seed 271 also emits nothing at the selected YOLO threshold of 0.05.
+elicited clinical-harm function, and only three validation seeds informed that
+frozen historical selection. Batch 43 separately completed the seed-271/314
+validation predictions and repeated the identical rule across all five runs as
+a post-hoc validation sensitivity; its 0.70/0.01 thresholds are not
+prospectively frozen and do not replace the historical 0.69/0.05 values. Seed
+271 emits nothing at the historical YOLO threshold of 0.05.
 The complete held-out threshold sweep is descriptive rather than a source of
 deployment settings.
 
 Batch 35 recomputes test-side threshold, official PR, FROC, frozen-threshold,
 and Pareto sensitivity over all five attempts without changing the n=3
-validation selection. This improves consistency with the clean comparison but
-does not create five-run validation evidence: threshold-selection n remains 3
-while sensitivity test n is 5. The 0.01--0.99 test sweep remains exploratory,
+validation selection. Batch 43 is distinct: it creates the missing four
+validation bundles and tests five-run validation selection without using test
+labels. The historical primary threshold-selection n remains 3; the new n=5
+result is explicitly post hoc. The 0.01--0.99 test sweep remains exploratory,
 its peak F1 and fixed-target rows are not selection rules, and pointwise
 mean +/- sample-SD bands over five runs remain coarse. Seed 271 contributes its
 observed nonzero AP and low-score FROC behavior but defined zeros at 0.25 and
@@ -172,6 +187,15 @@ strengthen; the AP@0.5 position count strengthens; the AP@0.5:0.95 position
 count and all four Pareto labels are unchanged. No conclusion reverses. These
 classifications compare observed margins and must not be read as inferential
 evidence that adding two more training runs caused a true effect change.
+
+The Batch 43 validation-selection comparison is also not uniformly favorable.
+The Faster R-CNN threshold changes only from 0.69 to 0.70, while YOLO11s moves
+from 0.05 to the 0.01 grid boundary. On the same five internal-test runs,
+Faster R-CNN retains higher mean precision, recall, and F1, but all three
+advantages weaken; the FP/image and detection-count orderings reverse. Several
+sample-SD comparisons also change direction. These are descriptive
+threshold-selection sensitivities over only five validation runs, not evidence
+of a stable deployment threshold or a prospectively specified replication.
 
 Batch 29 corrects the separate validation-only F-beta analysis: beta is a
 recall-versus-precision preference parameter, and beta squared is the relative
@@ -225,11 +249,13 @@ probability or a decision-maker's harm/benefit threshold. The arithmetic is
 preserved and relabeled as an exploratory raw-score threshold
 utility/sensitivity curve, but it was removed from the main manuscript Results
 and supplies no standard net-benefit, clinical-utility, beneficial-range, or
-deployment evidence. Probability-based salvage was not attempted: only six of
-the ten retained detector/runs have frozen validation predictions, leaving
-both detectors' seeds 271 and 314 without the run-specific validation data
-needed to fit and freeze mappings before test evaluation. No calibrator was
-chosen or fitted. The historical population was also a deliberately
+deployment evidence. At the time of that audit, only six of ten validation
+prediction bundles existed, so probability-based salvage was not attempted.
+Batch 43 later generated the four missing bundles solely for post-hoc
+validation threshold-selection sensitivity. That later availability does not
+retroactively define a calibration protocol: no calibrator was chosen or
+fitted, no outcome-probability mapping was frozen before test evaluation, and
+no DCA was rerun. The historical population was also a deliberately
 stratified, enriched 750-image internal test subset (169 positive, 581
 negative, 323 patient groups; 22.533% image-level prevalence), not a deployment
 prevalence sample. Full classification and archive provenance are in

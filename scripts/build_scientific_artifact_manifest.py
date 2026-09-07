@@ -74,6 +74,12 @@ VALIDATION_BUNDLES = tuple(
     for detector in ("faster_rcnn", "yolo11s")
     for seed in (17, 42, 137)
 )
+PHASE43_VALIDATION_BUNDLES = tuple(
+    "results/logs/phase43_threshold_selection_n5_validation_sensitivity/"
+    f"validation_predictions/{detector}_seed{seed}_validation_predictions.json.gz"
+    for detector in ("faster_rcnn", "yolo11s")
+    for seed in (271, 314)
+)
 PHASE6_BUNDLES = tuple(
     path.relative_to(ROOT).as_posix()
     for path in sorted((ROOT / "results/logs/phase6_robustness/predictions").glob("*.json.gz"))
@@ -150,6 +156,29 @@ SPECS = (
         "configs/dataset.yaml",
         RAW_DATA_INPUTS,
         "Phase 2 - dataset preparation",
+        "external_data_preparation",
+    ),
+    spec(
+        "results/logs/phase44_cohort_characteristics/summary.json",
+        "src/data/cohort_characteristics.py",
+        "configs/cohort_characteristics.yaml",
+        (
+            committed("data/manifests/rsna-pneumonia-5000-audit.json"),
+            committed("data/splits/rsna-pneumonia-5000/train.csv"),
+            committed("data/splits/rsna-pneumonia-5000/val.csv"),
+            committed("data/splits/rsna-pneumonia-5000/test.csv"),
+            *RAW_DATA_INPUTS,
+        ),
+        "Phase 44 - aggregate cohort characterization",
+        "external_data_preparation",
+        references=("results/tables/rsna_cohort_characteristics.csv",),
+    ),
+    spec(
+        "results/tables/rsna_cohort_characteristics.csv",
+        "src/data/cohort_characteristics.py",
+        "configs/cohort_characteristics.yaml",
+        (committed("results/logs/phase44_cohort_characteristics/summary.json"),),
+        "Phase 44 - aggregate cohort characterization",
         "external_data_preparation",
     ),
     spec(
@@ -493,6 +522,76 @@ SPECS = (
         (committed("results/logs/phase35_operating_regime_n5/summary.json"),),
         "Phase 35 - operating-regime conclusion audit",
         "committed_analysis",
+    ),
+    spec(
+        "results/logs/phase43_threshold_selection_n5_validation_sensitivity/"
+        "validation_prediction_manifest.json",
+        "src/analyze_validation_threshold_sensitivity.py",
+        "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        (
+            committed("results/logs/phase5_evaluation/summary.json"),
+            committed("results/checkpoint_release_manifest.json"),
+            committed(
+                "results/logs/phase14_threshold_selection/validation_prediction_manifest.json"
+            ),
+            external(
+                "data/processed/rsna-pneumonia-5000/annotations/instances_val.json",
+                "cf0592a36f96d2f7989695156ce3b9ef4701a36a4d70641bfe4292c91ae07f94",
+            ),
+            *CHECKPOINT_INPUTS,
+            *(committed(path) for path in PHASE43_VALIDATION_BUNDLES),
+        ),
+        "Phase 43 - five-run validation prediction completion",
+        "checkpoint_inference",
+        gpu=True,
+        references=PHASE43_VALIDATION_BUNDLES,
+    ),
+    spec(
+        "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+        "src/analyze_validation_threshold_sensitivity.py",
+        "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        (
+            committed(
+                "results/logs/phase43_threshold_selection_n5_validation_sensitivity/"
+                "validation_prediction_manifest.json"
+            ),
+            committed("results/logs/phase14_threshold_selection/summary.json"),
+            committed("results/logs/phase35_operating_regime_n5/summary.json"),
+            *(committed(path) for path in VALIDATION_BUNDLES),
+            *(committed(path) for path in PHASE43_VALIDATION_BUNDLES),
+            *(committed(path) for path in PHASE5_BUNDLES),
+        ),
+        "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+        "committed_analysis",
+        references=(
+            "results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv",
+            "results/tables/validation_threshold_sweep_per_seed_n5_validation_sensitivity.csv",
+            "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+            "results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv",
+            "results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv",
+        ),
+    ),
+    *(
+        spec(
+            path,
+            "src/analyze_validation_threshold_sensitivity.py",
+            "configs/threshold_selection_n5_validation_sensitivity.yaml",
+            (
+                committed(
+                    "results/logs/phase43_threshold_selection_n5_validation_sensitivity/"
+                    "summary.json"
+                ),
+            ),
+            "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+            "committed_analysis",
+        )
+        for path in (
+            "results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv",
+            "results/tables/validation_threshold_sweep_per_seed_n5_validation_sensitivity.csv",
+            "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+            "results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv",
+            "results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv",
+        )
     ),
     spec(
         "results/logs/phase29_threshold_sensitivity/summary.json",

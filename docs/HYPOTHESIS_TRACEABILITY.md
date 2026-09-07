@@ -46,7 +46,7 @@ convert the hypothesis into a prospective or confirmatory test.
 | Manuscript section | [`paper_draft.md` §§4.2 and 5.1](../report/paper_draft.md#42-operating-regime-sensitivity-internal-testing-n5-threshold-selection-n3). |
 | Result status | **Supported retrospectively and descriptively:** 97/101 AP@0.5 recall positions favor Faster R-CNN, four tie, and all five prespecified exact-score FROC budgets favor Faster R-CNN sensitivity. Scores below 0.01 weaken four historical-grid gaps, strengthen one, and reverse none. |
 | Multiplicity | No inferential multiplicity procedure applies to the descriptive curve-position counts and predeclared FROC budgets. The score-0.25 clean endpoint p-values are part of the separate seven-endpoint Holm family, not a test of the whole H2 pattern. |
-| Limitations | Exploratory n=5 internal-testing analysis; threshold selection remains n=3; no probabilistic-calibration inference; observed exact-score frontier remains bounded by the approved 0.00001 candidate floor for YOLO11s seed 137 at 2 FP/image, although its conservative maximum cannot reverse the detector ordering; no clinical operating point or external testing. |
+| Limitations | Exploratory n=5 internal-testing analysis; primary threshold selection remains historical n=3 and the five-validation-run selector is post-hoc sensitivity only; no probabilistic-calibration inference; observed exact-score frontier remains bounded by the approved 0.00001 candidate floor for YOLO11s seed 137 at 2 FP/image, although its conservative maximum cannot reverse the detector ordering; no clinical operating point or external testing. |
 
 ## H3 — Accuracy-compute Pareto trade-off
 

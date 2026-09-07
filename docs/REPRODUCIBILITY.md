@@ -90,6 +90,56 @@ change, rebuild it locally and inspect the diff:
 git diff -- results/scientific_artifact_manifest.json
 ```
 
+## Aggregate RSNA cohort-characteristics reproduction
+
+Batch 44 reads only the original selected DICOM headers and never trains a
+model, decodes pixel data, changes split membership, or writes a patient-level
+record. The root defaults to the repository-relative
+`dataset.paths.source_images_dir` in `configs/dataset.yaml`. If the licensed
+DICOMs are stored elsewhere, use the environment override:
+
+```powershell
+$env:RSNA_DICOM_ROOT = "<directory-containing-stage-2-training-DICOMs>" # optional override
+& $benchmarkPython -m src.data.cohort_characteristics --config configs/cohort_characteristics.yaml
+```
+
+The command first hash-checks the dataset config, original aggregate audit, and
+all three immutable split manifests. It reconstructs the official RSNA-to-NIH
+patient mapping from the pinned mapping source, verifies all 5,000 study rows,
+confirms zero patient-group overlap, and maps each selected source filename to
+one DICOM. It then reads only `PatientAge`, `PatientSex`, and `ViewPosition`
+with `stop_before_pixels=True`.
+
+The output table and summary are aggregate-only. The summary binds the selected
+header stream with one SHA-256 fingerprint but contains no source filenames,
+exam IDs, patient keys, or demographic rows. All numeric ages are validated for
+DICOM syntax/units and the configured 0--120-year range; this source's
+numeric-only AS values are reported as nominal years with an explicit caveat,
+and the single out-of-range value is excluded.
+
+## Five-run validation threshold-selection sensitivity
+
+Batch 43 is a separately versioned **post-hoc validation sensitivity**. It
+first reproduces the historical seeds 17/42/137 selector and thresholds, then
+extends only validation run coverage to seeds 271 and 314 under the same grid,
+objective, equal-run averaging, sample SD, and tie rule. Test labels are not
+used until both detector thresholds have been selected, and the historical
+n=3 artifacts are hash-protected against overwrite.
+
+```powershell
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode collect-validation
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode run
+```
+
+The first two commands require the pinned CUDA runtime only when the four
+seed-271/314 validation bundles need to be created. They load the exact frozen
+best checkpoints and never enter a training path. The final command is
+committed-analysis reproduction over ten hash-bound validation bundles and ten
+frozen internal-test bundles. It selects 0.70 for Faster R-CNN and 0.01 for
+YOLO11s, but those values are not prospectively frozen and do not replace the
+historical 0.69/0.05 provenance.
+
 ## Exact-score FROC committed-analysis reproduction
 
 The current FROC result uses ten versioned prediction bundles collected at the

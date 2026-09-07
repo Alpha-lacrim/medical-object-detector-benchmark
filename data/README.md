@@ -57,6 +57,18 @@ and CSV split manifests. DICOM-to-PNG conversion is streaming and does not load
 the full dataset into RAM. The committed manifests and figures can be reviewed
 without committing the raw/processed image files.
 
+After preparation, generate aggregate-only cohort characteristics with:
+
+```powershell
+python -m src.data.cohort_characteristics --config configs/cohort_characteristics.yaml
+```
+
+The command uses `dataset.paths.source_images_dir` by default. If the original
+DICOM directory is elsewhere, set `RSNA_DICOM_ROOT` to that directory. It
+hash-checks the immutable manifests, revalidates the official patient mapping,
+reads only age/sex/view-position headers, and never writes raw demographic rows
+or identifiers.
+
 ## Locally inspected source files
 
 The 2026-08-02 audit used the canonical Stage 2 CSV filenames and the official

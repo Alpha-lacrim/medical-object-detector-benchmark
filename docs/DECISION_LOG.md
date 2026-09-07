@@ -583,3 +583,81 @@ cannot theoretically reverse the detector ordering at 1 or 2 FP/image.
 - Current prose uses “observed exact-score frontier” and “prespecified
   FP/image operating budgets”; it does not call the frontier exhaustive or
   threshold-independent.
+
+## D-014 — Retain n=3 threshold provenance and report n=5 selection only as post-hoc sensitivity
+
+- **Date:** 2026-09-06
+- **Status:** Accepted for sensitivity reporting; historical precedence unchanged
+
+### Context
+
+Batch 35 expanded test-side operating-regime evidence to all five retained
+runs but deliberately kept threshold selection on validation seeds 17, 42,
+and 137. Batch 41 confirmed that raw validation predictions were missing for
+both detectors at seeds 271 and 314. Batch 43 generated only those four bundles
+from the exact frozen checkpoints under the original validation and inference
+contract, then repeated the historical 0.01--0.99 maximum equal-run mean-F1
+rule with the higher-threshold exact-tie rule. Test labels did not enter bundle
+validation or threshold selection.
+
+### Decision
+
+Keep 0.69 for Faster R-CNN and 0.05 for YOLO11s as frozen historical n=3
+provenance. Report the five-validation-run result only as **post-hoc validation
+sensitivity** and never as prospectively frozen. It selects 0.70 for Faster
+R-CNN and 0.01 for YOLO11s. Applying those thresholds unchanged to all five
+internal-test bundles preserves Faster R-CNN's mean precision, recall, and F1
+lead, although each margin weakens; the FP/image and detection-count orderings
+reverse.
+
+### Consequences
+
+- Phase 14 files and the historical threshold configs remain byte-for-byte
+  unchanged and authoritative for provenance.
+- Batch 43 writes only versioned config, bundle, table, and summary paths.
+- The four new validation bundles may support later explicitly authorized
+  validation analyses, but they do not retroactively make earlier work
+  prospective or validate a calibration/DCA protocol.
+- All mean and sample-SD comparisons remain descriptive over five retained
+  runs and are not inferential evidence of deployment stability.
+
+## D-015 — Report aggregate DICOM-header cohort characteristics with an age-unit caveat
+
+- **Date:** 2026-09-07
+- **Status:** Accepted for descriptive cohort reporting only
+
+### Context
+
+The original RSNA DICOMs were locally available through the repository-relative
+path already declared in `configs/dataset.yaml`. All 5,000 immutable split rows
+mapped one-to-one to those source files and to the official NIH patient mapping.
+The selected `PatientAge`, `PatientSex`, and `ViewPosition` tags could therefore
+improve cohort reporting without model training or any change to membership.
+
+All age elements use DICOM VR `AS`, but every selected value is numeric-only and
+lacks an encoded D/W/M/Y suffix. Sex is complete with only F/M values, and
+projection is complete with only AP/PA values. One numeric age is outside the
+configured 0--120 plausible-year range.
+
+### Decision
+
+Report plausible numeric-only age values as **nominal years under an explicit
+dataset-specific assumption**, and exclude the single out-of-range value from
+age summaries. Report sex and AP/PA projection exactly as encoded. Percentages
+use all studies in each partition as the denominator. These are descriptive
+study-level header characteristics, not independently verified clinical
+demographics, subgroup performance, or fairness evidence.
+
+### Consequences
+
+- `RSNA_DICOM_ROOT` is an optional environment override; the config-declared
+  repository-relative DICOM path remains the default. A missing or incomplete
+  root produces an actionable stop rather than path guessing.
+- The generator hash-checks the dataset contract and all three immutable split
+  manifests, reconstructs the official patient mapping, and reads headers with
+  pixel decoding disabled.
+- Only a four-row aggregate CSV and aggregate provenance JSON may be tracked.
+  No source filename, exam ID, patient key, patient-level demographic row, raw
+  DICOM, or pixel output is created.
+- No model training, inference, subgroup comparison, or fairness claim is part
+  of this decision.

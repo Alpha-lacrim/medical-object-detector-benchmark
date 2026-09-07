@@ -21,6 +21,12 @@ manuscript_semantic_guards:
   - id: detector_specific_timer_boundary_is_disclosed
     required_regex: 'Faster R-CNN\s+resizing occurred inside its timed forward, whereas YOLO tensor resizing\s+occurred before timed forward-plus-NMS'
 
+  - id: posthoc_threshold_is_not_prospectively_frozen
+    required_regex: 'This is post-hoc validation sensitivity, not a prospectively frozen\s+operating point'
+
+  - id: cohort_characteristics_are_descriptive_not_fairness_inference
+    required_regex: 'These are descriptive cohort characteristics;\s+no demographic subgroup comparison or fairness inference was performed'
+
 # Every regex must select exactly one manuscript value. Absolute tolerances encode
 # the stated decimal rounding; approximate prose claims use a deliberately wider
 # tolerance and a calculation over frozen source rows.
@@ -70,6 +76,84 @@ claims:
       kind: json_value
       path: data/manifests/rsna-pneumonia-5000-audit.json
       pointer: [subsample, selected_groups]
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_age_median
+    description: Selected-cohort median nominal age after range validation.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'Across the selected cohort,\s+median nominal age was (?P<value>\d+(?:\.\d+)?) years'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: age_median_years
+    absolute_tolerance: 0
+    rounding: integer years
+
+  - id: cohort_total_age_summary_n
+    description: Selected studies contributing to the validated nominal-age summary.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'median nominal age was 49 years \(IQR 36--60; n=(?P<value>[\d,]+)\)'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: age_summary_n
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_female_count
+    description: Selected studies with DICOM PatientSex encoded F.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'n=4,999\), (?P<value>[\d,]+) studies \(47\.2%\)\s+were encoded female'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: sex_f_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_male_count
+    description: Selected studies with DICOM PatientSex encoded M.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'encoded female and (?P<value>[\d,]+) \(52\.8%\) male'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: sex_m_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_ap_count
+    description: Selected studies with DICOM ViewPosition encoded AP.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'and (?P<value>[\d,]+) \(47\.3%\) were AP versus'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: projection_ap_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_pa_count
+    description: Selected studies with DICOM ViewPosition encoded PA.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'were AP versus\s+(?P<value>[\d,]+) \(52\.7%\) PA'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: projection_pa_count
     absolute_tolerance: 0
     rounding: integer
 
@@ -195,7 +279,7 @@ claims:
     description: Validation-selected Faster R-CNN score threshold.
     manuscript:
       section: Operating regime
-      regex: 'Validation selection remains n=3 and chose (?P<value>\d+\.\d+) for Faster R-CNN'
+      regex: 'Historical validation selection used n=3 and chose (?P<value>\d+\.\d+) for Faster R-CNN'
     source:
       kind: csv_cell
       path: results/tables/selected_operating_points_n5_sensitivity.csv
@@ -208,7 +292,7 @@ claims:
     description: Validation-selected YOLO11s score threshold.
     manuscript:
       section: Operating regime
-      regex: 'chose 0\.69 for Faster R-CNN and (?P<value>\d+\.\d+) for\s+YOLO11s'
+      regex: 'chose 0\.69 for Faster R-CNN and\s+(?P<value>\d+\.\d+) for YOLO11s'
     source:
       kind: csv_cell
       path: results/tables/selected_operating_points_n5_sensitivity.csv
@@ -240,6 +324,84 @@ claims:
       path: results/tables/selected_operating_points_n5_sensitivity.csv
       filters: {detector: yolo11s}
       column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_faster_selected_threshold
+    description: Five-run post-hoc validation-sensitivity Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'post-hoc validation sensitivity selected (?P<value>\d+\.\d+) for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: faster_rcnn}
+      column: selected_threshold
+    absolute_tolerance: 0.0000001
+    rounding: exact displayed threshold
+
+  - id: posthoc_yolo_selected_threshold
+    description: Five-run post-hoc validation-sensitivity YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'selected 0\.70 for Faster R-CNN and (?P<value>\d+\.\d+)\s+for YOLO11s from all five validation runs'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: yolo11s}
+      column: selected_threshold
+    absolute_tolerance: 0.0000001
+    rounding: exact displayed threshold
+
+  - id: posthoc_faster_test_f1
+    description: Five-run test F1 at the post-hoc Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: '0\.3388 \+/- 0\.0567, and (?P<value>\d+\.\d+) \+/- 0\.0222 for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: faster_rcnn}
+      column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_yolo_test_f1
+    description: Five-run test F1 at the post-hoc YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: '0\.2925 \+/- 0\.0886, and (?P<value>\d+\.\d+) \+/- 0\.0367 for YOLO11s'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: yolo11s}
+      column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_faster_test_fp_per_image
+    description: Five-run mean test FP/image at the post-hoc Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'Mean FP/image was (?P<value>\d+\.\d+) versus 0\.3104'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: faster_rcnn}
+      column: test_fp_per_image
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_yolo_test_fp_per_image
+    description: Five-run mean test FP/image at the post-hoc YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'Mean FP/image was 0\.2205 versus (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: yolo11s}
+      column: test_fp_per_image
     absolute_tolerance: 0.00005
     rounding: 4 decimal places
 

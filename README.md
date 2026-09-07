@@ -179,14 +179,35 @@ Visualization regenerates:
 - `results/figures/rsna_annotation_samples.png` (report Figure 2); and
 - `results/figures/rsna_eda_summary.json`.
 
-The dataset table in report Section 3 is a rounded rendering of
-`data/manifests/rsna-pneumonia-5000-audit.json` and the generated/committed split
-manifests from the preparation command. To regenerate metadata, splits, and
-COCO annotations without decoding pixels, use:
+The split counts in report Section 3 are bound to
+`data/manifests/rsna-pneumonia-5000-audit.json` and the committed split
+manifests. To regenerate metadata, splits, and COCO annotations without
+decoding pixels, use:
 
 ```powershell
 & $benchmarkPython -m src.data.prepare --config configs/dataset.yaml --metadata-only
 ```
+
+### 2a. Generate aggregate cohort characteristics
+
+The original DICOM root defaults to `dataset.paths.source_images_dir` in
+`configs/dataset.yaml`. If the files are stored elsewhere, supply the root at
+runtime rather than editing or hardcoding a machine-specific path:
+
+```powershell
+$env:RSNA_DICOM_ROOT = "<directory-containing-stage-2-training-DICOMs>" # optional override
+& $benchmarkPython -m src.data.cohort_characteristics --config configs/cohort_characteristics.yaml
+```
+
+If neither the config path nor `RSNA_DICOM_ROOT` resolves to the complete
+selected source, the command stops with an instruction to set
+`RSNA_DICOM_ROOT`. It verifies the immutable split hashes and counts, checks all
+5,000 rows against the official NIH patient mapping, then reads only
+`PatientAge`, `PatientSex`, and `ViewPosition` without decoding pixels. It
+writes only the four-row aggregate table
+`results/tables/rsna_cohort_characteristics.csv` and aggregate provenance
+summary under `results/logs/phase44_cohort_characteristics/`; no identifier- or
+patient-level demographic output is created.
 
 If Kaggle supplies the aggregate competition archive instead of the individual
 image ZIP, extract only its training-image member before preparation:
@@ -372,6 +393,29 @@ reselection:
 
 The outputs visibly separate `threshold_selection_run_count=3` from
 `test_run_count=5` and retain seed 271's zero-detection row at 0.05.
+
+#### 5b.1 Run the post-hoc five-validation-run selection sensitivity
+
+This separate workflow leaves every historical n=3 artifact unchanged. It
+uses validation evidence from seeds 17, 42, 137, 271, and 314 with the same
+99-point maximum-mean-F1 rule and then applies the selected thresholds once to
+all five frozen internal-test bundles. The result is a **post-hoc validation
+sensitivity**, never a prospectively frozen threshold choice.
+
+```powershell
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode collect-validation
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode run
+```
+
+`preflight` is read-only. `collect-validation` loads only the exact frozen best
+checkpoints for missing seed-271/314 validation bundles and performs no
+training. Once those four bundles exist, `run` is CPU-only and reproduces the
+historical 0.69/0.05 selection before selecting 0.70/0.01 over all five
+validation runs. The versioned summary is
+`results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json`;
+the aggregate comparison is
+`results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv`.
 
 ### 5c. Reparameterize the test sweep as FROC curves
 
@@ -728,7 +772,8 @@ adds exact bindings for central numerical prose and table claims.
 
 | Report or paper item | Generated source | Regenerating command |
 |---|---|---|
-| Paper §3.1; report Table 1 and Figures 1–2 | audit/split manifests; `rsna_*.png`; `rsna_eda_summary.json` | `src.data.prepare`, then `src.data.visualize` in §2 |
+| Paper §3.1 cohort construction; report Figures 1–2 | audit/split manifests; `rsna_*.png`; `rsna_eda_summary.json` | `src.data.prepare`, then `src.data.visualize` in §2 |
+| Paper §3.1 cohort table and §4.1 cohort Results | `rsna_cohort_characteristics.csv`; Phase 44 aggregate summary | `src.data.cohort_characteristics` in §2a |
 | Paper §§3.2–3.3 protocol parameters | run-level `resolved_config.json` / `resolved_experiment.json`; Phase 5 summary | detector train/finalize in §§3–4, then `src.evaluate --mode evaluate` in §5 |
 | Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
 | Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |

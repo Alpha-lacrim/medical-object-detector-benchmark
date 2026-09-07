@@ -233,12 +233,28 @@ The hardware-driven size improves reproducibility on the stated laptop but
 widens sampling uncertainty and limits generalizability to the complete source
 cohort.
 
-| Split | Radiographs | NIH patient groups | Lung Opacity | No opacity / not normal | Normal | Boxes |
-|---|---:|---:|---:|---:|---:|---:|
-| Train | 3,500 | 1,492 | 798 | 1,554 | 1,148 | 1,267 |
-| Validation | 750 | 321 | 169 | 331 | 250 | 277 |
-| Internal testing | 750 | 323 | 169 | 331 | 250 | 268 |
-| **Total** | **5,000** | **2,136** | **1,136** | **2,216** | **1,648** | **1,812** |
+For cohort characterization, the immutable split manifests were mapped
+one-to-one to the original DICOM filenames. Headers were read without decoding
+pixels, and only `PatientAge`, `PatientSex`, and `ViewPosition` were extracted.
+The age parser accepted conformant DICOM age strings with D/W/M/Y units. In
+these files, however, all 5,000 `PatientAge` elements had VR `AS` but contained
+bare numeric values without a unit suffix. We therefore report plausible
+values from 0 to 120 as nominal years under an explicit dataset-specific
+interpretation; one value above that range was excluded. Age quartiles use linear
+percentiles. Sex and projection categories were counted exactly as encoded,
+and every percentage below uses all studies in its partition as the
+denominator.
+
+| Split | Studies | Patient groups | Opacity-positive, n (%) | Boxes | Age, median [IQR], nominal y (n) | Age unavailable, n (%) | Female, n (%) | Male, n (%) | Sex missing, n (%) | AP, n (%) | PA, n (%) | Projection missing, n (%) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Train | 3,500 | 1,492 | 798 (22.8%) | 1,267 | 50 [36--60] (3,499) | 1 (0.03%) | 1,614 (46.1%) | 1,886 (53.9%) | 0 (0.0%) | 1,690 (48.3%) | 1,810 (51.7%) | 0 (0.0%) |
+| Validation | 750 | 321 | 169 (22.5%) | 277 | 49 [34--59] (750) | 0 (0.0%) | 399 (53.2%) | 351 (46.8%) | 0 (0.0%) | 348 (46.4%) | 402 (53.6%) | 0 (0.0%) |
+| Internal testing | 750 | 323 | 169 (22.5%) | 268 | 47 [35--61] (750) | 0 (0.0%) | 349 (46.5%) | 401 (53.5%) | 0 (0.0%) | 325 (43.3%) | 425 (56.7%) | 0 (0.0%) |
+| **Total** | **5,000** | **2,136** | **1,136 (22.7%)** | **1,812** | **49 [36--60] (4,999)** | **1 (0.02%)** | **2,362 (47.2%)** | **2,638 (52.8%)** | **0 (0.0%)** | **2,363 (47.3%)** | **2,637 (52.7%)** | **0 (0.0%)** |
+
+No `PatientSex` value outside F/M and no `ViewPosition` value outside AP/PA
+was observed. The table describes study-level header values, not independently
+verified clinical demographics or subgroup performance.
 
 #### Canonical preprocessing
 
@@ -315,8 +331,9 @@ The evidence has deliberately different scopes:
   sensitivities recompute internal-testing threshold/PR and Pareto evidence for
   all five runs; FROC uses an observed exact-score frontier from separately
   versioned, inference-only 0.00001 bundles generated from the same frozen
-  checkpoints. Threshold selection remains n=3; 0.69 and 0.05 are applied
-  unchanged to the five internal-testing bundles.
+  checkpoints. The historical selection remains n=3, with 0.69 and 0.05
+  applied unchanged to the five internal-testing bundles. A separate post-hoc
+  validation sensitivity repeats the same selection rule over all five runs.
 - Digital-corruption, raw-array acquisition-shift, and primary Grad-CAM analyses
   use the seed-17 checkpoint from each detector on one fixed 300-image sample.
 - Detection calibration uses all five frozen internal-testing bundles. The XAI
@@ -351,6 +368,15 @@ three seeds was frozen for each detector; exact ties favored the higher
 threshold. These thresholds were then applied once to the corresponding internal-testing
 bundles. Batch 35 additionally applied the same thresholds to seeds 271 and
 314. Internal-testing results did not feed back into selection in either scope.
+
+For post-hoc validation sensitivity, the missing seed-271 and seed-314
+validation predictions were generated from the exact frozen checkpoints with
+the original split, preprocessing, adapters, candidate floor, NMS, detection
+cap, and coordinate logic. The identical grid, objective, equal-run arithmetic
+mean, sample SD, and higher-threshold exact-tie rule were then applied across
+all five validation runs. The selected thresholds were applied unchanged to
+all five internal-testing bundles. Test labels were not used for selection,
+and the resulting thresholds were not prospectively frozen.
 
 FROC reports sensitivity versus false positives per image at the prespecified
 budgets 0.125, 0.25, 0.5, 1, and 2 FP/image. The current analysis evaluates
@@ -434,12 +460,15 @@ was specially handled, and no recalibration map was fitted. Reliability
 diagrams were confidence-only marginal summaries, not visualizations of all
 five D-ECE dimensions. D-ECE was programmatically separate from exam-level
 outcome-probability calibration required for valid decision-curve analysis.
-Conventional decision-curve analysis was not performed: frozen validation
-predictions existed for only six of the ten retained detector runs, so a
+Conventional decision-curve analysis was not performed: at the time of that
+decision, frozen validation predictions existed for only six of the ten
+retained detector runs, so a
 complete set of validation-fitted, run-specific exam-outcome probability
 mappings could not be frozen without dropping runs or using internal-testing
 outcomes. The historical raw-score calculation was therefore excluded from the
-main evidence rather than relabeled as probability-based DCA.
+main evidence rather than relabeled as probability-based DCA. Batch 43 later
+completed the four validation bundles for threshold-selection sensitivity, but
+did not fit a calibrator, freeze an outcome-probability mapping, or rerun DCA.
 
 ### 3.7 Compute and Pareto analysis
 
@@ -585,6 +614,15 @@ checkpoint-conditional p-values.
 
 ### 4.1 Clean internal-testing performance (n=5 per detector; conditional localization n=5/n=4)
 
+**Cohort characteristics.** All 5,000 selected DICOM headers mapped to the
+unchanged 3,500/750/750 patient-disjoint split. Across the selected cohort,
+median nominal age was 49 years (IQR 36--60; n=4,999), 2,362 studies (47.2%)
+were encoded female and 2,638 (52.8%) male, and 2,363 (47.3%) were AP versus
+2,637 (52.7%) PA. Sex and projection had no missing or other values. Age had no
+missing tags, but all age values lacked encoded units and the single
+out-of-range value was excluded. These are descriptive cohort characteristics;
+no demographic subgroup comparison or fairness inference was performed.
+
 The unified evaluator processed 750 internal-testing images and 268 reference boxes for
 each of 10 frozen checkpoints. At the original score threshold of 0.25, Faster
 R-CNN had higher recall, F1, and both AP endpoints, whereas YOLO11s had higher
@@ -618,7 +656,7 @@ are not mixed into it.
 
 ![Figure 1. Five-attempt clean predictive and compute distributions. Conditional YOLO11s IoU and Dice use four finite seeds; every other endpoint uses five seeds per detector.](../results/figures/raincloud_metrics.png)
 
-### 4.2 Operating-regime sensitivity (internal-testing n=5; threshold selection n=3)
+### 4.2 Operating-regime sensitivity (internal-testing n=5; historical selection n=3)
 
 The n=5 all-attempt threshold sensitivity showed why the score-0.25 comparison
 cannot be read as a general YOLO precision advantage. At 0.25, Faster R-CNN
@@ -644,13 +682,23 @@ nonzero AP curve and was not filtered for its zero detections at 0.25.
 
 ![Figure 2b. Five-run exploratory F1-versus-threshold sensitivity. Seed 271 is included exactly as observed; the internal-testing sweep is descriptive evidence, not threshold selection.](../results/figures/f1_vs_threshold_n5_sensitivity.png)
 
-Validation selection remains n=3 and chose 0.69 for Faster R-CNN and 0.05 for
-YOLO11s. Applying those unchanged thresholds to all five internal-testing bundles gave
+Historical validation selection used n=3 and chose 0.69 for Faster R-CNN and
+0.05 for YOLO11s. Applying those unchanged thresholds to all five internal-testing bundles gave
 precision/recall/F1 0.3624 +/- 0.0581, 0.3507 +/- 0.0463, and
 0.3511 +/- 0.0184 for Faster R-CNN, versus 0.2524 +/- 0.1418,
 0.1948 +/- 0.1110, and 0.2192 +/- 0.1233 for YOLO11s. Seed 271 contributes
 defined zeros with no detection at 0.05. These are n=5 internal-testing sensitivities of an
 n=3-selected rule, not thresholds reselected after internal-testing outcome inspection.
+
+The post-hoc validation sensitivity selected 0.70 for Faster R-CNN and 0.01
+for YOLO11s from all five validation runs. Applied unchanged to the same five
+internal-testing bundles, precision/recall/F1 was 0.3686 +/- 0.0632,
+0.3388 +/- 0.0567, and 0.3458 +/- 0.0222 for Faster R-CNN, versus
+0.2631 +/- 0.0360, 0.2925 +/- 0.0886, and 0.2657 +/- 0.0367 for YOLO11s.
+Faster R-CNN's three mean-metric advantages therefore remained but weakened.
+Mean FP/image was 0.2205 versus 0.3104, reversing the historical-threshold
+ordering. This is post-hoc validation sensitivity, not a prospectively frozen
+operating point.
 
 On the observed exact-score frontier, five-run FROC sensitivity was higher for
 Faster R-CNN at each prespecified FP/image operating budget: 0.2776 versus
@@ -913,8 +961,10 @@ every official recall position and higher observed sensitivity at every
 prespecified FP/image operating budget. The FROC claim remains bounded by the
 0.00001 candidate floor because one YOLO11s run ends just below 2 FP/image;
 even the mathematical-maximum missing sensitivity cannot reverse the detector
-ordering. Detector-specific thresholds selected on
-validation also differed sharply, 0.69 versus 0.05.
+ordering. Detector-specific thresholds selected on validation also differed
+sharply: 0.69 versus 0.05 historically and 0.70 versus 0.01 in the post-hoc
+five-run validation sensitivity. The latter preserved the mean precision,
+recall, and F1 ordering but weakened all three detector margins.
 
 These measurements are related but not interchangeable. AP summarizes ranking
 over predictions retained under the common evaluation and post-processing
@@ -1050,10 +1100,15 @@ prevalence representative. Precision and false-positive behavior are therefore
 benchmark characteristics, not deployment predictive values. Results may not
 transport to pediatric patients, portable-care
 settings, contemporary equipment, other institutions, modalities, or
-multi-class tasks. No external testing dataset or demographic subgroup/fairness
-analysis was available. Source accrual dates, full acquisition-device and
-exposure details, participant demographics, and several reference-standard
-details are absent. No prospective evaluation was performed.
+multi-class tasks. DICOM header age, sex, and AP/PA projection enabled limited
+partition-wise cohort description, but these study-level fields were not
+independently verified against clinical records. All age values lacked the
+required encoded unit suffix; the nominal-years interpretation is therefore a
+dataset-specific assumption, and one out-of-range value was excluded. Race,
+ethnicity, socioeconomic and comorbidity variables, source accrual dates, full
+acquisition-device and exposure details, and several reference-standard
+details remain absent. No demographic subgroup performance, fairness analysis,
+external testing, or prospective evaluation was performed.
 
 **Reference standard and preprocessing.** Boxes are coarse rectangles rather
 than pixel-accurate opacity masks; reader disagreement and ambiguous boundaries
@@ -1067,10 +1122,11 @@ studies from model training/evaluation. Five clean training attempts per
 detector remain a coarse sample of seed variation. The principal internal-testing
 threshold, PR, and Pareto displays are five-run all-attempt sensitivities, and
 FROC uses the five-run observed exact-score frontier; historical grid artifacts
-remain unchanged as provenance. Threshold
-selection itself still uses only the original three validation runs, so the
-n=5 fixed-threshold and recall-Pareto results are not n=5-selected operating
-points.
+remain unchanged as provenance. Primary threshold selection still uses the
+original three validation runs, so the n=5 fixed-threshold and recall-Pareto
+results are not n=5-selected operating points. A separate five-validation-run
+analysis is reported only as post-hoc validation sensitivity; five runs remain
+a coarse basis for threshold stability.
 Digital robustness, acquisition shifts, and primary Grad-CAM use one seed-17
 checkpoint per detector and 300 images from 183 patients with 111 boxes. XAI
 sanity uses 50 images from 41 patients. None of these secondary analyses
@@ -1091,7 +1147,11 @@ silently removed.
 are protocol-sensitivity endpoints. The primary validation-selected thresholds
 use three seeds and equal-weight F1, which does not encode an elicited
 clinical-harm function. Applying those thresholds to five internal-testing runs cannot add
-missing validation evidence or justify reselection. The n=3-versus-n=5 margin
+missing validation evidence or justify reselection. The separate post-hoc
+five-validation-run sensitivity selected 0.70/0.01 under the identical rule,
+but it is not prospectively frozen; its retained mean precision, recall, and F1
+ordering coexists with weakened margins and reversed FP/image ordering. The
+n=3-versus-n=5 margin
 classifications are descriptive influence summaries rather than inferential
 tests; several shared-threshold and AP gaps weakened even though no direction
 reversed. The
@@ -1125,8 +1185,10 @@ the threshold probability required by conventional DCA
 therefore classified the calculation as non-standard, removed it from the main
 Results, and retained its exact arithmetic only as a relabeled supplementary
 raw-score utility/sensitivity artifact. Probability-based salvage was not
-forced because frozen validation predictions were available for only six of
-ten retained runs; no calibrator was selected or fitted. The enriched
+forced because only six of ten validation prediction bundles existed at that
+time. Batch 43 later created the four missing bundles for post-hoc threshold
+selection, but no calibrator or outcome-probability mapping was selected or
+fitted and no DCA was rerun. The enriched
 internal-testing subset (169/750 positives; 323 patient groups) is not a
 deployment-prevalence sample. The preserved calculation supplies no conventional
 net-benefit, clinical-utility, beneficial-range, or deployment-readiness
@@ -1195,7 +1257,8 @@ audit, not certification of CLAIM, TRIPOD+AI, or STARD-AI compliance. The
 repository does not contain a local ethics/consent determination, registration,
 funding statement, conflict-of-interest statement, patient/public involvement
 statement, participant-flow diagram, source accrual dates, or external and
-demographic subgroup evaluation. These gaps cannot be repaired by narrative
+demographic subgroup evaluation beyond the limited descriptive age/sex/AP-PA
+header table. These gaps cannot be repaired by narrative
 wording without new traceable evidence.
 
 Clinical deployment would require prospective and external multi-site

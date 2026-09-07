@@ -1,0 +1,721 @@
+{
+  "analysis_id": "rsna-phase43-post-hoc-n5-validation-threshold-selection-sensitivity",
+  "checkpoint_manifest": {
+    "path": "results/checkpoint_release_manifest.json",
+    "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+    "size_bytes": 8732
+  },
+  "config": {
+    "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+    "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694",
+    "size_bytes": 6132
+  },
+  "counts": {
+    "annotations": 277,
+    "combined_bundles": 10,
+    "historical_bundles": 6,
+    "images_per_bundle": 750,
+    "new_bundles": 4
+  },
+  "environment": {
+    "pip_freeze": {
+      "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/pip_freeze.txt",
+      "sha256": "c41a2aa69b8a28f10bbab4feddb09ab9eccb593cb3a13e6844318e2676463a32",
+      "size_bytes": 3160
+    },
+    "run_environment": {
+      "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/run_environment.json",
+      "sha256": "3faa4062309bf1c332f28b163fe39fddc103282d7b8da4637cd2294491ff983f",
+      "size_bytes": 1577
+    }
+  },
+  "historical_protection": {
+    "overwritten": false,
+    "verified_after": [
+      {
+        "path": "configs/threshold_selection.yaml",
+        "sha256": "273e0cf22ad7732421738459b68eed6b5cb38546dae58bd8537f7451a37244a6",
+        "size_bytes": 1157
+      },
+      {
+        "path": "configs/threshold_selection_n3_frozen.yaml",
+        "sha256": "f7ba5bae4d206f4081fe94546823867a2d6c554a03156ad03b9da9c7463e0a60",
+        "size_bytes": 1135
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/pip_freeze.txt",
+        "sha256": "f8e9e7ffa3a2e2152240f9c64480bbf333ea252ec3a797b0929d7a8ac32a46d6",
+        "size_bytes": 3143
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/run_environment.json",
+        "sha256": "eb6f956cb4badee6ce65e391472de32f115da37106db051ebff36ede88de04af",
+        "size_bytes": 1576
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/summary.json",
+        "sha256": "4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50",
+        "size_bytes": 7863
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+        "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+        "size_bytes": 8271
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed17_validation_predictions.json.gz",
+        "sha256": "355413196476a14d87865ea20edc946f1e1b56e8320200d072a516d622160763",
+        "size_bytes": 750230
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed42_validation_predictions.json.gz",
+        "sha256": "6cc4b57a1cf7a789b5bb1a0af7d726db6417a024b65c1dea3b7bb1e69653afde",
+        "size_bytes": 347446
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed137_validation_predictions.json.gz",
+        "sha256": "14142327d8482e5cb8700d02bc293011c43a6191755d72db729bea3170467966",
+        "size_bytes": 991777
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed17_validation_predictions.json.gz",
+        "sha256": "7e42737d2d664acfb47a1bbb3552e4a21d0c44f44bde4b571e97d5e6b91cdab3",
+        "size_bytes": 89165
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed42_validation_predictions.json.gz",
+        "sha256": "2b3431029e208040f9e41c5a2865f260cf987e03f1424e289e0adc96a2e91478",
+        "size_bytes": 75157
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed137_validation_predictions.json.gz",
+        "sha256": "8d2caef6eb29cec81788ca3b9facf48c7bd6e44776074601a87df3dbcca38b89",
+        "size_bytes": 58718
+      },
+      {
+        "path": "results/tables/validation_threshold_sweep.csv",
+        "sha256": "c95665ad0c66e999f948e371153b6f8b826eb1d0cb83df9712420e53f93fcb98",
+        "size_bytes": 37568
+      },
+      {
+        "path": "results/tables/validation_threshold_sweep_per_seed.csv",
+        "sha256": "611b50fb79f493fca66ff72c2f0bdc2ca6c00a8ac000b4e82df8f5282b8e4b38",
+        "size_bytes": 49676
+      },
+      {
+        "path": "results/tables/selected_operating_points.csv",
+        "sha256": "1b0c9fe80b5867f7e8f60fdd9af3489bd779c0a2f124029a6c5b1b8c13d7d58d",
+        "size_bytes": 1019
+      },
+      {
+        "path": "results/tables/selected_operating_points_per_seed.csv",
+        "sha256": "cebedc9ced0d9bab1840bd8319d03865dc8d7e2cf9da53db7eff5eaa1f86b393",
+        "size_bytes": 1550
+      }
+    ],
+    "verified_before": [
+      {
+        "path": "configs/threshold_selection.yaml",
+        "sha256": "273e0cf22ad7732421738459b68eed6b5cb38546dae58bd8537f7451a37244a6",
+        "size_bytes": 1157
+      },
+      {
+        "path": "configs/threshold_selection_n3_frozen.yaml",
+        "sha256": "f7ba5bae4d206f4081fe94546823867a2d6c554a03156ad03b9da9c7463e0a60",
+        "size_bytes": 1135
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/pip_freeze.txt",
+        "sha256": "f8e9e7ffa3a2e2152240f9c64480bbf333ea252ec3a797b0929d7a8ac32a46d6",
+        "size_bytes": 3143
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/run_environment.json",
+        "sha256": "eb6f956cb4badee6ce65e391472de32f115da37106db051ebff36ede88de04af",
+        "size_bytes": 1576
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/summary.json",
+        "sha256": "4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50",
+        "size_bytes": 7863
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+        "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+        "size_bytes": 8271
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed17_validation_predictions.json.gz",
+        "sha256": "355413196476a14d87865ea20edc946f1e1b56e8320200d072a516d622160763",
+        "size_bytes": 750230
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed42_validation_predictions.json.gz",
+        "sha256": "6cc4b57a1cf7a789b5bb1a0af7d726db6417a024b65c1dea3b7bb1e69653afde",
+        "size_bytes": 347446
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed137_validation_predictions.json.gz",
+        "sha256": "14142327d8482e5cb8700d02bc293011c43a6191755d72db729bea3170467966",
+        "size_bytes": 991777
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed17_validation_predictions.json.gz",
+        "sha256": "7e42737d2d664acfb47a1bbb3552e4a21d0c44f44bde4b571e97d5e6b91cdab3",
+        "size_bytes": 89165
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed42_validation_predictions.json.gz",
+        "sha256": "2b3431029e208040f9e41c5a2865f260cf987e03f1424e289e0adc96a2e91478",
+        "size_bytes": 75157
+      },
+      {
+        "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed137_validation_predictions.json.gz",
+        "sha256": "8d2caef6eb29cec81788ca3b9facf48c7bd6e44776074601a87df3dbcca38b89",
+        "size_bytes": 58718
+      },
+      {
+        "path": "results/tables/validation_threshold_sweep.csv",
+        "sha256": "c95665ad0c66e999f948e371153b6f8b826eb1d0cb83df9712420e53f93fcb98",
+        "size_bytes": 37568
+      },
+      {
+        "path": "results/tables/validation_threshold_sweep_per_seed.csv",
+        "sha256": "611b50fb79f493fca66ff72c2f0bdc2ca6c00a8ac000b4e82df8f5282b8e4b38",
+        "size_bytes": 49676
+      },
+      {
+        "path": "results/tables/selected_operating_points.csv",
+        "sha256": "1b0c9fe80b5867f7e8f60fdd9af3489bd779c0a2f124029a6c5b1b8c13d7d58d",
+        "size_bytes": 1019
+      },
+      {
+        "path": "results/tables/selected_operating_points_per_seed.csv",
+        "sha256": "cebedc9ced0d9bab1840bd8319d03865dc8d7e2cf9da53db7eff5eaa1f86b393",
+        "size_bytes": 1550
+      }
+    ]
+  },
+  "historical_validation_manifest": {
+    "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+    "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+    "size_bytes": 8271
+  },
+  "preflight": {
+    "analysis_id": "rsna-phase43-post-hoc-n5-validation-threshold-selection-sensitivity",
+    "checkpoint_bytes_verified": 962924817,
+    "checkpoints_verified": 10,
+    "cuda_device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "historical_rule": {
+      "averaging": "equal_run_arithmetic_mean",
+      "rule": "maximum_mean_f1",
+      "standard_deviation": "sample",
+      "start": 0.01,
+      "steps": 99,
+      "stop": 0.99,
+      "thresholds": [
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        0.07,
+        0.08,
+        0.09,
+        0.1,
+        0.11,
+        0.12,
+        0.13,
+        0.14,
+        0.15,
+        0.16,
+        0.17,
+        0.18,
+        0.19,
+        0.2,
+        0.21,
+        0.22,
+        0.23,
+        0.24,
+        0.25,
+        0.26,
+        0.27,
+        0.28,
+        0.29,
+        0.3,
+        0.31,
+        0.32,
+        0.33,
+        0.34,
+        0.35,
+        0.36,
+        0.37,
+        0.38,
+        0.39,
+        0.4,
+        0.41,
+        0.42,
+        0.43,
+        0.44,
+        0.45,
+        0.46,
+        0.47,
+        0.48,
+        0.49,
+        0.5,
+        0.51,
+        0.52,
+        0.53,
+        0.54,
+        0.55,
+        0.56,
+        0.57,
+        0.58,
+        0.59,
+        0.6,
+        0.61,
+        0.62,
+        0.63,
+        0.64,
+        0.65,
+        0.66,
+        0.67,
+        0.68,
+        0.69,
+        0.7,
+        0.71,
+        0.72,
+        0.73,
+        0.74,
+        0.75,
+        0.76,
+        0.77,
+        0.78,
+        0.79,
+        0.8,
+        0.81,
+        0.82,
+        0.83,
+        0.84,
+        0.85,
+        0.86,
+        0.87,
+        0.88,
+        0.89,
+        0.9,
+        0.91,
+        0.92,
+        0.93,
+        0.94,
+        0.95,
+        0.96,
+        0.97,
+        0.98,
+        0.99
+      ],
+      "tie_breaker": "highest_threshold"
+    },
+    "historical_thresholds_verified": true,
+    "new_bundle_count": 4,
+    "new_bundles_ready": true,
+    "performs_training": false,
+    "preflight_performs_checkpoint_loading": false,
+    "preflight_performs_model_inference": false,
+    "reference_tables": [
+      {
+        "path": "results/tables/seeds/faster_rcnn_seed271_validation.csv",
+        "sha256": "5459eed1abb9d8ccc5c61485bccb9214d9f68c5b9b63576d6f758049221357ea",
+        "size_bytes": 486
+      },
+      {
+        "path": "results/tables/seeds/faster_rcnn_seed314_validation.csv",
+        "sha256": "968996ef37d62c66f4ed6258d88ddb3adfa498ff063210f245eed6b1a51a4bc5",
+        "size_bytes": 486
+      },
+      {
+        "path": "results/tables/seeds/yolo_seed271_validation.csv",
+        "sha256": "564d90b824829d5d91fb728ff5755d7094dfa6eab821193302724da4c94414d7",
+        "size_bytes": 431
+      },
+      {
+        "path": "results/tables/seeds/yolo_seed314_validation.csv",
+        "sha256": "0b9c1a0036459e952a9c78f6e67a628cb036cb46c9d0119e5419124a841de643",
+        "size_bytes": 480
+      }
+    ],
+    "selection_uses_test_labels": false,
+    "sensitivity_label": "post-hoc n=5 validation threshold-selection sensitivity",
+    "status": "ready",
+    "validation_annotations": 277,
+    "validation_images": 750
+  },
+  "protocol": {
+    "combined_sensitivity_seeds": [
+      17,
+      42,
+      137,
+      271,
+      314
+    ],
+    "coordinate_logic": "canonical detector adapters and xyxy serialization from src.evaluate",
+    "evaluation": {
+      "coco_minimum_score": 0.001,
+      "match_iou_threshold": 0.5,
+      "max_detections": 100,
+      "nms_iou_threshold": 0.5,
+      "score_threshold": 0.25
+    },
+    "faster_rcnn_tf32": "training-config runtime.allow_tf32 applied before the frozen adapter",
+    "historical_seeds_reused": [
+      17,
+      42,
+      137
+    ],
+    "inference_seeds": [
+      271,
+      314
+    ],
+    "performs_checkpoint_loading": true,
+    "performs_model_inference": true,
+    "performs_training": false,
+    "preprocessing_and_adapter": "unchanged run-specific frozen training contracts",
+    "reference_check": {
+      "max_false_negative_delta": 0,
+      "max_false_positive_delta": 1,
+      "max_prediction_count_delta": 1,
+      "max_true_positive_delta": 0
+    },
+    "selection_split": "validation",
+    "test_annotations_accessed": false,
+    "test_labels_used_for_selection": false
+  },
+  "runs": [
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt",
+        "sha256": "fa7ef259b30d5ce19c954e3e30ddecf3c6d74d05e82c5d525eb499a2db2c998f",
+        "size_bytes": 173412170
+      },
+      "detector": "faster_rcnn",
+      "image_count": 750,
+      "inference_seconds": 70.36462909946567,
+      "prediction_count": 6771,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 117,
+            "training_reference": 117
+          },
+          "fp": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 486,
+            "training_reference": 486
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.0,
+              "reinference": 0.3466955579631636,
+              "training_reference": 0.3466955579631636
+            },
+            "precision": {
+              "delta": 0.0,
+              "reinference": 0.2476780185758514,
+              "training_reference": 0.2476780185758514
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.5776173285198556,
+              "training_reference": 0.5776173285198556
+            }
+          },
+          "prediction_count": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 646,
+            "training_reference": 646
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 160,
+            "training_reference": 160
+          }
+        },
+        "exact": true,
+        "status": "exact"
+      },
+      "seed": 271,
+      "training_config": {
+        "path": "configs/faster_rcnn_seed271.yaml",
+        "sha256": "1374056522f088d22609d5ea0da490de880f48e0e4841ace0f0a6ee6861fbaa7",
+        "size_bytes": 2937
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed271_validation_predictions.json.gz",
+        "sha256": "f22c1b112dc3250473f737bfc0de0aa6a33e2042037b6cf8d74a1490c0c11b62",
+        "size_bytes": 302911
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/faster_rcnn_seed271_validation.csv",
+        "sha256": "5459eed1abb9d8ccc5c61485bccb9214d9f68c5b9b63576d6f758049221357ea",
+        "size_bytes": 486
+      }
+    },
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt",
+        "sha256": "e2147d0c45b1c7e369270a2d737e08b564fedd37cd88e2456ec13df03e4591a7",
+        "size_bytes": 173412170
+      },
+      "detector": "faster_rcnn",
+      "image_count": 750,
+      "inference_seconds": 70.04960860012216,
+      "prediction_count": 3809,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 125,
+            "training_reference": 125
+          },
+          "fp": {
+            "delta": -1,
+            "maximum_absolute_delta": 1,
+            "reinference": 407,
+            "training_reference": 408
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.00043445204735520493,
+              "reinference": 0.3636363636363636,
+              "training_reference": 0.3632019115890084
+            },
+            "precision": {
+              "delta": 0.00048556095067725513,
+              "reinference": 0.27191413237924866,
+              "training_reference": 0.2714285714285714
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.5487364620938628,
+              "training_reference": 0.5487364620938628
+            }
+          },
+          "prediction_count": {
+            "delta": -1,
+            "maximum_absolute_delta": 1,
+            "reinference": 559,
+            "training_reference": 560
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 152,
+            "training_reference": 152
+          }
+        },
+        "exact": false,
+        "status": "within_configured_count_bounds"
+      },
+      "seed": 314,
+      "training_config": {
+        "path": "configs/faster_rcnn_seed314.yaml",
+        "sha256": "b20dfe1ebc6355cf6921fc59d86271f0abd74e9046d359930e2d5bb76c106eb7",
+        "size_bytes": 2937
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed314_validation_predictions.json.gz",
+        "sha256": "14e8d4ae9c2b425c3b365febf74cba76db987f22afc7c2114d8b5147d2cdd007",
+        "size_bytes": 192959
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/faster_rcnn_seed314_validation.csv",
+        "sha256": "968996ef37d62c66f4ed6258d88ddb3adfa498ff063210f245eed6b1a51a4bc5",
+        "size_bytes": 486
+      }
+    },
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+        "sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+        "size_bytes": 19172435
+      },
+      "detector": "yolo11s",
+      "image_count": 750,
+      "inference_seconds": 20.090392299665837,
+      "prediction_count": 1090,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 277,
+            "training_reference": 277
+          },
+          "fp": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 0,
+            "training_reference": 0
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.0,
+              "reinference": 0.0,
+              "training_reference": 0.0
+            },
+            "precision": {
+              "delta": 0.0,
+              "reinference": 0.0,
+              "training_reference": 0.0
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.0,
+              "training_reference": 0.0
+            }
+          },
+          "prediction_count": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 0,
+            "training_reference": 0
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 0,
+            "training_reference": 0
+          }
+        },
+        "exact": true,
+        "status": "exact"
+      },
+      "seed": 271,
+      "training_config": {
+        "path": "configs/yolo_seed271.yaml",
+        "sha256": "15f40539b0091892a6d3f168b0c2813b903ee87123cba4725b14889963b0c41b",
+        "size_bytes": 2915
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed271_validation_predictions.json.gz",
+        "sha256": "9bdcf6a911e8aad0e008a68c66826f73158af0c08e43ce16f9111ab130470f50",
+        "size_bytes": 84532
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/yolo_seed271_validation.csv",
+        "sha256": "564d90b824829d5d91fb728ff5755d7094dfa6eab821193302724da4c94414d7",
+        "size_bytes": 431
+      }
+    },
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+        "sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+        "size_bytes": 19172691
+      },
+      "detector": "yolo11s",
+      "image_count": 750,
+      "inference_seconds": 18.719823300285498,
+      "prediction_count": 898,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 243,
+            "training_reference": 243
+          },
+          "fp": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 24,
+            "training_reference": 24
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.0,
+              "reinference": 0.20298507462686569,
+              "training_reference": 0.20298507462686569
+            },
+            "precision": {
+              "delta": 0.0,
+              "reinference": 0.5862068965517241,
+              "training_reference": 0.5862068965517241
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.12274368231046931,
+              "training_reference": 0.12274368231046931
+            }
+          },
+          "prediction_count": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 58,
+            "training_reference": 58
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 34,
+            "training_reference": 34
+          }
+        },
+        "exact": true,
+        "status": "exact"
+      },
+      "seed": 314,
+      "training_config": {
+        "path": "configs/yolo_seed314.yaml",
+        "sha256": "d436f4f635bbbaa6a0719eab1f158de1c81a744749a684f171b29c81da43cdbb",
+        "size_bytes": 2915
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed314_validation_predictions.json.gz",
+        "sha256": "658877d3654b7125e473a5ed484aa0b7a071f73b0979557d4d2c072ccd8b0b28",
+        "size_bytes": 77986
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/yolo_seed314_validation.csv",
+        "sha256": "0b9c1a0036459e952a9c78f6e67a628cb036cb46c9d0119e5419124a841de643",
+        "size_bytes": 480
+      }
+    }
+  ],
+  "schema_version": 1,
+  "sensitivity_label": "post-hoc n=5 validation threshold-selection sensitivity",
+  "source_identity": {
+    "src/analyze_validation_threshold_sensitivity.py": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+    "src/evaluate.py": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+    "src/evaluate_threshold_selection.py": "31a3198dcc3feb8632eab65cacb16799d15b735d99dc5ed0ac03645baee7b295"
+  },
+  "source_phase5": {
+    "config": {
+      "path": "configs/evaluation.yaml",
+      "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69",
+      "size_bytes": 6497
+    },
+    "status": "complete",
+    "summary": {
+      "path": "results/logs/phase5_evaluation/summary.json",
+      "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+      "size_bytes": 3162269
+    }
+  },
+  "status": "complete",
+  "validation_annotations": {
+    "path": "data/processed/rsna-pneumonia-5000/annotations/instances_val.json",
+    "sha256": "cf0592a36f96d2f7989695156ce3b9ef4701a36a4d70641bfe4292c91ae07f94",
+    "size_bytes": 274398
+  }
+}

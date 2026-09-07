@@ -1,0 +1,308 @@
+{
+  "analysis_id": "rsna-phase43-post-hoc-n5-validation-threshold-selection-sensitivity",
+  "completed_runs": [
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt",
+        "sha256": "fa7ef259b30d5ce19c954e3e30ddecf3c6d74d05e82c5d525eb499a2db2c998f",
+        "size_bytes": 173412170
+      },
+      "detector": "faster_rcnn",
+      "image_count": 750,
+      "inference_seconds": 70.36462909946567,
+      "prediction_count": 6771,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 117,
+            "training_reference": 117
+          },
+          "fp": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 486,
+            "training_reference": 486
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.0,
+              "reinference": 0.3466955579631636,
+              "training_reference": 0.3466955579631636
+            },
+            "precision": {
+              "delta": 0.0,
+              "reinference": 0.2476780185758514,
+              "training_reference": 0.2476780185758514
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.5776173285198556,
+              "training_reference": 0.5776173285198556
+            }
+          },
+          "prediction_count": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 646,
+            "training_reference": 646
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 160,
+            "training_reference": 160
+          }
+        },
+        "exact": true,
+        "status": "exact"
+      },
+      "seed": 271,
+      "training_config": {
+        "path": "configs/faster_rcnn_seed271.yaml",
+        "sha256": "1374056522f088d22609d5ea0da490de880f48e0e4841ace0f0a6ee6861fbaa7",
+        "size_bytes": 2937
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed271_validation_predictions.json.gz",
+        "sha256": "f22c1b112dc3250473f737bfc0de0aa6a33e2042037b6cf8d74a1490c0c11b62",
+        "size_bytes": 302911
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/faster_rcnn_seed271_validation.csv",
+        "sha256": "5459eed1abb9d8ccc5c61485bccb9214d9f68c5b9b63576d6f758049221357ea",
+        "size_bytes": 486
+      }
+    },
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt",
+        "sha256": "e2147d0c45b1c7e369270a2d737e08b564fedd37cd88e2456ec13df03e4591a7",
+        "size_bytes": 173412170
+      },
+      "detector": "faster_rcnn",
+      "image_count": 750,
+      "inference_seconds": 70.04960860012216,
+      "prediction_count": 3809,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 125,
+            "training_reference": 125
+          },
+          "fp": {
+            "delta": -1,
+            "maximum_absolute_delta": 1,
+            "reinference": 407,
+            "training_reference": 408
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.00043445204735520493,
+              "reinference": 0.3636363636363636,
+              "training_reference": 0.3632019115890084
+            },
+            "precision": {
+              "delta": 0.00048556095067725513,
+              "reinference": 0.27191413237924866,
+              "training_reference": 0.2714285714285714
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.5487364620938628,
+              "training_reference": 0.5487364620938628
+            }
+          },
+          "prediction_count": {
+            "delta": -1,
+            "maximum_absolute_delta": 1,
+            "reinference": 559,
+            "training_reference": 560
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 152,
+            "training_reference": 152
+          }
+        },
+        "exact": false,
+        "status": "within_configured_count_bounds"
+      },
+      "seed": 314,
+      "training_config": {
+        "path": "configs/faster_rcnn_seed314.yaml",
+        "sha256": "b20dfe1ebc6355cf6921fc59d86271f0abd74e9046d359930e2d5bb76c106eb7",
+        "size_bytes": 2937
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed314_validation_predictions.json.gz",
+        "sha256": "14e8d4ae9c2b425c3b365febf74cba76db987f22afc7c2114d8b5147d2cdd007",
+        "size_bytes": 192959
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/faster_rcnn_seed314_validation.csv",
+        "sha256": "968996ef37d62c66f4ed6258d88ddb3adfa498ff063210f245eed6b1a51a4bc5",
+        "size_bytes": 486
+      }
+    },
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+        "sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+        "size_bytes": 19172435
+      },
+      "detector": "yolo11s",
+      "image_count": 750,
+      "inference_seconds": 20.090392299665837,
+      "prediction_count": 1090,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 277,
+            "training_reference": 277
+          },
+          "fp": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 0,
+            "training_reference": 0
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.0,
+              "reinference": 0.0,
+              "training_reference": 0.0
+            },
+            "precision": {
+              "delta": 0.0,
+              "reinference": 0.0,
+              "training_reference": 0.0
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.0,
+              "training_reference": 0.0
+            }
+          },
+          "prediction_count": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 0,
+            "training_reference": 0
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 0,
+            "training_reference": 0
+          }
+        },
+        "exact": true,
+        "status": "exact"
+      },
+      "seed": 271,
+      "training_config": {
+        "path": "configs/yolo_seed271.yaml",
+        "sha256": "15f40539b0091892a6d3f168b0c2813b903ee87123cba4725b14889963b0c41b",
+        "size_bytes": 2915
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed271_validation_predictions.json.gz",
+        "sha256": "9bdcf6a911e8aad0e008a68c66826f73158af0c08e43ce16f9111ab130470f50",
+        "size_bytes": 84532
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/yolo_seed271_validation.csv",
+        "sha256": "564d90b824829d5d91fb728ff5755d7094dfa6eab821193302724da4c94414d7",
+        "size_bytes": 431
+      }
+    },
+    {
+      "action": "reused_verified",
+      "checkpoint": {
+        "path": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+        "sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+        "size_bytes": 19172691
+      },
+      "detector": "yolo11s",
+      "image_count": 750,
+      "inference_seconds": 18.719823300285498,
+      "prediction_count": 898,
+      "reference_operating_point_comparison": {
+        "comparisons": {
+          "fn": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 243,
+            "training_reference": 243
+          },
+          "fp": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 24,
+            "training_reference": 24
+          },
+          "metrics": {
+            "f1": {
+              "delta": 0.0,
+              "reinference": 0.20298507462686569,
+              "training_reference": 0.20298507462686569
+            },
+            "precision": {
+              "delta": 0.0,
+              "reinference": 0.5862068965517241,
+              "training_reference": 0.5862068965517241
+            },
+            "recall": {
+              "delta": 0.0,
+              "reinference": 0.12274368231046931,
+              "training_reference": 0.12274368231046931
+            }
+          },
+          "prediction_count": {
+            "delta": 0,
+            "maximum_absolute_delta": 1,
+            "reinference": 58,
+            "training_reference": 58
+          },
+          "tp": {
+            "delta": 0,
+            "maximum_absolute_delta": 0,
+            "reinference": 34,
+            "training_reference": 34
+          }
+        },
+        "exact": true,
+        "status": "exact"
+      },
+      "seed": 314,
+      "training_config": {
+        "path": "configs/yolo_seed314.yaml",
+        "sha256": "d436f4f635bbbaa6a0719eab1f158de1c81a744749a684f171b29c81da43cdbb",
+        "size_bytes": 2915
+      },
+      "validation_bundle": {
+        "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed314_validation_predictions.json.gz",
+        "sha256": "658877d3654b7125e473a5ed484aa0b7a071f73b0979557d4d2c072ccd8b0b28",
+        "size_bytes": 77986
+      },
+      "validation_reference_table": {
+        "path": "results/tables/seeds/yolo_seed314_validation.csv",
+        "sha256": "0b9c1a0036459e952a9c78f6e67a628cb036cb46c9d0119e5419124a841de643",
+        "size_bytes": 480
+      }
+    }
+  ],
+  "config_sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694",
+  "manifest_sha256": "b6e6a3efba1f6618f259754aa67296abec1c406ac8325a52a8736e4f83dcf8e7",
+  "status": "complete"
+}

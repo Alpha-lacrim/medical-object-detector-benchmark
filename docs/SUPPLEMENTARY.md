@@ -14,6 +14,11 @@ part of the evidence and must travel with any reused number.
   [validation](../data/splits/rsna-pneumonia-5000/val.csv), and
   [test](../data/splits/rsna-pneumonia-5000/test.csv) manifests preserve every
   study assignment and NIH patient grouping key.
+- [Aggregate cohort characteristics](../results/tables/rsna_cohort_characteristics.csv)
+  and their [validation/provenance summary](../results/logs/phase44_cohort_characteristics/summary.json)
+  report partition-wise age, sex, and AP/PA projection without exporting raw
+  patient rows or identifiers. The summary records the nonconformant age-unit
+  caveat and immutable split/mapping checks.
 - [Datasheet](DATASHEET.md) documents collection, annotation provenance,
   preprocessing, access conditions, and known population limitations.
 
@@ -54,8 +59,15 @@ part of the evidence and must travel with any reused number.
   [official PR curves](../results/tables/precision_recall_curves_n5_sensitivity.csv),
   [per-run PR curves](../results/tables/precision_recall_curves_per_seed_n5_sensitivity.csv),
   and [fixed-threshold test application](../results/tables/selected_operating_points_n5_sensitivity.csv).
-  Threshold selection remains n=3; test sensitivity uses n=5 and includes seed
-  271 exactly as observed.
+  Within Batch 35, threshold selection remains n=3; test sensitivity uses n=5
+  and includes seed 271 exactly as observed.
+- Batch 43 separately completes the four seed-271/314 validation bundles and
+  reports the [five-run validation sweep](../results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv),
+  [aggregate test application](../results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv),
+  [per-run test rows](../results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv),
+  and [classified conclusions](../results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv).
+  The 0.70/0.01 thresholds are post-hoc validation sensitivity only; the
+  historical n=3 thresholds and artifacts remain frozen provenance.
 - [Recall-weighted F-beta threshold sensitivity](../results/tables/recall_weighted_fbeta_threshold_summary.csv),
   its [candidate-level stability frequencies](../results/tables/recall_weighted_fbeta_threshold_stability.csv),
   and the separate [hypothetical linear detection-error loss](../results/tables/hypothetical_detection_error_loss_summary.csv)

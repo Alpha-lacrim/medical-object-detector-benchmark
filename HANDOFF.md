@@ -25,6 +25,166 @@
 
 ---
 
+## Session 92 - 2026-09-07 - Commit completed Batch 43--44 work
+
+**What I did:**
+- At the user's explicit request, prepared one consolidated commit containing
+  the completed Batch 43 threshold-sensitivity work and Batch 44 aggregate
+  cohort-reporting work on top of Batch 42 commit
+  `8f5c3508ccba3502287709a0848af14040349422`.
+- Scoped the commit to the files enumerated by Sessions 90 and 91. Unrelated
+  untracked specifications, review notes, orchestration records, and historical
+  aborted/smoke run logs remain untracked and outside the commit.
+- Rechecked Git whitespace and the staged inventory before commit. The exact
+  resulting commit identifier is reported in the session response because a
+  commit cannot contain its own final hash.
+
+**What's still incomplete / next step:**
+- No push was requested or performed. Batch 45 and all other later work remain
+  outside this session.
+
+**Needs the user's review before proceeding:**
+- None for the Git operation; the scientific review points recorded in
+  Sessions 90 and 91 remain applicable.
+
+**Files touched:**
+- `CODEX.md` and `HANDOFF.md`; all other committed files are the completed
+  Batch 43--44 files listed in Sessions 90 and 91.
+
+## Session 91 - 2026-09-07 - Batch 44 RSNA cohort characteristics
+
+**What I did:**
+- Passed the prerequisite gate without changing membership: rehashed the
+  immutable train/validation/test split manifests and committed audit, verified
+  exactly 3,500/750/750 studies, 1,492/321/323 disjoint NIH patient groups,
+  1,136 total opacity-positive studies, 1,812 boxes, and exact agreement of all
+  5,000 study-to-patient/stratum/label/box mappings with the official RSNA/NIH
+  CSVs. The configured raw root contains all 26,684 Stage 2 DICOM files.
+- Added `configs/cohort_characteristics.yaml`, a strict header-only aggregate
+  extractor, and eight regression tests. The workflow supports the optional
+  `RSNA_DICOM_ROOT` override, validates hashes/counts/mapping before reading
+  metadata, uses `stop_before_pixels=True`, and writes no row-level identifiers.
+- Read `PatientAge`, `PatientSex`, and `ViewPosition` for the selected cohort.
+  All 5,000 age tags are numeric `AS` strings without a D/W/M/Y unit. Under the
+  explicit nominal-years descriptive policy, 4,999 ages are usable after one
+  value above 120 is excluded: total median 49 years (IQR 36--60). Study-level
+  sex is 2,362 female and 2,638 male; projection is 2,363 AP and 2,637 PA; sex
+  and projection have no missing/other values, and no patient group has
+  conflicting nonmissing sex tags.
+- Generated the aggregate cohort CSV and provenance summary, then updated the
+  canonical manuscript, datasheet, limitations, supplementary material,
+  reproducibility/docs commands, reporting checklist, D-015 decision, claim
+  bindings, and scientific-artifact manifest. Wording is explicitly
+  descriptive and makes no subgroup-performance or fairness inference.
+- Final verification passes: 333 tests plus one expected environment-conditional
+  skip; repository-wide Ruff format/lint; scientific verifier with 67 artifacts,
+  224 present inputs, and 197 referenced result files; paper verifier with 49
+  numerical claims and all semantic guards; deterministic aggregate generation;
+  identifier-leak scan; and Git whitespace. No training or model inference ran,
+  and nothing was staged, committed, or pushed.
+
+**What's still incomplete / next step:**
+- Batch 44 is complete and stops here. Broader clinical/demographic variables,
+  subgroup-performance/fairness analyses, external testing, and later batches
+  remain outside this batch.
+
+**Needs the user's review before proceeding:**
+- Review the disclosed interpretation of unitless numeric `PatientAge` strings
+  as nominal years for descriptive reporting only, including exclusion of the
+  single value above the configured 0--120-year range.
+
+**Files touched:**
+- `configs/cohort_characteristics.yaml`, `src/data/cohort_characteristics.py`,
+  and `tests/test_cohort_characteristics.py`
+- `results/tables/rsna_cohort_characteristics.csv` and
+  `results/logs/phase44_cohort_characteristics/summary.json`
+- `README.md`, `data/README.md`, `docs/DATASHEET.md`, `docs/DECISION_LOG.md`,
+  `docs/LIMITATIONS.md`, `docs/REPRODUCIBILITY.md`,
+  `docs/REPORTING_CHECKLIST.md`, and `docs/SUPPLEMENTARY.md`
+- `report/paper_draft.md`, `report/paper_claim_sources.yaml`,
+  `scripts/build_scientific_artifact_manifest.py`,
+  `results/scientific_artifact_manifest.json`, `CODEX.md`, and `HANDOFF.md`
+
+## Session 90 - 2026-09-07 - Batch 43 five-run validation threshold-selection sensitivity
+
+**What I did:**
+- Passed the prerequisite gate without training: independently reconstructed
+  the historical validation-only selector (seeds 17/42/137, thresholds
+  0.01--0.99, maximum equal-run arithmetic mean F1, sample SD, higher-threshold
+  exact-tie rule) and verified Faster R-CNN 0.69 / YOLO11s 0.05; verified the
+  complete Batch 35 five-run test-side operating analysis, all ten checkpoint
+  hashes (962,924,817 bytes), and Batch 41's four missing validation bundles.
+  The original 750-image/277-box validation source and every referenced image
+  were present, so the batch was allowed to continue.
+- Added a strict versioned config, analyzer/collector, and regression tests.
+  The guards prohibit test-set threshold selection, omission of seed 271, and
+  any output overlap or hash drift in the historical Phase 14 artifacts. The
+  workflow reuses the original Phase 5 adapters/evaluator and performs only
+  validation inference for detector/seed pairs 271 and 314 when bundles are
+  absent; no optimizer, resume, or training path exists.
+- Generated and hash-bound four validation bundles from the exact frozen best
+  checkpoints under the original validation split, preprocessing, candidate
+  floor 0.001, NMS 0.50, maximum 100 detections, and coordinate logic. Faster
+  seed 271 and both YOLO runs reproduce their training-time score-0.25 counts
+  exactly. Faster seed 314 is deterministic across repeated inference and has
+  identical TP/FN but one fewer FP/prediction (407/559 rather than 408/560);
+  the bounded discrepancy and configured count audit are explicit in the
+  manifest. No test label was used to accept or modify a bundle.
+- Reproduced the historical sweep/tables numerically before selecting over all
+  five validation runs. The post-hoc validation sensitivity selects Faster
+  R-CNN 0.70 and YOLO11s 0.01. Applying these unchanged to all five test bundles
+  gives Faster versus YOLO mean precision 0.3686 vs 0.2631, recall 0.3388 vs
+  0.2925, F1 0.3458 vs 0.2657, FP/image 0.2205 vs 0.3104, and detections/run
+  256.2 vs 311.2. The historical 0.69/0.05 five-test-run results were also
+  reproduced exactly.
+- Classified all 11 conclusions. Threshold separation strengthens; Faster's
+  mean precision/recall/F1 leads remain but weaken; FP/image and detection-count
+  orderings reverse. For run-level sample SD, precision ordering reverses,
+  recall/F1 stability leads weaken, and FP/image/detection-count stability
+  leads strengthen. The 0.70/0.01 result is labeled only **post-hoc validation
+  sensitivity**, never prospectively frozen, and D-014 preserves historical
+  0.69/0.05 precedence.
+- Updated the threshold analysis, decision log, limitations, reproducibility,
+  README commands, supplementary/hypothesis traceability, canonical manuscript,
+  claim bindings, reporting-checklist manuscript hash, scientific manifest,
+  CODEX, and this handoff. `report/report.md`, the alternate manuscript/PDF,
+  and every historical n=3 artifact remain unchanged.
+- Final verification passes: 325 tests plus one expected metadata-only skip;
+  repository-wide Ruff format/lint; scientific verifier with 65 artifacts, 216
+  present inputs, and 196 references; paper verifier with 43 numerical claims
+  and all semantic guards; final CUDA preflight; historical hash protection;
+  and Git whitespace. Nothing was staged, committed, pushed, or retrained.
+
+**What's still incomplete / next step:**
+- Batch 43 is complete and stops here. Do not promote 0.70/0.01 to primary or
+  prospectively frozen thresholds. Run only the next separately requested
+  batch after review.
+- External/VinDr work, human declarations, checkpoint publication/release, and
+  any still-lower FROC inference remain outside this batch.
+
+**Needs the user's review before proceeding:**
+- Review the scientific interpretation: five-run validation coverage changes
+  YOLO11s to the 0.01 grid boundary and weakens Faster R-CNN's precision,
+  recall, and F1 margins without reversing them, while FP/image ordering does
+  reverse. Also review the explicitly disclosed one-FP Faster seed-314
+  re-inference discrepancy.
+
+**Files touched:**
+- `configs/threshold_selection_n5_validation_sensitivity.yaml`,
+  `src/analyze_validation_threshold_sensitivity.py`, and
+  `tests/test_validation_threshold_sensitivity.py`
+- `results/logs/phase43_threshold_selection_n5_validation_sensitivity/` and
+  the five Batch 43 CSV tables under `results/tables/`
+- `README.md`, `docs/THRESHOLD_ANALYSIS.md`, `docs/DECISION_LOG.md`,
+  `docs/LIMITATIONS.md`, `docs/REPRODUCIBILITY.md`,
+  `docs/HYPOTHESIS_TRACEABILITY.md`, `docs/SUPPLEMENTARY.md`, and
+  `docs/REPORTING_CHECKLIST.md`
+- `report/paper_draft.md`, `report/paper_claim_sources.yaml`,
+  `scripts/build_scientific_artifact_manifest.py`,
+  `results/scientific_artifact_manifest.json`, `CODEX.md`, and `HANDOFF.md`
+
+---
+
 ## Session 89 - 2026-09-06 - Batch 42 approved 0.00001 FROC continuation
 
 **What I did:**

@@ -74,6 +74,32 @@ CSV manifests under `data/splits/rsna-pneumonia-5000/` record every assignment.
 The other 21,684 valid labeled studies are excluded solely by the predeclared
 compute scope. No study was excluded for a metadata audit failure.
 
+### Selected-cohort DICOM header characteristics
+
+Batch 44 mapped every immutable split row to its original source DICOM and read
+only `PatientAge`, `PatientSex`, and `ViewPosition`, without decoding pixels.
+The aggregate-only output is
+[`results/tables/rsna_cohort_characteristics.csv`](../results/tables/rsna_cohort_characteristics.csv);
+no study-level or patient-level demographic file is exported.
+
+| Split | Studies | Patient groups | Opacity-positive | Boxes | Age, median [IQR], nominal y (n) | Female | Male | AP | PA |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Train | 3,500 | 1,492 | 798 | 1,267 | 50 [36--60] (3,499) | 1,614 (46.1%) | 1,886 (53.9%) | 1,690 (48.3%) | 1,810 (51.7%) |
+| Validation | 750 | 321 | 169 | 277 | 49 [34--59] (750) | 399 (53.2%) | 351 (46.8%) | 348 (46.4%) | 402 (53.6%) |
+| Internal test | 750 | 323 | 169 | 268 | 47 [35--61] (750) | 349 (46.5%) | 401 (53.5%) | 325 (43.3%) | 425 (56.7%) |
+| **Total** | **5,000** | **2,136** | **1,136** | **1,812** | **49 [36--60] (4,999)** | **2,362 (47.2%)** | **2,638 (52.8%)** | **2,363 (47.3%)** | **2,637 (52.7%)** |
+
+All 5,000 age elements had DICOM VR `AS`, but none used the conformant encoded
+unit suffix; each was a bare numeric string. Plausible values from 0 to 120 are
+therefore summarized as nominal years under an explicit dataset-specific
+interpretation. There were no missing age tags, but one training value was
+out of range and excluded, leaving 4,999 usable ages. `PatientSex` was complete
+with only F/M values, and no NIH patient group had conflicting nonmissing sex
+values across its selected studies. `ViewPosition` was complete with only
+AP/PA values. Percentages use all studies in the corresponding partition.
+These header fields are not independently verified clinical records and do not
+constitute a subgroup-performance or fairness analysis.
+
 ## Annotation conversion and image processing
 
 `src/data/prepare.py` converts each split to canonical COCO JSON. Every COCO
@@ -160,6 +186,11 @@ no patient images.
 
 - The single-institution, historical NIH imaging cohort may encode site,
   equipment, workflow, demographic, and acquisition-position effects.
+- Header-derived age, sex, and AP/PA projection allow limited descriptive
+  reporting, but age units are nonconformant/assumed, one age is out of range,
+  and the fields were not independently verified against clinical records.
+- No race, ethnicity, socioeconomic, comorbidity, subgroup-performance, or
+  fairness evidence is available.
 - Challenge selection was enriched with pre-existing labels and is not a
   prevalence-representative sample. Deployment precision cannot be inferred
   from this class balance.

@@ -21,6 +21,13 @@ without reselection or test-set feedback. Decision D-008 makes the n=5 curves
 the manuscript's principal operating-regime display while retaining every n=3
 artifact as the prespecified historical analysis and provenance reference.
 
+Batch 43 asks the distinct missing question using validation rather than test
+evidence. It adds seeds 271 and 314 to the validation prediction set, repeats
+the exact historical 99-point maximum-mean-F1 rule, and applies the resulting
+thresholds unchanged to the same five internal-test bundles. This is a
+**post-hoc validation sensitivity**, not a prospectively frozen selection, and
+it does not replace or modify any historical n=3 artifact.
+
 ## Plain finding
 
 The fixed confidence threshold of 0.25 exaggerated YOLO11s's low-recall appearance, but it
@@ -172,10 +179,11 @@ not feed back into selection.
 
 These are the authoritative single-threshold operating-point results for the frozen n=3
 threshold-selection, FROC, and Pareto analyses. The YOLO11s threshold 0.05 was selected from
-only the three validation seeds 17, 42, and 137. It was not reselected at n=5: the later
-seed-271 checkpoint has a maximum test confidence of only 0.0412735 and therefore produces
-zero detections even at 0.05. That later observation is evidence of seed-specific confidence-
-score instability, not a reason to revise this historical selection with test feedback.
+only the three validation seeds 17, 42, and 137. Batch 35's later test-side
+sensitivity did not reselect it. The seed-271 checkpoint has a
+maximum test confidence of only 0.0412735 and therefore produces zero detections even at
+0.05. That observation is evidence of seed-specific confidence-score instability, not a
+reason to revise the historical selection with test feedback.
 The original 0.25 comparison and complete test sweep remain explicitly labeled protocol
 sensitivity analyses.
 
@@ -190,6 +198,38 @@ All three Faster-R-CNN-minus-YOLO11s margins strengthen relative to n=3. This
 is a sensitivity of test performance to the all-attempt run set, not a new
 threshold-selection analysis: validation evidence remains n=3, test evidence
 is n=5, and seed 271 contributes 0/0/0 with zero emitted detections at 0.05.
+
+## Post-hoc n=5 validation threshold-selection sensitivity
+
+Batch 43 completed the missing validation predictions for seeds 271 and 314
+from the exact frozen best checkpoints. It used the original validation split,
+preprocessing, detector adapters, score floor 0.001, NMS IoU 0.50, cap of 100
+detections per image, and canonical coordinates. Three of four regenerated
+score-0.25 operating points reproduced the training-time counts exactly.
+Faster R-CNN seed 314 reproducibly yielded the same TP/FN counts and one fewer
+false positive (407 rather than 408); that bounded discrepancy is recorded in
+the bundle manifest and no test label was consulted to accept or alter it.
+
+The historical grid, objective, equal-run arithmetic averaging, sample SD, and
+higher-threshold exact-tie rule were then applied to all five validation runs.
+The selected thresholds and their unchanged application to all five test runs
+are:
+
+| Detector | Selection scope | Validation n | Threshold | Test precision / recall / F1, mean +/- SD | Test FP/image, mean +/- SD | Test detections/run, mean +/- SD |
+|---|---|---:|---:|---:|---:|---:|
+| Faster R-CNN | Historical frozen provenance | 3 | 0.69 | 0.3624 +/- 0.0581 / 0.3507 +/- 0.0463 / 0.3511 +/- 0.0184 | 0.2320 +/- 0.0802 | 268.0 +/- 71.37 |
+| Faster R-CNN | Post-hoc validation sensitivity | 5 | 0.70 | 0.3686 +/- 0.0632 / 0.3388 +/- 0.0567 / 0.3458 +/- 0.0222 | 0.2205 +/- 0.0829 | 256.2 +/- 76.09 |
+| YOLO11s | Historical frozen provenance | 3 | 0.05 | 0.2524 +/- 0.1418 / 0.1948 +/- 0.1110 / 0.2192 +/- 0.1233 | 0.1517 +/- 0.0882 | 166.0 +/- 95.68 |
+| YOLO11s | Post-hoc validation sensitivity | 5 | 0.01 | 0.2631 +/- 0.0360 / 0.2925 +/- 0.0886 / 0.2657 +/- 0.0367 | 0.3104 +/- 0.1351 | 311.2 +/- 124.50 |
+
+Relative to the detector contrast under the historical thresholds, the
+threshold separation is **strengthened** (0.64 to 0.69). Faster R-CNN's mean
+test precision, recall, and F1 advantages remain but are **weakened**. The
+FP/image ordering and detection-count ordering are **reversed**. For run-level
+sample SD, the precision ordering is **reversed**, the recall and F1 stability
+advantages are **weakened**, and the FP/image and detection-count stability
+advantages are **strengthened**. No claim here is prospective or inferential:
+the only intended change is validation run coverage from three to five.
 
 The separate Batch 42 FROC repair does not alter this threshold selection or
 the 0.01--0.99 threshold/PR sensitivity. Following user approval, inference-
@@ -270,6 +310,22 @@ suffix. `results/logs/phase35_operating_regime_n5/threshold_summary.json`
 hashes the config, annotations, all ten bundles, source code, and outputs. The
 final Batch 35 summary additionally binds these files to FROC, Pareto, the
 inventory, and the complete n=3-versus-n=5 conclusion table.
+
+The separate Batch 43 post-hoc validation sensitivity uses GPU only when the
+four seed-271/314 validation bundles are absent; selection and test application
+are offline:
+
+```powershell
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode preflight
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode collect-validation
+& $benchmarkPython -m src.analyze_validation_threshold_sensitivity --config configs/threshold_selection_n5_validation_sensitivity.yaml --mode run
+```
+
+Its versioned manifest hashes the four new validation bundles and their exact
+checkpoint, annotation, config, adapter, and environment identities. The
+summary binds the ten validation bundles, five-run selection, unchanged
+application to the ten internal-test bundles, output tables, conclusion
+classifications, and historical-artifact hash audit.
 
 The current approved lower-floor FROC reproduction is separately versioned:
 

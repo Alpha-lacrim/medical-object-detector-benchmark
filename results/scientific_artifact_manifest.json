@@ -6,6 +6,8 @@
   "verification_command": "python scripts/verify_scientific_artifacts.py",
   "manuscript_critical_paths": [
     "data/manifests/rsna-pneumonia-5000-audit.json",
+    "results/logs/phase44_cohort_characteristics/summary.json",
+    "results/tables/rsna_cohort_characteristics.csv",
     "results/logs/phase5_evaluation/summary.json",
     "results/tables/detector_comparison.csv",
     "results/tables/detector_comparison_per_seed.csv",
@@ -36,6 +38,13 @@
     "results/tables/selected_operating_points_n5_sensitivity.csv",
     "results/tables/operating_regime_n5_inventory.csv",
     "results/tables/operating_regime_n3_vs_n5_conclusions.csv",
+    "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_prediction_manifest.json",
+    "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+    "results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv",
+    "results/tables/validation_threshold_sweep_per_seed_n5_validation_sensitivity.csv",
+    "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+    "results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv",
+    "results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv",
     "results/logs/phase29_threshold_sensitivity/summary.json",
     "results/tables/recall_weighted_fbeta_threshold_summary.csv",
     "results/tables/recall_weighted_fbeta_threshold_stability.csv",
@@ -108,6 +117,191 @@
         ]
       },
       "study_phase": "Phase 2 - dataset preparation",
+      "reproduction_tier": "external_data_preparation",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase44_cohort_characteristics/summary.json",
+      "sha256": "4a4d205599a6bc3142d33d928d9251cd02a3fb3b231e62c58f5219f2f4adc397",
+      "generating_script": "src/data/cohort_characteristics.py",
+      "generating_script_sha256": "0e71c8c7798a7b0dac2996ef1a483336fa257a1688aae7ee63e953e4499abf9a",
+      "config": {
+        "path": "configs/cohort_characteristics.yaml",
+        "sha256": "a4ae6a5721bed61ece00b1c96d8b5e5f36eb7f109afb44f49d0bb49e0640b5fe"
+      },
+      "input_artifacts": [
+        {
+          "path": "data/manifests/rsna-pneumonia-5000-audit.json",
+          "sha256": "a39c847f30bc0a499f1d7a5fe3c7a204650b77cdadc690ba78251518e9e45a40",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/train.csv",
+          "sha256": "a904345ce56c5753a49c1cc7d375b6730699c9cd60533fd3daa281b9e2760676",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/val.csv",
+          "sha256": "c185656d0ff3dc1918effdf1726e0030ee723254d8b7ef9e1b9187291ffc7ea4",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test.csv",
+          "sha256": "6b5890343e34ae568b97d7034c29fb8fa75df43517cc3691a5f912292c2f4534",
+          "availability": "committed"
+        },
+        {
+          "path": "data/raw/rsna-pneumonia/stage_2_train_labels.csv",
+          "sha256": "bb40b7e956e9922a6b275ed4a158197568cf9ab618017d53db6159b1b624bb65",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "data/raw/rsna-pneumonia/stage_2_detailed_class_info.csv",
+          "sha256": "c004c12dea2042cc23e3b848f65e8cb2e725799afaa90f13ee81f854bcc9614d",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "data/raw/rsna-pneumonia/mappings.json",
+          "sha256": "803ce79e3bc9c66d3631738e91e62e1175730e98ad1415e8dc4d6292ba10bf27",
+          "availability": "external_or_ignored"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "age_validation",
+          "aggregates",
+          "analysis_id",
+          "artifacts",
+          "input_contract",
+          "prerequisite_gate",
+          "privacy",
+          "projection_validation",
+          "schema_version",
+          "sex_validation",
+          "status"
+        ]
+      },
+      "study_phase": "Phase 44 - aggregate cohort characterization",
+      "reproduction_tier": "external_data_preparation",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/rsna_cohort_characteristics.csv"
+      ]
+    },
+    {
+      "path": "results/tables/rsna_cohort_characteristics.csv",
+      "sha256": "30567e9aa1ea4fab56e4d71001bd9c0fe2c7964eb6d17134504e1de2d2855281",
+      "generating_script": "src/data/cohort_characteristics.py",
+      "generating_script_sha256": "0e71c8c7798a7b0dac2996ef1a483336fa257a1688aae7ee63e953e4499abf9a",
+      "config": {
+        "path": "configs/cohort_characteristics.yaml",
+        "sha256": "a4ae6a5721bed61ece00b1c96d8b5e5f36eb7f109afb44f49d0bb49e0640b5fe"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase44_cohort_characteristics/summary.json",
+          "sha256": "4a4d205599a6bc3142d33d928d9251cd02a3fb3b231e62c58f5219f2f4adc397",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "split",
+          "studies",
+          "patient_groups",
+          "opacity_positive_studies",
+          "bounding_boxes",
+          "age_summary_n",
+          "age_mean_years",
+          "age_sd_years",
+          "age_median_years",
+          "age_q1_years",
+          "age_q3_years",
+          "age_min_years",
+          "age_max_years",
+          "age_tag_missing_count",
+          "age_tag_missing_percent",
+          "age_unusable_count",
+          "age_unusable_percent",
+          "age_conformant_as_count",
+          "age_numeric_without_unit_count",
+          "age_unit_missing_count",
+          "age_unit_missing_percent",
+          "age_out_of_range_count",
+          "age_out_of_range_percent",
+          "age_invalid_other_count",
+          "sex_f_count",
+          "sex_f_percent",
+          "sex_m_count",
+          "sex_m_percent",
+          "sex_o_count",
+          "sex_o_percent",
+          "sex_other_count",
+          "sex_other_percent",
+          "sex_missing_count",
+          "sex_missing_percent",
+          "projection_ap_count",
+          "projection_ap_percent",
+          "projection_pa_count",
+          "projection_pa_percent",
+          "projection_other_count",
+          "projection_other_percent",
+          "projection_missing_count",
+          "projection_missing_percent"
+        ],
+        "exact_columns": [
+          "split",
+          "studies",
+          "patient_groups",
+          "opacity_positive_studies",
+          "bounding_boxes",
+          "age_summary_n",
+          "age_mean_years",
+          "age_sd_years",
+          "age_median_years",
+          "age_q1_years",
+          "age_q3_years",
+          "age_min_years",
+          "age_max_years",
+          "age_tag_missing_count",
+          "age_tag_missing_percent",
+          "age_unusable_count",
+          "age_unusable_percent",
+          "age_conformant_as_count",
+          "age_numeric_without_unit_count",
+          "age_unit_missing_count",
+          "age_unit_missing_percent",
+          "age_out_of_range_count",
+          "age_out_of_range_percent",
+          "age_invalid_other_count",
+          "sex_f_count",
+          "sex_f_percent",
+          "sex_m_count",
+          "sex_m_percent",
+          "sex_o_count",
+          "sex_o_percent",
+          "sex_other_count",
+          "sex_other_percent",
+          "sex_missing_count",
+          "sex_missing_percent",
+          "projection_ap_count",
+          "projection_ap_percent",
+          "projection_pa_count",
+          "projection_pa_percent",
+          "projection_other_count",
+          "projection_other_percent",
+          "projection_missing_count",
+          "projection_missing_percent"
+        ],
+        "row_count": 4
+      },
+      "study_phase": "Phase 44 - aggregate cohort characterization",
       "reproduction_tier": "external_data_preparation",
       "gpu_required": false,
       "training_required": false,
@@ -1960,6 +2154,597 @@
         "row_count": 19
       },
       "study_phase": "Phase 35 - operating-regime conclusion audit",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_prediction_manifest.json",
+      "sha256": "b6e6a3efba1f6618f259754aa67296abec1c406ac8325a52a8736e4f83dcf8e7",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_prediction_manifest.json",
+          "sha256": "d9e9b3eca05b1345972d82f766e24e5898284a9f150ff95f6bcf06cd3f73be6e",
+          "availability": "committed"
+        },
+        {
+          "path": "data/processed/rsna-pneumonia-5000/annotations/instances_val.json",
+          "sha256": "cf0592a36f96d2f7989695156ce3b9ef4701a36a4d70641bfe4292c91ae07f94",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed17_full/best_model.pt",
+          "sha256": "9ec35c5d761f8e4bf7a43f7999f388ac1ffc0d533f62746409db280706dffab4",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed42_full/best_model.pt",
+          "sha256": "c97813cf5dfe50b6eb074fe50cd4a870bb24e5a667bfaf8b94b37a844fd2b83d",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed137_full/best_model.pt",
+          "sha256": "0d651d620c4106de296648960424326980ff13dd631a9baa120997590abc2a78",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed271_full/best_model.pt",
+          "sha256": "fa7ef259b30d5ce19c954e3e30ddecf3c6d74d05e82c5d525eb499a2db2c998f",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/faster_rcnn_rsna_seed314_full/best_model.pt",
+          "sha256": "e2147d0c45b1c7e369270a2d737e08b564fedd37cd88e2456ec13df03e4591a7",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt",
+          "sha256": "65909164e82c1ef53c0d38e0d898d37bbbec5f46cb9f5cd029e76ba486c0371c",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt",
+          "sha256": "7710372489e96c547aebd4c868663c33a8cf62f8ec48557049b7de8b2a6ab1c0",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt",
+          "sha256": "b7677b5343b5d3930616f1b5a530f6005ded88dfc54f7e8fdecbe93e3a04fa19",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+          "sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+          "sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed271_validation_predictions.json.gz",
+          "sha256": "f22c1b112dc3250473f737bfc0de0aa6a33e2042037b6cf8d74a1490c0c11b62",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed314_validation_predictions.json.gz",
+          "sha256": "14e8d4ae9c2b425c3b365febf74cba76db987f22afc7c2114d8b5147d2cdd007",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed271_validation_predictions.json.gz",
+          "sha256": "9bdcf6a911e8aad0e008a68c66826f73158af0c08e43ce16f9111ab130470f50",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed314_validation_predictions.json.gz",
+          "sha256": "658877d3654b7125e473a5ed484aa0b7a071f73b0979557d4d2c072ccd8b0b28",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "checkpoint_manifest",
+          "config",
+          "counts",
+          "environment",
+          "historical_protection",
+          "historical_validation_manifest",
+          "preflight",
+          "protocol",
+          "runs",
+          "schema_version",
+          "sensitivity_label",
+          "source_identity",
+          "source_phase5",
+          "status",
+          "validation_annotations"
+        ]
+      },
+      "study_phase": "Phase 43 - five-run validation prediction completion",
+      "reproduction_tier": "checkpoint_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": [
+        "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed271_validation_predictions.json.gz",
+        "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed314_validation_predictions.json.gz",
+        "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed271_validation_predictions.json.gz",
+        "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed314_validation_predictions.json.gz"
+      ]
+    },
+    {
+      "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+      "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_prediction_manifest.json",
+          "sha256": "b6e6a3efba1f6618f259754aa67296abec1c406ac8325a52a8736e4f83dcf8e7",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/summary.json",
+          "sha256": "4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase35_operating_regime_n5/summary.json",
+          "sha256": "297a395cb484c0e4628f3c68ff8dfb6a2c67a1b33fd7a1c3a24f21277de9a68a",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed17_validation_predictions.json.gz",
+          "sha256": "355413196476a14d87865ea20edc946f1e1b56e8320200d072a516d622160763",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed42_validation_predictions.json.gz",
+          "sha256": "6cc4b57a1cf7a789b5bb1a0af7d726db6417a024b65c1dea3b7bb1e69653afde",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/faster_rcnn_seed137_validation_predictions.json.gz",
+          "sha256": "14142327d8482e5cb8700d02bc293011c43a6191755d72db729bea3170467966",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed17_validation_predictions.json.gz",
+          "sha256": "7e42737d2d664acfb47a1bbb3552e4a21d0c44f44bde4b571e97d5e6b91cdab3",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed42_validation_predictions.json.gz",
+          "sha256": "2b3431029e208040f9e41c5a2865f260cf987e03f1424e289e0adc96a2e91478",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/validation_predictions/yolo11s_seed137_validation_predictions.json.gz",
+          "sha256": "8d2caef6eb29cec81788ca3b9facf48c7bd6e44776074601a87df3dbcca38b89",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed271_validation_predictions.json.gz",
+          "sha256": "f22c1b112dc3250473f737bfc0de0aa6a33e2042037b6cf8d74a1490c0c11b62",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/faster_rcnn_seed314_validation_predictions.json.gz",
+          "sha256": "14e8d4ae9c2b425c3b365febf74cba76db987f22afc7c2114d8b5147d2cdd007",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed271_validation_predictions.json.gz",
+          "sha256": "9bdcf6a911e8aad0e008a68c66826f73158af0c08e43ce16f9111ab130470f50",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/validation_predictions/yolo11s_seed314_validation_predictions.json.gz",
+          "sha256": "658877d3654b7125e473a5ed484aa0b7a071f73b0979557d4d2c072ccd8b0b28",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed17_test_predictions.json.gz",
+          "sha256": "d7dfecb06bf57008cc4b6a392e309e5101c723c66d86d796a38c358d04568c66",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed42_test_predictions.json.gz",
+          "sha256": "83b6222c4cece06f8e25dfbb75df2b1d1b6ba44fd171ae6508ed68893f470b3b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed137_test_predictions.json.gz",
+          "sha256": "f9c4b18e57790b0751ae30487e7fddf0b9e3fded3a528a6a47be50a991c1d163",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed271_test_predictions.json.gz",
+          "sha256": "0f8c5d2e615f65d337b74126c0226f2bd3f5fd069660b47756d2461d22e04a44",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/faster_rcnn_seed314_test_predictions.json.gz",
+          "sha256": "b0d11508dd7319ea3524f0c05658df95bdf81c28d169592a22eeb98ea964e316",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_top_level_keys": [
+          "analysis_id",
+          "artifacts",
+          "conclusions",
+          "config",
+          "counts",
+          "historical_protection",
+          "historical_reproduction",
+          "phase5_status",
+          "posthoc_selection",
+          "schema_version",
+          "sensitivity_label",
+          "source_identity",
+          "status",
+          "test_evaluation",
+          "upstream"
+        ]
+      },
+      "study_phase": "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv",
+        "results/tables/validation_threshold_sweep_per_seed_n5_validation_sensitivity.csv",
+        "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+        "results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv",
+        "results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv"
+      ]
+    },
+    {
+      "path": "results/tables/validation_threshold_sweep_n5_validation_sensitivity.csv",
+      "sha256": "710a660603150a3ccb89e32b6931a7b932efebcba70a65c58197101cb8cc1dc4",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+          "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "threshold",
+          "seed_count",
+          "precision",
+          "precision_std",
+          "precision_mean_plus_minus_std",
+          "recall",
+          "recall_std",
+          "recall_mean_plus_minus_std",
+          "f1",
+          "f1_std",
+          "f1_mean_plus_minus_std"
+        ],
+        "exact_columns": [
+          "detector",
+          "threshold",
+          "seed_count",
+          "precision",
+          "precision_std",
+          "precision_mean_plus_minus_std",
+          "recall",
+          "recall_std",
+          "recall_mean_plus_minus_std",
+          "f1",
+          "f1_std",
+          "f1_mean_plus_minus_std"
+        ],
+        "row_count": 198
+      },
+      "study_phase": "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/validation_threshold_sweep_per_seed_n5_validation_sensitivity.csv",
+      "sha256": "05e40e63ec50d7b2328466329b8f41c1327342cd8a83c4f935375f55edcd623d",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+          "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "detector",
+          "seed",
+          "threshold",
+          "precision",
+          "recall",
+          "f1",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "prediction_count",
+          "target_count"
+        ],
+        "exact_columns": [
+          "detector",
+          "seed",
+          "threshold",
+          "precision",
+          "recall",
+          "f1",
+          "true_positives",
+          "false_positives",
+          "false_negatives",
+          "prediction_count",
+          "target_count"
+        ],
+        "row_count": 990
+      },
+      "study_phase": "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+      "sha256": "526fc5a17f18c47cc7da9eef65a555474287976725ee5ad49f1b728cbd7ed99d",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+          "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "selection_scope",
+          "sensitivity_label",
+          "detector",
+          "selection_split",
+          "selection_rule",
+          "tie_breaker",
+          "selected_threshold",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "validation_precision",
+          "validation_precision_std",
+          "validation_recall",
+          "validation_recall_std",
+          "validation_f1",
+          "validation_f1_std",
+          "test_precision",
+          "test_precision_std",
+          "test_recall",
+          "test_recall_std",
+          "test_f1",
+          "test_f1_std",
+          "test_fp_per_image",
+          "test_fp_per_image_std",
+          "test_prediction_count",
+          "test_prediction_count_std"
+        ],
+        "exact_columns": [
+          "selection_scope",
+          "sensitivity_label",
+          "detector",
+          "selection_split",
+          "selection_rule",
+          "tie_breaker",
+          "selected_threshold",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "validation_precision",
+          "validation_precision_std",
+          "validation_recall",
+          "validation_recall_std",
+          "validation_f1",
+          "validation_f1_std",
+          "test_precision",
+          "test_precision_std",
+          "test_recall",
+          "test_recall_std",
+          "test_f1",
+          "test_f1_std",
+          "test_fp_per_image",
+          "test_fp_per_image_std",
+          "test_prediction_count",
+          "test_prediction_count_std"
+        ],
+        "row_count": 4
+      },
+      "study_phase": "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv",
+      "sha256": "82ec1f7712ca1a41732738187eca92e854d1990528e027ee95219f21626535ce",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+          "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "selection_scope",
+          "detector",
+          "seed",
+          "selection_split",
+          "selection_rule",
+          "tie_breaker",
+          "selected_threshold",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "test_precision",
+          "test_recall",
+          "test_f1",
+          "test_true_positives",
+          "test_false_positives",
+          "test_false_negatives",
+          "test_fp_per_image",
+          "test_prediction_count",
+          "test_target_count"
+        ],
+        "exact_columns": [
+          "selection_scope",
+          "detector",
+          "seed",
+          "selection_split",
+          "selection_rule",
+          "tie_breaker",
+          "selected_threshold",
+          "threshold_selection_run_count",
+          "test_run_count",
+          "test_precision",
+          "test_recall",
+          "test_f1",
+          "test_true_positives",
+          "test_false_positives",
+          "test_false_negatives",
+          "test_fp_per_image",
+          "test_prediction_count",
+          "test_target_count"
+        ],
+        "row_count": 20
+      },
+      "study_phase": "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
+      "reproduction_tier": "committed_analysis",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/tables/threshold_selection_n3_vs_n5_validation_conclusions.csv",
+      "sha256": "372fcd776aa60d3e8d9c1e4415b41ed9441c97c43720cc4932b81fd6f3b8bad1",
+      "generating_script": "src/analyze_validation_threshold_sensitivity.py",
+      "generating_script_sha256": "da836b984c9e95aab6281a57bc973e82f91e96000e7ab41f496dd3ff9ea714e6",
+      "config": {
+        "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+        "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+          "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "analysis",
+          "conclusion",
+          "historical_value",
+          "posthoc_value",
+          "historical_directional_margin",
+          "posthoc_directional_margin",
+          "classification",
+          "interpretation"
+        ],
+        "exact_columns": [
+          "analysis",
+          "conclusion",
+          "historical_value",
+          "posthoc_value",
+          "historical_directional_margin",
+          "posthoc_directional_margin",
+          "classification",
+          "interpretation"
+        ],
+        "row_count": 11
+      },
+      "study_phase": "Phase 43 - post-hoc n=5 validation threshold-selection sensitivity",
       "reproduction_tier": "committed_analysis",
       "gpu_required": false,
       "training_required": false,
