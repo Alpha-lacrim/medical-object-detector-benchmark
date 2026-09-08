@@ -872,6 +872,21 @@ Every item in the benchmark's Definition of Done is satisfied:
 
 ## Repository verification
 
+The focused internal manuscript and its prerequisite/literature/scope checks
+are recorded in [`docs/INTERNAL_PAPER_FOCUS_AUDIT.md`](docs/INTERNAL_PAPER_FOCUS_AUDIT.md).
+Its title and abstract remain provisional pending external results. The shared
+bibliography also supports the preserved historical report and long alternate;
+the offline check below resolves citations in all three without editing them.
+
+```powershell
+& .\.venv\Scripts\python.exe scripts/check_bibliography.py --bibliography report/references.bib --manuscripts report/paper_draft.md report/report.md report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md
+& .\.venv\Scripts\python.exe scripts/verify_paper_claims.py
+& .\.venv\Scripts\python.exe scripts/verify_scientific_artifacts.py
+& .\.venv\Scripts\python.exe -m pytest tests/test_check_bibliography.py tests/test_verify_paper_claims.py tests/test_verify_scientific_artifacts.py -q --basetemp=tmp/pytest-paper-review -p no:cacheprovider
+& .\.venv\Scripts\python.exe -m ruff check scripts/check_bibliography.py tests/test_check_bibliography.py
+& .\.venv\Scripts\python.exe -m ruff format --check scripts/check_bibliography.py tests/test_check_bibliography.py
+```
+
 The release-candidate software and committed-evidence checks are:
 
 ```powershell

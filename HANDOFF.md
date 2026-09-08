@@ -25,6 +25,131 @@
 
 ---
 
+## Session 97 - 2026-09-08 - Commit completed Batch 46 work
+
+**What I did:**
+- At the user's explicit request, prepared a scoped local commit of the eleven
+  Batch 46 files listed in Session 96, using the exact message
+  `Focus the Internal Q2 Manuscript and Update Related Work`.
+- Included the existing CODEX/HANDOFF publication-state notes with the current
+  batch/session updates. Unrelated untracked specifications, audits, historical
+  logs and orchestration records remain outside this commit.
+- Rechecked the staged scope, whitespace, and manuscript bytes against the
+  reporting-audit hash. Scientific outputs, historical manuscripts and the
+  completed Batch 46 checks are unchanged. The resulting commit hash is
+  reported in the session response because a commit cannot contain its own hash.
+
+**What's still incomplete / next step:**
+- No push is requested or performed. Later scientific batches, external work,
+  author declarations and the previously recorded train.csv serialization
+  issue remain outside this Git operation.
+
+**Needs the user's review before proceeding:**
+- None for this explicitly requested local commit. Session 96 records the
+  manuscript-review and scientific-scope boundaries.
+
+**Files touched:**
+- Session state in `CODEX.md` and `HANDOFF.md`; the committed Batch 46 file
+  inventory is the eleven paths listed in Session 96.
+
+## Session 96 - 2026-09-08 - Batch 46 focused internal manuscript and related work
+
+**What I did:**
+- Read the latest handoff, living state, relevant static spec, canonical-file
+  adjudication and Batch 42--45 prerequisites; checked Git state. The initial
+  paper/scientific verifiers passed. All four scientific summaries are complete;
+  the FROC residual and optional five-run matched timing remain explicitly bounded.
+- Reduced canonical `report/paper_draft.md` from 11,890 to 4,940 words (about
+  58%, counting the same whitespace-delimited Markdown content). Centered
+  AP/PR, shared thresholds, historical and post-hoc validation selection,
+  exact-score FROC, training variability, and standardized compute. Removed
+  project identifiers/course framing/inflated causal language from journal prose.
+- Verified current primary literature, adding ECCV 2024 calibration/threshold
+  pitfalls, a direct 2026 RSNA modern-detector comparison, CLAIM 2024, and
+  official dataset/challenge methodology. The IEEE text access limitation and
+  primary author-uploaded-paper fallback are documented in the citation audit.
+  No cross-paper performance figures or clinical-use claims were imported.
+- Demoted D-ECE, Grad-CAM, corruption/acquisition stress, F-beta, hypothetical
+  loss and decision archaeology to concise secondary text and existing
+  supplementary records. D-ECE's population/support/binning/clinical-risk
+  boundaries remain explicit. Kept the title/abstract provisional and all seven
+  author-action declarations textually unchanged.
+- Updated claim bindings, the current citation/reporting audits, README and
+  project state; created `docs/INTERNAL_PAPER_FOCUS_AUDIT.md` and a small
+  repeatable offline bibliography checker with tests. Retained the earlier
+  citation audit verbatim as dated provenance.
+- Verification passes: 66 numerical claims and all semantic guards; 72 scientific
+  artifacts, 346 present inputs, zero unavailable external/ignored inputs,
+  201 referenced results; 37 unique bibliography entries resolving 16 canonical,
+  19 historical-report and 27 long-alternate keys; 20 affected tests; focused
+  Ruff lint/format; offline timing/history/raw-statistics verification;
+  manuscript/crosswalk local links and anchors; SHA preservation; Git whitespace.
+- No training, calibration fit, inference, external integration, result/manifest
+  regeneration, staging, commit or push occurred. The pre-existing staged
+  CODEX/HANDOFF changes and unrelated untracked files remain. Historical report,
+  long manuscript/PDF, decisions, supplementary index, and scientific artifacts
+  retain their pre-edit SHA256s.
+
+**What's still incomplete / next step:**
+- Batch 46 is complete. Stop for review of the focused internal paper before
+  any separately requested external/VinDr batch. Title and abstract will need
+  revisiting after external evidence; no external claims were anticipated.
+- Human declarations and public checkpoint release remain unresolved. Further
+  lower-floor FROC inference is not authorized; one residual contribution is
+  bounded without changing the frozen-run ordering. Matched timing remains one
+  checkpoint per detector with technical repetitions.
+- Prior Git push approval and train.csv Git/working-tree serialization records
+  remain separate, unchanged issues. This batch did not act on publication.
+
+**Needs the user's review before proceeding:**
+- Review the smaller internal thesis and source-supported positioning. Author
+  facts may remain AUTHOR ACTION REQUIRED unless the authors choose to provide
+  documented determinations; no declaration is needed to review this draft.
+
+**Files touched:**
+- `report/paper_draft.md`, `report/references.bib`, `report/paper_claim_sources.yaml`
+- `docs/CITATION_AUDIT.md`, `docs/REPORTING_CHECKLIST.md`,
+  `docs/INTERNAL_PAPER_FOCUS_AUDIT.md`, `README.md`
+- `scripts/check_bibliography.py`, `tests/test_check_bibliography.py`
+- `CODEX.md`, `HANDOFF.md`
+
+## Session 95 - 2026-09-07 - Direct main push blocked by automatic approval review
+
+**What I did:**
+- The user explicitly requested committing and pushing directly on `main`.
+  Verified that Batch 45 was already committed as `1318ee3` with the exact
+  title `Standardized End-to-End Inference Timing`; no new implementation
+  changes were pending.
+- Fetched the configured origin and verified zero remote-only commits and two
+  local-only commits: `21defcf` (Batch 43--44 reporting analyses) and `1318ee3`
+  (Batch 45 timing). The destination is
+  `https://github.com/Alpha-lacrim/medical-object-detector-benchmark.git`,
+  branch `main`. The push would be a normal fast-forward, without force.
+- Attempted `git push origin main`. Automatic approval review rejected the
+  action before execution, stating that the user must explicitly authorize
+  this specific external destination and payload despite having requested a
+  direct main push. No remote branch was changed and no workaround was used.
+- Prepared a local session-state commit of only `CODEX.md` and `HANDOFF.md`
+  documenting the rejection. No code, scientific artifact, timing value,
+  checkpoint, prediction bundle, or unrelated untracked file was changed.
+
+**What's still incomplete / next step:**
+- Ask for explicit approval to push local `main` to the named GitHub repository.
+  The outgoing scope comprises Batch 43--45 code/manuscript/provenance,
+  validation-prediction bundles, aggregate cohort and per-image timing data,
+  environment metadata, and this session-state record. After approval, recheck
+  the remote and perform a normal fast-forward push.
+- The previously recorded `train.csv` serialization issue and all later
+  scientific batches remain outside this publication operation.
+
+**Needs the user's review before proceeding:**
+- Automatic approval review requires explicit confirmation of the destination
+  and outgoing contents. This is a tool approval block, not a project-skill
+  requirement or a new scientific-review checkpoint.
+
+**Files touched:**
+- `CODEX.md` and `HANDOFF.md` only.
+
 ## Session 94 - 2026-09-07 - Commit completed Batch 45 work
 
 **What I did:**

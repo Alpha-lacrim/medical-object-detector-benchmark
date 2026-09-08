@@ -6,9 +6,10 @@
 
 ## Project one-liner
 
-Controlled study of Faster R-CNN versus YOLO11s for lung-opacity detection,
-evaluated for accuracy, calibration, compute, common-corruption robustness,
-explainability, and statistical uncertainty under one unified protocol.
+Controlled comparison of Faster R-CNN and YOLO11s for lung-opacity localization.
+The current internal manuscript centers on operating-point dependence, five
+retained runs, patient/run uncertainty, and standardized implementation timing;
+calibration, robustness, and explainability remain secondary evidence.
 
 ## Fixed hardware
 
@@ -18,6 +19,36 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 ## Decisions Log
 
 Newest entries appear first; superseded decisions remain recorded.
+
+- **Focused internal manuscript complete before external integration:** Batch 46
+  passed the Batch 42--45 gate and retained Batch 41's canonical
+  `report/paper_draft.md`. It reduced the draft from 11,890 to 4,940
+  whitespace-delimited words (about 58%), retaining patient-disjoint data,
+  common evaluation, five runs, AP/PR, shared thresholds, historical n=3 and
+  separately post-hoc n=5 validation selection, floor-bounded exact-score FROC,
+  training-procedure uncertainty, and matched timing. D-ECE is explicitly
+  secondary, detection-level, emitted-population conditional, descriptive,
+  support/binning dependent, and not clinical-risk calibration; Grad-CAM,
+  corruption/acquisition stress, F-beta, hypothetical loss, and project history
+  are routed to existing supplementary/provenance records. No research,
+  calibration fitting, inference, retraining, or external integration was added.
+  Current primary sources were verified, including Kuzucu et al. ECCV 2024,
+  Chinnam et al. CCIC 2026, CLAIM 2024, RSNA methodology, and Wu et al. 2024.
+  The citation audit records inaccessible IEEE text and the primary coauthor-
+  uploaded-paper fallback without importing performance claims. All 16 current
+  citations and the historical manuscripts' 19/27 keys resolve against the
+  shared 37-entry bibliography. New offline `scripts/check_bibliography.py`
+  and its tests document syntax/identifier resolution separately from source
+  review. Paper verification passes 66 numerical bindings and revised guards;
+  six removed secondary prose bindings retain their scientific artifacts, and
+  eight additions cover every central FROC budget. Scientific verification
+  remains 72 artifacts/346 present inputs/201 referenced results, with no
+  manifest regeneration. The 20 affected tests, focused Ruff, timing verifier,
+  links/anchors, SHA preservation and whitespace pass. Title/abstract remain
+  provisional; seven unchanged AUTHOR ACTION REQUIRED declarations remain.
+  `docs/INTERNAL_PAPER_FOCUS_AUDIT.md`, citation/reporting audits and README
+  record the review state. Historical/alternate manuscripts and scientific
+  provenance are unchanged. No staging, commit or push occurred (Session 96).
 
 - **Matched decoded-host inference timing v1 is primary runtime evidence:**
   Batch 45 verified the actual ASUS ROG Strix G16/i7-13650HX/16 GB/RTX 4060
@@ -1762,7 +1793,8 @@ Newest entries appear first; superseded decisions remain recorded.
 | `docs/PROJECT_PLAN.md` | Reconciled pre-implementation plan preserving superseded proposals while distinguishing frozen historical analyses from research-track corrections | Batch 28 records independent within-detector run resampling and estimand separation |
 | `docs/LITERATURE_REVIEW.md` | YOLO11, detector paradigms, Grad-CAM/XAI, related work, robustness, and the controlled-comparison/operating-regime gap | Batch 42 aligns the FROC contribution with the approved 0.00001 boundary and conservative bound; existing BibTeX citations unchanged |
 | `docs/HYPOTHESES.md` | Primary question plus six retrospective, artifact-checkable hypotheses with endpoint-specific evidence scopes | Batch 42 routes H2 FROC evidence to the observed exact-score frontier while retaining historical grids |
-| `report/paper_draft.md`, `report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md`, `report/A_Controlled_Comparative_Study___article.pdf`, `report/report.md`, `report/references.bib` | Canonical editable manuscript, noncanonical long alternate, its rendered PDF derivative, preserved historical/full technical report, and resolving bibliography | D-010 hierarchy retained; Batch 44 adds limited aggregate cohort characteristics only to the canonical manuscript; alternate/PDF/historical report remain unchanged |
+| `report/paper_draft.md`, `report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md`, `report/A_Controlled_Comparative_Study___article.pdf`, `report/report.md`, `report/references.bib` | Canonical editable manuscript, noncanonical long alternate, its rendered PDF derivative, preserved historical/full technical report, and resolving bibliography | D-010 hierarchy retained; Batch 46 focuses and shortens only the canonical manuscript and refreshes primary references; alternate/PDF/historical report remain unchanged |
+| `docs/INTERNAL_PAPER_FOCUS_AUDIT.md`, `scripts/check_bibliography.py`, `tests/test_check_bibliography.py` | Batch 46 prerequisite/editorial audit and repeatable offline bibliography syntax/citation checks | Complete; 16 canonical citations resolve in the shared 37-entry database; scientific provenance and author facts are unchanged |
 | `docs/LIMITATIONS.md` | Consolidated dataset, cohort-header, compute, comparison, calibration, decision analysis, robustness, explainability, statistics, reporting, deployment, and regulatory limitations | Batch 44 adds unitless-age, limited-sex/projection, and no-subgroup/fairness caveats while retaining Batch 43 threshold scope |
 | `docs/FASTER_RCNN_BASELINE.md` | Batch 2 architecture, optimization, metrics, timing, and profiling protocol | complete with final measurements |
 | `docs/YOLO_BASELINE.md` | Batch 3 architecture, parity/stability decisions, timing, metrics, and profiling | complete with final measurements |
@@ -1829,6 +1861,27 @@ Newest entries appear first; superseded decisions remain recorded.
 
 ## Current phase
 
+**Batch 46 is complete locally; stop for review of the focused internal paper.**
+`report/paper_draft.md` is the sole canonical editable manuscript. It is now
+about 58% shorter, centered on operating-point definition and the five-run
+internal evidence; title and abstract await external results. Batches 42--45
+passed the prerequisite gate. Current literature and citation/reporting audits,
+66 numerical claim bindings, bibliography syntax/resolution, and 20 affected
+tests pass. No scientific output, training configuration, frozen prediction,
+checkpoint, or historical/alternate manuscript was changed. Author declarations
+remain placeholders. The next batch is not authorized by this session.
+No staging, commit or push occurred; the pre-existing staged CODEX/HANDOFF
+changes and unrelated untracked files were preserved. The publication-state
+record below is historical and was not acted on during this editorial batch.
+
+The user subsequently requested the scoped local Batch 46 commit with the
+exact message `Focus the Internal Q2 Manuscript and Update Related Work`
+(Session 97). The commit includes the eleven Session 96 paths and these
+session-state notes, including previously staged publication-state history.
+Unrelated untracked files stay outside the commit; no push is requested.
+
+### Previous phase and publication state (through Session 95)
+
 **Batch 45 is complete locally on `main`, based on Batch 43--44 commit
 `21defcfe6a2c25cb7cfbaada0fb255755b9c111d`.** Primary manuscript runtime
 now uses the versioned matched decoded-host boundary, measured on the intended
@@ -1844,7 +1897,14 @@ Ruff and timing verifier pass. The exact command, hardware/software and raw
 per-image/repetition provenance are recorded in README and COMPUTE_TIMING.
 No retraining or change to frozen accuracy bundles occurred. The user
 explicitly requested the scoped Batch 45 local commit with the exact message
-`Standardized End-to-End Inference Timing` in Session 94; no push was requested.
+`Standardized End-to-End Inference Timing` in Session 94, producing `1318ee3`.
+In Session 95 the user requested a direct `main` push. The configured origin
+is `https://github.com/Alpha-lacrim/medical-object-detector-benchmark.git`;
+a fetch confirmed that `21defcf` and `1318ee3` were the two outgoing commits
+with no remote divergence. Automatic approval review rejected the push before
+execution because it requires explicit confirmation of this destination and
+payload. No remote change occurred. A local session-state commit records the
+block; pushing remains pending explicit destination/payload approval.
 Narrow `.gitattributes` exceptions preserve the new timing artifacts' exact
 bytes so Git normalization cannot invalidate their recorded SHA256 hashes.
 Batch 46 and later work, external testing, author declarations, checkpoint

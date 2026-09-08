@@ -1,3 +1,57 @@
+# Citation Verification Audit
+
+## Current focused manuscript — 2026-09-08
+
+This section supersedes the manuscript-location and citation-coverage statements
+in the archived audit below. It audits `report/paper_draft.md` only. All 16
+current citation keys were checked against primary/authoritative sources;
+37 unique BibTeX entries remain because the database also serves the unchanged
+historical report and long alternate. No uncited entry is injected into the
+canonical manuscript. DOI/publisher/official sources are preferred; access
+limitations and the one author-uploaded-paper fallback are explicit.
+
+| Key | Verified source / authority | Current bounded use | Verification and limits |
+|---|---|---|---|
+| `kuzucu2024calibration` | Kuzucu, Oksuz, Sadeghi, Dokania, ECCV 2024, pp. 185--204; [Springer DOI](https://doi.org/10.1007/978-3-031-72664-4_11), [official ECVA full text](https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03148.pdf) | §§1, 2.1, 5: threshold/population pitfalls already documented | VERIFIED: especially pp. 1--4. Supports prior-art attribution, not novelty or a new calibration experiment here. |
+| `kuppers2020calibration` | Küppers et al., CVPR Workshops 2020; [DOI](https://doi.org/10.1109/CVPRW50498.2020.00171), [CVF paper](https://openaccess.thecvf.com/content_CVPRW_2020/papers/w20/Kuppers_Multivariate_Confidence_Calibration_for_Object_Detection_CVPRW_2020_paper.pdf) | §§2.1, 3.7: multivariate detection-confidence framework | VERIFIED. Our minimum-cell convention and support sensitivities are repository implementation choices, not clinical-risk calibration. IEEE pagination is 1322--1330; CVF's landing-page listing uses a different short pagination. |
+| `shih2019rsna` | Shih et al., Radiology: AI 2019, e180041; [publisher](https://doi.org/10.1148/ryai.2019180041) | §§1, 2.2: expert opacity boxes, categories, adjudication | VERIFIED from publisher-indexed resource/annotation text. Source-cohort numbers are not substituted for our audited Stage 2 counts or selected patient groups. |
+| `rsna2022datasetdescription` | RSNA, *2018 Pneumonia Detection Challenge Dataset Description*, document marked V1 02/07/2022; [official PDF](https://www.rsna.org/rsnai/-/media/Files/RSNA/Education/AI%20resources%20and%20training/AI%20image%20challenge/RSNA-2018-Pneumonia-Detection-Challenge-Dataset-Description.ashx?hash=8331DDFA52AA5EE9C3C99B5983BB680D7BD2ABBF&la=en) | §2.2: annotation workflow and DICOM conversion/header additions | VERIFIED, both pages. The template's option lists are not treated as completed answers. It supplies no local ethics/consent determination. |
+| `rsna2018challenge` | RSNA/Kaggle 2018; [official evaluation](https://www.kaggle.com/c/rsna-pneumonia-detection-challenge/overview/evaluation) | §2.2: original challenge score differs from internal COCO AP | VERIFIED from official indexed competition evaluation text; direct page extraction was empty. IoU range is 0.40--0.75. No leaderboard metric is relabeled as our COCO AP. |
+| `wu2024pneumonia` | Wu et al., Scientific Reports 14:1929 (2024); [publisher](https://doi.org/10.1038/s41598-024-52156-7) | §§2.2, 5: prior RSNA anchor-free comparison and ablations | VERIFIED, Tables 2--3 and methods. Protocol-specific context only; not a reproduced result or architecture-family effect. |
+| `chinnam2026modern` | Chinnam, Gogineni, Rao, Suryanarayana, Nagaraj, Sunitha, CCIC 2026; [DOI](https://doi.org/10.1109/CCIC68129.2026.11485895), [IEEE record](https://ieeexplore.ieee.org/document/11485895), [author-uploaded paper](https://www.researchgate.net/publication/404406332_Automated_Pneumonia_Detection_in_Medical_X-Rays_Using_Modern_Object_Detectors) | §§2.2, 5: recent direct RSNA comparison including YOLOv8l, Faster R-CNN, Deformable DETR | VERIFIED from the primary paper uploaded by coauthor Seema Nagaraj; IEEE extraction was unavailable. Title/DOI/authors appear in the paper. Table 1 gives different input resolutions; §III instead describes resizing all images alike. We say “reported” resolutions, do not resolve that inconsistency for the authors, and import no numerical performance or clinical-use claim. |
+| `ren2015fasterrcnn` | Ren et al., NeurIPS 2015; [official proceedings](https://proceedings.neurips.cc/paper/2015/hash/14bfa6bb14875e45bba028a21ed38046-Abstract.html) | §2.3: proposals and second-stage detection | VERIFIED from proceedings text; no general accuracy claim. |
+| `lin2017fpn` | Lin et al., CVPR 2017; [CVF proceedings](https://openaccess.thecvf.com/content_cvpr_2017/html/Lin_Feature_Pyramid_Networks_CVPR_2017_paper.html), DOI 10.1109/CVPR.2017.106 | §2.3: multiscale features | VERIFIED from official indexed abstract; direct landing-page fetch returned 403. |
+| `ultralytics2026release` | Ultralytics 8.4.110; [PyPI version record](https://pypi.org/project/ultralytics/8.4.110/) | §2.3: pinned implementation identity | VERIFIED against release page and local resolved configs; no assertion about the latest available model. |
+| `ultralytics2026yolo11config` | Ultralytics, pinned v8.4.110; [official raw model configuration](https://raw.githubusercontent.com/ultralytics/ultralytics/v8.4.110/ultralytics/cfg/models/11/yolo11.yaml) | §2.3: YOLO11s configuration authority | VERIFIED. Raw source was readable when the GitHub HTML route failed. |
+| `tejani2024claim` | Tejani et al., Radiology: AI 6(4):e240300 (2024); [publisher](https://doi.org/10.1148/ryai.240300) | §2.3: reporting, reference-standard and internal/external-testing terminology | VERIFIED from full publisher text. Directly applicable; the local crosswalk remains an audit, not certification. |
+| `lin2014coco` | Lin et al., ECCV 2014, pp. 740--755; [publisher](https://doi.org/10.1007/978-3-319-10602-1_48) | §3.3: COCO evaluation framework | VERIFIED resource identity. Exact IoU grid, interpolation and cap are supported by the official evaluator and the pinned local pycocotools/code/config, not inferred solely from the original dataset paper. |
+| `efron1993bootstrap` | Efron and Tibshirani, *An Introduction to the Bootstrap*; [DOI](https://doi.org/10.1201/9780429246593), [publisher listing](https://www.routledge.com/An-Introductionto-the-Bootstrap/Efron-Tibshirani/p/book/9780412042317) | §3.5: bootstrap framework | VERIFIED method source; the publisher lists a 1994 edition while its series list identifies the original 1993 book retained in the bibliography. Patient/run design and actual results are ours. |
+| `phipson2010permutation` | Phipson and Smyth, 2010; [DOI](https://doi.org/10.2202/1544-6115.1585), [PubMed author abstract](https://pubmed.ncbi.nlm.nih.gov/21044043/) | §3.5: nonzero Monte Carlo permutation p-values | VERIFIED through author abstract/identifier record; direct DOI route was unavailable. |
+| `holm1979simple` | Holm, Scandinavian Journal of Statistics 6(2):65--70 (1979); [JSTOR source](https://www.jstor.org/stable/4615733), [issue contents](https://www.jstor.org/stable/i412579) | §3.5: multiplicity adjustment | Source identity VERIFIED from the official issue listing. Full text was unavailable on this route; the existing implementation/tests establish the named adjustment used locally. |
+
+Searches on 2026-09-08 covered detector calibration/threshold pitfalls and
+direct RSNA modern-detector comparisons, with 2024--2026 queries and checks of
+older retained methods. This was a focused literature refresh, not a systematic
+review. Reviews, leaderboards, unrelated RSNA bone-age/CT studies, and
+classification-only COVID/pneumonia comparisons were not used as direct
+lung-opacity detector evidence. The old broad “comparability gap” and brain-MRI
+detour were removed from journal prose. Prior saliency, corruption, DICOM,
+F-beta/loss, and raw-score decision-analysis references remain in the shared
+bibliography for historical/supplementary use.
+
+Offline syntax, duplicate-key/DOI, required-field, and used-key resolution
+checks are documented in README and implemented by
+`scripts/check_bibliography.py`. They do not substitute for the source-support
+review above. Current and preserved manuscript citations all resolve.
+
+## Historical audit retained verbatim (through 2026-09-07)
+
+The text below is a dated provenance record of the broader draft. Its uses of
+“current manuscript,” old section numbers, and citation totals describe that
+earlier version; the current mapping is exclusively the table above. The
+reporting-guideline references retained below still document the crosswalk's
+by-analogy use of STARD-AI/TRIPOD+AI and are not new primary frameworks.
+
 # Citation Audit
 
 Audit date: 2026-08-31
