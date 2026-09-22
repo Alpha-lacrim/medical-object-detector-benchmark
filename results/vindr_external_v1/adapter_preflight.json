@@ -1,0 +1,305 @@
+{
+  "adapter_config_sha256": "a372367257b953a780fb044e9f4657254b35b9270992c89530b38e70ea5748ad",
+  "adapter_sha256": "131221a8595a125c8caf5ec3e7e8525c4e35dbb34d69d96d1a6227b64b61b79f",
+  "annotations_sha256": "ffe1dd4b1752d7043b8bfe4525e970dd4934d3316f1aa836ae959bdce8869aa9",
+  "common_loader_images_verified": 3000,
+  "config_sha256": "9516d62b8164ca25794ad0be3ba3f13eec32e29b2377442194a3095b2671a19b",
+  "dataset_version": "1.0.0",
+  "dimension_range": {
+    "height": [
+      1184,
+      3408
+    ],
+    "width": [
+      1120,
+      3320
+    ]
+  },
+  "environment": {
+    "Pillow": "12.3.0",
+    "numpy": "2.4.4",
+    "openjpeg": "2.5.4",
+    "pydicom": "3.0.2",
+    "python": "3.11.15",
+    "torch": "2.6.0+cpu",
+    "torchvision": "0.21.0+cpu",
+    "ultralytics": "8.4.110"
+  },
+  "evaluation": {
+    "ap": {
+      "area": "all",
+      "evaluator": "src.meddet_benchmark.coco_evaluation.evaluate_coco",
+      "iou_thresholds": [
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "max_dets": [
+        1,
+        10,
+        100
+      ],
+      "recall_grid_points": 101
+    },
+    "ap_minimum_score": 0.001,
+    "candidate_score_floor": 1e-05,
+    "froc": {
+      "budget_rule": "maximum_observed_sensitivity_at_or_below_budget",
+      "disclose_floor_limited_runs": true,
+      "disclose_images_at_detection_cap": true,
+      "fp_denominator": "all_official_test_images",
+      "fp_per_image_budgets": [
+        0.125,
+        0.25,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "interpolation": false,
+      "lower_floor_after_external_results": "prohibited",
+      "numeric_tolerance": 1e-12,
+      "reference_config": "configs/froc_exact_score_v4.yaml",
+      "sensitivity_denominator": "strict_target_box_count",
+      "thresholds": "every_distinct_retained_score_plus_empty_upper_and_floor_endpoints",
+      "tie_breakers": [
+        "fewer_fp_per_image",
+        "higher_score"
+      ]
+    },
+    "matching": "score_descending_greedy_one_to_one_same_class",
+    "matching_iou_threshold": 0.5,
+    "max_detections_per_image": 100,
+    "nms": "detector_native_class_aware_no_extra_postprocessing",
+    "nms_iou_threshold": 0.5,
+    "primary_endpoints": [
+      "ap50",
+      "ap50_95",
+      "exact_score_froc",
+      "sensitivity_at_fp_per_image_budgets"
+    ],
+    "score_comparison": "greater_than_or_equal"
+  },
+  "freeze_files_verified": 38,
+  "geometry_max_absolute_error": 0.00019315886765980395,
+  "header_audit": {
+    "BitsAllocated": {
+      "counts": {
+        "16": 3000
+      },
+      "distinct_nonmissing": 1,
+      "present": 3000
+    },
+    "BitsStored": {
+      "counts": {
+        "10": 35,
+        "12": 2073,
+        "14": 624,
+        "16": 268
+      },
+      "distinct_nonmissing": 4,
+      "present": 3000
+    },
+    "Columns": {
+      "distinct_nonmissing": 526,
+      "present": 3000
+    },
+    "HighBit": {
+      "distinct_nonmissing": 4,
+      "present": 3000
+    },
+    "ImageOrientationPatient": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "ModalityLUTSequence": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "NumberOfFrames": {
+      "distinct_nonmissing": 1,
+      "present": 653
+    },
+    "PatientID": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "PatientOrientation": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "PhotometricInterpretation": {
+      "counts": {
+        "MONOCHROME1": 541,
+        "MONOCHROME2": 2459
+      },
+      "distinct_nonmissing": 2,
+      "present": 3000
+    },
+    "PixelPaddingRangeLimit": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "PixelPaddingValue": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "PixelRepresentation": {
+      "counts": {
+        "0": 3000
+      },
+      "distinct_nonmissing": 1,
+      "present": 3000
+    },
+    "PresentationLUTShape": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "RescaleIntercept": {
+      "distinct_nonmissing": 3,
+      "present": 2414
+    },
+    "RescaleSlope": {
+      "distinct_nonmissing": 3,
+      "present": 2414
+    },
+    "RescaleType": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "Rows": {
+      "distinct_nonmissing": 564,
+      "present": 3000
+    },
+    "SOPInstanceUID": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "SamplesPerPixel": {
+      "distinct_nonmissing": 1,
+      "present": 3000
+    },
+    "SeriesInstanceUID": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "StudyInstanceUID": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "TransferSyntaxUID": {
+      "counts": {
+        "1.2.840.10008.1.2": 1966,
+        "1.2.840.10008.1.2.1": 1,
+        "1.2.840.10008.1.2.4.90": 1033
+      },
+      "distinct_nonmissing": 3,
+      "present": 3000
+    },
+    "VOILUTFunction": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "VOILUTSequence": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "ViewPosition": {
+      "distinct_nonmissing": 0,
+      "present": 0
+    },
+    "WindowCenter": {
+      "distinct_nonmissing": 846,
+      "present": 2941
+    },
+    "WindowWidth": {
+      "distinct_nonmissing": 761,
+      "present": 2941
+    }
+  },
+  "inference_performed": false,
+  "manifest_sha256": "55a79bae66f160da3e0a00b688b1e58cee34d0a269e7705f191758257a27f654",
+  "mode": "prepare",
+  "ontology": {
+    "canonical_box_coordinates": "original_image_xyxy",
+    "canonical_classes": {
+      "1": "Lung Opacity"
+    },
+    "coco_box_conversion": [
+      "x_min",
+      "y_min",
+      "x_max_minus_x_min",
+      "y_max_minus_y_min"
+    ],
+    "detector_foreground_labels": {
+      "faster_rcnn": 1,
+      "yolo11s": 0
+    },
+    "ignore_regions_for_other_findings": false,
+    "inclusive_pixel_offset": 0,
+    "invalid_or_duplicate_target_box_policy": "stop_for_annotation_review_without_predictions",
+    "merge_other_findings": false,
+    "missing_or_corrupt_image_policy": "stop_no_silent_exclusion",
+    "source_coordinates": "original_image_xyxy",
+    "source_exact_class_name": "Lung Opacity",
+    "source_spelling_note": "Explicit release CSV capitalization; no case folding or synonym expansion.",
+    "target_concept": "Lung opacity",
+    "use_global_labels_as_box_targets": false,
+    "zero_target_box_images": "retain_as_strict_target_negatives"
+  },
+  "performance_analysis_performed": false,
+  "pixel_audit": {
+    "constant": 0,
+    "decoded": 3000,
+    "nonfinite_pixels": 0
+  },
+  "preprocessing": {
+    "apply_modality_lut": false,
+    "apply_rescale_slope_intercept": false,
+    "apply_voi_lut_or_window": false,
+    "array_dtype": "float32",
+    "constant_image_policy": "zero_uint8_as_reference",
+    "crop": false,
+    "decoder": "pydicom_pixel_array",
+    "grayscale_to_rgb": "replicate",
+    "histogram_equalization": false,
+    "image_kind": "single_frame_grayscale",
+    "input_size": 640,
+    "invert_monochrome1": true,
+    "mask_pixel_padding": false,
+    "no_finite_pixels_policy": "error",
+    "nonfinite_policy": "finite_min_max_replace_nan_and_inf_as_reference",
+    "normalization": "per_image_minmax",
+    "output_bit_depth": 8,
+    "processed_format": "lossless_png_native_dimensions",
+    "reference_config": "configs/dataset.yaml",
+    "reference_function": "src.data.prepare.scale_radiograph_to_uint8",
+    "resize": "frozen_detector_native_aspect_preserving_transform",
+    "restore_predictions_to_source_coordinates": true,
+    "rotate_or_flip": false,
+    "rounding": "numpy_rint",
+    "test_time_augmentation": false,
+    "unexpected_semantics_policy": "stop_for_documented_pre_inference_review"
+  },
+  "protocol_id": "vindr-cxr-external-testing-v1",
+  "protocol_sha256": "7b157a19550340d00d7a043ef4a380739d54faae5525a6ebba27ed1cd5ccff87",
+  "source_sha256": {
+    "boxes": "23be546c210c5560433247d9a8caa8573468d24a4a30e671e580962650e682dd",
+    "checksums": "175f64e334b3c8a0773d1580263ac64bd4ba72511cb7391f3ab503025a8ed5d4",
+    "dicom_tag_documentation": "bb872fe2755c436c0db63fc6fa497a8d90fa7d3bc138601d21e1f285c8a696d4",
+    "image_labels": "9874c665991c5098db571082f9d9d096fe80c40ac3c2b2007a76d8d226c87a02",
+    "license": "30492d35caacc57d31754ce490e806110abee5d55effac7ddc460de4191ac773"
+  },
+  "status": "passed",
+  "strict_box_count": 95,
+  "strict_negative_count": 2916,
+  "strict_positive_count": 84,
+  "technical_repeat_and_geometry_count": 94,
+  "test_count": 3000
+}

@@ -25,6 +25,179 @@
 
 ---
 
+## Session 101 - 2026-09-23 - Commit VinDr protocol and validated adapter
+
+**What I did:**
+- At the user's explicit `git commit` request, prepared a scoped local commit
+  of the completed Batch 48 adapter together with its required uncommitted
+  Batch 47 protocol/config/freeze and decision record.
+- Included the tracked CODEX/HANDOFF state history and the relevant README
+  section. Excluded the separate wget README hunk and untracked setup document,
+  unrelated specifications/audits/logs, and all restricted source/derived data.
+- Rechecked all 38 frozen hashes, adapter/config receipt bindings, Git byte
+  preservation, staged scope and whitespace. No new scientific work or inference.
+- Commit message: `Add and validate frozen VinDr external adapter`. The final
+  commit hash is reported in the session response; it cannot be embedded in
+  the same commit. No push requested or performed.
+
+**What's still incomplete / next step:**
+- Batch 48 remains complete; Batch 49 requires separate authorization.
+- Unrelated unstaged/untracked files are preserved. No push is requested.
+
+**Needs the user's review before proceeding:**
+- No further approval is needed for this explicitly requested local commit.
+  Session 100 preserves the adapter/protocol review and scientific boundaries.
+
+**Files touched:**
+- CODEX/HANDOFF session state; the scoped commit contains README,
+  `docs/DECISION_LOG.md`, the three frozen protocol files, adapter code/config,
+  tests, preflight review and aggregate summary. No restricted data.
+
+## Session 100 - 2026-09-23 - Batch 48 VinDr adapter and preflight
+
+**What I did:**
+- Followed the Batch 47 handoff, project decisions/specification and V7 rules;
+  checked Git state on `main` at `1a7104d7a817b835f5a4d171b44d532fcbee9701`.
+  Preserved prior Batch 47/download-tooling edits and unrelated untracked files.
+- Verified all 38 frozen definitions, existing authorization/DUA attestation,
+  v1.0.0 source metadata hashes, exact official test inventory, schema/IDs and
+  all 3,000 DICOM content hashes. No prior configured external predictions or
+  performance outputs existed. Frozen config/protocol/sidecar remain unchanged.
+- Built the config/environment-driven, data-only adapter, operational config
+  and synthetic tests. Exact `Lung Opacity` gives 84 positive images, 95 boxes
+  and 2,916 strict negatives, including other-finding negatives. No invalid or
+  duplicate target box was found; original annotation order is retained.
+- Audited actual polarity, dimensions, unsigned 16-bit storage with 10/12/14/16
+  stored bits, identity/absent rescale, varied windows and absent projection/
+  orientation/padding/LUT fields. Kept the frozen shared float32 min-max,
+  MONOCHROME1 inversion and uint8 normalization without rescale/window changes.
+- Completed all 3,000 native PNG conversions, lossless round trips and common
+  COCO-loader checks; no constant or nonfinite image. Repeated preprocessing
+  and native coordinate checks on a fixed 94-image technical sample passed;
+  maximum inverse error 0.00019315886765980395 pixels, below 0.001 tolerance.
+  JPEG 2000 uses pydicom 3.0.2/Pillow 12.3.0/OpenJPEG 2.5.4. Preparation and
+  geometric tests used the CPU environment; no detector precision was tested.
+- An initial partial conversion was interrupted to configure lossless PNG
+  compression level 1 for speed; final conversion regenerated every image.
+  The user's quota interruption occurred during that final run. On resumption
+  its successful complete receipt and code/config/derived hashes were checked.
+- Kept source IDs, headers, PNGs, sorted manifest, COCO and loader config inside
+  ignored `data/processed/vindr-cxr-external-v1/`. Added only a nonidentifying
+  aggregate summary in `results/vindr_external_v1/`, plus the preflight review
+  document and exact README commands. A running/incomplete receipt cannot
+  represent a completed prepare run.
+- Focused checks: 71 tests passed, one declared metadata-only skip; Ruff lint
+  and format pass. Existing paper verifier passes 66 numerical claims/guards;
+  scientific verifier passes 72 artifacts/346 present inputs/zero unavailable
+  inputs/201 result references. A fresh workspace-local pytest base resolved
+  old temporary/cache permission failures. Pre-existing model/evaluator source
+  and internal results remain unchanged.
+- No model/checkpoint load, detector inference (including smoke), external
+  performance interpretation, protocol tuning, staging, commit or push.
+
+**What's still incomplete / next step:**
+- Batch 48 is complete. Stop for user review; do not start Batch 49 automatically.
+- Batch 49 requires separate authorization and unchanged protocol/config,
+  checkpoint identity, native candidate-floor equality, actual AMP dtypes and
+  prediction-bundle checks. The historical FP32/new AMP YOLO caveat and unknown
+  patient dependence remain. No external detector result is available yet.
+- No current dataset acquisition or decoder blocker was found. Future commands
+  must set `VINDR_CXR_ROOT` explicitly as documented; no fallback is built in.
+
+**Needs the user's review before proceeding:**
+- Review `docs/VINDR_ADAPTER_PREFLIGHT.md` and the aggregate preflight summary,
+  especially strict-target negatives, native-axis/stored-pixel normalization,
+  the unchanged scientific contract and private/public artifact boundary.
+
+**Files touched:**
+- `src/data/prepare_vindr.py`, `configs/vindr_adapter_v1.yaml`,
+  `tests/test_prepare_vindr.py`, `docs/VINDR_ADAPTER_PREFLIGHT.md`,
+  `results/vindr_external_v1/adapter_preflight.json`, `README.md`, `CODEX.md`,
+  `HANDOFF.md`; ignored derived dataset and temporary local verification files.
+
+## Session 99 - 2026-09-22 - Batch 47 VinDr external protocol freeze
+
+**What I did:**
+- Read the newest handoff, current decisions/phase, relevant specification,
+  V7 rules and prerequisite artifacts. Started on `main` at
+  `1a7104d7a817b835f5a4d171b44d532fcbee9701`, with unstaged download-tooling
+  changes in CODEX/HANDOFF/README and unrelated untracked files; preserved all.
+- Verified Batch 46 manuscript/bibliography, current exact-score v4 FROC and
+  AP definitions, historical n=3 and post-hoc n=5 thresholds, completed
+  Batch 42--45 summaries and all ten local checkpoint sizes/SHA-256s.
+- Checked official public v1.0.0 release, license and DUA. Asked only for
+  missing access provenance; user confirmed approved access, DUA acceptance
+  and official download before restricted contents were read. No credentials,
+  authentication, DUA acceptance or download by Codex.
+- Verified local annotation/license/supplement hashes against the supplied
+  official checksum manifest and all 3,000 test filenames/image-label IDs.
+  Inspected schema and all headers only: actual box label is `Lung Opacity`,
+  explicitly mapped to requested concept `Lung opacity`; no patient/study/
+  series/SOP identity tag is nonempty. No invented patient grouping.
+- Created frozen v1 YAML and review protocol, plus D-017 and README offline
+  verification/planned interfaces. Fixed strict ontology, DICOM transform,
+  AMP, all ten runs, collection floor 0.00001/AP floor 0.001, NMS/matching 0.50,
+  cap 100, five internal FROC budgets, threshold policies, score summaries,
+  image/run resampling, publication boundaries, tables/figures and no tuning.
+- Freeze sidecar binds 38 files. Config SHA256:
+  `9516d62b8164ca25794ad0be3ba3f13eec32e29b2377442194a3095b2671a19b`.
+  Protocol SHA256:
+  `7b157a19550340d00d7a043ef4a380739d54faae5525a6ebba27ed1cd5ccff87`.
+- Checks pass: 66 paper claims/guards; 72 scientific artifacts, 346 inputs,
+  zero missing inputs, 201 result references; 37 bibliography entries with
+  16/19/27 cited keys; all ten checkpoint hashes; 38 focused evaluator/FROC/
+  threshold tests; YAML/source-definition checks; freeze hashes and whitespace.
+- No pixels decoded, inference (including smoke), external detector results
+  inspected, adapter implemented, internal artifact regenerated, manuscript
+  edited, staging, commit or push. No later batch was executed.
+
+**What's still incomplete / next step:**
+- Batch 47 is complete. Batch 48 must verify full DICOM checksums and decoder
+  support, inspect remaining pixel semantics, count strict targets, implement
+  and test deterministic conversion/coordinate handling, and emit preflight.
+- Set `VINDR_CXR_ROOT` to the authorized parent of `test/` and the two CSVs;
+  current supplied layout is `data/raw/vindr-cxr/`. No additional download or
+  missing file is currently identified. Source checksum authenticity rests
+  on the attested official download; no new authenticated fetch was performed.
+- Patient dependence cannot be established; resample released images. Keep
+  the historical FP32 versus planned mandatory AMP YOLO caveat. Restricted
+  per-image derivatives belong in ignored `data/`, not tracked results.
+
+**Needs the user's review before proceeding:**
+- Review `docs/VINDR_EXTERNAL_PROTOCOL.md`, especially exact source-label
+  spelling, separate AP/FROC floors, unchanged historical thresholds, image
+  resampling and AMP caveat. Before Batch 49 require review/authorization,
+  passing Batch 48 and unchanged protocol/config/checkpoint identities.
+
+**Files touched:**
+- `configs/vindr_external_v1.yaml`, `docs/VINDR_EXTERNAL_PROTOCOL.md`,
+  `docs/VINDR_EXTERNAL_PROTOCOL_v1.sha256.json`, `docs/DECISION_LOG.md`,
+  `README.md`, `CODEX.md`, `HANDOFF.md`.
+
+## Session 98 - 2026-09-16 - Windows GNU Wget setup
+
+**What I did:**
+- Read newest handoff, project state, relevant acquisition/coding specification
+  and Git state for the explicit environment-support request.
+- Diagnosed `wget` as PowerShell's Invoke-WebRequest alias; GNU Wget absent
+  from PATH. Installed portable GNU Wget 1.21.4 x64 under ignored `.tools/wget/`.
+- Verified executable/version and HTTPS connection to exactly the requested
+  PhysioNet test folder; server returned expected HTTP 401 without credentials.
+- Documented a test-only, resumable command with local password prompting,
+  default ignored destination, source/hash and no-config mitigation.
+
+**What's still incomplete / next step:**
+- User runs the command in their terminal with their approved PhysioNet account.
+  Authenticated access, available disk space and download completion unverified.
+- No dataset downloaded or scientific batch executed; Batch 46 review state remains.
+
+**Needs the user's review before proceeding:**
+- None for tooling setup. Password must be entered locally, not in chat.
+
+**Files touched:**
+- `.tools/wget/wget.exe` (ignored), `docs/VINDR_WGET_WINDOWS.md`, `README.md`,
+  `CODEX.md`, `HANDOFF.md`. No commit or push.
+
 ## Session 97 - 2026-09-08 - Commit completed Batch 46 work
 
 **What I did:**

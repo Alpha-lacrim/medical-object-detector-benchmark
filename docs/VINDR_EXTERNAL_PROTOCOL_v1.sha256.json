@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "protocol_id": "vindr-cxr-external-testing-v1",
+  "freeze_date": "2026-09-22",
+  "baseline_branch": "main",
+  "baseline_git_commit": "1a7104d7a817b835f5a4d171b44d532fcbee9701",
+  "status": "frozen_pending_user_review_and_batch48",
+  "hash_algorithm": "sha256_exact_bytes",
+  "registration": "local_prespecification_not_public_registration_or_trusted_timestamp",
+  "full_detector_inference_performed_in_batch47": false,
+  "external_detector_results_inspected_in_batch47": false,
+  "user_authorized_access_attestation_date": "2026-09-22",
+  "local_release_verification": {
+    "scope": "annotation_schema_and_hashes_inventory_and_all_headers_no_pixels",
+    "source_hashes_in_config": true,
+    "source_files_match_supplied_official_checksum_manifest": true,
+    "supplied_checksum_manifest_independently_downloaded_this_session": false,
+    "test_image_count": 3000,
+    "image_label_row_count": 3000,
+    "distinct_image_label_ids": 3000,
+    "inventory_equals_manifest_test_entries": true,
+    "annotation_ids_subset_of_test_inventory": true,
+    "patient_id_nonempty": 0,
+    "study_instance_uid_nonempty": 0,
+    "series_instance_uid_nonempty": 0,
+    "sop_instance_uid_nonempty": 0,
+    "monochrome1_count": 541,
+    "monochrome2_count": 2459,
+    "single_frame_grayscale_count": 3000,
+    "transfer_syntax_counts": {
+      "1.2.840.10008.1.2.4.90": 1033,
+      "1.2.840.10008.1.2": 1966,
+      "1.2.840.10008.1.2.1": 1
+    },
+    "full_image_content_checksums": "pending_batch48",
+    "pixel_decoding_and_box_conversion": "pending_batch48",
+    "patient_grouping": "not_established_use_released_study_image"
+  },
+  "prerequisite_verification": {
+    "paper_numerical_claims": 66,
+    "scientific_artifacts": 72,
+    "present_inputs": 346,
+    "unavailable_inputs": 0,
+    "referenced_results": 201,
+    "focused_tests_passed": 38,
+    "all_ten_local_checkpoint_sizes_and_sha256_match": true,
+    "both_threshold_policies_and_froc_ap_contracts_match": true
+  },
+  "artifacts": [
+    {
+      "path": "configs/dataset.yaml",
+      "role": "internal_definition",
+      "size_bytes": 2763,
+      "sha256": "419ed20987cce95c61f7806d0913f09b9d3452df5e0b1ac2c091f8e6ff109693"
+    },
+    {
+      "path": "configs/evaluation.yaml",
+      "role": "internal_definition",
+      "size_bytes": 6497,
+      "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69"
+    },
+    {
+      "path": "configs/evaluation_froc_lower_floor_v4.yaml",
+      "role": "internal_definition",
+      "size_bytes": 4049,
+      "sha256": "969f1a707adbdcf591ace64d12b5944ebb7ba02ec9b3026d074f138ef66188f2"
+    },
+    {
+      "path": "configs/faster_rcnn.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2898,
+      "sha256": "ef1e3ebe1fbe3cf1a6e27bf8b9c12f61719c2ea8771c9758f64dc278dd0e2633"
+    },
+    {
+      "path": "configs/faster_rcnn_seed137.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2937,
+      "sha256": "77dd468667f86ae34b48718f2fd9197a2334f9eec09eed75184ac9557e3d8279"
+    },
+    {
+      "path": "configs/faster_rcnn_seed271.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2937,
+      "sha256": "1374056522f088d22609d5ea0da490de880f48e0e4841ace0f0a6ee6861fbaa7"
+    },
+    {
+      "path": "configs/faster_rcnn_seed314.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2937,
+      "sha256": "b20dfe1ebc6355cf6921fc59d86271f0abd74e9046d359930e2d5bb76c106eb7"
+    },
+    {
+      "path": "configs/faster_rcnn_seed42.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2926,
+      "sha256": "c632ca100199787bb681e23fb8f3ac4426cfcd288537b1256bcef201e0af7464"
+    },
+    {
+      "path": "configs/froc_exact_score_v4.yaml",
+      "role": "internal_definition",
+      "size_bytes": 2360,
+      "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0"
+    },
+    {
+      "path": "configs/inference_timing_v1.yaml",
+      "role": "internal_definition",
+      "size_bytes": 1178,
+      "sha256": "f8e0691a76864a1fa5b5d28bfca9697329a7a2c240bbc66598aa36c2b3fe88f3"
+    },
+    {
+      "path": "configs/statistics.yaml",
+      "role": "internal_definition",
+      "size_bytes": 3204,
+      "sha256": "d1d12f986cf62924491436c784e2147ee94380497f43590a534c5ffcaf152de2"
+    },
+    {
+      "path": "configs/threshold_selection_n3_frozen.yaml",
+      "role": "threshold_provenance",
+      "size_bytes": 1135,
+      "sha256": "f7ba5bae4d206f4081fe94546823867a2d6c554a03156ad03b9da9c7463e0a60"
+    },
+    {
+      "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+      "role": "threshold_provenance",
+      "size_bytes": 6132,
+      "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694"
+    },
+    {
+      "path": "configs/vindr_external_v1.yaml",
+      "role": "frozen_protocol",
+      "size_bytes": 8535,
+      "sha256": "9516d62b8164ca25794ad0be3ba3f13eec32e29b2377442194a3095b2671a19b"
+    },
+    {
+      "path": "configs/yolo.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2878,
+      "sha256": "5a9bd54c730a42db166d8e5c7075f863f914b5be7c66567f5bc91a70b50ef8d2"
+    },
+    {
+      "path": "configs/yolo_seed137.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2915,
+      "sha256": "f726b54408681308eb149d7bb11eec17ed1c33f5f5c93233425b11cbf9bf38e5"
+    },
+    {
+      "path": "configs/yolo_seed271.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2915,
+      "sha256": "15f40539b0091892a6d3f168b0c2813b903ee87123cba4725b14889963b0c41b"
+    },
+    {
+      "path": "configs/yolo_seed314.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2915,
+      "sha256": "d436f4f635bbbaa6a0719eab1f158de1c81a744749a684f171b29c81da43cdbb"
+    },
+    {
+      "path": "configs/yolo_seed42.yaml",
+      "role": "checkpoint_training_config",
+      "size_bytes": 2906,
+      "sha256": "303a26c5debb26cadfc703d2d571d2f9507d5da636d1829e46a2d35dc9fb18b3"
+    },
+    {
+      "path": "docs/INTERNAL_PAPER_FOCUS_AUDIT.md",
+      "role": "batch46_baseline",
+      "size_bytes": 8318,
+      "sha256": "14de03eb44341e1ebb1c6167f41164453e4e3497a4aaad5ac2826da2f1f96e4d"
+    },
+    {
+      "path": "docs/VINDR_EXTERNAL_PROTOCOL.md",
+      "role": "frozen_protocol",
+      "size_bytes": 19957,
+      "sha256": "7b157a19550340d00d7a043ef4a380739d54faae5525a6ebba27ed1cd5ccff87"
+    },
+    {
+      "path": "report/paper_claim_sources.yaml",
+      "role": "batch46_baseline",
+      "size_bytes": 35786,
+      "sha256": "44f2abd6747b0f316f662e3b0884f3879b9169550f4d07ddbbbdb4f2101a77d5"
+    },
+    {
+      "path": "report/paper_draft.md",
+      "role": "batch46_baseline",
+      "size_bytes": 36528,
+      "sha256": "75c214ae28ceffc643f85dae96d4a58a18b172458a867bc867e69c11d0563b5e"
+    },
+    {
+      "path": "results/checkpoint_release_manifest.json",
+      "role": "checkpoint_identities",
+      "size_bytes": 8732,
+      "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5"
+    },
+    {
+      "path": "results/logs/phase14_threshold_selection/summary.json",
+      "role": "threshold_provenance",
+      "size_bytes": 7863,
+      "sha256": "4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50"
+    },
+    {
+      "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+      "role": "internal_evidence",
+      "size_bytes": 103345,
+      "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898"
+    },
+    {
+      "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+      "role": "threshold_provenance",
+      "size_bytes": 28056,
+      "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0"
+    },
+    {
+      "path": "results/logs/phase44_cohort_characteristics/summary.json",
+      "role": "internal_evidence",
+      "size_bytes": 9050,
+      "sha256": "4a4d205599a6bc3142d33d928d9251cd02a3fb3b231e62c58f5219f2f4adc397"
+    },
+    {
+      "path": "results/logs/phase45_inference_timing_v1/summary.json",
+      "role": "internal_evidence",
+      "size_bytes": 39488,
+      "sha256": "1e33816ce4519083f139c3e05a81ca5857ed67c6cf9242af2bf7f224bdae5df8"
+    },
+    {
+      "path": "results/scientific_artifact_manifest.json",
+      "role": "internal_evidence",
+      "size_bytes": 236464,
+      "sha256": "ab921ee1c410257c25e60b7c5a9f396f423fb899ca90f5e58860c6e6f53f0caf"
+    },
+    {
+      "path": "results/tables/selected_operating_points.csv",
+      "role": "threshold_provenance",
+      "size_bytes": 1019,
+      "sha256": "1b0c9fe80b5867f7e8f60fdd9af3489bd779c0a2f124029a6c5b1b8c13d7d58d"
+    },
+    {
+      "path": "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+      "role": "threshold_provenance",
+      "size_bytes": 2439,
+      "sha256": "526fc5a17f18c47cc7da9eef65a555474287976725ee5ad49f1b728cbd7ed99d"
+    },
+    {
+      "path": "src/analyze_exact_score_froc.py",
+      "role": "implementation_reference",
+      "size_bytes": 80032,
+      "sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b"
+    },
+    {
+      "path": "src/benchmark_inference.py",
+      "role": "implementation_reference",
+      "size_bytes": 33831,
+      "sha256": "95118a9993da2a858b2e4bb618058c9f1ba318701086886238ed61af91fe4307"
+    },
+    {
+      "path": "src/data/prepare.py",
+      "role": "implementation_reference",
+      "size_bytes": 48173,
+      "sha256": "928d619e63b43b73dfb7d43648eb4fc1acdb9f8457056a858e862d780af23cbc"
+    },
+    {
+      "path": "src/evaluate.py",
+      "role": "implementation_reference",
+      "size_bytes": 51150,
+      "sha256": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a"
+    },
+    {
+      "path": "src/meddet_benchmark/coco_evaluation.py",
+      "role": "implementation_reference",
+      "size_bytes": 8156,
+      "sha256": "05070ebb84df6f6f35ab1c711bc35dcfe0d9e478ceb8c94ecafca911811a8dd7"
+    },
+    {
+      "path": "src/meddet_benchmark/evaluation.py",
+      "role": "implementation_reference",
+      "size_bytes": 12000,
+      "sha256": "be7bca53c50d9e1de45a686709fb303c9e389491196406978988dc2033eb933f"
+    }
+  ]
+}

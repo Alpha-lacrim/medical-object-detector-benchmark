@@ -1,0 +1,214 @@
+schema_version: 1
+protocol_id: vindr-cxr-external-testing-v1
+protocol_document: docs/VINDR_EXTERNAL_PROTOCOL.md
+freeze_manifest: docs/VINDR_EXTERNAL_PROTOCOL_v1.sha256.json
+status: frozen_pending_user_review_and_batch48
+freeze_date: '2026-09-22'
+
+dataset:
+  name: VinDr-CXR
+  version: '1.0.0'
+  source_url: https://physionet.org/content/vindr-cxr/1.0.0/
+  version_doi: 10.13026/3akn-b287
+  split: official_test
+  expected_images: 3000
+  root_environment_variable: VINDR_CXR_ROOT
+  root_default: null
+  paths:
+    images: test
+    boxes: annotations_test.csv
+    image_labels: image_labels_test.csv
+    checksums: SHA256SUMS.txt
+    license: LICENSE.txt
+    dicom_tag_documentation: supplemental_file_DICOM_tags.pdf
+  extension: .dicom
+  source_sha256:
+    checksums: 175f64e334b3c8a0773d1580263ac64bd4ba72511cb7391f3ab503025a8ed5d4
+    boxes: 23be546c210c5560433247d9a8caa8573468d24a4a30e671e580962650e682dd
+    image_labels: 9874c665991c5098db571082f9d9d096fe80c40ac3c2b2007a76d8d226c87a02
+    license: 30492d35caacc57d31754ce490e806110abee5d55effac7ddc460de4191ac773
+    dicom_tag_documentation: bb872fe2755c436c0db63fc6fa497a8d90fa7d3bc138601d21e1f285c8a696d4
+  annotation_columns: [image_id, class_name, x_min, y_min, x_max, y_max]
+  image_id_column: image_id
+  class_name_column: class_name
+  access:
+    user_attestation_date: '2026-09-22'
+    approved_access_dua_and_official_download_confirmed: true
+    license_version: '1.5.0'
+    restricted_outputs_local_only: true
+    training_data_use: prohibited
+
+ontology:
+  target_concept: Lung opacity
+  source_exact_class_name: Lung Opacity
+  source_spelling_note: Explicit release CSV capitalization; no case folding or synonym expansion.
+  canonical_classes:
+    1: Lung Opacity
+  detector_foreground_labels:
+    faster_rcnn: 1
+    yolo11s: 0
+  merge_other_findings: false
+  use_global_labels_as_box_targets: false
+  zero_target_box_images: retain_as_strict_target_negatives
+  ignore_regions_for_other_findings: false
+  source_coordinates: original_image_xyxy
+  canonical_box_coordinates: original_image_xyxy
+  coco_box_conversion: [x_min, y_min, x_max_minus_x_min, y_max_minus_y_min]
+  inclusive_pixel_offset: 0
+  invalid_or_duplicate_target_box_policy: stop_for_annotation_review_without_predictions
+  missing_or_corrupt_image_policy: stop_no_silent_exclusion
+
+preprocessing:
+  reference_config: configs/dataset.yaml
+  reference_function: src.data.prepare.scale_radiograph_to_uint8
+  decoder: pydicom_pixel_array
+  image_kind: single_frame_grayscale
+  array_dtype: float32
+  normalization: per_image_minmax
+  output_bit_depth: 8
+  rounding: numpy_rint
+  invert_monochrome1: true
+  nonfinite_policy: finite_min_max_replace_nan_and_inf_as_reference
+  no_finite_pixels_policy: error
+  constant_image_policy: zero_uint8_as_reference
+  apply_modality_lut: false
+  apply_rescale_slope_intercept: false
+  apply_voi_lut_or_window: false
+  mask_pixel_padding: false
+  grayscale_to_rgb: replicate
+  processed_format: lossless_png_native_dimensions
+  crop: false
+  rotate_or_flip: false
+  histogram_equalization: false
+  test_time_augmentation: false
+  input_size: 640
+  resize: frozen_detector_native_aspect_preserving_transform
+  restore_predictions_to_source_coordinates: true
+  unexpected_semantics_policy: stop_for_documented_pre_inference_review
+
+models:
+  detectors: [faster_rcnn, yolo11s]
+  seeds: [17, 42, 137, 271, 314]
+  run_inventory_config: configs/evaluation_froc_lower_floor_v4.yaml
+  checkpoint_manifest: results/checkpoint_release_manifest.json
+  require_all_checkpoint_hashes: true
+  retain_all_runs_including_271: true
+  retrain_or_select_checkpoint: false
+
+runtime:
+  device: cuda:0
+  inference_batch_size: 1
+  num_workers: 0
+  pin_memory: true
+  amp: true
+  amp_dtype: {faster_rcnn: float16, yolo11s: bfloat16}
+  verify_actual_convolution_dtype: true
+  amp_reference: src/benchmark_inference.py
+  deterministic: true
+  allow_tf32: false
+  torch_threads: 1
+  cache_decoded_dataset_in_ram: false
+  versions:
+    torch: 2.6.0+cu124
+    torchvision: 0.21.0+cu124
+    ultralytics: 8.4.110
+    cuda: '12.4'
+
+evaluation:
+  candidate_score_floor: 0.00001
+  ap_minimum_score: 0.001
+  score_comparison: greater_than_or_equal
+  max_detections_per_image: 100
+  nms_iou_threshold: 0.5
+  nms: detector_native_class_aware_no_extra_postprocessing
+  matching_iou_threshold: 0.5
+  matching: score_descending_greedy_one_to_one_same_class
+  primary_endpoints: [ap50, ap50_95, exact_score_froc, sensitivity_at_fp_per_image_budgets]
+  ap:
+    evaluator: src.meddet_benchmark.coco_evaluation.evaluate_coco
+    iou_thresholds: [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+    recall_grid_points: 101
+    area: all
+    max_dets: [1, 10, 100]
+  froc:
+    reference_config: configs/froc_exact_score_v4.yaml
+    fp_per_image_budgets: [0.125, 0.25, 0.5, 1.0, 2.0]
+    thresholds: every_distinct_retained_score_plus_empty_upper_and_floor_endpoints
+    sensitivity_denominator: strict_target_box_count
+    fp_denominator: all_official_test_images
+    budget_rule: maximum_observed_sensitivity_at_or_below_budget
+    tie_breakers: [fewer_fp_per_image, higher_score]
+    interpolation: false
+    numeric_tolerance: 1.0e-12
+    disclose_floor_limited_runs: true
+    disclose_images_at_detection_cap: true
+    lower_floor_after_external_results: prohibited
+
+threshold_transport:
+  primary:
+    label: historical_n3_rsna_validation_threshold_transport
+    thresholds: {faster_rcnn: 0.69, yolo11s: 0.05}
+    selection_seeds: [17, 42, 137]
+    source_config: configs/threshold_selection_n3_frozen.yaml
+    source_summary: results/logs/phase14_threshold_selection/summary.json
+    source_table: results/tables/selected_operating_points.csv
+  secondary:
+    label: posthoc_n5_rsna_validation_threshold_transport_sensitivity
+    thresholds: {faster_rcnn: 0.70, yolo11s: 0.01}
+    selection_seeds: [17, 42, 137, 271, 314]
+    source_config: configs/threshold_selection_n5_validation_sensitivity.yaml
+    source_summary: results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json
+    source_table: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+  metrics: [precision, recall, f1, fp_per_image, detections_per_image, percent_images_with_detections]
+  report_counts: [tp, fp, fn, detections, images_with_detections, images, target_boxes]
+  select_external_threshold: false
+
+score_summaries:
+  unit: emitted_detection
+  populations: [all_retained_candidates, ap_candidates, historical_threshold, posthoc_n5_threshold]
+  statistics: [detection_count, min, quantiles, median, mean, max]
+  quantiles: [0.01, 0.05, 0.25, 0.50, 0.75, 0.95, 0.99]
+  quantile_method: linear
+  empty_population: count_zero_other_statistics_null
+  aggregation: per_run_then_equal_run_mean_and_sample_sd
+  ecdf: per_run_no_pooling_across_runs
+  clinical_probability_interpretation: false
+
+statistics:
+  observational_unit: released_study_image
+  resampling_key: image_id
+  defensible_patient_group_id: null
+  infer_patient_groups_from_hash_or_demographics: false
+  primary_estimand: training_procedure
+  secondary_estimand: checkpoint_conditional_seed17
+  run_aggregation: equal_run_arithmetic_mean
+  standard_deviation_ddof: 1
+  run_resampling: independent_within_detector
+  observation_resampling: paired_across_detectors_and_runs
+  bootstrap_resamples: 2000
+  bootstrap_seed: 20260811
+  confidence_level: 0.95
+  interval: percentile
+  contrast: faster_rcnn_minus_yolo11s
+  zero_prediction_with_positive_targets: defined_zero_ap_precision_recall_f1
+  undefined_metrics: null_with_reason_and_defined_run_count
+  hypothesis_tests: none_planned
+  pool_internal_external: false
+
+outputs:
+  private_root: data/processed/vindr-cxr-external-v1
+  local_manifest: data/processed/vindr-cxr-external-v1/manifest.csv
+  local_annotations: data/processed/vindr-cxr-external-v1/instances_test.json
+  local_predictions: data/processed/vindr-cxr-external-v1/predictions
+  aggregate_results_root: results/vindr_external_v1
+  public_artifacts: [protocol, config, code, hashes, aggregate_nonidentifying_tables_and_plots]
+  restricted_artifacts: [dicoms, pngs, annotations, image_ids, headers, per_image_predictions, per_image_scores]
+
+gates:
+  full_inference_in_batch47: false
+  adapter_implementation_in_batch47: false
+  user_protocol_review_required_before_batch49: true
+  batch48_tests_and_release_integrity_required: true
+  versioned_amendment_required_for_any_protocol_change: true
+  preserve_superseded_artifacts: true
+  external_performance_may_inform_protocol_changes: false

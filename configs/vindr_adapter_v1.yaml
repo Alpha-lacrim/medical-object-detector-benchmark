@@ -1,0 +1,40 @@
+schema_version: 1
+# Operational adapter settings only; scientific settings remain in the frozen config.
+images_directory_name: images
+# Encoding effort only; every PNG is checked against the same uint8 pixels.
+png_compress_level: 1
+private_audit_name: preflight_private.json
+loader_config_name: dataset_loader.yaml
+aggregate_summary_name: adapter_preflight.json
+progress_every: 100
+technical_sample_per_stratum: 1
+technical_sample_key: [TransferSyntaxUID, PhotometricInterpretation, BitsStored]
+geometry_absolute_tolerance: 0.001
+header_fields:
+  - PhotometricInterpretation
+  - Rows
+  - Columns
+  - PixelRepresentation
+  - BitsAllocated
+  - BitsStored
+  - HighBit
+  - SamplesPerPixel
+  - NumberOfFrames
+  - RescaleSlope
+  - RescaleIntercept
+  - RescaleType
+  - WindowCenter
+  - WindowWidth
+  - VOILUTFunction
+  - ModalityLUTSequence
+  - VOILUTSequence
+  - PresentationLUTShape
+  - PixelPaddingValue
+  - PixelPaddingRangeLimit
+  - ViewPosition
+  - PatientOrientation
+  - ImageOrientationPatient
+  - PatientID
+  - StudyInstanceUID
+  - SeriesInstanceUID
+  - SOPInstanceUID

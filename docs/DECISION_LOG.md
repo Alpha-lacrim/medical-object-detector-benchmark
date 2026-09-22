@@ -687,3 +687,50 @@ their original labels. Keep parameters and incomplete profiler-registered
 operation counts; remove the approximate 21-fold ratio as a headline fact.
 Detailed provenance and an excluded warning-emitting development trial are
 documented in `docs/COMPUTE_TIMING.md`. No later batch is authorized here.
+
+## D-017 — Freeze VinDr-CXR external testing v1 before performance
+
+Date: 2026-09-22. Status: frozen for user review; full inference not authorized
+in Batch 47. Protocol: [VINDR_EXTERNAL_PROTOCOL.md](VINDR_EXTERNAL_PROTOCOL.md).
+Config: [vindr_external_v1.yaml](../configs/vindr_external_v1.yaml).
+Exact byte bindings: [v1 freeze manifest](VINDR_EXTERNAL_PROTOCOL_v1.sha256.json).
+
+The user confirmed approved PhysioNet access, DUA acceptance and an official
+download before restricted contents were read. Public v1.0.0 documentation,
+local annotation/checksum/license files and all 3,000 test DICOM headers were
+checked without decoding pixels or invoking a detector. Annotation files match
+the supplied official checksum manifest; full image checksums and conversion
+remain Batch 48 gates. Batch 46 paper/scientific/bibliography verification passes.
+
+Freeze the official 3,000-image consensus test set and the single local target
+concept `Lung opacity`, explicitly mapped to its actual CSV spelling
+`Lung Opacity`. No synonym matching or merging of other local/global findings.
+Every image without a strict-target box remains a negative for this target.
+This is external testing and cross-dataset/cross-annotation-ontology
+transportability, not an identical annotation task.
+
+Freeze AP@0.50 and AP@0.50:0.95 at the internal 0.001 AP floor, exact-score
+FROC from candidates down to 0.00001, and sensitivity at the same internal
+0.125/0.25/0.5/1/2 FP/image budgets. NMS and matching IoU are 0.50, cap 100.
+Historical RSNA n=3 validation thresholds 0.69/0.05 remain primary and apply
+unchanged to all five external runs per detector. Batch 43's 0.70/0.01 applies
+only as the separately labeled post-hoc n=5 sensitivity. Never optimize an
+external threshold, including from FROC score coordinates. No VinDr training
+data, fine-tuning, calibration, model/seed selection or outcome-guided changes
+to ontology, preprocessing, support, endpoints or hyperparameters.
+
+No defensible patient identifier exists in the inspected release: both CSVs
+lack a patient key and all headers have no nonempty patient/study/series/SOP
+identity tags. Freeze released study/image-level resampling, jointly across
+detectors, and independent run resampling within detector. Do not invent
+patient groups or pair seed numbers. All five runs, including seed 271, stay.
+Document unknown within-patient dependence and the historical FP32 versus new
+mandatory AMP YOLO execution difference. Per-run score count/range/quantiles
+and planned tables/figures are specified before any external results.
+
+Restricted derivatives remain local in ignored `data/`; only reviewed
+nonidentifying aggregates may be published. User protocol review plus passing
+Batch 48 adapter/integrity tests and a separate Batch 49 authorization are
+required before full inference. No inference or external detector results
+were inspected in this session. Changes require a versioned amendment with
+reason and timing; never silently replace v1 or its hash record.

@@ -18,6 +18,66 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 ## Decisions Log
 
+- **VinDr Batch 48 adapter complete (2026-09-23):**
+  `src/data/prepare_vindr.py` and operational `configs/vindr_adapter_v1.yaml`
+  implement the unchanged Batch 47 scientific contract. All 38 frozen files,
+  official v1.0.0 metadata and all 3,000 DICOM checksums pass. Strict exact
+  `Lung Opacity` yields 84 positive images, 95 boxes and 2,916 negatives,
+  retaining negatives with other findings; no invalid/duplicate target boxes.
+  All 3,000 native PNGs pass decoding, lossless round-trip and common-loader
+  integration. A fixed 94-image repeat/native-geometry sample is deterministic,
+  with maximum inverse error 0.00019315886765980395 native pixels (<0.001).
+  Actual unsigned 16-bit storage contains 10/12/14/16 stored bits and both
+  polarities; JPEG 2000 is supported by Pillow/OpenJPEG. Present rescale is
+  identity; windows vary; orientation/projection tags are absent. The frozen
+  stored-pixel min-max transform remains unchanged. No constant/nonfinite
+  images were found. PNG compression level 1 affects encoding only.
+  Restricted manifest/COCO/headers/PNG data and loader YAML remain under
+  ignored `data/processed/vindr-cxr-external-v1/`; only the nonidentifying
+  `results/vindr_external_v1/adapter_preflight.json` is a public result artifact.
+  `docs/VINDR_ADAPTER_PREFLIGHT.md` and README record reproduction and boundaries.
+  Focused checks pass 71 tests plus one declared skip, Ruff, 66 paper claims,
+  and the unchanged 72-artifact scientific verifier. No detector inference,
+  external performance analysis, protocol amendment, commit or push occurred.
+  Stop for user review; Batch 49 still requires separate authorization and
+  native candidate-floor/AMP/checkpoint/prediction checks.
+
+- **VinDr external protocol v1 frozen before performance (Batch 47):**
+  `docs/VINDR_EXTERNAL_PROTOCOL.md`, `configs/vindr_external_v1.yaml` and
+  `docs/VINDR_EXTERNAL_PROTOCOL_v1.sha256.json` freeze the official v1.0.0
+  3,000-image consensus test set and 38 protocol/internal dependency hashes.
+  D-017 records strict target concept `Lung opacity`, explicitly mapped to
+  actual CSV `Lung Opacity` without merging findings. Collection/FROC floor
+  0.00001, AP floor 0.001, NMS/matching IoU 0.50, cap 100 and internal
+  0.125/0.25/0.5/1/2 FP/image budgets are fixed. Historical 0.69/0.05 threshold
+  transport remains primary; Batch 43's 0.70/0.01 stays post-hoc sensitivity.
+  All five runs per detector including 271 remain; independent detector-run
+  resampling and paired released-image resampling are prespecified. No
+  defensible patient grouping: both CSVs lack a patient key and all 3,000
+  headers have no nonempty PatientID/Study/Series/SOP identity tags. Unknown
+  patient dependence remains a limitation. Mandatory verified AMP also
+  retains the disclosed difference from historical FP32 YOLO accuracy outputs.
+  User confirmed approved access/DUA/official download before restricted reads.
+  Local root is supplied via `VINDR_CXR_ROOT`; the provided layout is
+  `data/raw/vindr-cxr/` with CSVs at root and DICOMs under `test/`. Annotation,
+  license and supplement hashes agree with the supplied official manifest;
+  the 3,000 filenames agree with its test inventory. Full DICOM checksums,
+  decoding, target counts and adapter tests remain Batch 48. Restricted
+  row-level derivatives stay under ignored `data/`, with only reviewed
+  nonidentifying aggregate publication. Batch 46 verifiers, all ten checkpoint
+  hashes and 38 focused tests pass. No pixels decoded, detector inference,
+  external results inspected, model/source/internal-result changes, commit
+  or push. User must review the protocol before separately authorized Batch 49.
+
+- **Windows download tooling (2026-09-16, Session 98):** Explicit standalone
+  environment-support request; no scientific batch executed. Bare `wget` is
+  PowerShell's Invoke-WebRequest alias. Installed portable GNU Wget 1.21.4 x64
+  in ignored `.tools/wget/wget.exe`. `docs/VINDR_WGET_WINDOWS.md` records source,
+  local hash, `--no-config`, and the resumable test-only command. HTTPS probe
+  reaches PhysioNet and returns expected unauthenticated HTTP 401. User must
+  run with their approved account and enter their password locally. No dataset
+  files downloaded; authenticated access and available disk space unverified.
+
 Newest entries appear first; superseded decisions remain recorded.
 
 - **Focused internal manuscript complete before external integration:** Batch 46
@@ -1758,6 +1818,13 @@ Newest entries appear first; superseded decisions remain recorded.
 
 ## File Map
 
+- `configs/vindr_external_v1.yaml`: frozen external scientific contract; root
+  via `VINDR_CXR_ROOT`, with no machine-path fallback.
+- `docs/VINDR_EXTERNAL_PROTOCOL.md`: canonical Batch 47 external prespecification
+  and user review document, including source/access and observational-unit evidence.
+- `docs/VINDR_EXTERNAL_PROTOCOL_v1.sha256.json`: exact byte hashes for protocol,
+  config and internal dependencies; aggregate metadata-only release audit.
+
 | Path | Purpose | Status |
 |---|---|---|
 | `PROJECT_SPEC.md`, `BATCHES.md`, `AGENTS.md` | Static requirements, sequence, and session protocol | authoritative |
@@ -1861,6 +1928,38 @@ Newest entries appear first; superseded decisions remain recorded.
 
 ## Current phase
 
+**Batch 48 is complete locally; stop for adapter/protocol review.** All 3,000
+official test DICOMs and derived PNGs are validated, with 84 strict-target
+positive images, 95 boxes and 2,916 negatives. Canonical COCO and the manifest
+remain private; `results/vindr_external_v1/adapter_preflight.json` and
+`docs/VINDR_ADAPTER_PREFLIGHT.md` record the completed preflight. The Batch 47
+protocol/config and all 38 frozen dependencies remain unchanged. README has
+the executable preparation and test commands. No detector inference or
+external performance analysis occurred. Review the protocol and preflight
+before separately authorizing Batch 49; do not start it automatically. No
+staging, commit or push occurred. Existing unrelated changes are preserved.
+
+The user subsequently requested a scoped local commit of the completed VinDr
+adapter and its required, still-uncommitted Batch 47 freeze (Session 101).
+The commit includes the protocol/config/sidecar, D-017, adapter/config/tests,
+aggregate preflight, review document, relevant README section and tracked
+session-state history. Restricted data and unrelated local files remain
+excluded; the separate wget README hunk stays unstaged. No push requested.
+
+### Previous phase: Batch 47
+
+**Batch 47 is complete locally; stop for protocol review.** The external
+contract and 38 dependency hashes are frozen in the three VinDr v1 files
+above, with D-017 and executable offline verification/planned later commands
+in README. No external detector inference or performance inspection occurred.
+Next is a separately requested Batch 48 adapter/data-integrity session. User
+review of `docs/VINDR_EXTERNAL_PROTOCOL.md`, passing Batch 48 and separate
+authorization are required before Batch 49. Existing Batch 46 manuscript,
+historical artifacts, download-tooling edits and unrelated files are preserved.
+No staging, commit or push occurred in Batch 47.
+
+### Previous phase: Batch 46
+
 **Batch 46 is complete locally; stop for review of the focused internal paper.**
 `report/paper_draft.md` is the sole canonical editable manuscript. It is now
 about 58% shorter, centered on operating-point definition and the five-run
@@ -1911,6 +2010,15 @@ Batch 46 and later work, external testing, author declarations, checkpoint
 publication and further FROC inference remain outside this session.
 
 ## Residual limitations / reproducibility risks
+
+- VinDr v1 is a frozen external testing plan, not evidence of transportability
+  yet. Image-level resampling cannot account for unknown repeated patients.
+  Strict local-target ontology differs from RSNA; FP32/AMP inference-path
+  differences are also disclosed. Batch 48 passed full source-image checksum,
+  decoder and geometry checks, including JPEG 2000 lossless support. This is
+  ingestion evidence only; native inference/AMP checks remain Batch 49. Do not
+  publish restricted image-linked derivatives or tune any protocol choice on
+  external performance. Do not regenerate v1 hashes to conceal a change.
 
 - Batch 45 standardizes timing boundaries but remains one primary checkpoint
   per detector and one hardware/software state. Three technical timing repeats

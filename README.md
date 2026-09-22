@@ -870,6 +870,108 @@ Every item in the benchmark's Definition of Done is satisfied:
   retraining additionally require the external data/checkpoints described
   above.
 
+## VinDr-CXR external protocol and adapter (Batches 47–48; experiment not run)
+
+Review [`docs/VINDR_EXTERNAL_PROTOCOL.md`](docs/VINDR_EXTERNAL_PROTOCOL.md)
+and [`configs/vindr_external_v1.yaml`](configs/vindr_external_v1.yaml) before
+Batch 49. The official v1.0.0 test set is fixed at 3,000 images. The strict
+target concept `Lung opacity` has the exact CSV spelling `Lung Opacity`; no
+other finding is merged. Historical RSNA thresholds remain 0.69/0.05;
+0.70/0.01 is a separately labeled post-hoc n=5 sensitivity. Full inference
+and external performance inspection were not performed in Batch 47.
+
+The user must personally obtain credentialed access, complete the required
+training/DUA and download the official release. The current user confirmed
+this prerequisite on 2026-09-22. No credentials belong in this repository.
+Set the root to the parent of `test/` and the two annotation CSVs. For the
+user-supplied repository layout, from the repository root:
+
+```powershell
+$env:VINDR_CXR_ROOT = (Resolve-Path -LiteralPath 'data/raw/vindr-cxr').Path
+```
+
+There is no config fallback root. On another machine set `VINDR_CXR_ROOT` to
+that machine's authorized release directory. Restricted source and derived
+row-level data stay in ignored `data/`; only reviewed nonidentifying aggregates
+may enter the configured result directory.
+
+Run this **offline, no-inference** freeze check from the repository root before
+implementing the adapter and again before full inference. It checks both frozen
+files and their internal definition/provenance dependencies; a mismatch means
+stop and review, not regenerate the sidecar:
+
+```powershell
+$vindrFreeze = Get-Content -Raw -Encoding utf8 'docs/VINDR_EXTERNAL_PROTOCOL_v1.sha256.json' | ConvertFrom-Json
+foreach ($vindrArtifact in $vindrFreeze.artifacts) {
+    if (-not (Test-Path -LiteralPath $vindrArtifact.path -PathType Leaf)) {
+        throw "Missing frozen input: $($vindrArtifact.path)"
+    }
+    $vindrActual = (Get-FileHash -LiteralPath $vindrArtifact.path -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($vindrActual -ne $vindrArtifact.sha256) {
+        throw "Frozen input changed: $($vindrArtifact.path)"
+    }
+}
+Write-Output "VinDr v1 freeze verified: $($vindrFreeze.artifacts.Count) files; no inference."
+```
+
+The Batch 48 adapter consumes the unchanged frozen config plus operational
+settings in `configs/vindr_adapter_v1.yaml`. Run from the repository root with
+the authorized `VINDR_CXR_ROOT` set as above. The CPU preparation environment
+is sufficient; this does not change the mandatory CUDA/AMP contract for later
+detector inference.
+
+```powershell
+# Full data-only audit: checksums, headers, all decoded pixels, PNG round trips,
+# strict targets, deterministic repeat sample and native coordinate restoration.
+& .\.venv\Scripts\python.exe -m src.data.prepare_vindr --config configs/vindr_external_v1.yaml --adapter-config configs/vindr_adapter_v1.yaml --mode preflight
+# Includes the same full audit and additionally writes all native PNGs, the
+# sorted manifest, canonical COCO annotations and common-loader integration.
+& .\.venv\Scripts\python.exe -m src.data.prepare_vindr --config configs/vindr_external_v1.yaml --adapter-config configs/vindr_adapter_v1.yaml --mode prepare
+& .\.venv\Scripts\python.exe -m pytest tests/test_prepare_vindr.py tests/test_prepare.py tests/test_faster_rcnn_data.py tests/test_evaluation.py tests/test_coco_evaluation.py -q --basetemp=tmp/pytest-vindr-adapter -p no:cacheprovider
+```
+
+`prepare` subsumes `preflight`; running both is optional. Neither loads a
+detector. Both write the restricted detailed audit under the private root and
+the nonidentifying aggregate `results/vindr_external_v1/adapter_preflight.json`.
+Only `prepare` writes `manifest.csv`, `instances_test.json`, `images/*.png` and
+`dataset_loader.yaml` under ignored `data/processed/vindr-cxr-external-v1/`.
+The generated loader config works with `CocoDetectionDataset(..., "test")`;
+canonical evaluator IDs are COCO `file_name` values (including `.png`), with
+native `(height, width)` and original-coordinate boxes. The manifest also
+retains the original source image ID locally. No patient grouping is invented.
+Source/PNG hashes, source-row box order, sorted image order, decoder versions,
+adapter/config hashes and the unchanged scientific contract are recorded.
+The technical sample is the first sorted image per transfer-syntax/polarity/
+bit-depth stratum plus every strict-target-positive image. All images still
+undergo checksum, decode, dimension and PNG checks; none is excluded.
+
+See [the adapter preflight review](docs/VINDR_ADAPTER_PREFLIGHT.md). Restricted
+images, headers, identifiers, annotations and predictions must remain private.
+These commands stop on integrity/schema/semantics failures or existing external
+prediction/result artifacts; do not reuse them after performance collection
+without reviewing that gate. A failed/interrupted conversion is incomplete and
+must not be used for inference; require a successful `prepare` summary and
+matching private artifact hashes. Repeat verification may replace the summary
+with `mode: preflight`, which is not a completed preparation receipt.
+
+The following remain **planned, unimplemented later-batch interfaces**. Batch 49
+requires protocol/adapter review and explicit authorization; Batch 50 supplies
+statistics. They remain commented to prevent accidental execution:
+
+```powershell
+# PLANNED Batch 49, only after user review and passing Batch 48:
+# & $benchmarkPython -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --mode preflight
+# & $benchmarkPython -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --mode run
+# PLANNED Batch 50, verified predictions only; no model inference:
+# & $benchmarkPython -m src.analyze_vindr_external --config configs/vindr_external_v1.yaml --mode run
+```
+
+No later batch is authorized by these examples. Batch 48 checks ingestion and
+coordinates only; it supplies no external detector performance evidence.
+The freeze record is local provenance, not a public registration or trusted
+timestamp. Preserve v1; record amendments under a new version and retain any
+superseded evidence.
+
 ## Repository verification
 
 The focused internal manuscript and its prerequisite/literature/scope checks
