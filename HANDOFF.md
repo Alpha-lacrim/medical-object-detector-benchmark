@@ -25,6 +25,83 @@
 
 ---
 
+## Session 103 - 2026-09-23 - Commit and direct main push request
+
+**What I did:**
+- At the user's explicit request to commit and push directly on GitHub `main`,
+  reviewed the Session 102 changes and fetched `origin/main` from
+  `https://github.com/Alpha-lacrim/medical-object-detector-benchmark.git`.
+  The remote has no divergent commits; local `main` is one commit ahead with
+  `0c3b99e` (the validated VinDr adapter and required Batch 47 freeze).
+- Prepared a scoped commit of CODEX/HANDOFF revalidation and publication-state
+  notes. The existing unrelated wget README change and all untracked files
+  remain excluded. Outgoing paths contain no restricted dataset derivatives.
+- Requested commit message: `Record Batch 48 adapter revalidation`.
+  The direct push targets `origin main:main`, without force. Final commit ID
+  and push outcome are reported in the session response and verified Git refs.
+  No additional scientific work, model load or inference is part of this task.
+
+**What's still incomplete / next step:**
+- Batch 48 remains complete; Batch 49 requires separate authorization.
+- Preserve unrelated working-tree changes and local-only data.
+
+**Needs the user's review before proceeding:**
+- No further permission is needed for the explicitly requested commit/push.
+  Scientific adapter/protocol review remains as recorded in Session 102.
+
+**Files touched:**
+- `CODEX.md`, `HANDOFF.md`; scoped Git commit and remote `main` push.
+
+## Session 102 - 2026-09-23 - Batch 48 existing adapter revalidation
+
+**What I did:**
+- Read the standing handoff/state, relevant specification and V7 rules,
+  frozen protocol/config, adapter/tests, preflight evidence and README.
+  Began on `main` at `0c3b99eadc3f0618af53f72fa73f3767433f4f70`, which already
+  contains the completed Batch 48 implementation. Preserved the existing
+  unrelated wget README change and all untracked files; index was empty.
+- Verified the existing access/DUA attestation, environment-resolved authorized
+  root, official v1.0.0 metadata/inventory/schema and all 38 frozen hashes.
+  No external prediction files or unexpected aggregate results were present
+  in configured locations. This is repository evidence, not a claim about
+  activity outside the workspace.
+- Independently rechecked every source DICOM and saved PNG hash, all 3,000
+  actual header records, manifest ordering/content, receipt/code/config
+  bindings and private/public summary equality. Fresh source-to-COCO conversion
+  matches the saved annotations exactly: 3,000 images, 84 strict positives,
+  95 boxes and 2,916 strict negatives. No exclusions or ontology changes.
+- The common loader fully decoded all 3,000 saved PNGs and matched all native
+  dimensions, IDs and targets. Repeated DICOM decoding for the existing fixed
+  94-image sample matched itself and saved PNG pixels exactly; native resize
+  and inverse restoration passed with maximum error
+  0.00019315886765980395 pixels (<0.001). The full-loader decode check took
+  several minutes; the verification process completed successfully.
+- Re-ran the README focused suite with fresh
+  `--basetemp=tmp/pytest-vindr-session102 -p no:cacheprovider`: 71 passed,
+  one expected metadata-only skip. Ruff lint/format and whitespace checks
+  passed. Restricted outputs remain ignored; no VinDr source or row-level
+  derivative is tracked.
+- Reused the existing exact README adapter/preflight commands and completed
+  preparation receipt. No implementation gap or necessary code change was
+  found. No receipt regeneration, detector/checkpoint load, inference,
+  performance analysis, protocol amendment, staging, commit or push.
+
+**What's still incomplete / next step:**
+- Batch 48 remains complete. Stop for user review; do not start Batch 49.
+- Separately authorized Batch 49 must still verify checkpoint identity,
+  native candidate-floor behavior, actual AMP dtypes and prediction bundles.
+  Unknown patient dependence and the historical FP32/new AMP caveat remain.
+
+**Needs the user's review before proceeding:**
+- Review `docs/VINDR_ADAPTER_PREFLIGHT.md` and
+  `results/vindr_external_v1/adapter_preflight.json`, including exact ontology,
+  strict negatives, preprocessing and the unchanged evaluator parameters.
+
+**Files touched:**
+- `CODEX.md`, `HANDOFF.md`; ignored synthetic pytest temporary files only.
+  Adapter/config/tests, scientific artifacts, README and restricted prepared
+  data remain unchanged by this session.
+
 ## Session 101 - 2026-09-23 - Commit VinDr protocol and validated adapter
 
 **What I did:**

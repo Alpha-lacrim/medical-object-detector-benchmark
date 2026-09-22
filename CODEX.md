@@ -18,6 +18,27 @@ ASUS ROG Strix G16: Intel i7-13650HX, RTX 4060 Laptop GPU (8 GB VRAM),
 
 ## Decisions Log
 
+- **Batch 48 publication request (2026-09-23, Session 103):** User explicitly
+  requested committing the revalidation notes and pushing directly to GitHub
+  `main`. The fetched `origin/main` has no divergence and is one commit behind
+  local `0c3b99e`; outgoing scientific content is the reviewed VinDr adapter
+  and its Batch 47 freeze. Only CODEX/HANDOFF notes are added to that scope.
+  The unrelated wget README change, untracked files and restricted data remain
+  excluded. This Git operation does not authorize Batch 49.
+
+- **Batch 48 revalidated (2026-09-23, Session 102):** The pasted batch was
+  already implemented in `0c3b99e`; no adapter or scientific changes were
+  needed. Fresh checks confirm all 38 frozen definitions, all 3,000 source
+  and PNG hashes/headers, exact source-to-COCO equality, complete common-loader
+  decoding, and the fixed 94-image repeat/geometry sample. Counts remain
+  3,000/84/95/2,916 (images/positives/boxes/negatives); maximum inverse error
+  remains 0.00019315886765980395 pixels. Focused tests pass 71 with one expected
+  skip; Ruff passes. The completed preparation receipt remains unchanged,
+  restricted derivatives remain ignored, and no external predictions/results
+  were found in the configured locations. No inference or performance analysis
+  was run. Batch 48 remains complete and awaiting review; Batch 49 is not
+  authorized by this repeated Batch 48 request.
+
 - **VinDr Batch 48 adapter complete (2026-09-23):**
   `src/data/prepare_vindr.py` and operational `configs/vindr_adapter_v1.yaml`
   implement the unchanged Batch 47 scientific contract. All 38 frozen files,
