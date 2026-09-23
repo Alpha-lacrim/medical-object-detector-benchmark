@@ -1,0 +1,23 @@
+schema_version: 1
+# Operational paths only. Scientific choices come from the frozen protocol.
+adapter_config: configs/vindr_adapter_v1.yaml
+source_evaluation_config: configs/evaluation.yaml
+progress_every: 100
+required_gpu_name: NVIDIA GeForce RTX 4060 Laptop GPU
+authorization: User explicitly requested Batch 49 on 2026-09-23 after Batch 48 review checkpoint.
+summary_name: inference_summary.json
+run_receipt_name: execution.json
+environment_directory_name: environment
+private_froc_name: exact_score_froc.json.gz
+prediction_name: predictions.json.gz
+metrics_name: metrics.json
+gate_name: inference_gate.json
+source_files:
+  - src/evaluate_vindr_external.py
+  - src/benchmark_inference.py
+  - src/models/faster_rcnn_model.py
+  - src/models/faster_rcnn_data.py
+  - src/models/faster_rcnn_config.py
+  - src/models/yolo_config.py
+  - src/meddet_benchmark/reproducibility.py
+  - src/utils/seed.py

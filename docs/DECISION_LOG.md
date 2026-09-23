@@ -734,3 +734,38 @@ Batch 48 adapter/integrity tests and a separate Batch 49 authorization are
 required before full inference. No inference or external detector results
 were inspected in this session. Changes require a versioned amendment with
 reason and timing; never silently replace v1 or its hash record.
+
+## D-018 — Retain complete frozen VinDr external inference and adverse results
+
+Date: 2026-09-23. Batch 49 completed after the user's explicit request and
+passing protocol, adapter, authorization, checkpoint and release gates.
+Canonical generated aggregate evidence is
+[`inference_summary.json`](../results/vindr_external_v1/inference_summary.json),
+SHA-256 `d15070ebcafdfb2711b07db5090e67ef556b60d0042c87ac047b243bdf8fc656`.
+All ten checkpoints and 3,000 official images per run are retained. Full
+hash/metric/raw-coordinate-repair replay passed. The protocol/config and
+38 frozen dependencies remain byte-identical; no scientific amendment occurred.
+
+The first attempt stopped before any completed bundle or performance metric
+because float32 inverse resizing could restore a clipped Faster R-CNN boundary
+one ULP outside the original image. The exact native error was reproduced;
+only one-ULP upper-bound overshoots are now canonicalized. Larger/negative
+errors still stop, and raw corrected coordinates are preserved and replayed.
+Seven initial-attempt files, including the original implementation/config and
+raw diagnostic, remain hash-verified in the private superseded archive.
+No ontology, preprocessing, resolution, score floor, NMS, cap, checkpoint or
+threshold changed. See [the implementation record](VINDR_INFERENCE.md).
+
+Both pipelines have severely reduced external performance under the strict
+target ontology. Retain the near-zero historical-threshold recall, YOLO
+seed-271 zero-output historical result, secondary-policy FP/image ordering
+reversal, YOLO seed-137 floor limits and Faster R-CNN cap saturation exactly
+as observed. Historical n=3 threshold transport remains primary; post-hoc n=5
+transport remains secondary. No external threshold is selected. These results
+do not establish an architecture-family cause, a patient-level clinical
+interpretation or ordering beyond observed candidate support.
+
+Readable [per-run tables](VINDR_INFERENCE_RESULTS.md) are deterministically
+rendered from the generated aggregate summary. Restricted image-linked evidence
+stays in ignored local storage. Batch 50 uncertainty/internal-external synthesis
+and later manuscript updates require separate authorization; stop for review.

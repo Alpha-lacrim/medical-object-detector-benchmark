@@ -870,7 +870,7 @@ Every item in the benchmark's Definition of Done is satisfied:
   retraining additionally require the external data/checkpoints described
   above.
 
-## VinDr-CXR external protocol and adapter (Batches 47–48; experiment not run)
+## VinDr-CXR frozen external testing (Batches 47–49)
 
 Review [`docs/VINDR_EXTERNAL_PROTOCOL.md`](docs/VINDR_EXTERNAL_PROTOCOL.md)
 and [`configs/vindr_external_v1.yaml`](configs/vindr_external_v1.yaml) before
@@ -954,20 +954,70 @@ must not be used for inference; require a successful `prepare` summary and
 matching private artifact hashes. Repeat verification may replace the summary
 with `mode: preflight`, which is not a completed preparation receipt.
 
-The following remain **planned, unimplemented later-batch interfaces**. Batch 49
-requires protocol/adapter review and explicit authorization; Batch 50 supplies
-statistics. They remain commented to prevent accidental execution:
+Batch 49 uses `src.evaluate_vindr_external` with the unchanged scientific
+protocol and the operational paths in `configs/vindr_inference_v1.yaml`.
+The user explicitly requested Batch 49 on 2026-09-23 after the Batch 48 review
+checkpoint. Run sequentially on the reporting RTX 4060 laptop in the pinned
+CUDA environment, with the authorized dataset root set above:
 
 ```powershell
-# PLANNED Batch 49, only after user review and passing Batch 48:
-# & $benchmarkPython -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --mode preflight
-# & $benchmarkPython -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --mode run
+# Read-only: 38 frozen definitions, ten checkpoints, all source/PNG hashes,
+# source-to-COCO equality and complete common-loader decoding.
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --operation-config configs/vindr_inference_v1.yaml --mode preflight
+# Full run repeats the gate before any detector inference; never overwrites.
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --operation-config configs/vindr_inference_v1.yaml --mode run
+# No inference: verify hashes and recompute every metric from private bundles.
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --operation-config configs/vindr_inference_v1.yaml --mode verify
+& .\.venv\Scripts\python.exe -m pytest tests/test_evaluate_vindr_external.py tests/test_exact_score_froc.py tests/test_inference_timing.py -q --basetemp=tmp/pytest-vindr-inference -p no:cacheprovider
+# Format the verified aggregate evidence as readable per-run tables (no analysis).
+& .\.venv\Scripts\python.exe -m scripts.report_vindr_inference --config configs/vindr_inference_report_v1.yaml
 # PLANNED Batch 50, verified predictions only; no model inference:
 # & $benchmarkPython -m src.analyze_vindr_external --config configs/vindr_external_v1.yaml --mode run
 ```
 
-No later batch is authorized by these examples. Batch 48 checks ingestion and
-coordinates only; it supplies no external detector performance evidence.
+Both native candidate filters use strict `score > floor`; common evaluation
+uses `score >= threshold` on emitted candidates. Synthetic equality tests
+record this boundary without changing the frozen floor. Actual convolution
+dtypes must be float16 for Faster R-CNN and bfloat16 for YOLO11s, using the
+Batch 45 explicit autocast path with `quantize=None`.
+
+The private prediction tree retains all images, including empty outputs,
+exact scores and native coordinates, exact-score FROC curves, environment
+files, execution metadata and hashes. The nonidentifying
+`results/vindr_external_v1/inference_summary.json` contains all ten per-run
+AP/FROC/threshold/score results and equal-run descriptive mean/sample SD with
+defined counts. Historical n=3 threshold transport is primary; post-hoc n=5
+transport is secondary. Study percentages use released images, not inferred
+patient counts. No external threshold is selected. The runner refuses to
+overwrite or automatically resume existing output; a failure requires review
+with all existing evidence preserved. Never manually edit generated artifacts.
+
+The initial attempt exposed a one-ULP Torchvision inverse-resize boundary
+overshoot before any complete run or performance calculation. The corrected
+handoff repairs only that numerical upper-bound error and preserves raw
+coordinates privately; larger errors still stop. See the
+[implementation and failure record](docs/VINDR_INFERENCE.md). The bounded
+diagnostic command used against the stopped first-attempt receipt was:
+
+```powershell
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m scripts.diagnose_vindr_bounds --config configs/vindr_external_v1.yaml --operation-config configs/vindr_inference_v1.yaml --maximum-images 200
+```
+
+This diagnostic intentionally refuses successful or already-diagnosed runs.
+The initial receipt and diagnostic are now preserved in the private
+`superseded/batch49_initial_bounds_failure/` archive, with original source and
+config bytes and a hash manifest; do not move them back over accepted outputs.
+
+Batch 50 uncertainty and internal/external synthesis remain separately
+authorized work; these commands do not execute them.
+
+Batch 49 completed all ten runs and passed full hash/metric replay verification.
+See [per-run results](docs/VINDR_INFERENCE_RESULTS.md) and the
+[execution and findings record](docs/VINDR_INFERENCE.md). Both pipelines show
+severely reduced external performance under the strict ontology; the historical
+thresholds yield near-zero recall, and YOLO seed 271 emits no detections at its
+historical cutoff. All adverse results, candidate-floor/cap limits and both
+threshold policies are retained. No frozen scientific setting was tuned.
 The freeze record is local provenance, not a public registration or trusted
 timestamp. Preserve v1; record amendments under a new version and retain any
 superseded evidence.
