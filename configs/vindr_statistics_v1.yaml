@@ -1,0 +1,56 @@
+schema_version: 1
+analysis_id: batch50-cross-dataset-transportability-v1
+# All scientific choices are inherited from the immutable Batch 47 protocol.
+protocol_config: configs/vindr_external_v1.yaml
+inference_config: configs/vindr_inference_v1.yaml
+external_summary: results/vindr_external_v1/inference_summary.json
+internal:
+  scientific_manifest: results/scientific_artifact_manifest.json
+  statistics_config: configs/statistics.yaml
+  evaluation_summary: results/logs/phase5_evaluation/summary.json
+  froc_config: configs/froc_exact_score_v4.yaml
+  threshold_config: configs/threshold_selection_n5_validation_sensitivity.yaml
+  threshold_per_run: results/tables/threshold_selection_test_operating_points_per_seed_n5_validation_sensitivity.csv
+  primary_scope: historical_n3_selection
+  secondary_scope: posthoc_n5_validation_sensitivity
+conditional_seed: 17
+progress_every: 100
+outputs:
+  public_root: results/vindr_external_v1/statistics
+  private_root: data/processed/vindr-cxr-external-v1/statistics
+  summary: summary.json
+  intervals: intervals.csv
+  per_run: per_run.csv
+  scores: score_summaries.csv
+  comparison: transport_comparison.csv
+  policy_comparison: threshold_policy_comparison.csv
+  bootstrap_draws: bootstrap_draws.npz
+  plot_data: plot_data.json.gz
+  report: docs/VINDR_STATISTICS_RESULTS.md
+  figures:
+    froc: internal_external_froc.png
+    scores: internal_external_scores.png
+    thresholds: frozen_threshold_transport.png
+plot:
+  dpi: 180
+  froc_size: [10.4, 4.9]
+  score_size: [10.4, 7.2]
+  threshold_size: [12.4, 7.0]
+  froc_maximum_x: 4.0
+  detector_labels: {faster_rcnn: Faster R-CNN, yolo11s: YOLO11s}
+  colors: {faster_rcnn: '#176B9B', yolo11s: '#C65D20'}
+  dataset_labels: {internal: RSNA internal, external: VinDr external}
+  seed_styles: ['-', '--', ':', '-.', [0, [5, 1, 1, 1]]]
+  minimum_y: 0.0
+  maximum_y: 1.0
+source_files:
+  - scripts/verify_scientific_artifacts.py
+  - src/stats/transportability.py
+  - src/stats/run_vindr_statistics.py
+  - src/stats/report_transportability.py
+  - src/stats/paired.py
+  - src/stats/run_statistics.py
+  - src/evaluate_vindr_external.py
+  - src/meddet_benchmark/coco_evaluation.py
+  - src/meddet_benchmark/evaluation.py
+  - src/analyze_exact_score_froc.py

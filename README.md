@@ -1008,8 +1008,8 @@ The initial receipt and diagnostic are now preserved in the private
 `superseded/batch49_initial_bounds_failure/` archive, with original source and
 config bytes and a hash manifest; do not move them back over accepted outputs.
 
-Batch 50 uncertainty and internal/external synthesis remain separately
-authorized work; these commands do not execute them.
+The Batch 49 commands above do not execute Batch 50 statistics; its separately
+authorized offline analysis and commands are documented below.
 
 Batch 49 completed all ten runs and passed full hash/metric replay verification.
 See [per-run results](docs/VINDR_INFERENCE_RESULTS.md) and the
@@ -1021,6 +1021,72 @@ threshold policies are retained. No frozen scientific setting was tuned.
 The freeze record is local provenance, not a public registration or trusted
 timestamp. Preserve v1; record amendments under a new version and retain any
 superseded evidence.
+
+## VinDr statistics and cross-dataset transportability (Batch 50)
+
+[Methods and estimands](docs/VINDR_STATISTICS.md) and the generated
+[results and three figures](docs/VINDR_STATISTICS_RESULTS.md) compare the
+separate internal and external datasets. All five runs per detector remain.
+The observed AP/FROC ordering is unchanged, while absolute performance and
+RSNA-frozen operating-point recall collapse externally. The two external AP
+contrast intervals remain positive; four of five FROC-budget contrasts and
+all four historical-threshold contrasts include zero. This is cross-dataset
+transportability, without attributing the shift to a specific confounded factor.
+
+The analysis inherits all scientific choices from the Batch 47 freeze. It
+uses 2,000 shared observation/independent detector-run bootstrap draws per
+dataset and separate seed-17 checkpoint-conditional sensitivity. RSNA resamples
+its 323 NIH patient groups; VinDr resamples 3,000 released images because no
+defensible patient grouping exists. Historical n=3 thresholds remain primary;
+Batch 43's post-hoc n=5 policy stays descriptive. No external threshold or
+ontology tuning, training, new inference, dataset pooling or new hypothesis
+tests occur. Floor-limited FROC values remain observed lower bounds.
+
+Run from the repository root in the pinned environment. The initial Batch 49
+read-only verification requires the authorized local source dataset; the
+offline statistics use existing local annotations, prediction bundles and
+checkpoint hashes. They do not require a GPU. These commands reproduce every
+new displayed number and figure:
+
+```powershell
+# Verify the complete prerequisite experiment, including all source and metric replays.
+$env:VINDR_CXR_ROOT = (Resolve-Path 'data/raw/vindr-cxr').Path
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.evaluate_vindr_external --config configs/vindr_external_v1.yaml --operation-config configs/vindr_inference_v1.yaml --mode verify
+
+# Verify frozen inputs and run inventory; generate statistics once in a fresh output location.
+& .\.venv\Scripts\python.exe -m src.stats.run_vindr_statistics --config configs/vindr_statistics_v1.yaml --mode preflight
+& .\.venv\Scripts\python.exe -m src.stats.run_vindr_statistics --config configs/vindr_statistics_v1.yaml --mode run
+
+# For the completed analysis: read-only hashes, aggregate and saved-draw interval replay.
+& .\.venv\Scripts\python.exe -m src.stats.run_vindr_statistics --config configs/vindr_statistics_v1.yaml --mode verify
+
+# Full deterministic recomputation from bundles: both datasets and every bootstrap draw.
+& .\.venv\Scripts\python.exe -m src.stats.run_vindr_statistics --config configs/vindr_statistics_v1.yaml --mode replay
+
+# Reproduce the three PNGs and review document from verified evidence, then check their hashes.
+& .\.venv\Scripts\python.exe -m src.stats.run_vindr_statistics --config configs/vindr_statistics_v1.yaml --mode render
+
+# Synthetic COCO-copy/FROC, joint-observation, independent-run and provenance regression tests.
+& .\.venv\Scripts\python.exe -m pytest tests/test_transportability.py tests/test_statistics.py tests/test_evaluate_vindr_external.py tests/test_exact_score_froc.py tests/test_verify_scientific_artifacts.py -q --basetemp=tmp/pytest-batch50-focused -p no:cacheprovider
+& .\.venv\Scripts\python.exe -m pytest -q --basetemp=tmp/pytest-batch50-full -p no:cacheprovider
+& .\.venv\Scripts\python.exe -m ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
+& .\.venv\Scripts\python.exe -m ruff format --check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
+& .\.venv\Scripts\python.exe -m scripts.verify_paper_claims
+& .\.venv\Scripts\python.exe -m scripts.verify_scientific_artifacts
+git diff --check
+```
+
+`run` refuses to replace completed statistics or saved bootstrap draws; use
+`verify` or `replay` on this completed checkout. The public summary, five CSVs
+and three figures are under `results/vindr_external_v1/statistics/`. Source
+hashes and all 44 marginal-interval rows are bound in its summary. Public
+outputs contain no image identifiers. Restricted inputs and private plot/draw
+working files stay in `data/processed/vindr-cxr-external-v1/statistics/` and
+the existing ignored prediction tree. A public checkout without authorized
+private inputs cannot run the complete external replay; ordinary CI tests
+synthetic statistical logic and preserves the existing internal verifiers.
+The historical manuscript and prior results are unchanged. Stop after Batch
+50 review; manuscript integration is a separately requested Batch 51.
 
 ## Repository verification
 

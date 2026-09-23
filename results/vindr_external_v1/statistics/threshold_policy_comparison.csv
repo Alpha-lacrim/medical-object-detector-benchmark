@@ -1,0 +1,11 @@
+dataset,metric,historical_n3_gap,posthoc_n5_gap,ordering_change,gap_change
+internal,precision,0.11001610395133027,0.10554985077324686,unchanged,weakened
+internal,recall,0.15597014925373137,0.04626865671641789,unchanged,weakened
+internal,f1,0.13193881525914242,0.08012770366507499,unchanged,weakened
+internal,fp_per_image,0.08026666666666671,-0.08986666666666668,reversed,reversed
+internal,detections_per_image,0.13600000000000007,-0.07333333333333336,reversed,reversed
+external,precision,0.006559272192047545,0.006868096676001917,unchanged,strengthened
+external,recall,0.01473684210526316,0.008421052631578949,unchanged,weakened
+external,f1,0.009365737370523644,0.007769144014558061,unchanged,weakened
+external,fp_per_image,0.020600000000000004,-0.015866666666666668,reversed,reversed
+external,detections_per_image,0.021066666666666664,-0.015599999999999996,reversed,reversed

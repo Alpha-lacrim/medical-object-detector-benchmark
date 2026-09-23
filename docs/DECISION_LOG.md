@@ -769,3 +769,58 @@ Readable [per-run tables](VINDR_INFERENCE_RESULTS.md) are deterministically
 rendered from the generated aggregate summary. Restricted image-linked evidence
 stays in ignored local storage. Batch 50 uncertainty/internal-external synthesis
 and later manuscript updates require separate authorization; stop for review.
+
+## D-019 — Separate observed ranking transport from frozen operating-point transport
+
+- **Date:** 2026-09-24
+- **Status:** Accepted for Batch 50 analysis; stop for user review before Batch 51
+
+### Context and decision
+
+The separately requested Batch 50 passed full Batch 49 source/artifact/metric
+replay and the unchanged Batch 47 38-file freeze. It implements the existing
+primary training-procedure and secondary seed-17 checkpoint-conditional
+estimands. VinDr resamples released study/images jointly across detectors and
+runs; RSNA retains its known NIH patient groups. Trained runs are resampled
+independently within each detector, with no same-number seed pairing. Each
+cohort uses 2,000 marginal percentile bootstrap draws. No datasets or run
+predictions are pooled; there are no new hypothesis tests.
+
+The new aligned internal intervals are separate Batch 50 reconstructions,
+not replacements for historical Phase 8 artifacts. Historical n=3 thresholds
+remain the primary transported policy. Batch 43's post-hoc n=5 policy remains
+descriptive sensitivity. Both are applied unchanged to all five runs on both
+datasets. Threshold-selection uncertainty is not resampled.
+
+### Interpretation and boundaries
+
+- Observed equal-run AP and all five FROC-budget orderings remain Faster
+  R-CNN above YOLO11s; every raw AP/FROC gap weakens externally. Absolute
+  external performance is severely reduced, so unchanged ranking does not
+  establish successful performance transport.
+- Both external AP contrast intervals remain above zero. Four of five
+  external FROC-budget contrast intervals include zero; only the 0.25
+  FP/image interval excludes it. All four historical-threshold metric
+  contrast intervals include zero. These are marginal interval descriptions,
+  not a new confirmatory family or a cross-dataset interaction test.
+- Historical mean recall changes from 0.350746/0.194776 internally to
+  0.018947/0.004211 externally (Faster R-CNN/YOLO11s). The secondary policy
+  also has very low external recall. FP/image and detection-count ordering
+  reverse between the historical and secondary policies within both cohorts;
+  lower FP/image cannot be read as improvement when emissions and recall fall.
+- External YOLO seed 137 remains floor-limited at 1 and 2 FP/image. Its
+  conservative missing-support upper bounds allow an ordering reversal beyond
+  retained support, unlike the existing internal 2-FP/image no-reversal bound.
+  Bootstrap intervals do not repair missing support or cap saturation.
+- Keep all adverse runs, including seed 271. Unknown VinDr patient dependence,
+  five-run empirical uncertainty, strict annotation differences and historical
+  YOLO FP32 versus mandatory external AMP remain explicit limitations.
+  Use **cross-dataset transportability**; do not assign the observed shift to
+  scanners, institution, country, patient population or ontology individually.
+
+Canonical evidence is
+[`results/vindr_external_v1/statistics/summary.json`](../results/vindr_external_v1/statistics/summary.json),
+with [methods](VINDR_STATISTICS.md), [generated results and three figures](VINDR_STATISTICS_RESULTS.md),
+and exact README commands. Restricted inputs and plot/draw working files stay
+private. The existing manuscript, frozen protocols, thresholds, checkpoints
+and internal results remain unchanged. No new inference or training occurred.
