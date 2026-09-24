@@ -4,7 +4,9 @@ This repository is a controlled, multi-axis benchmark of two disclosed Faster
 R-CNN and YOLO11s pipelines on a patient-disjoint internal subset of the RSNA
 Pneumonia Detection Challenge. It characterizes clean detection performance,
 operating points, calibration, compute, common-corruption robustness, Grad-CAM
-localization, and statistical uncertainty under one common evaluator.
+localization, and statistical uncertainty under one common evaluator. Frozen
+external testing applies all ten RSNA checkpoints without adaptation to the
+official VinDr-CXR test release under its strict local opacity ontology.
 
 The documented benchmark experiments are complete, while the manuscript remains
 a living document. This is a retrospective benchmark, not a clinical device or
@@ -40,6 +42,8 @@ and delta from `v1.0.0`, [`CHANGELOG.md`](CHANGELOG.md) for release history, and
 | [`docs/`](docs/) | **Analysis, methodology, decision, and audit record.** These files explain provenance and scope but do not replace the manuscript. |
 | [`results/`](results/) | **Numerical source of truth.** Manuscript prose and tables are rounded views of these generated artifacts. |
 | [`results/scientific_artifact_manifest.json`](results/scientific_artifact_manifest.json) | **Frozen critical-artifact inventory.** Hashes, schemas, generators, configs, inputs, phases, and regeneration requirements. |
+| [`results/publication_artifact_manifest.json`](results/publication_artifact_manifest.json) | **Final publication inventory.** Extends the unchanged internal inventory with frozen external aggregate evidence and explicit private-input boundaries. |
+| [`report/provenance/batch46/`](report/provenance/batch46/) | **Immutable editorial baseline only.** Exact pre-external manuscript/claim bytes bound by the original protocol; never independently maintained. |
 | [`report/paper_claim_sources.yaml`](report/paper_claim_sources.yaml) | **Numerical claim bindings.** Exact source cells/calculations and manuscript rounding tolerances. |
 
 The consolidated scope statement is
@@ -51,7 +55,18 @@ treating either report document as a numerical source.
 
 ## Headline result
 
-Across seeds 17, 42, 137, 271, and 314, Faster R-CNN achieves
+The final manuscript separates ranking, operating-point behavior and external
+transportability. On the strict VinDr target (3,000 images; 84 positive images;
+95 boxes), equal-run AP@0.50 was 0.002505/0.000501 and historical-threshold
+recall 0.018947/0.004211 (Faster R-CNN/YOLO11s). Preserved observed AP ordering
+does not mean preserved performance: absolute AP and operating-point performance
+collapsed. Most external FROC contrasts and all historical-threshold metric
+contrasts include zero. The external upper-budget missing-support bound permits
+a reversal beyond retained candidates; Faster R-CNN cap saturation is another
+limit. See [complete transportability evidence](docs/VINDR_STATISTICS_RESULTS.md)
+and [final manuscript audit](docs/FINAL_MANUSCRIPT_AUDIT.md).
+
+For the **internal benchmark**, across seeds 17, 42, 137, 271, and 314, Faster R-CNN achieves
 mAP@0.5:0.95 of 0.0995 ± 0.0067 versus 0.0542 ± 0.0060 for YOLO11s.
 At thresholds selected by maximum mean validation F1 in the frozen original
 n=3 analysis and applied unchanged to all five test bundles, sensitivity test
@@ -82,7 +97,7 @@ laptop, YOLO11s achieved 57.56 FPS versus 20.91 FPS and median latency
 17.29 ms versus 47.20 ms, using the same 100 images and three technical repeats
 of the primary frozen checkpoints. Parameter counts are 9.43 M versus 43.26 M.
 The historical five-run asymmetric profiles remain preserved separately. On the
-observed exact-score FROC frontier, Faster R-CNN has higher sensitivity at all five
+internal observed exact-score FROC frontier, Faster R-CNN has higher sensitivity at all five
 prespecified FP/image operating budgets. User-approved inference at a 0.0001
 candidate floor and then 0.00001 materially narrows the higher-budget gap.
 YOLO11s seed 137 still ends just below 2 FP/image, but even a mathematical-
@@ -802,27 +817,28 @@ adds exact bindings for central numerical prose and table claims.
 | Report or paper item | Generated source | Regenerating command |
 |---|---|---|
 | Paper §3.1 cohort construction; report Figures 1–2 | audit/split manifests; `rsna_*.png`; `rsna_eda_summary.json` | `src.data.prepare`, then `src.data.visualize` in §2 |
-| Paper §3.1 cohort table and §4.1 cohort Results | `rsna_cohort_characteristics.csv`; Phase 44 aggregate summary | `src.data.cohort_characteristics` in §2a |
+| Paper Table 1 / §3.1 cohort table | `rsna_cohort_characteristics.csv`; Phase 44 aggregate summary | `src.data.cohort_characteristics` in §2a |
 | Paper §§3.2–3.3 protocol parameters | run-level `resolved_config.json` / `resolved_experiment.json`; Phase 5 summary | detector train/finalize in §§3–4, then `src.evaluate --mode evaluate` in §5 |
-| Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
-| Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
-| Paper §§4.1 and 4.5; report Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
+| Historical report Table 2; Figure 3 | `faster_rcnn_*.csv`; Faster curve | seed-17 Faster R-CNN train/finalize in §3 |
+| Historical report Table 3; Figure 4 | `yolo_*.csv`; YOLO curve | seed-17 YOLO train/finalize in §4 |
+| Paper Table 2 / §4.1; historical report Tables 4a–4b | `detector_comparison*.csv` | unified `src.evaluate --mode evaluate` in §5 |
 | YOLO seed-stability diagnostic | `yolo_seed_stability.csv` | `src.analyze_yolo_seed_stability` in §5 |
-| Paper §4.2 PR/F1 evidence | principal `*_n5_sensitivity` threshold/PR tables and figures; unsuffixed n=3 history retained | offline `src.evaluate_threshold_sweep --mode run` in §5a |
+| Paper Figures 1a/1b / §§4.1–4.2 PR/F1 evidence | principal `*_n5_sensitivity` threshold/PR tables and figures; unsuffixed n=3 history retained | offline `src.evaluate_threshold_sweep --mode run` in §5a |
 | Paper §4.2 validation-selected operating points | n=3 validation selection plus `selected_operating_points*_n5_sensitivity.csv` test application | `src.evaluate_threshold_selection` plus offline `src.analyze_operating_regime_sensitivity` in §5b |
-| Paper §4.2 FROC evidence | approved lower-floor bundles and `froc_exact_score_*_v4` curves, prespecified-budget tables, comparisons, bound, figure, and summary; v2/v3 and historical grids retained | inference-only collection plus offline `src.analyze_exact_score_froc --mode run` in §5c |
-| Paper §4.5 table and Figure 5: primary matched timing (Batch 45) | `inference_timing_v1{,_repetitions,_images}.csv`; `inference_timing_v1.png`; Phase 45 summary and preservation manifest | `src.benchmark_inference --mode run` and offline `--mode report`; exact commands in the Batch 45 section above |
-| Paper §4.5 historical Pareto evidence | `pareto_{points,summary}_n5_sensitivity.csv`; `pareto_frontier_n5_sensitivity.png`; n=3 figure retained | offline `src.plot_pareto_frontier --mode run` in §5d; historical asymmetric timing axes |
-| Paper §4.4 five-seed detection calibration and support sensitivity (Batch 33 v2) | `calibration_summary_v2.csv`; `calibration_support_v2.csv`; `calibration_sensitivity_v2.csv`; four v2 figures; Phase 33 summary | offline `src.stats.calibration --mode run` in §5e |
-| Paper §4.3 recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
+| Paper §4.3 internal exact-score FROC evidence | approved lower-floor bundles and `froc_exact_score_*_v4` curves, prespecified-budget tables, comparisons, bound, figure, and summary; v2/v3 and historical grids retained | inference-only collection plus offline `src.analyze_exact_score_froc --mode run` in §5c |
+| Paper Table 4 / Figure 3 / §4.5: primary matched timing (Batch 45) | `inference_timing_v1{,_repetitions,_images}.csv`; `inference_timing_v1.png`; Phase 45 summary and preservation manifest | `src.benchmark_inference --mode run` and offline `--mode report`; exact commands in the Batch 45 section above |
+| Supplementary historical Pareto evidence | `pareto_{points,summary}_n5_sensitivity.csv`; `pareto_frontier_n5_sensitivity.png`; n=3 figure retained | offline `src.plot_pareto_frontier --mode run` in §5d; historical asymmetric timing axes |
+| Supplementary five-seed detection calibration and support sensitivity (Batch 33 v2) | `calibration_summary_v2.csv`; `calibration_support_v2.csv`; `calibration_sensitivity_v2.csv`; four v2 figures; Phase 33 summary | offline `src.stats.calibration --mode run` in §5e |
+| Supplementary recall-weighted F-beta and hypothetical-loss sensitivity (Batch 29; frozen n=3 validation) | `recall_weighted_fbeta_threshold_summary.csv`; `recall_weighted_fbeta_threshold_stability.csv`; `hypothetical_detection_error_loss_summary.csv`; corrected sensitivity figure; Phase 29 summary | offline `src.stats.threshold_calibration --mode run` in §5f |
 | Supplementary non-standard raw-score utility audit (Batch 30) | `raw_score_threshold_utility_summary.csv`; `raw_score_threshold_utility_sensitivity.png`; Phase 30 summary; exact pre-Batch-30 archives | offline `src.clinical.raw_score_utility --mode run` in §5g |
-| Paper Figure 1 seed-level predictive/historical-compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
-| Paper §4.6; report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
-| Paper §4.7 radiography-motivated synthetic acquisition/display sensitivity (Batch 32) | per-image DICOM audit; pre/post-min-max diagnostics; `radiography_synthetic_shift_results.csv`; Phase 32 summary; unchanged historical bundles | CPU-only `src.robustness.radiography_shifts --mode audit` in §6a |
-| Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
-| Paper §4.8 Grad-CAM v2 parameter cascade and input-pixel control (Batch 31) | `gradcam_sanity_v2*.csv`; `gradcam_sanity_v2_panel.png`; Phase 31 summary; frozen Batch 21 artifacts | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
-| Paper §4.9; report Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
+| Supplementary seed-level predictive/historical-compute rainclouds (Batch 23) | `detector_comparison.csv`; `detector_comparison_per_seed.csv`; `raincloud_metrics.png`; Phase 23 summary | audited `src.plot_raincloud_metrics --mode run` in §5h |
+| Supplementary corruption evidence; historical report Table 5 and Figures 5–6 | `robustness*.csv`; robustness plots | robustness `--mode run` in §6 |
+| Supplementary radiography-motivated synthetic acquisition/display sensitivity (Batch 32) | per-image DICOM audit; pre/post-min-max diagnostics; `radiography_synthetic_shift_results.csv`; Phase 32 summary; unchanged historical bundles | CPU-only `src.robustness.radiography_shifts --mode audit` in §6a |
+| Historical report Table 6; Figures 7–9 | `gradcam*.csv`; Grad-CAM plots | explainability `--mode run` in §7 |
+| Supplementary Grad-CAM v2 parameter cascade and input-pixel control (Batch 31) | `gradcam_sanity_v2*.csv`; `gradcam_sanity_v2_panel.png`; Phase 31 summary; frozen Batch 21 artifacts | checkpoint-only `src.explainability.sanity_checks --mode run` in §7a |
+| Paper Table 3 / §4.4; historical report Table 7 | `statistical_clean_comparison.csv` | statistics `--mode run --scope clean` in §8 |
 | Frozen seed-17 corruption inference | `statistical_robustness_comparison.csv` | prior full-scope statistics `--mode run` after §6; not rerun for n=5 |
+| Paper Table 5–7 / Figures 2 and 4 / §§4.6–4.8 | VinDr adapter/inference/statistical summaries and five CSVs; internal/external FROC and threshold-transport figures | Frozen external and statistics commands below; current read-only replay commands in Batch 51 verification |
 
 ## Definition of Done audit
 
@@ -1088,11 +1104,82 @@ synthetic statistical logic and preserves the existing internal verifiers.
 The historical manuscript and prior results are unchanged. Stop after Batch
 50 review; manuscript integration is a separately requested Batch 51.
 
+## Final manuscript verification (Batch 51)
+
+`report/paper_draft.md` is the only editable journal manuscript. The final
+scientific draft is ready for review, not a completed submission: author
+ethics/consent, funding, conflicts, contributions, availability and involvement
+statements still require human completion. The [audit](docs/FINAL_MANUSCRIPT_AUDIT.md)
+records evidence gates and remaining reporting gaps.
+
+Portable CI runs synthetic/unit tests and checks committed evidence; it does
+not need licensed RSNA/VinDr images, local annotations, checkpoints or private
+bootstrap files. Seven full-data exact-FROC integration tests are explicitly
+marked `scientific_data` and deselected by default. Enable them in an authorized
+local environment; missing inputs then fail rather than being skipped:
+
+```powershell
+# Portable default (the normal CI test command).
+uv run --locked --extra cpu python -m pytest -q
+# Full suite including authorized-data scientific integration checks.
+& .\.venv\Scripts\python.exe -m pytest -q --run-scientific --basetemp=tmp/pytest-scientific -p no:cacheprovider
+# Only those full-data integration checks.
+& .\.venv\Scripts\python.exe -m pytest -q --run-scientific -m scientific_data --basetemp=tmp/pytest-scientific-only -p no:cacheprovider
+# Final publication evidence, claims, bibliography and original freeze.
+& .\.venv\Scripts\python.exe scripts/verify_scientific_artifacts.py --manifest results/publication_artifact_manifest.json
+& .\.venv\Scripts\python.exe scripts/verify_paper_claims.py
+& .\.venv\Scripts\python.exe scripts/check_bibliography.py --bibliography report/references.bib --manuscripts report/paper_draft.md report/report.md report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md
+& .\.venv\Scripts\python.exe -m scripts.verify_frozen_external --mode freeze
+```
+
+Two split CSVs use file-specific Git attributes to preserve their original
+cohort-bound byte hashes. Their rows and partition memberships are unchanged;
+the earlier Git blobs differed only by newline normalization. Include those
+byte-preservation diffs with the CI repair rather than refreshing expected hashes.
+
+The Batch 47 freeze includes the then-current manuscript and claim manifest as
+**editorial baseline** records. Their exact bytes are preserved under
+`report/provenance/batch46/`; the original freeze, scientific configs, result
+summaries and original scientific inventory remain unchanged. The read-only
+wrapper below explicitly resolves only those two baseline reads to the archives.
+It neither swaps files on disk nor changes a scientific check, source file,
+threshold, numerical result or hash. It rejects baseline tampering and any
+attempt to redirect scientific inputs. Current manuscript claims are checked
+separately against the new publication inventory. Raw legacy verification
+commands above refer to the pre-rewrite tree; use these current replay commands:
+
+```powershell
+# Use the existing authorized raw-data root; do not download or accept terms here.
+$env:VINDR_CXR_ROOT = (Resolve-Path data/raw/vindr-cxr).Path
+# Full source/checkpoint/provenance and per-run metric replay, without inference.
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m scripts.verify_frozen_external --mode inference
+# All source bindings, aggregate replay and saved-draw interval reconstruction.
+& .\.venv\Scripts\python.exe -m scripts.verify_frozen_external --mode statistics
+# Additionally recompute every draw and all twenty internal/external point rows.
+& .\.venv\Scripts\python.exe -m scripts.verify_frozen_external --mode replay
+```
+
+These replay modes require authorized local evidence. The inference verifier
+retains a historical absolute adapter-source path binding and must run at the
+recorded local project location; relocation needs a separately documented
+provenance treatment, not a silent hash rewrite. The public freeze, artifact,
+claim and bibliography checks remain portable. Restricted external images,
+annotations, IDs, image-linked predictions and working draws are never added
+to the public checkout.
+
+The publication inventory is generated only by a deliberate maintenance
+command, `python -m scripts.build_publication_manifest`, and reviewed as a diff.
+CI never runs that builder. It retains every original internal inventory entry
+and binds the external public summaries/tables/figures to their existing sources.
+The [audit](docs/FINAL_MANUSCRIPT_AUDIT.md) maps manuscript methods, tables,
+figures and inferential statements to deterministic commands and artifacts.
+
 ## Repository verification
 
-The focused internal manuscript and its prerequisite/literature/scope checks
-are recorded in [`docs/INTERNAL_PAPER_FOCUS_AUDIT.md`](docs/INTERNAL_PAPER_FOCUS_AUDIT.md).
-Its title and abstract remain provisional pending external results. The shared
+The final internal/external manuscript checks are recorded in
+[`docs/FINAL_MANUSCRIPT_AUDIT.md`](docs/FINAL_MANUSCRIPT_AUDIT.md).
+The earlier [`internal focus audit`](docs/INTERNAL_PAPER_FOCUS_AUDIT.md)
+is preserved as pre-external provenance, not current manuscript status. The shared
 bibliography also supports the preserved historical report and long alternate;
 the offline check below resolves citations in all three without editing them.
 
@@ -1113,14 +1200,15 @@ uv sync --locked --group dev --extra cpu
 uv run --locked --extra cpu ruff format --check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
 uv run --locked --extra cpu ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
 uv run --locked --extra cpu python -m pytest -q
-uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py
+uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py --manifest results/publication_artifact_manifest.json
 uv run --locked --extra cpu python scripts/verify_paper_claims.py
 uv run --locked --extra cpu python -m meddet_benchmark smoke configs/smoke.yaml
 git diff --check
 ```
 
 Foundation CI runs these checks on Ubuntu and Windows and also applies Ruff to
-`scripts/build_scientific_artifact_manifest.py`. The two verifier commands are
+both manifest builders, the bibliography checker and frozen-baseline verifier.
+It checks the bibliography and original external freeze as well. The verifiers are
 lightweight integrity/consistency checks over committed evidence; they do not
 regenerate models or predictions. Green CI therefore verifies the repository's
 declared software/evidence boundary, not full training or end-to-end scientific

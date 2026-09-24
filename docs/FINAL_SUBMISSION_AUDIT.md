@@ -1,5 +1,12 @@
 # Final Submission Audit
 
+> Historical audit retained as provenance. The current Batch 51 manuscript,
+> completed external evidence and verification are assessed in
+> [FINAL_MANUSCRIPT_AUDIT.md](FINAL_MANUSCRIPT_AUDIT.md). Statements below about
+> absent external testing or then-current section/citation counts describe the
+> earlier manuscript. Author declarations remain unresolved.
+
+
 **Audit date:** 2026-09-01
 
 **Audited commit:** `9aaf414bdbab337a7c45283d4b32fe58b1e1700d` (`main`, aligned with `origin/main`)

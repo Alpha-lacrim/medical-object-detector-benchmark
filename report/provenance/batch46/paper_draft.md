@@ -1,46 +1,46 @@
 ---
-title: "Ranking and Operating-Point Transportability of Lung-Opacity Detectors: A Multi-Run RSNA–VinDr Study"
+title: "Operating-Point Dependence in an Internal Comparison of Faster R-CNN and YOLO11s for Lung-Opacity Localization"
 bibliography: references.bib
 link-citations: true
 reference-section-title: References
-draft-status: "Final scientific draft for author review; declarations and submission details unresolved"
+draft-status: "Internal draft; title and abstract provisional pending external results"
 ---
 
 ## Abstract
 
-**Background:** Ranking performance, confidence cutoffs, and false-positive
-budgets characterize different aspects of object detection. We examined whether
-these aspects transport together in two deep-learning lung-opacity pipelines.
+**Background:** Cross-detector conclusions can depend materially on how an
+operating point is defined. We examined this dependence in two deep-learning
+pipelines for lung-opacity localization.
 
-**Methods:** This retrospective study used 5,000 RSNA radiographs in
-patient-disjoint training/validation/internal-testing partitions
-(3,500/750/750). Faster R-CNN and YOLO11s shared canonical inputs, disabled
-stochastic augmentation, and a common evaluator. All five training runs per
-detector were retained. A protocol frozen before external inference applied
-the same checkpoints without adaptation to 3,000 VinDr-CXR images, including
-84 images with 95 strict-target boxes. Historical three-run RSNA validation
-thresholds remained primary; five-run selection was post-hoc sensitivity.
-Primary uncertainty resampled held-out observations and independent detector
-runs. Timing used a matched boundary on an RTX 4060 laptop.
+**Methods:** This retrospective internal benchmark used 5,000 RSNA radiographs
+in patient-disjoint training, validation, and internal-testing partitions
+(3,500/750/750 studies). Faster R-CNN and YOLO11s shared canonical inputs,
+disabled stochastic augmentation, and a common evaluator. All five retained
+training runs per detector contributed to AP/PR, shared-threshold comparisons,
+and exact-score FROC. Historical thresholds selected from three validation
+runs were applied unchanged to five test runs; five-run validation selection
+was a separate post-hoc sensitivity. Primary uncertainty combined patient-cluster
+and independent detector-run resampling. Runtime used a matched decoded-host
+boundary on the reporting laptop.
 
-**Results:** Mean AP@0.50 fell from 0.304224 to 0.002505 for Faster R-CNN and
-from 0.162612 to 0.000501 for YOLO11s. External AP contrasts retained positive
-marginal intervals, but historical-threshold recall fell from 0.350746/0.194776
-to 0.018947/0.004211, respectively. External precision was 0.010830/0.004271;
-all historical-threshold metric contrast intervals included zero. Observed
-FROC means retained the internal ordering, but most external contrast intervals
-included zero. Missing candidate support allowed an ordering reversal beyond
-the observed frontier at the upper budgets; detection-cap saturation imposed
-an additional limit. One low-score YOLO run emitted nothing at the historical
-threshold and remained included. YOLO11s had 2.75-fold higher measured
-throughput under the matched timing protocol.
+**Results:** At score 0.25, YOLO11s had higher mean precision but substantially
+lower recall. Faster R-CNN had higher mean interpolated precision at 97 of 101
+AP@0.5 recall positions and mean mAP@0.5:0.95 of 0.0995 versus 0.0542.
+Validation-selected thresholds differed markedly between detectors and changed
+the precision comparison. Five-run validation selection weakened the
+precision/recall/F1 margins and reversed FP/image ordering relative to the
+historical thresholds. Faster R-CNN had higher observed sensitivity at all five
+FROC budgets; a conservative bound preserved the ordering despite one
+floor-limited run. Training-procedure intervals excluded zero for recall, F1,
+and AP differences, but included zero for shared-threshold precision. Matched
+timing with one checkpoint per detector and three technical repetitions yielded
+2.75-fold higher throughput for YOLO11s, which had 78% fewer parameters.
 
-**Conclusions:** Preserved observed AP ordering did not imply preserved
-performance or successful operating-point transport. Ranking, score scale,
-training variability, false-positive regimes, and implementation efficiency
-require separate interpretation. This is cross-dataset and cross-annotation-
-ontology transportability testing, with confounded dataset and numerical
-implementation differences; it does not establish diagnostic utility.
+**Conclusions:** Ranking performance, raw-threshold behavior,
+validation-selected operating points, training variability, false-positive
+budgets, and measured efficiency describe different properties of these
+pipelines. The results concern an internal localization benchmark; external
+testing and clinical utility remain unestablished.
 
 ## 1. Introduction
 
@@ -61,22 +61,19 @@ pipelines, not diagnosis or patient prioritization.
 The central question is whether cross-detector conclusions change when the
 same patient-disjoint test set is evaluated through ranking performance,
 shared raw thresholds, detector-specific validation-selected operating points,
-and false-positive budgets, and whether those conclusions transport to an
-independent dataset under a non-identical opacity ontology. We compare Faster R-CNN and YOLO11s using common
+and false-positive budgets. We compare Faster R-CNN and YOLO11s using common
 data, canonical preprocessing, no stochastic augmentation, a common evaluator,
 and five retained training runs per detector. Patient-cluster and detector-run
 resampling characterize uncertainty; standardized timing describes the measured
 implementation costs.
 
-The contribution is a controlled separation of these evaluation objects under
-a leakage-aware internal protocol and frozen external testing. The RSNA-trained
-checkpoints and operating rules are applied to VinDr-CXR without adaptation;
-the question concerns both relative ordering and absolute performance. We do not claim the first discovery of
+The contribution is an empirical account of these distinctions under one
+leakage-aware internal protocol. We do not claim the first discovery of
 detector score-scale mismatch. Optimization and numerical-precision differences
 remain disclosed, so conclusions apply to the evaluated pipelines. Secondary
 calibration, stress-test, and explanation analyses are indexed in the
-[supplement](../docs/SUPPLEMENTARY.md). The internal analysis is retrospective and was not preregistered. The external
-protocol was locally frozen before full inference, not publicly preregistered.
+[supplement](../docs/SUPPLEMENTARY.md). The analysis is retrospective and was
+not preregistered.
 
 ## 2. Related Work
 
@@ -132,16 +129,6 @@ testing; `validation` below denotes the model-optimization partition used for
 checkpoint and threshold selection. The accompanying reporting crosswalk
 records remaining gaps and is not a certification of compliance.
 
-### 2.4 External testing under a different annotation ontology
-
-VinDr-CXR provides radiologist-annotated local findings and separate global
-labels [@nguyen2022vindr]. Its local lung-opacity category is not an identical
-reference standard to RSNA's pneumonia-like opacity target. External testing
-therefore assesses cross-dataset and cross-annotation-ontology transportability.
-Holding checkpoints and operating rules fixed allows ranking transport to be
-examined separately from the transport of absolute performance and emissions.
-It does not isolate which dataset or implementation difference causes a shift.
-
 ## 3. Materials and Methods
 
 ### 3.1 Dataset, target, and patient-disjoint split
@@ -167,8 +154,6 @@ D/W/M/Y units. Values from 0 to 120 were interpreted as nominal years; one
 out-of-range value was excluded. Quartiles used linear percentiles. Sex and
 projection were counted as encoded, with percentages based on all studies in
 each partition.
-
-Table 1. RSNA cohort and limited DICOM-header characteristics by partition.
 
 | Characteristic | Training | Validation | Internal testing | Total |
 |---|---:|---:|---:|---:|
@@ -267,51 +252,7 @@ budget. No interpolation or extrapolation was used. Means and sample SDs
 summarized five runs per detector. The frontier remains conditional on the
 candidate floor; an endpoint below a budget is reported as floor-limited.
 
-### 3.5 Frozen VinDr external testing
-
-We included the complete official VinDr-CXR v1.0.0 test release obtained through
-credentialed PhysioNet access [@nguyen2021vindrrelease; @pollard2026physionet].
-The source describes consensus test annotations from three initial radiologists
-and two reviewers [@nguyen2022vindr]. The strict target concept was `Lung opacity`,
-mapped only to the exact released local label `Lung Opacity`. Consolidation,
-Infiltration, Atelectasis, ILD, global Pneumonia, and other findings were not
-merged. Images without strict-target boxes remained negatives for this task,
-including images with other abnormalities; those findings were not ignore regions.
-
-The protocol fixed cohort inclusion, ontology, preprocessing, checkpoints,
-endpoints, candidate floor, cap, and both transported threshold policies before
-full external inference. No VinDr annotations were used for training,
-fine-tuning, model or checkpoint selection, threshold selection, calibration
-fitting, or outcome-guided ontology, preprocessing, NMS, or endpoint changes.
-No VinDr-optimized threshold was created. All ten RSNA-trained checkpoints were
-applied without adaptation. AP used the common 0.001 evaluation floor; exact-score
-FROC used the frozen 0.00001 collection floor, IoU-0.50 matching/NMS, and cap of
-100 detections per image. Native candidate filters use strict `score > floor`;
-the common evaluator uses `>=` on the retained candidates. FROC score coordinates
-were not exported as operating rules.
-
-Source checksums, complete decoding, PNG round trips, source-to-COCO equality,
-common-loader compatibility, and inverse-coordinate checks preceded inference.
-External conversion used the same min-max/inversion policy and frozen native
-resizing, with no test-time augmentation. External inference verified float16
-AMP for Faster R-CNN and bfloat16 AMP for YOLO11s. Historical internal YOLO
-accuracy inference used FP32. Thus internal/external score and performance
-changes cannot be attributed solely to dataset differences.
-
-A narrow Faster R-CNN numerical correction canonicalized a documented one-ULP
-float32 inverse-coordinate overshoot at the upper image boundary. Negative
-lower bounds and materially out-of-range coordinates still fail. The correction
-preceded any completed external result and changed no frozen scientific setting;
-it was not post-hoc external tuning. Raw-coordinate replay and the original
-failed attempt are documented in
-[Supplementary Section S9](../docs/SUPPLEMENTARY.md#s9-frozen-external-testing-and-transportability).
-
-No defensible VinDr patient linkage was available in the released annotations
-or inspected headers. The external resampling unit was therefore the released
-image, not a verified independent patient. Repeated patients could make these
-intervals too narrow.
-
-### 3.6 Estimands and uncertainty
+### 3.5 Training-procedure uncertainty
 
 Primary pointwise 95% bootstrap intervals combined patient sampling and
 stochastic training variability [@efron1993bootstrap]. In 2,000 two-stage
@@ -328,33 +269,10 @@ patient-group detector-label swaps, a plus-one correction
 [@holm1979simple]. Conditional localization used four complete same-label
 pairs for this secondary test only. These p-values do not test the same
 training-procedure estimand as the bootstrap intervals. No seed-aware p-value
-was introduced. Those historical intervals do not incorporate threshold-selection
-uncertainty and do not cover validation-selected or FROC endpoints.
+was introduced. The intervals do not incorporate threshold-selection
+uncertainty and are not intervals for validation-selected or FROC results.
 
-The external analysis used the same inferential principles, with 2,000 draws
-separately per dataset. Within each draw, observations were shared across
-both detectors and all runs; trained runs were sampled independently within
-detector. RSNA resampled its 323 known patient groups, while VinDr resampled
-3,000 released images. Cohort-level AP, exact-score FROC, and historical-threshold
-precision, recall, F1, and FP/image were reconstructed before averaging runs.
-The primary estimand concerns the disclosed training procedure conditional on
-its fixed training data and recipe; training patients were not resampled or
-retrained. Secondary seed-17 checkpoint-conditional intervals resampled only
-observations. Same-number detector seeds were not paired stochastic replicates.
-
-Aligned internal intervals for these endpoints were computed separately and
-preserve the historical analysis above. Percentile intervals are marginal 95%
-intervals, not simultaneous or familywise guarantees. They condition on the
-selected thresholds and retained floor/cap support; neither threshold-selection
-uncertainty nor missing candidate support is resolved. Undefined draws are
-reported without retrying or imputing. The post-hoc five-run threshold policy
-and score/emission summaries remain descriptive. Cohorts and predictions were
-never pooled, and no cross-dataset interaction test was performed. Labels such
-as unchanged, strengthened, weakened, and reversed describe observed ordering
-or raw gaps, not significance decisions. Full estimands and all intervals are in
-[Supplementary Section S9](../docs/SUPPLEMENTARY.md#s9-frozen-external-testing-and-transportability).
-
-### 3.7 Standardized implementation timing
+### 3.6 Standardized implementation timing
 
 The primary timer starts from the same decoded uint8 RGB source image in host
 memory. It includes resize/letterbox, tensor conversion, host-to-device transfer,
@@ -384,7 +302,7 @@ training replicates. Full timing conditions and raw checks are in the
 Pareto panels, training profiles, and incomplete profiler-registered operation
 counts remain supplementary and are not pooled with this timing protocol.
 
-### 3.8 Secondary analyses
+### 3.7 Secondary analyses
 
 Detection-level D-ECE [@kuppers2020calibration] used post-NMS predictions at
 the 0.001 floor and the same IoU-0.50 matcher. Within the one-class stratum,
@@ -410,10 +328,6 @@ analysis and clinical net benefit were not evaluated.
 
 ## 4. Results
 
-All detector summaries weight the five retained runs equally. AP is on the
-0--1 scale, not a percentage. A denotes Faster R-CNN and B denotes YOLO11s.
-No checkpoint predictions are pooled into an ensemble.
-
 ### 4.1 Clean internal-testing performance
 
 Across the selected cohort,
@@ -430,8 +344,6 @@ shared score threshold of 0.25, Faster R-CNN had higher recall and F1, whereas
 YOLO11s had higher precision and slightly higher conditional localization
 among successfully matched detections. YOLO11s conditional IoU and Dice used
 only four defined seeds.
-
-Table 2. Internal-test endpoints at the shared cutoff and on ranked predictions.
 
 | Endpoint | Faster R-CNN, mean +/- SD | YOLO11s, mean +/- SD |
 |---|---:|---:|
@@ -482,23 +394,22 @@ precision, recall, and F1 advantages remained but weakened. Mean FP/image was
 0.2205 versus 0.3104, reversing the historical-threshold ordering. This is
 post-hoc validation sensitivity, not a prospectively frozen operating point.
 
-### 4.3 Internal exact-score false-positive regimes
+### 4.3 Exact-score false-positive operating regimes
 
 Five-run FROC sensitivity was higher for Faster R-CNN at each prespecified
 budget: 0.2776 versus 0.1799 at 0.125 FP/image, 0.3664 versus 0.2664 at 0.25,
 0.4858 versus 0.3821 at 0.5, 0.6000 versus 0.5075 at 1, and 0.6978 versus
-0.6090 at 2 (Figure 2). These are descriptive equal-run means; aligned inferential
-intervals are separately available with the transportability analysis.
+0.6090 at 2 (Figure 2). These are descriptive equal-run means.
 
 The 0.00001 candidate floor permits all runs to reach 1 FP/image. YOLO11s
 seed 137 nevertheless ends at 1.9907 FP/image, so the aggregate at 2 FP/image
 remains a lower-bound observation. Assigning that run the mathematical
 maximum sensitivity of 1.0 gives a YOLO11s aggregate upper bound of 0.6963,
-below Faster R-CNN's observed 0.6978. The internal ordering therefore cannot reverse
+below Faster R-CNN's observed 0.6978. The ordering therefore cannot reverse
 under this bound for these frozen runs; this is not a population-level
 uncertainty statement or evidence of a terminal plateau.
 
-![Figure 2. Internal and external observed exact-score FROC, with all five runs and their candidate-floor endpoints. Curves have finite retained support at floor 0.00001 and cap 100; the external upper-budget ordering is not an unrestricted frontier conclusion.](../results/vindr_external_v1/statistics/internal_external_froc.png)
+![Figure 2. Five-run observed exact-score FROC at candidate floor 0.00001, with the historical coarse grid for context. Bands are sample SD, diamonds mark prespecified budgets, and triangles mark candidate-floor endpoints.](../results/figures/froc_exact_score_v4.png)
 
 ### 4.4 Training-procedure uncertainty and conditional tests
 
@@ -507,8 +418,6 @@ secondary checkpoint-conditional p-values. Differences are Faster R-CNN minus
 YOLO11s; the corresponding absolute endpoint estimates are reported in Section
 4.1. Every row contains 750 images from 323 patient clusters. `Runs A/B`
 gives the eligible Faster R-CNN/YOLO11s trained-run counts.
-
-Table 3. Historical internal uncertainty, with distinct inferential targets.
 
 | Endpoint | Runs A/B | Conditioning | Difference (95% training-procedure CI) | Seed 271 | Holm p, conditional on observed checkpoints |
 |---|---:|---|---:|---|---:|
@@ -537,8 +446,6 @@ The matched v1 protocol measured Faster R-CNN at 20.91 FPS and YOLO11s at
 (Figure 3). The table pools three complete 100-image repetitions per frozen
 checkpoint; dispersion is image-latency IQR, not training-run SD.
 
-Table 4. Measured implementation timing and model size on the reporting laptop.
-
 | Matched v1 metric | Faster R-CNN | YOLO11s |
 |---|---:|---:|
 | Total timed elapsed, 300 calls (s) | 14.3466 | 5.2124 |
@@ -550,7 +457,10 @@ Table 4. Measured implementation timing and model size on the reporting laptop.
 | Training-trainable parameters | 43,030,809 | 9,428,163 |
 
 All 600 timed-image checks agreed exactly with ordinary inference in counts,
-category labels, boxes, and scores. These are technical repetitions of one checkpoint per detector, not a new
+category labels, boxes, and scores; per repetition this covered 2,471 Faster
+R-CNN and 165 YOLO11s detections. Per-repetition FPS was
+21.18/20.58/20.99 for Faster R-CNN and 58.55/57.60/56.55 for YOLO11s.
+These are technical repetitions of one checkpoint per detector, not a new
 training-replicate analysis. The machine-readable source is
 `results/tables/inference_timing_v1.csv`; full protocol, individual repetitions,
 raw intervals, and provenance are indexed in `docs/COMPUTE_TIMING.md`.
@@ -561,235 +471,106 @@ architecture families or clinical workflow speed.
 
 ![Figure 3. Matched decoded-host inference timing on the reporting laptop. Three repetitions per primary checkpoint are technical measurements; latency dispersion is not training-run uncertainty.](../results/figures/inference_timing_v1.png)
 
-### 4.6 External cohort and ranking performance
+### 4.6 Secondary descriptive evidence
 
-All 3,000 official test images passed the adapter and all ten checkpoint runs
-completed. The strict target occurred in 84 images (2.8%), with 95 boxes;
-2,916 images had no strict-target box. These counts describe target support,
-not pneumonia prevalence or independent patient counts. They contrast with
-169 positive internal-test images and 268 boxes, and limit the precision of
-external estimates.
-
-Both AP endpoints retained the direction of the equal-run internal ordering,
-but absolute AP collapsed for both pipelines (Table 5). External AP@0.50
-contrasts and AP@0.50:0.95 contrasts had positive marginal training-procedure
-intervals. This supports a relative difference under the declared estimand,
-not successful absolute generalization. No particular dataset or numerical
-implementation factor is identified as the cause.
-
-Table 5. Equal-run AP means +/- sample SD (n=5 per detector); external contrasts
-are A minus B with marginal 95% training-procedure intervals.
-
-| Endpoint | RSNA A | RSNA B | VinDr A | VinDr B | External difference [95% CI] |
-|---|---:|---:|---:|---:|---:|
-| AP@0.50 | 0.304224 +/- 0.018896 | 0.162612 +/- 0.016174 | 0.002505 +/- 0.001380 | 0.000501 +/- 0.000272 | 0.002004 [0.000331, 0.006689] |
-| AP@0.50:0.95 | 0.099502 +/- 0.006681 | 0.054168 +/- 0.006030 | 0.000618 +/- 0.000170 | 0.000119 +/- 0.000077 | 0.000499 [0.000075, 0.001719] |
-
-### 4.7 Failure of frozen operating-point transport
-
-Historical RSNA validation thresholds of 0.69/0.05 transported poorly (Table 6).
-External precision, recall, and F1 were near zero for both pipelines. The
-lower external FP/image values accompanied sharply reduced emission and recall;
-they do not establish improvement. All four primary operating-metric contrast
-intervals included zero: neither a positive mean gap nor preserved AP ordering
-establishes the same external ordering at the frozen operating points.
-
-Table 6. Historical n=3 validation-selection policy applied unchanged to all
-five runs in each cohort. Values are equal-run means; full sample SDs and run
-counts are in Supplementary Section S9. External contrasts have marginal 95%
-training-procedure intervals. Emission rows are descriptive without intervals.
-
-| Historical-policy endpoint | RSNA A | RSNA B | VinDr A | VinDr B | External difference [95% CI] |
-|---|---:|---:|---:|---:|---:|
-| Precision | 0.362419 | 0.252403 | 0.010830 | 0.004271 | 0.006559 [-0.008360, 0.025664] |
-| Recall | 0.350746 | 0.194776 | 0.018947 | 0.004211 | 0.014737 [-0.004880, 0.045485] |
-| F1 | 0.351144 | 0.219206 | 0.013580 | 0.004214 | 0.009366 [-0.006376, 0.031685] |
-| FP/image | 0.232000 | 0.151733 | 0.047667 | 0.027067 | 0.020600 [-0.001735, 0.045672] |
-| Detections/image | 0.357333 | 0.221333 | 0.048267 | 0.027200 | Descriptive |
-| Images with detections (%) | 25.573333 | 14.213333 | 4.260000 | 2.140000 | Descriptive |
-
-The separately transported post-hoc n=5 RSNA policy used 0.70/0.01. External
-precision/recall/F1 was 0.011367/0.018947/0.014046 for Faster R-CNN and
-0.004499/0.010526/0.006277 for YOLO11s. FP/image was 0.044200 versus 0.060067,
-reversing the historical-policy ordering within the external cohort, as it did
-internally. These descriptive sensitivities do not select a replacement policy.
-Neither policy restores external recall. The proportion of images with detections
-also changed ordering across datasets under the secondary policy; ordering is
-endpoint- and policy-specific.
-
-YOLO11s seed 271 emitted no external detection at 0.05 and remained in the
-five-run zero-valued precision/recall/F1 summaries. At the secondary cutoff of
-0.01 it emitted 54 detections, all false positives against the strict target.
-Its AP still contributed. No inconvenient run was removed or downweighted.
-
-At the common AP support, mean detections/image changed from 16.326133/1.080800
-internally to 11.502800/0.217200 externally. The equal-run percentage of images
-with no such detections rose from 7.466667%/62.373333% to 8.333333%/87.073333%.
-Per-run score distributions and counts are reported together in the supplement;
-these emitted-population summaries are not probability calibration and exclude
-missed targets. Historical FP32 versus external bfloat16 YOLO inference further
-limits a dataset-only interpretation of score shifts.
-
-![Figure 4. Transport of the frozen historical thresholds, with all retained runs and marginal training-procedure intervals; the separately labeled n=5 validation policy is descriptive post-hoc sensitivity. No VinDr threshold was selected.](../results/vindr_external_v1/statistics/frozen_threshold_transport.png)
-
-### 4.8 External FROC and uncertainty boundaries
-
-Observed external FROC means retained the internal direction at every specified
-budget (Figure 2; Table 7), with smaller raw gaps. Four of the five external
-contrast intervals included zero; only the interval at 0.25 FP/image was wholly
-positive. These marginal intervals do not establish a simultaneous ordering
-across budgets.
-
-Table 7. External observed exact-score sensitivities (equal-run means, n=5)
-and A-minus-B marginal 95% training-procedure intervals. Asterisks identify
-YOLO11s aggregates containing a floor-limited lower-bound contribution.
-
-| FP/image budget | VinDr A sensitivity | VinDr B sensitivity | External difference [95% CI] |
-|---|---:|---:|---:|
-| 0.125 | 0.056842 | 0.018947 | 0.037895 [-0.002128, 0.092453] |
-| 0.25 | 0.086316 | 0.033684 | 0.052632 [0.005345, 0.113471] |
-| 0.5 | 0.094737 | 0.061053 | 0.033684 [-0.014829, 0.092312] |
-| 1 | 0.117895 | 0.077895* | 0.040000 [-0.020939, 0.108700] |
-| 2 | 0.164211 | 0.098947* | 0.065263 [-0.005663, 0.149396] |
-
-YOLO11s seed 137 ended at 0.793333 FP/image and was floor-limited at budgets
-1 and 2. Replacing that run's observed sensitivity with the mathematical
-maximum of 1.0 gives conservative aggregate upper bounds of 0.258947 and
-0.280000, respectively, above Faster R-CNN's observed 0.117895 and 0.164211.
-Thus, unlike the internal bound, the external missing-support bound does not
-rule out an ordering reversal beyond retained candidates. These are support
-bounds, not confidence bounds; bootstrapping cannot restore unobserved support.
-The floor was not lowered after external results.
-
-Faster R-CNN reached the collection cap on 3,000/2,635/3,000/3,000/209 images
-for seeds 17/42/137/271/314; no YOLO11s image reached it. This substantial cap
-saturation is another limitation on the observed frontier, not corrected by
-the YOLO floor bound. The cap remained frozen. No unrestricted or full-frontier
-external FROC superiority is established.
-
-Checkpoint conditioning also changed the comparison. For the seed-17 pair,
-external AP contrast intervals included zero, and observed FROC sensitivity
-favored YOLO11s at the three largest budgets. Those secondary results are
-available in the complete interval table and cannot replace the primary
-training-procedure interpretation. One checkpoint does not represent an entire
-training procedure.
+Mean D-ECE was 0.0320 +/- 0.0058 for Faster R-CNN and
+0.0990 +/- 0.0232 for YOLO11s across five runs. Only 68--354 of 3,125 cells
+were occupied per run and 15--169 met minimum support. Existing sensitivity
+analyses showed changes with binning, support, and the retained population;
+these descriptive errors do not establish clinical-risk calibration.
+The supplementary stress tests were condition-specific, and Grad-CAM
+localization was weak despite parameter sensitivity. These secondary findings
+do not alter the scope of the operating-point comparison.
 
 ## 5. Discussion
 
-The central finding is the separation between relative ordering and performance
-transport. Faster R-CNN retained higher observed equal-run AP on VinDr, while
-both pipelines' AP and the recall of their RSNA-selected operating rules fell
-severely. **Preserved ordering is not preserved performance** here refers to
-the observed equal-run AP direction. It does not mean that every external
-endpoint resolves the same detector difference, that the complete FROC frontier
-was observed, or that external generalization succeeded.
+Cross-detector conclusions depended on operating-point definition. The shared
+cutoff suggested higher YOLO11s precision, while the PR curves, both
+validation-selection scopes, and observed FROC favored Faster R-CNN on their
+respective endpoints. The five-run validation sensitivity also changed the
+false-positive ordering without reversing the mean precision/recall/F1
+ordering. Reporting these as separate measurements makes the comparison
+interpretable without treating raw scores as common probabilities.
 
-Internally, a shared numerical cutoff suggested higher YOLO11s precision,
-whereas ranking curves and detector-specific validation selection gave different
-comparisons. The post-hoc five-run selection also reversed FP/image ordering
-relative to the historical policy. Externally, both policies produced very
-low recall and emission; lower FP/image was therefore an incomplete account
-of their behavior. Confidence scales are not interchangeable across detectors,
-and higher AP does not imply better performance at every operating point.
-Score-scale mismatch is established prior knowledge [@kuzucu2024calibration];
-the contribution is its controlled examination alongside training variability,
-false-positive support, measured efficiency, and external transport.
+This result is consistent with prior detector-threshold critiques
+[@kuzucu2024calibration]. The added evidence is its magnitude and interaction
+with retained training variability in this internal lung-opacity benchmark.
+The low-score YOLO11s run retained nonzero AP while contributing no detections
+at the shared and historical selected cutoffs. Patient-only comparisons of
+fixed checkpoints consequently answer a narrower question than intervals that
+also resample training runs. The precision results illustrate that distinction.
 
-The retained low-score run illustrates why stochastic training variability
-matters. Its nonzero internal AP coexisted with zero emissions at conventional
-cutoffs; excluding it would conceal behavior of the evaluated recipe. Likewise,
-image/patient-only uncertainty for fixed checkpoints answers a narrower question
-than resampling both observations and independently trained detector runs.
-The external seed-17 sensitivity and the historical internal precision analysis
-show why these interpretations should remain separate.
-
-Measured implementation costs provided another distinct comparison. YOLO11s'
-smaller parameter count and higher matched-boundary throughput coexisted with
-lower AP for the studied pipelines. Timing on one machine does not establish
-an architecture-family efficiency law or clinical workflow benefit. The
-comparison controls several data and evaluation factors but does not isolate
-architecture from optimization, normalization, precision, losses, or native API
-behavior, and it does not compare fully tuned native recipes. Prior RSNA
-comparisons [@wu2024pneumonia; @chinnam2026modern] give context without supplying
-interchangeable scores.
-
-VinDr external testing was deliberately frozen without adaptation, so it
-measures transport of established pipelines and rules. Its strict local opacity
-ontology differs from RSNA's reference standard. Acquisition, hospital/site,
-country, population, annotation ontology, preprocessing effects, and the YOLO
-inference-precision path are confounded. The study cannot attribute the collapse
-to any one of them. Nor would combining labels after seeing results repair
-that inference. The adverse result motivates separately designed future
-transport studies; it does not justify post-hoc tuning on this external test set.
+Faster R-CNN's stronger ranking and coverage coexisted with YOLO11s' smaller
+parameter count and higher matched-boundary throughput. Those measurements
+describe an implementation trade-off, not an intended-use recommendation.
+The comparison does not isolate architecture: precision, normalization,
+optimization, assignment, losses, and native API behavior differ. Nor does it
+compare fully tuned native recipes. Current direct RSNA comparisons
+[@wu2024pneumonia; @chinnam2026modern] provide context, but their scores cannot
+be pooled with ours without reproducing their data and metric protocols.
 
 ## 6. Limitations
 
-**Data and reference standards.** The hardware-scoped 5,000-study RSNA subset
-is not a deployment-prevalence sample, and only two disclosed detector pipelines
-were evaluated. Coarse expert boxes and the nonspecific opacity target do not
-establish pneumonia diagnosis. Technical annotation checks are not an independent
-radiologist rereading. RSNA source accrual dates and broader clinical/acquisition
-variables are unavailable locally; header age requires the nominal-year
-assumption. Min-max conversion and resizing do not reproduce vendor display
-processing. VinDr has a non-identical ontology, only 84 strict-target-positive
-images and 95 boxes, and no defensible patient grouping. Image-level external
-intervals may be too narrow if repeat patients exist. Dataset and numerical
-implementation differences are inseparable in this design.
+**Data and reference standard.** This is one internal, hardware-scoped subset
+of the RSNA/NIH source with a single non-specific finding. Sampling tracks
+source label strata rather than deployment prevalence. Precision and FP/image
+depend on this case mix. Coarse expert boxes retain ambiguity; our technical
+annotation audit is not an independent radiologist rereading. Source accrual
+dates and broader clinical, demographic, and acquisition variables are
+unavailable locally. Header age requires the disclosed nominal-year assumption.
+Min-max conversion does not reproduce vendor display processing, and native
+resizing can affect image detail. No external testing, demographic subgroup
+performance, fairness analysis, prospective evaluation, or clinical utility
+assessment has been performed.
 
-**Training and selection.** Five runs per detector are a coarse empirical
-sample of training variability, conditional on one fixed training dataset.
-Disabled augmentation may disadvantage YOLO11s relative to its usual recipe.
-Optimization, normalization, and precision asymmetries limit architecture-only
-interpretation. Historical thresholds used three validation runs; five-run
-selection remains post-hoc sensitivity and does not rewrite that provenance.
-Equal-weight F1 does not encode measured clinical harms, and the YOLO five-run
-choice reaches the selection grid's lower boundary. Internal hypotheses and
-analyses were retrospective; the external freeze was a local prespecification.
+**Training and selection.** Five runs per detector provide a coarse estimate
+of stochastic training variability. Disabled augmentation controls the input
+distribution but may disadvantage YOLO11s relative to its usual recipe.
+Optimization and precision asymmetries prevent architecture-family causal
+attribution. Historical thresholds were selected using only three validation
+runs; the five-run alternative is explicitly post-hoc. Equal-weight F1 does
+not encode measured clinical harms, and YOLO11s' five-run optimum reaches the
+grid's lower boundary. Analyses and hypotheses were retrospective, not
+preregistered confirmatory tests.
 
-**Evaluation and uncertainty.** AP and FROC depend on retained support and
-postprocessing. The internal floor-bound no-reversal result does not transport
-to VinDr's upper budgets. External YOLO candidate-floor limits and substantial
-Faster R-CNN detection-cap saturation preclude a full-frontier conclusion.
-Marginal intervals offer no familywise coverage, omit threshold-selection
-uncertainty, and cannot recover missing support. No cross-dataset interaction
-test was conducted. Conditional IoU/Dice exclude misses and use unequal numbers
-of defined runs. Historical internal YOLO accuracy inference used FP32 while
-external inference used verified bfloat16 AMP; dataset differences alone
-cannot explain score/performance shifts. No calibration map was fitted.
-Detection-level D-ECE remains descriptive, emitted-population dependent,
-binning/support dependent, and not patient-level clinical-risk calibration.
+**Evaluation and uncertainty.** AP remains bounded by the prediction floor and
+postprocessing. FROC retains one floor-limited contribution at 2 FP/image;
+its conservative no-reversal bound applies only to the observed runs. No
+FROC inferential interval is claimed. Matched-box IoU/Dice exclude misses and
+use unequal numbers of defined runs. Primary bootstrap intervals are
+pointwise and omit threshold-selection uncertainty; secondary permutation
+tests condition on observed checkpoints. Neither procedure establishes
+transportability. D-ECE depends on emitted-detection support and binning and
+does not include missed targets or estimate exam-level risk.
 
-**Secondary analyses and compute.** Corruption, acquisition stress, and Grad-CAM
-analyses use one primary checkpoint per detector and limited samples. Synthetic
-stored-array changes do not validate scanner/dose models; Grad-CAM and its
-controls do not establish causal or clinically appropriate reasoning. The
-runtime comparison uses one checkpoint per detector, different AMP dtypes,
-100 images, and one hardware/software state. Technical repetitions do not
-estimate retraining or hardware uncertainty, and disk I/O and workflow costs
-are excluded. Incomplete profiler GFLOPs remain supplementary.
+**Secondary and compute scope.** Stress and explanation studies use one
+checkpoint per detector. Stored-array perturbations operate on converted,
+lossily compressed Secondary Capture images with insufficient metadata for a
+dose or scanner model. Grad-CAM maps and randomization checks do not establish
+causal or clinically appropriate reasoning. The runtime comparison covers one
+checkpoint per detector, different AMP dtypes, 100 images, and one machine
+state; disk I/O and workflow costs are excluded. Technical repetitions do not
+estimate retraining or hardware uncertainty. Ordinary-reference agreement uses
+the timing protocol's AMP, not the historical YOLO prediction precision.
 
-**Clinical and reporting scope.** No prospective evaluation, reader study,
-validated clinical deployment, diagnostic utility, patient benefit, or complete
-fairness analysis was established. Demographic representation is not subgroup
-performance evidence. Portable CI verifies public evidence without licensed
-images; full scientific replay requires authorized data and matching checkpoints.
-Restricted VinDr image-linked derivatives remain private, and the ten checkpoint
-binaries have no public release URL. Retraining is not promised to be bitwise
-identical, including the recorded CUDA ROI Align backward limitation. Human
-declarations, final availability details, source-reporting gaps, and a
+**Reproducibility and reporting.** A clean checkout can verify and replay
+committed prediction evidence. Exact inference still requires separately
+supplied licensed images and matching checkpoints; the ten checkpoint binaries
+are local and have no public release URL. Retraining is not promised to be
+bitwise identical, including the recorded nondeterministic CUDA ROI Align
+backward path. Author declarations, source-data reporting gaps, and a
 participant-flow diagram remain unresolved in the reporting crosswalk.
 
 ## 7. Conclusion
 
-A leakage-aware, multi-run comparison separated ranking performance, raw-score
-behavior, validation-selected operating points, false-positive regimes,
-training variability, and measured implementation efficiency. Frozen VinDr
-testing preserved the observed equal-run AP ordering while exposing severe
-loss of absolute performance and failure of internal operating rules to
-transport well. Uncertain endpoint contrasts and finite FROC support limit
-broader ordering claims. Reporting these evaluation objects separately makes
-the comparison informative without implying clinical validation or universal
-superiority of either detector family.
+Under a patient-disjoint common evaluation protocol, ranking performance,
+shared raw cutoffs, detector-specific validation selection, stochastic
+training variability, false-positive operating regimes, and implementation
+efficiency yielded different comparisons of Faster R-CNN and YOLO11s.
+Retaining all five runs and reporting these properties separately exposed
+differences that a single threshold or AP value could not describe. The
+conclusions apply to these internal pipelines; external evidence is still
+needed to assess their reach beyond this benchmark.
 
 ## 8. Declarations
 
@@ -807,9 +588,7 @@ author-confirmed none statement where appropriate.
 **Ethics and data use — AUTHOR ACTION REQUIRED:** Insert the responsible
 institution's determination for this retrospective secondary analysis,
 including the body, determination type, identifier, and date where applicable;
-separately confirm compliance with the RSNA/Kaggle, NIH, and credentialed
-PhysioNet/VinDr data-use terms. Recorded access attestation is not an
-institutional ethics determination.
+separately confirm compliance with the RSNA/Kaggle and NIH data-use terms.
 
 **Consent — AUTHOR ACTION REQUIRED:** State whether consent was required,
 waived, or not applicable under the documented ethics determination and give

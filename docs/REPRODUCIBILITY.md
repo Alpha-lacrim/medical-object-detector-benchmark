@@ -1,5 +1,22 @@
 # Reproducibility contract
 
+**Batch 51 publication boundary:** The sole current manuscript is
+`report/paper_draft.md`. The [final audit](FINAL_MANUSCRIPT_AUDIT.md) maps its
+internal/external claims to artifacts and completed verification. Portable
+`pytest -q` deselects seven explicitly marked `scientific_data` tests;
+`pytest -q --run-scientific` retains the full authorized-data suite and fails
+when its required data are absent. Synthetic scientific tests stay in CI.
+The exact commands are in [README](../README.md#final-manuscript-verification-batch-51).
+
+External metric/bootstrap replay needs restricted local data and predictions;
+it is not committed-analysis reproduction from Git alone. Use the read-only
+`python -m scripts.verify_frozen_external --mode inference|statistics|replay`
+wrapper (choose one mode). It preserves the original scientific freeze and
+resolves only its two historical editorial inputs to their exact archived
+bytes. `--mode freeze` remains portable. Full inference verification retains
+the original absolute adapter-source location binding. No relocation or
+scientific hash rewrite is implicit in these commands.
+
 **Batch 45 timing:** The primary matched runtime evidence uses
 `configs/inference_timing_v1.yaml` and `src.benchmark_inference`; exact commands
 are in [README](../README.md#standardized-end-to-end-inference-timing-batch-45)
@@ -48,7 +65,7 @@ uv sync --locked --group dev --extra cpu
 uv run --locked --extra cpu ruff format --check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
 uv run --locked --extra cpu ruff check src tests scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
 uv run --locked --extra cpu python -m pytest -q
-uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py
+uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py --manifest results/publication_artifact_manifest.json
 uv run --locked --extra cpu python scripts/verify_paper_claims.py
 uv run --locked --extra cpu python -m meddet_benchmark smoke configs/smoke.yaml
 git diff --check
@@ -62,8 +79,11 @@ or exact-retraining reproduction.
 
 ## Machine-checkable committed evidence
 
-`results/scientific_artifact_manifest.json` is the reviewed inventory of
-manuscript-critical artifacts. Each record binds the artifact SHA256 to its
+`results/publication_artifact_manifest.json` is the current reviewed inventory
+of 83 manuscript-supporting artifacts. It copies all 72 original entries in
+`results/scientific_artifact_manifest.json` unchanged and adds the external
+aggregate evidence. The original inventory remains a frozen scientific input.
+Each record binds the artifact SHA256 to its
 generating script and hash, config and hash, input artifact hashes, frozen
 schema, study phase, reproduction tier, and GPU/training requirements. It also
 lists result files referenced by the corresponding provenance summary.
@@ -80,7 +100,7 @@ calculation and states the permitted absolute rounding tolerance.
 Run the same lightweight checks used by CI:
 
 ```powershell
-& $benchmarkPython scripts/verify_scientific_artifacts.py
+& $benchmarkPython scripts/verify_scientific_artifacts.py --manifest results/publication_artifact_manifest.json
 & $benchmarkPython scripts/verify_paper_claims.py
 ```
 
@@ -93,12 +113,13 @@ manuscript regex to identify exactly one value, and every comparison to fall
 within its stated tolerance.
 
 The manifest is intentionally not regenerated in CI: silently refreshing
-hashes would approve changed evidence. After an intentional, reviewed artifact
-change, rebuild it locally and inspect the diff:
+hashes would approve changed evidence. Its publication extension was built
+with the following maintenance command. Any future change requires scientific
+review; this is not permission to refresh settled source hashes:
 
 ```powershell
-& $benchmarkPython scripts/build_scientific_artifact_manifest.py
-git diff -- results/scientific_artifact_manifest.json
+& $benchmarkPython -m scripts.build_publication_manifest
+git diff -- results/publication_artifact_manifest.json
 ```
 
 ## Aggregate RSNA cohort-characteristics reproduction

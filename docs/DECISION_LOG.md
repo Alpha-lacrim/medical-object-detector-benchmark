@@ -824,3 +824,43 @@ with [methods](VINDR_STATISTICS.md), [generated results and three figures](VINDR
 and exact README commands. Restricted inputs and plot/draw working files stay
 private. The existing manuscript, frozen protocols, thresholds, checkpoints
 and internal results remain unchanged. No new inference or training occurred.
+
+## D-020 — Integrate frozen external evidence and preserve the verification boundary
+
+- **Date:** 2026-09-24
+- **Status:** Implemented in Batch 51; final manuscript awaits user review
+
+The sole canonical manuscript, `report/paper_draft.md`, now separates ranking,
+raw-score and selected-threshold behavior, finite FROC support, training
+variability, matched implementation timing and external transportability.
+All five runs per detector remain. Adverse absolute external AP, recall and
+emission results are central; observed AP ordering does not imply successful
+transport or a consistent ordering of every endpoint. The external upper-budget
+support bound permits reversal, and Faster R-CNN cap saturation remains visible.
+No result, checkpoint, threshold, scientific config or analysis definition changed.
+
+The historical freeze bound two then-current editorial files. Their exact
+bytes are archived and verified against the original hashes, using an explicit
+read-only wrapper that redirects only those historical editorial reads.
+Scientific inputs stay live and unchanged. The new publication inventory
+retains all original internal entries and adds the external public evidence;
+current manuscript claims are independently checked against it.
+
+A clean export exposed seven exact-FROC integration tests requiring licensed
+annotations. They retain their assertions under the explicit `scientific_data`
+marker and `--run-scientific` opt-in; the default portable suite does not require
+private data. Missing data still fail when the scientific suite is requested.
+This changes the test boundary, not scientific validation. Full authorized
+metric/provenance/bootstrap replay remains separately documented and executed.
+
+The public artifact gate also required preserving the original CRLF bytes of
+the training/validation split CSVs. Their rows and values equal the prior Git
+blobs after newline normalization, and their raw bytes match the frozen cohort
+hashes. File-specific `.gitattributes` exceptions prevent Git from altering
+those bytes. No split membership or expected scientific hash was changed.
+
+Reporting/citation, limitation and supplementary artifacts now point to the
+final paper. Historical reports and inferential/threshold provenance remain
+preserved. Author declarations and submission-specific reporting remain open;
+the [final audit](FINAL_MANUSCRIPT_AUDIT.md) records checks and review boundaries.
+No publication, commit or push is implied by completion of this batch.

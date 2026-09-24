@@ -1,6 +1,6 @@
 # Author Declarations — Action Required
 
-Audit date: 2026-08-31
+Audit date: 2026-09-24
 
 This file isolates submission facts that cannot be inferred from code,
 artifacts, public-dataset documentation, or prior analysis. It is a to-do list,
@@ -32,11 +32,11 @@ course-project status.
 ## Ethics and data-use determination
 
 **AUTHOR ACTION REQUIRED:** Obtain or document the responsible institution's
-determination for this retrospective secondary analysis of public challenge
-data. Report the institution/board, determination type (for example, approval,
+determination for this retrospective secondary analysis of RSNA challenge and credentialed VinDr external-test data. Report the institution/board, determination type (for example, approval,
 exemption, or not-human-subjects determination), identifier, and date if one
-exists. Separately confirm compliance with the RSNA/Kaggle and NIH data-use
-terms. Public availability and de-identification do not by themselves establish
+exists. Separately confirm compliance with the RSNA/Kaggle, NIH and PhysioNet/VinDr data-use
+terms. The recorded approved-access/DUA attestation is not an institutional
+ethics determination; restricted VinDr derivatives remain private. Public availability and de-identification do not by themselves establish
 the applicable ethics determination.
 
 ## Consent applicability

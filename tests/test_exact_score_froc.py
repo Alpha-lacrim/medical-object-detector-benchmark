@@ -170,6 +170,7 @@ def test_sensitivity_and_fp_are_monotonic_as_threshold_relaxes() -> None:
     assert [row["fp_per_image"] for row in rows] == [0, 1, 1, 2, 2]
 
 
+@pytest.mark.scientific_data
 def test_exact_config_and_inputs_include_all_five_runs_and_seed_271(
     frozen_exact_inputs: tuple[Any, dict[str, Any], list[dict[str, Any]], Any, Any],
 ) -> None:
@@ -193,6 +194,7 @@ def test_exact_config_and_inputs_include_all_five_runs_and_seed_271(
     }
 
 
+@pytest.mark.scientific_data
 def test_all_frozen_runs_pass_exact_monotonicity_and_seed_271_is_retained(
     frozen_exact_rows: tuple[Any, list[dict[str, Any]], list[dict[str, Any]]],
 ) -> None:
@@ -212,6 +214,7 @@ def test_all_frozen_runs_pass_exact_monotonicity_and_seed_271_is_retained(
     assert yolo_271["maximum_emitted_score"] < 0.05
 
 
+@pytest.mark.scientific_data
 def test_exact_budget_aggregation_retains_five_runs_and_marks_floor_limits(
     frozen_exact_rows: tuple[Any, list[dict[str, Any]], list[dict[str, Any]]],
 ) -> None:
@@ -236,6 +239,7 @@ def test_exact_budget_aggregation_retains_five_runs_and_marks_floor_limits(
     assert yolo_two["candidate_floor_limited_seeds"] == "17;42;137;271;314"
 
 
+@pytest.mark.scientific_data
 def test_lower_floor_inputs_retain_all_runs_and_approved_contract(
     lower_floor_exact_inputs: tuple[Any, dict[str, Any], list[dict[str, Any]], Any, Any],
 ) -> None:
@@ -263,6 +267,7 @@ def test_lower_floor_inputs_retain_all_runs_and_approved_contract(
     }
 
 
+@pytest.mark.scientific_data
 def test_lower_floor_runs_are_monotonic_and_seed_271_is_retained(
     lower_floor_exact_rows: tuple[Any, list[dict[str, Any]], list[dict[str, Any]]],
 ) -> None:
@@ -283,6 +288,7 @@ def test_lower_floor_runs_are_monotonic_and_seed_271_is_retained(
     assert yolo_271["maximum_emitted_score"] < 0.05
 
 
+@pytest.mark.scientific_data
 def test_lower_floor_budget_aggregation_retains_five_runs_and_residual_limit(
     lower_floor_exact_rows: tuple[Any, list[dict[str, Any]], list[dict[str, Any]]],
 ) -> None:
@@ -323,6 +329,7 @@ def test_lower_floor_budget_aggregation_retains_five_runs_and_residual_limit(
     assert yolo_two["candidate_floor_limited_seeds"] == "137"
 
 
+@pytest.mark.scientific_data
 def test_v4_inputs_retain_ten_runs_seed_271_and_prior_hash_binding() -> None:
     config = load_exact_froc_config("configs/froc_exact_score_v4.yaml")
     phase5, summary, bundles, targets, category_names = load_exact_inputs(config)

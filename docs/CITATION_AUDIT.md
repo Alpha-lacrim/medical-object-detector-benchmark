@@ -1,11 +1,12 @@
 # Citation Verification Audit
 
-## Current focused manuscript — 2026-09-08
+## Current final manuscript — 2026-09-24
 
 This section supersedes the manuscript-location and citation-coverage statements
-in the archived audit below. It audits `report/paper_draft.md` only. All 16
-current citation keys were checked against primary/authoritative sources;
-37 unique BibTeX entries remain because the database also serves the unchanged
+in the archived audit below. It audits `report/paper_draft.md` only. All 19 current citation keys resolve. The 16 retained method/background
+references preserve their bounded uses and primary-source review of 2026-09-08;
+three external-resource references were added and checked on 2026-09-24.
+40 unique BibTeX entries remain because the database also serves the unchanged
 historical report and long alternate. No uncited entry is injected into the
 canonical manuscript. DOI/publisher/official sources are preferred; access
 limitations and the one author-uploaded-paper fallback are explicit.
@@ -13,7 +14,7 @@ limitations and the one author-uploaded-paper fallback are explicit.
 | Key | Verified source / authority | Current bounded use | Verification and limits |
 |---|---|---|---|
 | `kuzucu2024calibration` | Kuzucu, Oksuz, Sadeghi, Dokania, ECCV 2024, pp. 185--204; [Springer DOI](https://doi.org/10.1007/978-3-031-72664-4_11), [official ECVA full text](https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03148.pdf) | §§1, 2.1, 5: threshold/population pitfalls already documented | VERIFIED: especially pp. 1--4. Supports prior-art attribution, not novelty or a new calibration experiment here. |
-| `kuppers2020calibration` | Küppers et al., CVPR Workshops 2020; [DOI](https://doi.org/10.1109/CVPRW50498.2020.00171), [CVF paper](https://openaccess.thecvf.com/content_CVPRW_2020/papers/w20/Kuppers_Multivariate_Confidence_Calibration_for_Object_Detection_CVPRW_2020_paper.pdf) | §§2.1, 3.7: multivariate detection-confidence framework | VERIFIED. Our minimum-cell convention and support sensitivities are repository implementation choices, not clinical-risk calibration. IEEE pagination is 1322--1330; CVF's landing-page listing uses a different short pagination. |
+| `kuppers2020calibration` | Küppers et al., CVPR Workshops 2020; [DOI](https://doi.org/10.1109/CVPRW50498.2020.00171), [CVF paper](https://openaccess.thecvf.com/content_CVPRW_2020/papers/w20/Kuppers_Multivariate_Confidence_Calibration_for_Object_Detection_CVPRW_2020_paper.pdf) | §§2.1, 3.8: multivariate detection-confidence framework | VERIFIED. Our minimum-cell convention and support sensitivities are repository implementation choices, not clinical-risk calibration. IEEE pagination is 1322--1330; CVF's landing-page listing uses a different short pagination. |
 | `shih2019rsna` | Shih et al., Radiology: AI 2019, e180041; [publisher](https://doi.org/10.1148/ryai.2019180041) | §§1, 2.2: expert opacity boxes, categories, adjudication | VERIFIED from publisher-indexed resource/annotation text. Source-cohort numbers are not substituted for our audited Stage 2 counts or selected patient groups. |
 | `rsna2022datasetdescription` | RSNA, *2018 Pneumonia Detection Challenge Dataset Description*, document marked V1 02/07/2022; [official PDF](https://www.rsna.org/rsnai/-/media/Files/RSNA/Education/AI%20resources%20and%20training/AI%20image%20challenge/RSNA-2018-Pneumonia-Detection-Challenge-Dataset-Description.ashx?hash=8331DDFA52AA5EE9C3C99B5983BB680D7BD2ABBF&la=en) | §2.2: annotation workflow and DICOM conversion/header additions | VERIFIED, both pages. The template's option lists are not treated as completed answers. It supplies no local ethics/consent determination. |
 | `rsna2018challenge` | RSNA/Kaggle 2018; [official evaluation](https://www.kaggle.com/c/rsna-pneumonia-detection-challenge/overview/evaluation) | §2.2: original challenge score differs from internal COCO AP | VERIFIED from official indexed competition evaluation text; direct page extraction was empty. IoU range is 0.40--0.75. No leaderboard metric is relabeled as our COCO AP. |
@@ -25,9 +26,20 @@ limitations and the one author-uploaded-paper fallback are explicit.
 | `ultralytics2026yolo11config` | Ultralytics, pinned v8.4.110; [official raw model configuration](https://raw.githubusercontent.com/ultralytics/ultralytics/v8.4.110/ultralytics/cfg/models/11/yolo11.yaml) | §2.3: YOLO11s configuration authority | VERIFIED. Raw source was readable when the GitHub HTML route failed. |
 | `tejani2024claim` | Tejani et al., Radiology: AI 6(4):e240300 (2024); [publisher](https://doi.org/10.1148/ryai.240300) | §2.3: reporting, reference-standard and internal/external-testing terminology | VERIFIED from full publisher text. Directly applicable; the local crosswalk remains an audit, not certification. |
 | `lin2014coco` | Lin et al., ECCV 2014, pp. 740--755; [publisher](https://doi.org/10.1007/978-3-319-10602-1_48) | §3.3: COCO evaluation framework | VERIFIED resource identity. Exact IoU grid, interpolation and cap are supported by the official evaluator and the pinned local pycocotools/code/config, not inferred solely from the original dataset paper. |
-| `efron1993bootstrap` | Efron and Tibshirani, *An Introduction to the Bootstrap*; [DOI](https://doi.org/10.1201/9780429246593), [publisher listing](https://www.routledge.com/An-Introductionto-the-Bootstrap/Efron-Tibshirani/p/book/9780412042317) | §3.5: bootstrap framework | VERIFIED method source; the publisher lists a 1994 edition while its series list identifies the original 1993 book retained in the bibliography. Patient/run design and actual results are ours. |
-| `phipson2010permutation` | Phipson and Smyth, 2010; [DOI](https://doi.org/10.2202/1544-6115.1585), [PubMed author abstract](https://pubmed.ncbi.nlm.nih.gov/21044043/) | §3.5: nonzero Monte Carlo permutation p-values | VERIFIED through author abstract/identifier record; direct DOI route was unavailable. |
-| `holm1979simple` | Holm, Scandinavian Journal of Statistics 6(2):65--70 (1979); [JSTOR source](https://www.jstor.org/stable/4615733), [issue contents](https://www.jstor.org/stable/i412579) | §3.5: multiplicity adjustment | Source identity VERIFIED from the official issue listing. Full text was unavailable on this route; the existing implementation/tests establish the named adjustment used locally. |
+| `efron1993bootstrap` | Efron and Tibshirani, *An Introduction to the Bootstrap*; [DOI](https://doi.org/10.1201/9780429246593), [publisher listing](https://www.routledge.com/An-Introductionto-the-Bootstrap/Efron-Tibshirani/p/book/9780412042317) | §3.6: bootstrap framework | VERIFIED method source; the publisher lists a 1994 edition while its series list identifies the original 1993 book retained in the bibliography. Patient/run design and actual results are ours. |
+| `phipson2010permutation` | Phipson and Smyth, 2010; [DOI](https://doi.org/10.2202/1544-6115.1585), [PubMed author abstract](https://pubmed.ncbi.nlm.nih.gov/21044043/) | §3.6: nonzero Monte Carlo permutation p-values | VERIFIED through author abstract/identifier record; direct DOI route was unavailable. |
+| `holm1979simple` | Holm, Scandinavian Journal of Statistics 6(2):65--70 (1979); [JSTOR source](https://www.jstor.org/stable/4615733), [issue contents](https://www.jstor.org/stable/i412579) | §3.6: multiplicity adjustment | Source identity VERIFIED from the official issue listing. Full text was unavailable on this route; the existing implementation/tests establish the named adjustment used locally. |
+| `nguyen2022vindr` | Nguyen et al., Scientific Data 9:429 (2022); [publisher version of record](https://www.nature.com/articles/s41597-022-01498-w), DOI 10.1038/s41597-022-01498-w | §§2.4/3.5: local findings versus global diagnoses and consensus test annotation | VERIFIED 2026-09-24. Supports resource methodology, not equivalence to RSNA or the local 84/95 strict-support counts, which come from the verified adapter. |
+| `nguyen2021vindrrelease` | Official [PhysioNet VinDr-CXR v1.0.0](https://physionet.org/content/vindr-cxr/1.0.0/), DOI 10.13026/3akn-b287, released 2021-06-22 | §3.5: exact external release and credentialed access | VERIFIED 2026-09-24. Versioned dataset citation is separate from the later methodology paper. No restricted images/annotations were sent to browsing tools. |
+| `pollard2026physionet` | Pollard et al., Nature Health 1(8):792--795 (2026); [publisher](https://www.nature.com/articles/s44360-026-00096-z), DOI 10.1038/s44360-026-00096-z | §3.5: platform attribution accompanying use of PhysioNet | VERIFIED 2026-09-24; this is the platform citation currently requested on the official dataset page. It supports platform attribution only, not detector performance. |
+
+The 2026-09-24 refresh also rechecked [CLAIM 2024](https://pubs.rsna.org/doi/10.1148/ryai.240300)
+and the [official ECCV calibration paper](https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03148.pdf).
+CLAIM remains the primary reporting framework, while threshold-population
+pitfalls remain prior knowledge. The manuscript adds no claim of newly
+discovering score-scale mismatch. The local crosswalk now distinguishes
+completed external testing from successful generalization and unresolved human
+reporting obligations. This focused refresh is not a systematic literature review.
 
 Searches on 2026-09-08 covered detector calibration/threshold pitfalls and
 direct RSNA modern-detector comparisons, with 2024--2026 queries and checks of

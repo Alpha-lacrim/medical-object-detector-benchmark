@@ -7,7 +7,7 @@ real patients, or guide care.
 
 ## Dataset, population, and target scope
 
-The experiment uses one foreground category from one source: `Lung Opacity` in
+Training and internal testing use one foreground category from one source: `Lung Opacity` in
 the historical RSNA challenge cohort derived from the NIH archive. The images
 come from one institution and an adult-heavy population under historical
 acquisition practices. Results may not transport to pediatric patients,
@@ -42,6 +42,42 @@ groups, and permutation swaps move every observed exam from one patient
 together. Batch 28 further separates primary training-procedure intervals from
 secondary checkpoint-conditional p-values. The remaining limitation is the
 finite number of observed patient groups, not unaddressed image-level clustering.
+
+## Frozen external testing and transportability
+
+Batch 51 integrates the completed [VinDr external evidence](VINDR_STATISTICS_RESULTS.md).
+Every official test image and all five runs per detector are retained, including
+seed 271. Strict local `Lung opacity` (exact released `Lung Opacity`) has only
+84 positive images and 95 boxes among 3,000 images; no consolidation,
+infiltration, atelectasis, ILD, global pneumonia or other label is merged.
+This is cross-dataset/cross-annotation-ontology transportability, not an
+identical-task validation. Preserved observed equal-run AP ordering coexists
+with collapsed AP, recall and emissions; it is not successful generalization.
+Lower FP/image alone is not improvement. Neither transported RSNA policy was
+selected on external labels, and the n=5 policy stays post-hoc sensitivity.
+
+No defensible VinDr patient grouping is available. Image-level external
+intervals may be too narrow if patients repeat. The primary observation/run
+intervals, secondary fixed seed-17 intervals, and descriptive cross-dataset
+comparisons are separate. They provide marginal coverage, not simultaneous
+coverage or a cross-dataset interaction test. The five runs are a coarse
+empirical sample conditional on the fixed training data and recipe.
+
+Retained exact-score FROC has finite support. External YOLO seed 137 ends
+below the upper 1/2 FP/image budgets; the conservative missing-support bound
+allows reversal beyond retained candidates. The internal no-reversal bound
+cannot be transported. Substantial Faster R-CNN max-detection-cap saturation
+is a separate support limit. Neither the floor nor cap was changed after
+external results; bootstrap intervals cannot fill missing support.
+
+Historical internal YOLO accuracy used FP32; external YOLO used verified
+bfloat16 AMP. Scanners/acquisition, hospital/site, country, population,
+annotation ontology, preprocessing effects and numerical implementation are
+confounded. No single-factor explanation is demonstrated. A documented one-ULP
+Faster R-CNN inverse-coordinate upper-bound correction was a narrow numerical
+handoff repair before any complete external result. Lower-bound or materially
+out-of-range coordinates still fail; no frozen scientific definition changed.
+Detailed raw-coordinate/failed-attempt provenance remains supplementary and private.
 
 ## Annotation and preprocessing scope
 
@@ -424,8 +460,7 @@ while target-level decisions would remain nested within images.
 ## Deployment and regulatory scope
 
 The benchmark does not demonstrate prospective benefit, calibrated risk,
-clinical safety, subgroup equity, workflow compatibility, or generalization to
-another site. Clinical deployment would require prospective and external
+clinical safety, subgroup equity, workflow compatibility, or successful performance transport to another clinical setting. Clinical deployment would require prospective and external
 validation, human-factors and safety engineering, monitoring, and the applicable
 medical-device regulatory process, such as FDA clearance or CE marking. Those
 activities are beyond this project; mentioning them defines the boundary of the
@@ -443,7 +478,7 @@ is developed. The evidence base still lacks source accrual dates, an
 author-confirmed ethics/data-use and consent determination, funding and
 competing-interest declarations, author contributions, a release-ready
 data/code availability statement, patient/public involvement disclosure, a
-participant-flow diagram, demographic subgroup/fairness evaluation, and
-external testing. Narrative reporting cannot repair those gaps without new
+participant-flow diagram and demographic subgroup/fairness evaluation. Frozen
+VinDr external testing is complete; it does not resolve these remaining gaps. Narrative reporting cannot repair those gaps without new
 traceable evidence; the unresolved declarations are isolated in
 [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md).

@@ -198,3 +198,56 @@ part of the evidence and must travel with any reused number.
   absent, or not applicable in the repository as it exists now.
 - [README](../README.md) gives the exact commands that regenerate every linked
   table and figure; it is the command authority rather than this pointer index.
+
+## S9. Frozen external testing and transportability
+
+The final canonical manuscript integrates the completed external evidence.
+The pre-external paper is preserved only as an immutable protocol baseline;
+it is not a second maintained manuscript.
+
+- [Frozen protocol](VINDR_EXTERNAL_PROTOCOL.md), [scientific config](../configs/vindr_external_v1.yaml),
+  and [original hash sidecar](VINDR_EXTERNAL_PROTOCOL_v1.sha256.json): locally
+  prespecified ontology, all-run inventory, endpoints, thresholds, floors/cap,
+  numerical precision and inferential estimands. No external tuning occurred.
+- [Adapter receipt](../results/vindr_external_v1/adapter_preflight.json) and
+  [preflight review](VINDR_ADAPTER_PREFLIGHT.md): complete official test cohort,
+  strict target support, source integrity, decoding and coordinate checks.
+- [Inference summary](../results/vindr_external_v1/inference_summary.json) and
+  [generated per-run report](VINDR_INFERENCE_RESULTS.md): every checkpoint,
+  both threshold policies, AP, exact-score FROC, cap saturation and emissions.
+- [Statistical methods](VINDR_STATISTICS.md), [bound summary](../results/vindr_external_v1/statistics/summary.json),
+  [all twenty run rows](../results/vindr_external_v1/statistics/per_run.csv),
+  [all marginal intervals](../results/vindr_external_v1/statistics/intervals.csv),
+  [score/emission support](../results/vindr_external_v1/statistics/score_summaries.csv),
+  [cross-dataset comparisons](../results/vindr_external_v1/statistics/transport_comparison.csv),
+  and [threshold-policy sensitivity](../results/vindr_external_v1/statistics/threshold_policy_comparison.csv).
+  Primary observation/run uncertainty, fixed seed-17 sensitivity, and descriptive
+  comparisons remain separate. The aligned internal intervals do not replace
+  historical Phase 8 artifacts in S7. The n=5 threshold policy remains post hoc.
+- [Generated statistics report](VINDR_STATISTICS_RESULTS.md) gives all SDs,
+  valid/undefined-draw counts and conservative missing-support bounds.
+  [Per-run score-distribution figure](../results/vindr_external_v1/statistics/internal_external_scores.png)
+  accompanies counts because confidence summaries depend on emission support.
+- [Numerical implementation record](VINDR_INFERENCE.md) documents the initial
+  Faster R-CNN float32 inverse-resize upper-bound overshoot of
+  0.000244140625 pixels (one ULP), stopped before any complete result. Only that
+  narrow upper-bound error is canonicalized; negative lower bounds and larger
+  errors fail. Original failed-attempt evidence and raw corrected coordinates
+  remain private and hash-bound. This was not a scientific protocol amendment
+  or post-hoc optimization. Historical internal YOLO FP32 and verified external
+  bfloat16 AMP remain a confound in cross-dataset comparisons.
+
+External AP ordering is an observed equal-run result. Most FROC contrasts and
+all historical-threshold contrasts include zero. At upper FROC budgets the
+YOLO missing-support bound permits reversal beyond retained candidates;
+substantial Faster R-CNN cap saturation remains independent of that bound.
+Neither low FP/image with collapsed recall nor preserved relative AP ordering
+establishes successful generalization. No patient grouping is invented for VinDr.
+
+[Publication verification](FINAL_MANUSCRIPT_AUDIT.md) records the current paper's
+claim bindings and clean-checkout checks. The [immutable editorial baseline
+bindings](../report/provenance/batch46/baseline_bindings.json) allow read-only
+legacy evidence replay while preserving every original freeze hash. Exact
+commands are in [README](../README.md#final-manuscript-verification-batch-51).
+Restricted images, IDs, annotations and image-linked derivatives remain local;
+only nonidentifying aggregate external artifacts accompany the manuscript.

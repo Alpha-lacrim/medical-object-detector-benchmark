@@ -77,6 +77,9 @@ packages = ["src/meddet_benchmark"]
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers --basetemp=.pytest-tmp"
 testpaths = ["tests"]
+markers = [
+  "scientific_data: full scientific integration checks requiring authorized local data (enable with --run-scientific)",
+]
 
 [tool.ruff]
 line-length = 100

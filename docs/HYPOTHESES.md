@@ -1,5 +1,14 @@
 # Research Question and Hypotheses
 
+> Batch 51 scope: H1--H6 and the internal analysis history below remain
+> retrospective provenance. They were not redefined after VinDr results.
+> The final paper's external question, frozen protocol and evidence are in
+> [VINDR_EXTERNAL_PROTOCOL.md](VINDR_EXTERNAL_PROTOCOL.md) and
+> [VINDR_STATISTICS_RESULTS.md](VINDR_STATISTICS_RESULTS.md). Historical internal
+> FROC no-reversal claims do not apply to external upper-budget support, and
+> old compute/Pareto axes remain distinct from matched timing.
+
+
 ## Status and interpretation
 
 H1--H5 were recorded in Batch 17 after the original experimental artifacts had been frozen;

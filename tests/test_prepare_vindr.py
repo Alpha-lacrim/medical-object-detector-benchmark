@@ -11,6 +11,7 @@ import yaml
 from pydicom.dataset import FileDataset, FileMetaDataset
 from pydicom.uid import ExplicitVRLittleEndian
 
+from scripts.verify_frozen_external import historical_editorial_view
 from src.data.prepare import scale_radiograph_to_uint8
 from src.data.prepare_vindr import (
     PreflightError,
@@ -196,7 +197,8 @@ def test_root_has_no_fallback_and_requires_authorization(config, monkeypatch, tm
 
 
 def test_frozen_config_and_dependencies(config):
-    assert len(verify_freeze(Path("configs/vindr_external_v1.yaml"), config)) == 38
+    with historical_editorial_view(Path.cwd()):
+        assert len(verify_freeze(Path("configs/vindr_external_v1.yaml"), config)) == 38
 
 
 def test_synthetic_release_inventory_and_failure_gates(tmp_path, config, monkeypatch):

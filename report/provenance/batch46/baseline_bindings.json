@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "freeze_manifest": "docs/VINDR_EXTERNAL_PROTOCOL_v1.sha256.json",
+  "scope": "Only the two editable Batch-46 manuscript baseline records; scientific definitions always use their original paths.",
+  "artifacts": [
+    {
+      "path": "report/paper_draft.md",
+      "archived_path": "report/provenance/batch46/paper_draft.md",
+      "sha256": "75c214ae28ceffc643f85dae96d4a58a18b172458a867bc867e69c11d0563b5e",
+      "role": "batch46_baseline"
+    },
+    {
+      "path": "report/paper_claim_sources.yaml",
+      "archived_path": "report/provenance/batch46/paper_claim_sources.yaml",
+      "sha256": "44f2abd6747b0f316f662e3b0884f3879b9169550f4d07ddbbbdb4f2101a77d5",
+      "role": "batch46_baseline"
+    }
+  ]
+}

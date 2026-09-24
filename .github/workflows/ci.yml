@@ -31,13 +31,24 @@ jobs:
           uv run --locked --extra cpu ruff format --check src tests
           scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
           scripts/build_scientific_artifact_manifest.py
+          scripts/check_bibliography.py scripts/verify_frozen_external.py
+          scripts/build_publication_manifest.py
       - run: >-
           uv run --locked --extra cpu ruff check src tests
           scripts/verify_scientific_artifacts.py scripts/verify_paper_claims.py
           scripts/build_scientific_artifact_manifest.py
+          scripts/check_bibliography.py scripts/verify_frozen_external.py
+          scripts/build_publication_manifest.py
       - run: uv run --locked --extra cpu python -m pytest -q
       - name: Verify frozen scientific artifacts
-        run: uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py
+        run: uv run --locked --extra cpu python scripts/verify_scientific_artifacts.py --manifest results/publication_artifact_manifest.json
       - name: Verify manuscript numerical claims
         run: uv run --locked --extra cpu python scripts/verify_paper_claims.py
+      - name: Verify unchanged external freeze and archived editorial baseline
+        run: uv run --locked --extra cpu python -m scripts.verify_frozen_external --mode freeze
+      - name: Verify current and preserved manuscript citations
+        run: >-
+          uv run --locked --extra cpu python scripts/check_bibliography.py
+          --bibliography report/references.bib --manuscripts report/paper_draft.md
+          report/report.md report/Manuscript_FasterRCNN_vs_YOLO11s_LungOpacity.md
       - run: uv run --locked --extra cpu python -m meddet_benchmark smoke configs/smoke.yaml

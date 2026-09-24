@@ -1,0 +1,939 @@
+schema_version: 1
+manuscript: report/paper_draft.md
+scientific_artifact_manifest: results/scientific_artifact_manifest.json
+
+# These bounded prose guards complement the numerical claim bindings below.
+# They protect implementation-sensitive qualifications without freezing whole
+# sentences or historical documentation outside the current manuscript.
+manuscript_semantic_guards:
+  - id: no_threshold_free_ranking
+    forbidden_regex: '(?i:\bthreshold-free\s+ranking\b)'
+  - id: no_internal_project_identifiers
+    forbidden_regex: '\bBatch\s+\d+|\bD-\d{3}\b|(?i:\bcourse[ -]project\b)'
+  - id: no_inflated_journal_language
+    forbidden_regex: '(?i:\bdefinitive\b|\bdecisive\b|\boverwhelming\b|fundamental[ -]fallacy)'
+  - id: no_first_discovery_claim
+    required_regex: 'We do not claim the first discovery of\s+detector score-scale mismatch'
+  - id: ap_is_bounded_by_retained_predictions
+    required_regex: 'COCO AP\s+ranking does not depend on the selected single operating threshold.{0,150}retained prediction floor.{0,80}evaluation/post-processing protocol'
+  - id: d_ece_is_secondary_detection_level_error
+    required_regex: 'Supplementary D-ECE is a descriptive,\s+detection-level statistic of the emitted-detection population, dependent on\s+support and binning; it is not clinical-risk calibration'
+  - id: froc_exact_score_frontier_is_floor_bounded
+    required_regex: '0\.00001 candidate floor.{0,150}seed 137.{0,180}lower-bound observation.{0,400}ordering therefore cannot reverse.{0,150}not a population-level'
+  - id: standardized_timing_boundary_is_complete
+    required_regex: 'includes resize/letterbox, tensor conversion, host-to-device transfer,\s+model forward, native postprocessing/NMS, source-coordinate restoration, and\s+CPU extraction of boxes, scores, and labels\. It excludes disk I/O and decoding'
+  - id: timing_repetitions_are_technical
+    required_regex: 'repetitions are technical repeats, not independent biological or\s+training replicates'
+  - id: historical_timing_is_supplementary
+    required_regex: 'Historical asymmetric timing,\s+Pareto panels, training profiles, and incomplete profiler-registered operation\s+counts remain supplementary'
+  - id: no_headline_architecture_operation_ratio
+    forbidden_regex: '(?i:about\s+21-fold|approximately\s+21-fold|one twenty-first)'
+  - id: same_amp_reference_scope_is_explicit
+    required_regex: 'Agreement is not claimed against the\s+historical FP32 YOLO evaluation bundles, which remain unchanged'
+  - id: posthoc_threshold_is_not_prospectively_frozen
+    required_regex: 'This is\s+post-hoc validation sensitivity, not a prospectively frozen operating point'
+  - id: cohort_characteristics_are_descriptive_not_fairness_inference
+    required_regex: 'These are descriptive cohort characteristics;\s+no demographic subgroup comparison or fairness inference was performed'
+  - id: uncertainty_excludes_threshold_selection
+    required_regex: 'intervals do not incorporate threshold-selection\s+uncertainty and are not intervals for validation-selected or FROC results'
+  - id: five_runs_retained
+    required_regex: 'All five accepted training attempts per detector were retained'
+  - id: no_calibration_fitting
+    required_regex: 'No calibration map was fitted; this is not clinical-risk calibration'
+  - id: title_abstract_provisional
+    required_regex: 'draft-status: "Internal draft; title and abstract provisional pending external results"'
+
+# Every regex must select exactly one manuscript value. Absolute tolerances encode
+# the stated decimal rounding; approximate prose claims use a deliberately wider
+# tolerance and a calculation over frozen source rows.
+claims:
+  - id: source_radiograph_count
+    description: Full labeled RSNA source cohort size.
+    manuscript:
+      section: Dataset
+      regex: 'complete source contains (?P<value>[\d,]+) labeled radiographs'
+    source:
+      kind: json_value
+      path: data/manifests/rsna-pneumonia-5000-audit.json
+      pointer: [input_counts, annotation_exam_ids]
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: source_box_count
+    description: Full source bounding-box count.
+    manuscript:
+      section: Dataset
+      regex: 'contains 26,684 labeled radiographs and (?P<value>[\d,]+)\s+positive boxes'
+    source:
+      kind: json_value
+      path: data/manifests/rsna-pneumonia-5000-audit.json
+      pointer: [input_counts, valid_boxes]
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: subset_study_count
+    description: Deterministic study-subset size.
+    manuscript:
+      section: Dataset
+      regex: 'motivated a deterministic (?P<value>[\d,]+)-study subset'
+    source:
+      kind: json_value
+      path: data/manifests/rsna-pneumonia-5000-audit.json
+      pointer: [subsample, selected_images]
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: subset_patient_group_count
+    description: Patient groups represented in the selected subset.
+    manuscript:
+      section: Dataset
+      regex: 'studies came from (?P<value>[\d,]+) patient groups'
+    source:
+      kind: json_value
+      path: data/manifests/rsna-pneumonia-5000-audit.json
+      pointer: [subsample, selected_groups]
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_age_median
+    description: Selected-cohort median nominal age after range validation.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'Across the selected cohort,\s+median nominal age was (?P<value>\d+(?:\.\d+)?) years'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: age_median_years
+    absolute_tolerance: 0
+    rounding: integer years
+
+  - id: cohort_total_age_summary_n
+    description: Selected studies contributing to the validated nominal-age summary.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'median nominal age was 49 years \(IQR 36--60; n=(?P<value>[\d,]+)\)'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: age_summary_n
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_female_count
+    description: Selected studies with DICOM PatientSex encoded F.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'n=4,999\), (?P<value>[\d,]+) studies \(47\.2%\)\s+were encoded female'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: sex_f_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_male_count
+    description: Selected studies with DICOM PatientSex encoded M.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'encoded female and (?P<value>[\d,]+) \(52\.8%\) male'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: sex_m_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_ap_count
+    description: Selected studies with DICOM ViewPosition encoded AP.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'and (?P<value>[\d,]+) \(47\.3%\) were AP versus'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: projection_ap_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: cohort_total_pa_count
+    description: Selected studies with DICOM ViewPosition encoded PA.
+    manuscript:
+      section: Cohort characteristics
+      regex: 'were AP versus\s+(?P<value>[\d,]+) \(52\.7%\) PA'
+    source:
+      kind: csv_cell
+      path: results/tables/rsna_cohort_characteristics.csv
+      filters: {split: total}
+      column: projection_pa_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: test_image_count
+    description: Clean internal-testing evaluation image count.
+    manuscript:
+      section: Clean performance
+      regex: 'unified evaluator processed (?P<value>[\d,]+) internal-testing images and 268'
+    source:
+      kind: csv_cell
+      path: results/tables/detector_comparison_per_seed.csv
+      filters: {detector: faster_rcnn, seed: 17}
+      column: image_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: test_reference_box_count
+    description: Clean internal-testing reference-box count.
+    manuscript:
+      section: Clean performance
+      regex: 'processed 750 internal-testing images and (?P<value>[\d,]+) reference boxes'
+    source:
+      kind: csv_cell
+      path: results/tables/detector_comparison_per_seed.csv
+      filters: {detector: faster_rcnn, seed: 17}
+      column: target_count
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: faster_map_mean
+    description: Five-run Faster R-CNN mean mAP@0.5:0.95.
+    manuscript:
+      section: Clean performance
+      regex: '\| mAP@0\.5:0\.95 \| \*\*(?P<value>\d+\.\d+) \+/- 0\.0067'
+    source:
+      kind: csv_cell
+      path: results/tables/pareto_summary_n5_sensitivity.csv
+      filters: {detector: faster_rcnn, metric: map_50_95}
+      column: mean
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: faster_map_std
+    description: Five-run Faster R-CNN sample SD for mAP@0.5:0.95.
+    manuscript:
+      section: Clean performance
+      regex: '\| mAP@0\.5:0\.95 \| \*\*0\.0995 \+/- (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/pareto_summary_n5_sensitivity.csv
+      filters: {detector: faster_rcnn, metric: map_50_95}
+      column: sample_std
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_map_mean
+    description: Five-run YOLO11s mean mAP@0.5:0.95.
+    manuscript:
+      section: Clean performance
+      regex: '\| mAP@0\.5:0\.95 \| \*\*0\.0995 \+/- 0\.0067 \(n=5\)\*\* \| (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/pareto_summary_n5_sensitivity.csv
+      filters: {detector: yolo11s, metric: map_50_95}
+      column: mean
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_map_std
+    description: Five-run YOLO11s sample SD for mAP@0.5:0.95.
+    manuscript:
+      section: Clean performance
+      regex: '\| mAP@0\.5:0\.95 \|.*?0\.0542 \+/- (?P<value>\d+\.\d+) \(n=5\)'
+    source:
+      kind: csv_cell
+      path: results/tables/pareto_summary_n5_sensitivity.csv
+      filters: {detector: yolo11s, metric: map_50_95}
+      column: sample_std
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_seed271_maximum_score
+    description: Maximum internal-testing confidence of the zero-detection YOLO11s run.
+    manuscript:
+      section: Clean performance
+      regex: 'maximum internal-testing confidence was (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/detector_comparison_per_seed.csv
+      filters: {detector: yolo11s, seed: 271}
+      column: maximum_prediction_score
+    absolute_tolerance: 0.00000005
+    rounding: 7 decimal places
+
+  - id: faster_ap50_leading_recall_positions
+    description: AP50 recall-grid positions led by Faster R-CNN.
+    manuscript:
+      section: Operating regime
+      regex: 'interpolated precision at (?P<value>\d+) of 101 recall positions'
+    source:
+      kind: csv_cell
+      path: results/tables/operating_regime_n3_vs_n5_conclusions.csv
+      filters:
+        analysis: official precision-recall
+        conclusion: Faster R-CNN leads more official ap50 recall positions
+      column: n5_directional_margin
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: official_recall_grid_size
+    description: Count of AP50 recall-grid rows for one detector.
+    manuscript:
+      section: Operating regime
+      regex: 'interpolated precision at 97 of (?P<value>\d+) recall positions'
+    source:
+      kind: csv_row_count
+      path: results/tables/precision_recall_curves_n5_sensitivity.csv
+      filters: {detector: faster_rcnn, curve: ap50}
+    absolute_tolerance: 0
+    rounding: integer
+
+  - id: faster_selected_threshold
+    description: Validation-selected Faster R-CNN score threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'Historical validation selection used n=3 and chose (?P<value>\d+\.\d+) for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/selected_operating_points_n5_sensitivity.csv
+      filters: {detector: faster_rcnn}
+      column: selected_threshold
+    absolute_tolerance: 0.0000001
+    rounding: exact displayed threshold
+
+  - id: yolo_selected_threshold
+    description: Validation-selected YOLO11s score threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'chose 0\.69 for Faster R-CNN and\s+(?P<value>\d+\.\d+) for YOLO11s'
+    source:
+      kind: csv_cell
+      path: results/tables/selected_operating_points_n5_sensitivity.csv
+      filters: {detector: yolo11s}
+      column: selected_threshold
+    absolute_tolerance: 0.0000001
+    rounding: exact displayed threshold
+
+  - id: faster_selected_threshold_f1
+    description: Five-run test F1 at the frozen Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: '0\.3507 \+/- 0\.0463, and\s+(?P<value>\d+\.\d+) \+/- 0\.0184 for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/selected_operating_points_n5_sensitivity.csv
+      filters: {detector: faster_rcnn}
+      column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_selected_threshold_f1
+    description: Five-run test F1 at the frozen YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: '0\.1948 \+/- 0\.1110, and (?P<value>\d+\.\d+) \+/- 0\.1233 for YOLO11s'
+    source:
+      kind: csv_cell
+      path: results/tables/selected_operating_points_n5_sensitivity.csv
+      filters: {detector: yolo11s}
+      column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_faster_selected_threshold
+    description: Five-run post-hoc validation-sensitivity Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'post-hoc validation sensitivity selected (?P<value>\d+\.\d+) for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: faster_rcnn}
+      column: selected_threshold
+    absolute_tolerance: 0.0000001
+    rounding: exact displayed threshold
+
+  - id: posthoc_yolo_selected_threshold
+    description: Five-run post-hoc validation-sensitivity YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'selected 0\.70 for Faster R-CNN and (?P<value>\d+\.\d+)\s+for YOLO11s from all five validation runs'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: yolo11s}
+      column: selected_threshold
+    absolute_tolerance: 0.0000001
+    rounding: exact displayed threshold
+
+  - id: posthoc_faster_test_f1
+    description: Five-run test F1 at the post-hoc Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: '0\.3388 \+/- 0\.0567, and\s+(?P<value>\d+\.\d+) \+/- 0\.0222 for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: faster_rcnn}
+      column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_yolo_test_f1
+    description: Five-run test F1 at the post-hoc YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: '0\.2925 \+/- 0\.0886, and (?P<value>\d+\.\d+) \+/- 0\.0367 for YOLO11s'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: yolo11s}
+      column: test_f1
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_faster_test_fp_per_image
+    description: Five-run mean test FP/image at the post-hoc Faster R-CNN threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'Mean FP/image was\s+(?P<value>\d+\.\d+) versus 0\.3104'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: faster_rcnn}
+      column: test_fp_per_image
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: posthoc_yolo_test_fp_per_image
+    description: Five-run mean test FP/image at the post-hoc YOLO11s threshold.
+    manuscript:
+      section: Operating regime
+      regex: 'Mean FP/image was\s+0\.2205 versus (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv
+      filters: {selection_scope: posthoc_n5_validation_sensitivity, detector: yolo11s}
+      column: test_fp_per_image
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: faster_froc_sensitivity_at_2
+    description: Faster R-CNN observed exact-score sensitivity at 2 false positives per image.
+    manuscript:
+      section: Operating regime
+      regex: 'and (?P<value>\d+\.\d+) versus\s+0\.6090 at 2 \(Figure 2\)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters: {detector: faster_rcnn, fp_per_image_budget: 2.0}
+      column: sensitivity
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_froc_sensitivity_at_2
+    description: YOLO11s observed exact-score sensitivity at 2 false positives per image.
+    manuscript:
+      section: Operating regime
+      regex: '0\.6978 versus\s+(?P<value>\d+\.\d+) at 2 \(Figure 2\)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters: {detector: yolo11s, fp_per_image_budget: 2.0}
+      column: sensitivity
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_seed137_froc_floor_endpoint_fp_per_image
+    description: Maximum reachable YOLO11s seed-137 FP/image at the approved floor.
+    manuscript:
+      section: Operating regime
+      regex: 'YOLO11s\s+seed 137 nevertheless ends at (?P<value>\d+\.\d+) FP/image'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_per_seed_exact_score_v4.csv
+      filters: {detector: yolo11s, seed: 137, fp_per_image_budget: 2.0}
+      column: candidate_floor_endpoint_fp_per_image
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_froc_conservative_upper_at_2
+    description: Mathematical-maximum YOLO11s aggregate sensitivity bound at 2 FP/image.
+    manuscript:
+      section: Operating regime
+      regex: 'YOLO11s aggregate upper bound of (?P<value>\d+\.\d+)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_incomplete_frontier_bounds_v4.csv
+      filters: {detector: yolo11s, fp_per_image_budget: 2.0}
+      column: conservative_upper_aggregate_sensitivity
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: faster_detection_ece
+    description: Five-run descriptive Faster R-CNN detection ECE.
+    manuscript:
+      section: Calibration
+      regex: 'Mean D-ECE was (?P<value>\d+\.\d+) \+/- 0\.0058 for Faster R-CNN'
+    source:
+      kind: csv_cell
+      path: results/tables/calibration_summary_v2.csv
+      filters: {row_type: detector_descriptive_mean, detector: faster_rcnn}
+      column: detection_ece
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: yolo_detection_ece
+    description: Five-run descriptive YOLO11s detection ECE.
+    manuscript:
+      section: Calibration
+      regex: 'for Faster R-CNN and\s+(?P<value>\d+\.\d+) \+/- 0\.0232 for YOLO11s'
+    source:
+      kind: csv_cell
+      path: results/tables/calibration_summary_v2.csv
+      filters: {row_type: detector_descriptive_mean, detector: yolo11s}
+      column: detection_ece
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: approximate_throughput_ratio
+    description: Matched v1 aggregate throughput ratio for two primary frozen checkpoints.
+    manuscript:
+      section: Abstract
+      regex: 'three technical repetitions yielded\s+(?P<value>\d+\.\d+)-fold higher throughput for YOLO11s'
+    source:
+      kind: calculation
+      operation: divide
+      operands:
+        - kind: csv_cell
+          path: results/tables/inference_timing_v1.csv
+          filters: {detector: yolo11s}
+          column: fps
+        - kind: csv_cell
+          path: results/tables/inference_timing_v1.csv
+          filters: {detector: faster_rcnn}
+          column: fps
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: approximate_parameter_reduction_percent
+    description: YOLO11s parameter reduction relative to Faster R-CNN.
+    manuscript:
+      section: Abstract
+      regex: 'YOLO11s, which had (?P<value>\d+)% fewer parameters'
+    source:
+      kind: calculation
+      operation: percent_reduction
+      operands:
+        - kind: csv_cell
+          path: results/tables/pareto_summary_n5_sensitivity.csv
+          filters: {detector: faster_rcnn, metric: total_parameters}
+          column: mean
+        - kind: csv_cell
+          path: results/tables/pareto_summary_n5_sensitivity.csv
+          filters: {detector: yolo11s, metric: total_parameters}
+          column: mean
+    absolute_tolerance: 0.5
+    rounding: nearest whole percent
+
+  - id: precision_difference
+    description: Training-procedure precision difference, Faster R-CNN minus YOLO11s.
+    manuscript:
+      section: Statistical comparisons
+      regex: '\| Precision at 0\.25 \| 5/5 \| Unconditional \| (?P<value>-?\d+\.\d+) \(-0\.2423, 0\.0553\)'
+    source:
+      kind: csv_cell
+      path: results/tables/statistical_clean_comparison.csv
+      filters: {metric: precision}
+      column: difference_a_minus_b
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: precision_difference_ci_low
+    description: Lower 95% bootstrap bound for the precision difference.
+    manuscript:
+      section: Statistical comparisons
+      regex: '\| Precision at 0\.25 \| 5/5 \| Unconditional \| -0\.1024 \((?P<value>-?\d+\.\d+), 0\.0553\)'
+    source:
+      kind: csv_cell
+      path: results/tables/statistical_clean_comparison.csv
+      filters: {metric: precision}
+      column: difference_ci_low
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: precision_difference_ci_high
+    description: Upper 95% bootstrap bound for the precision difference.
+    manuscript:
+      section: Statistical comparisons
+      regex: '\| Precision at 0\.25 \| 5/5 \| Unconditional \| -0\.1024 \(-0\.2423, (?P<value>-?\d+\.\d+)\)'
+    source:
+      kind: csv_cell
+      path: results/tables/statistical_clean_comparison.csv
+      filters: {metric: precision}
+      column: difference_ci_high
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: precision_holm_p_value
+    description: Holm-adjusted checkpoint-conditional precision p-value.
+    manuscript:
+      section: Statistical comparisons
+      regex: '\| Precision at 0\.25 \|[^\n]*\| \*\*(?P<value>\d+\.\d+)\*\* \|'
+    source:
+      kind: csv_cell
+      path: results/tables/statistical_clean_comparison.csv
+      filters: {metric: precision}
+      column: p_value_holm_conditional_on_observed_checkpoints
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: map_difference
+    description: Training-procedure mAP@0.5:0.95 difference, Faster R-CNN minus YOLO11s.
+    manuscript:
+      section: Statistical comparisons
+      regex: '\| mAP@0\.5:0\.95 \| 5/5 \| Unconditional \| (?P<value>-?\d+\.\d+) \(0\.0313, 0\.0599\)'
+    source:
+      kind: csv_cell
+      path: results/tables/statistical_clean_comparison.csv
+      filters: {metric: map_50_95}
+      column: difference_a_minus_b
+    absolute_tolerance: 0.00005
+    rounding: 4 decimal places
+
+  - id: timing_v1_faster_rcnn_total_elapsed_seconds
+    description: 'Matched v1 primary-checkpoint timing table: total_elapsed_seconds'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total timed elapsed, 300 calls \(s\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: total_elapsed_seconds
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+
+  - id: timing_v1_yolo11s_total_elapsed_seconds
+    description: 'Matched v1 primary-checkpoint timing table: total_elapsed_seconds'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total timed elapsed, 300 calls \(s\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: total_elapsed_seconds
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+
+  - id: timing_v1_faster_rcnn_fps
+    description: 'Matched v1 primary-checkpoint timing table: fps'
+    manuscript:
+      section: Standardized timing
+      regex: \| FPS \(300 / total elapsed\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: fps
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_fps
+    description: 'Matched v1 primary-checkpoint timing table: fps'
+    manuscript:
+      section: Standardized timing
+      regex: \| FPS \(300 / total elapsed\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: fps
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_median_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: median_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| Median image latency \(ms\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: median_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_median_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: median_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| Median image latency \(ms\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: median_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_iqr_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: iqr_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| IQR image latency \(ms\) \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: iqr_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_iqr_latency_ms
+    description: 'Matched v1 primary-checkpoint timing table: iqr_latency_ms'
+    manuscript:
+      section: Standardized timing
+      regex: \| IQR image latency \(ms\) \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: iqr_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_total_parameters
+    description: 'Matched v1 primary-checkpoint timing table: total_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total parameters \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: total_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_yolo11s_total_parameters
+    description: 'Matched v1 primary-checkpoint timing table: total_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Total parameters \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: total_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_faster_rcnn_training_trainable_parameters
+    description: 'Matched v1 primary-checkpoint timing table: training_trainable_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Training-trainable parameters \| (?P<value>[\d,.]+) \| [\d,.]+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: training_trainable_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_yolo11s_training_trainable_parameters
+    description: 'Matched v1 primary-checkpoint timing table: training_trainable_parameters'
+    manuscript:
+      section: Standardized timing
+      regex: \| Training-trainable parameters \| [\d,.]+ \| (?P<value>[\d,.]+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: training_trainable_parameters
+    absolute_tolerance: 0
+    rounding: 0 decimal places
+
+  - id: timing_v1_faster_rcnn_q1
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| (?P<value>\d+\.\d+)--\d+\.\d+ \| \d+\.\d+--\d+\.\d+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: q1_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_faster_rcnn_q3
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| \d+\.\d+--(?P<value>\d+\.\d+) \| \d+\.\d+--\d+\.\d+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: faster_rcnn
+      column: q3_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_q1
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| \d+\.\d+--\d+\.\d+ \| (?P<value>\d+\.\d+)--\d+\.\d+ \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: q1_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+  - id: timing_v1_yolo11s_q3
+    manuscript:
+      section: Standardized timing
+      regex: \| Q1--Q3 image latency \(ms\) \| \d+\.\d+--\d+\.\d+ \| \d+\.\d+--(?P<value>\d+\.\d+) \|
+    source:
+      kind: csv_cell
+      path: results/tables/inference_timing_v1.csv
+      filters:
+        detector: yolo11s
+      column: q3_latency_ms
+    absolute_tolerance: 0.005
+    rounding: 2 decimal places
+
+# Complete the central exact-score FROC budget coverage after the focused rewrite.
+  - id: faster_rcnn_froc_sensitivity_at_0_125
+    description: Five-run observed exact-score sensitivity at 0.125 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '(?P<value>\d+\.\d+) versus\s+0\.1799 at 0\.125(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: faster_rcnn
+        fp_per_image_budget: 0.125
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: yolo11s_froc_sensitivity_at_0_125
+    description: Five-run observed exact-score sensitivity at 0.125 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '0\.2776 versus\s+(?P<value>\d+\.\d+) at 0\.125(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: yolo11s
+        fp_per_image_budget: 0.125
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: faster_rcnn_froc_sensitivity_at_0_25
+    description: Five-run observed exact-score sensitivity at 0.25 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '(?P<value>\d+\.\d+) versus\s+0\.2664 at 0\.25(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: faster_rcnn
+        fp_per_image_budget: 0.25
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: yolo11s_froc_sensitivity_at_0_25
+    description: Five-run observed exact-score sensitivity at 0.25 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '0\.3664 versus\s+(?P<value>\d+\.\d+) at 0\.25(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: yolo11s
+        fp_per_image_budget: 0.25
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: faster_rcnn_froc_sensitivity_at_0_5
+    description: Five-run observed exact-score sensitivity at 0.5 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '(?P<value>\d+\.\d+) versus\s+0\.3821 at 0\.5(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: faster_rcnn
+        fp_per_image_budget: 0.5
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: yolo11s_froc_sensitivity_at_0_5
+    description: Five-run observed exact-score sensitivity at 0.5 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '0\.4858 versus\s+(?P<value>\d+\.\d+) at 0\.5(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: yolo11s
+        fp_per_image_budget: 0.5
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: faster_rcnn_froc_sensitivity_at_1
+    description: Five-run observed exact-score sensitivity at 1 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '(?P<value>\d+\.\d+) versus\s+0\.5075 at 1(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: faster_rcnn
+        fp_per_image_budget: 1.0
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
+  - id: yolo11s_froc_sensitivity_at_1
+    description: Five-run observed exact-score sensitivity at 1 FP/image.
+    manuscript:
+      section: Exact-score FROC
+      regex: '0\.6000 versus\s+(?P<value>\d+\.\d+) at 1(?: FP/image|,)'
+    source:
+      kind: csv_cell
+      path: results/tables/froc_operating_points_exact_score_v4.csv
+      filters:
+        detector: yolo11s
+        fp_per_image_budget: 1.0
+      column: sensitivity
+    absolute_tolerance: 5.0e-05
+    rounding: 4 decimal places
