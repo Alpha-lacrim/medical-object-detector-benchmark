@@ -1296,3 +1296,44 @@ locally and recorded their sizes/hashes in
 feasible only after the attribution, AGPL, Torchvision-pretraining permission,
 and serialized-metadata review described in `docs/REPRODUCIBILITY.md`. No
 checkpoint download link exists at present.
+
+## YOLO numerical inference-path sensitivity (Batch 53)
+
+The [secondary protocol and interpretation](docs/YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md),
+[path audit](docs/YOLO_NUMERICAL_PATH_AUDIT_V1.md) and
+[complete results](docs/YOLO_NUMERICAL_PATH_RESULTS_V1.md) compare all five frozen
+YOLO checkpoints on the immutable internal test set. Explicit bfloat16 autocast
+and disabled TF32 reproduce the external numerical path. Historical FP32 bundles,
+thresholds, primary estimates and all VinDr outputs remain unchanged. Collection
+completed on the intended RTX 4060; CI does not regenerate GPU predictions.
+
+These commands reproduce every new metric, agreement statistic and report:
+
+```powershell
+# Only before collection, with an absent versioned output root and exact local inputs:
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.analyze_yolo_numerical_path --config configs/yolo_numerical_path_sensitivity_v1.yaml --mode preflight
+& C:\Users\Pouyan\.conda\envs\torch-gpu\python.exe -m src.analyze_yolo_numerical_path --config configs/yolo_numerical_path_sensitivity_v1.yaml --mode run
+# Completed experiment: read-only CPU replay, including hashes and source images:
+& .\.venv\Scripts\python.exe -m src.analyze_yolo_numerical_path --config configs/yolo_numerical_path_sensitivity_v1.yaml --mode verify
+# Create the derived report only when its output does not exist; otherwise verify it:
+& .\.venv\Scripts\python.exe -m scripts.report_yolo_numerical_path --config configs/yolo_numerical_path_report_v1.yaml --verify
+& .\.venv\Scripts\python.exe -m pytest tests/test_yolo_numerical_path.py tests/test_evaluate_vindr_external.py tests/test_exact_score_froc.py tests/test_inference_timing.py -q
+& .\.venv\Scripts\python.exe -m pytest -q
+& .\.venv\Scripts\python.exe -m pytest -q --run-scientific
+& .\.venv\Scripts\python.exe scripts/verify_scientific_artifacts.py --manifest results/publication_artifact_manifest.json
+& .\.venv\Scripts\python.exe scripts/verify_paper_claims.py
+```
+
+Omit `--verify` from the report command only for first creation. Neither command
+overwrites prior evidence. The publication inventory adds five secondary records
+while preserving all 83 previous entries. Its one-time maintenance command was:
+
+```powershell
+& .\.venv\Scripts\python.exe -m scripts.extend_yolo_numerical_path_manifest --config configs/yolo_numerical_path_sensitivity_v1.yaml --manifest results/publication_artifact_manifest.json
+```
+
+That command refuses an existing extension; never refresh scientific hashes to
+hide changes. Historical uncertainty intervals are not re-estimated by this
+sensitivity. The Markdown manuscript is updated; the existing reviewed PDF,
+PDF receipts and Batch 52 numerical trace remain their earlier snapshot and
+require a separately reviewed refresh before submission.

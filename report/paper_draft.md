@@ -50,8 +50,8 @@ throughput under the matched timing protocol.
 performance or successful operating-point transport. Ranking, score scale,
 training variability, false-positive regimes, and implementation efficiency
 require separate interpretation. This is cross-dataset and cross-annotation-
-ontology transportability testing, with confounded dataset and numerical
-implementation differences; it does not establish diagnostic utility.
+ontology transportability testing, with remaining confounding among dataset
+and pipeline factors; it does not establish diagnostic utility.
 
 ## 1. Introduction
 
@@ -309,6 +309,17 @@ resizing, with no test-time augmentation. External inference verified float16
 AMP for Faster R-CNN and bfloat16 AMP for YOLO11s. Historical internal YOLO
 accuracy inference used FP32. Thus internal/external score and performance
 changes cannot be attributed solely to dataset differences.
+
+A secondary sensitivity subsequently applied the external YOLO numerical path
+to the same internal images and all retained checkpoints, preserving historical
+FP32 results. It used explicit bfloat16 autocast and the external disabled-TF32
+policy, unchanged native preprocessing/postprocessing, candidate support,
+evaluator and frozen thresholds. Historical effective TF32 flags were not
+recorded, so this assesses the numerical path rather than activation dtype alone.
+Candidate agreement used same-image, same-class greedy descending-IoU matching;
+unmatched candidates were retained in the emission comparison. Full settings,
+paired differences and matching details are in
+[Supplementary Section S10](../docs/SUPPLEMENTARY.md#s10-yolo-numerical-inference-path-sensitivity).
 
 A narrow Faster R-CNN numerical correction canonicalized a documented one-ULP
 float32 inverse-coordinate overshoot at the upper image boundary. Negative
@@ -639,8 +650,9 @@ internally to 11.502800/0.217200 externally. The equal-run percentage of images
 with no such detections rose from 7.466667%/62.373333% to 8.333333%/87.073333%.
 Per-run score distributions and counts are reported together in the supplement;
 these emitted-population summaries are not probability calibration and exclude
-missed targets. Historical FP32 versus external bfloat16 YOLO inference further
-limits a dataset-only interpretation of score shifts.
+missed targets. Historical FP32 versus external bfloat16 YOLO inference was
+examined separately in the secondary sensitivity below; score shifts still
+cannot be assigned to a single dataset or pipeline factor.
 
 ![Figure 4. Transport of the frozen historical thresholds, with all retained runs and marginal training-procedure intervals; the separately labeled n=5 validation policy is descriptive post-hoc sensitivity. No VinDr threshold was selected.](../results/vindr_external_v1/statistics/frozen_threshold_transport.png)
 
@@ -689,6 +701,24 @@ available in the complete interval table and cannot replace the primary
 training-procedure interpretation. One checkpoint does not represent an entire
 training procedure.
 
+### 4.9 Secondary YOLO numerical-path sensitivity
+
+Under the harmonised internal path, mean AP@0.50 was 0.158412 and mean
+AP@0.50:0.95 was 0.053137, compared with historical FP32 means of 0.162612
+and 0.054168. Mean recall was 0.191791 at the historical cutoff and 0.285821
+under the post-hoc policy. Equal-run FROC sensitivity changes ranged from
+-0.005970 to +0.002239. Observed internal detector orderings at these endpoints
+were unchanged. Seed 271 retained nonzero AP@0.50 of 0.151761 and a maximum
+score of 0.040771, remaining below the historical cutoff.
+
+These aggregate performance changes were modest, although post-NMS candidate
+composition changed and predictions were not numerically equivalent. Detailed
+score distributions, emissions and box/score agreement are in Supplementary
+Section S10. Harmonisation left severe external performance and operating-point
+transport failure intact; it reduces the numerical-path concern without
+identifying the causes of the remaining cross-dataset differences. Historical
+primary values and their uncertainty analyses remain unchanged.
+
 ## 5. Discussion
 
 The central finding is the separation between relative ordering and performance
@@ -731,9 +761,12 @@ interchangeable scores.
 VinDr external testing was deliberately frozen without adaptation, so it
 measures transport of established pipelines and rules. Its strict local opacity
 ontology differs from RSNA's reference standard. Acquisition, hospital/site,
-country, population, annotation ontology, preprocessing effects, and the YOLO
-inference-precision path are confounded. The study cannot attribute the collapse
-to any one of them. Nor would combining labels after seeing results repair
+country, population, annotation ontology and preprocessing effects remain
+confounded. Internal numerical-path harmonisation produced modest aggregate
+changes and preserved the major observed comparisons, weakening precision
+asymmetry as an explanation for the severe transport collapse in this sensitivity.
+It does not establish that every remaining difference is a dataset effect or
+attribute the collapse to any one factor. Nor would combining labels after seeing results repair
 that inference. The adverse result motivates separately designed future
 transport studies; it does not justify post-hoc tuning on this external test set.
 
@@ -748,8 +781,9 @@ variables are unavailable locally; header age requires the nominal-year
 assumption. Min-max conversion and resizing do not reproduce vendor display
 processing. VinDr has a non-identical ontology, only 84 strict-target-positive
 images and 95 boxes, and no defensible patient grouping. Image-level external
-intervals may be too narrow if repeat patients exist. Dataset and numerical
-implementation differences are inseparable in this design.
+intervals may be too narrow if repeat patients exist. The numerical-path
+sensitivity narrows one implementation concern; dataset, site, population,
+annotation and preprocessing differences remain inseparable in this design.
 
 **Training and selection.** Five runs per detector are a coarse empirical
 sample of training variability, conditional on one fixed training dataset.
@@ -769,8 +803,10 @@ Marginal intervals offer no familywise coverage, omit threshold-selection
 uncertainty, and cannot recover missing support. No cross-dataset interaction
 test was conducted. Conditional IoU/Dice exclude misses and use unequal numbers
 of defined runs. Historical internal YOLO accuracy inference used FP32 while
-external inference used verified bfloat16 AMP; dataset differences alone
-cannot explain score/performance shifts. No calibration map was fitted.
+external inference used verified bfloat16 AMP. The secondary internal sensitivity
+found modest aggregate changes but non-identical candidate composition; it is
+not an equivalence test, and historical TF32 flags were not recorded. It does
+not identify a dataset-only cause for the remaining shifts. No calibration map was fitted.
 Detection-level D-ECE remains descriptive, emitted-population dependent,
 binning/support dependent, and not patient-level clinical-risk calibration.
 

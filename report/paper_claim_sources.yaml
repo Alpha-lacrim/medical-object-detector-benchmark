@@ -82,6 +82,12 @@ manuscript_semantic_guards:
     establish improvement
 - id: conditional_not_procedure
   required_regex: One checkpoint does not represent an entire\s+training procedure
+- id: numerical_path_remains_secondary
+  required_regex: A secondary sensitivity subsequently applied the external YOLO numerical path
+- id: numerical_path_is_not_equivalence
+  required_regex: not an equivalence test, and historical TF32 flags were not recorded
+- id: numerical_path_preserves_primary
+  required_regex: Historical\s+primary values and their uncertainty analyses remain unchanged
 claims:
 - id: source_radiograph_count
   description: Full labeled RSNA source cohort size.
@@ -4338,27 +4344,7 @@ claims:
   rounding: displayed precision
 - id: external_count_positive_images_2
   manuscript:
-    regex: '\*\*Data\ and\ reference\ standards\.\*\*\ The\ hardware\-scoped\ 5,000\-study\ RSNA\ subset\
-
-      is\ not\ a\ deployment\-prevalence\ sample,\ and\ only\ two\ disclosed\ detector\ pipelines\
-
-      were\ evaluated\.\ Coarse\ expert\ boxes\ and\ the\ nonspecific\ opacity\ target\ do\ not\
-
-      establish\ pneumonia\ diagnosis\.\ Technical\ annotation\ checks\ are\ not\ an\ independent\
-
-      radiologist\ rereading\.\ RSNA\ source\ accrual\ dates\ and\ broader\ clinical/acquisition\
-
-      variables\ are\ unavailable\ locally;\ header\ age\ requires\ the\ nominal\-year\
-
-      assumption\.\ Min\-max\ conversion\ and\ resizing\ do\ not\ reproduce\ vendor\ display\
-
-      processing\.\ VinDr\ has\ a\ non\-identical\ ontology,\ only\ (?P<value>-?\d[\d,]*(?:\.\d+)?)\ strict\-target\-positive\
-
-      images\ and\ 95\ boxes,\ and\ no\ defensible\ patient\ grouping\.\ Image\-level\ external\
-
-      intervals\ may\ be\ too\ narrow\ if\ repeat\ patients\ exist\.\ Dataset\ and\ numerical\
-
-      implementation\ differences\ are\ inseparable\ in\ this\ design\.'
+    regex: VinDr has a non-identical ontology, only (?P<value>\d+) strict-target-positive\s+images
   source:
     kind: json_value
     path: results/vindr_external_v1/statistics/summary.json
@@ -4502,28 +4488,8 @@ claims:
   rounding: displayed precision
 - id: external_count_target_boxes_11
   manuscript:
-    regex: '\*\*Data\ and\ reference\ standards\.\*\*\ The\ hardware\-scoped\ 5,000\-study\ RSNA\ subset\
-
-      is\ not\ a\ deployment\-prevalence\ sample,\ and\ only\ two\ disclosed\ detector\ pipelines\
-
-      were\ evaluated\.\ Coarse\ expert\ boxes\ and\ the\ nonspecific\ opacity\ target\ do\ not\
-
-      establish\ pneumonia\ diagnosis\.\ Technical\ annotation\ checks\ are\ not\ an\ independent\
-
-      radiologist\ rereading\.\ RSNA\ source\ accrual\ dates\ and\ broader\ clinical/acquisition\
-
-      variables\ are\ unavailable\ locally;\ header\ age\ requires\ the\ nominal\-year\
-
-      assumption\.\ Min\-max\ conversion\ and\ resizing\ do\ not\ reproduce\ vendor\ display\
-
-      processing\.\ VinDr\ has\ a\ non\-identical\ ontology,\ only\ 84\ strict\-target\-positive\
-
-      images\ and\ (?P<value>-?\d[\d,]*(?:\.\d+)?)\ boxes,\ and\ no\ defensible\ patient\ grouping\.\ Image\-level\
-      external\
-
-      intervals\ may\ be\ too\ narrow\ if\ repeat\ patients\ exist\.\ Dataset\ and\ numerical\
-
-      implementation\ differences\ are\ inseparable\ in\ this\ design\.'
+    regex: VinDr has a non-identical ontology, only 84 strict-target-positive\s+images
+      and (?P<value>\d+) boxes
   source:
     kind: json_value
     path: results/vindr_external_v1/statistics/summary.json
@@ -5719,3 +5685,106 @@ claims:
       seed: 17
     column: secondary_threshold
   absolute_tolerance: 0
+- id: numerical_path_ap50_new
+  manuscript:
+    regex: Under the harmonised internal path, mean AP@0\.50 was (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: ap.ap50
+    column: bfloat16_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_ap95_new
+  manuscript:
+    regex: was 0\.158412 and mean\s+AP@0\.50:0\.95 was (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: ap.ap50_95
+    column: bfloat16_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_ap50_historical
+  manuscript:
+    regex: compared with historical FP32 means of (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: ap.ap50
+    column: fp32_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_ap95_historical
+  manuscript:
+    regex: compared with historical FP32 means of 0\.162612\s+and (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: ap.ap50_95
+    column: fp32_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_historical_recall
+  manuscript:
+    regex: Mean recall was (?P<value>[+-]?\d+(?:\.\d+)?) at the historical cutoff
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: threshold_transport.primary.recall
+    column: bfloat16_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_posthoc_recall
+  manuscript:
+    regex: at the historical cutoff and (?P<value>[+-]?\d+(?:\.\d+)?)\s+under the
+      post-hoc policy
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: threshold_transport.secondary.recall
+    column: bfloat16_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_froc_low_delta
+  manuscript:
+    regex: Equal-run FROC sensitivity changes ranged from\s+(?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: froc_budgets.2.sensitivity
+    column: delta_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_froc_high_delta
+  manuscript:
+    regex: changes ranged from\s+-0\.005970 to (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/aggregate.csv
+    filters:
+      metric: froc_budgets.1.sensitivity
+    column: delta_mean
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_seed271_ap
+  manuscript:
+    regex: Seed 271 retained nonzero AP@0\.50 of (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/per_run.csv
+    filters:
+      seed: 271
+      metric: ap.ap50
+    column: bfloat16
+  absolute_tolerance: 5.0e-07
+- id: numerical_path_seed271_max
+  manuscript:
+    regex: 0\.151761 and a maximum\s+score of (?P<value>[+-]?\d+(?:\.\d+)?)
+  source:
+    kind: csv_cell
+    path: results/logs/phase53_yolo_numerical_path_v1/per_run.csv
+    filters:
+      seed: 271
+      metric: score_summaries.all_retained_candidates.max
+    column: bfloat16
+  absolute_tolerance: 5.0e-07

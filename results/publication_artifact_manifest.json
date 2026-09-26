@@ -87,7 +87,12 @@
     "results/vindr_external_v1/statistics/threshold_policy_comparison.csv",
     "results/vindr_external_v1/statistics/internal_external_froc.png",
     "results/vindr_external_v1/statistics/internal_external_scores.png",
-    "results/vindr_external_v1/statistics/frozen_threshold_transport.png"
+    "results/vindr_external_v1/statistics/frozen_threshold_transport.png",
+    "results/logs/phase53_yolo_numerical_path_v1/summary.json",
+    "results/logs/phase53_yolo_numerical_path_v1/protocol.json",
+    "results/logs/phase53_yolo_numerical_path_v1/per_run.csv",
+    "results/logs/phase53_yolo_numerical_path_v1/aggregate.csv",
+    "results/logs/phase53_yolo_numerical_path_v1/agreement.csv"
   ],
   "artifacts": [
     {
@@ -7580,6 +7585,525 @@
       "gpu_required": false,
       "training_required": false,
       "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase53_yolo_numerical_path_v1/summary.json",
+      "sha256": "f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830",
+      "generating_script": "src/analyze_yolo_numerical_path.py",
+      "generating_script_sha256": "9ec11aa54561b48dee3b892e8836aea5d674288ec82c50fe8dd9a428c002a292",
+      "config": {
+        "path": "configs/yolo_numerical_path_sensitivity_v1.yaml",
+        "sha256": "5cc88201e3602d4473881138e55ea3404d1aed295a0b1b428a1138defd799192"
+      },
+      "input_artifacts": [
+        {
+          "path": "configs/cohort_characteristics.yaml",
+          "sha256": "a4ae6a5721bed61ece00b1c96d8b5e5f36eb7f109afb44f49d0bb49e0640b5fe",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/dataset.yaml",
+          "sha256": "419ed20987cce95c61f7806d0913f09b9d3452df5e0b1ac2c091f8e6ff109693",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/evaluation.yaml",
+          "sha256": "df4cb3f8ae3107db8f3109d64220452ef0900908c708c7182009c20e453faa69",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/evaluation_froc_lower_floor_v4.yaml",
+          "sha256": "969f1a707adbdcf591ace64d12b5944ebb7ba02ec9b3026d074f138ef66188f2",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/froc_exact_score_v4.yaml",
+          "sha256": "05644660c0e7c682a37781b030c6b159968397ddb53b6c062f7313df77c293d0",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/threshold_selection_n3_frozen.yaml",
+          "sha256": "f7ba5bae4d206f4081fe94546823867a2d6c554a03156ad03b9da9c7463e0a60",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/threshold_selection_n5_validation_sensitivity.yaml",
+          "sha256": "7c7d998f8a2297046b6be097e7a5f5dbe69e26e5a5128164ce48883b65731694",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/vindr_external_v1.yaml",
+          "sha256": "9516d62b8164ca25794ad0be3ba3f13eec32e29b2377442194a3095b2671a19b",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/yolo.yaml",
+          "sha256": "5a9bd54c730a42db166d8e5c7075f863f914b5be7c66567f5bc91a70b50ef8d2",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/yolo_seed137.yaml",
+          "sha256": "f726b54408681308eb149d7bb11eec17ed1c33f5f5c93233425b11cbf9bf38e5",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/yolo_seed271.yaml",
+          "sha256": "15f40539b0091892a6d3f168b0c2813b903ee87123cba4725b14889963b0c41b",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/yolo_seed314.yaml",
+          "sha256": "d436f4f635bbbaa6a0719eab1f158de1c81a744749a684f171b29c81da43cdbb",
+          "availability": "committed"
+        },
+        {
+          "path": "configs/yolo_seed42.yaml",
+          "sha256": "303a26c5debb26cadfc703d2d571d2f9507d5da636d1829e46a2d35dc9fb18b3",
+          "availability": "committed"
+        },
+        {
+          "path": "data/processed/rsna-pneumonia-5000/annotations/instances_test.json",
+          "sha256": "86bbe6c238d651bfc0b017a447a67548aa631f95855d66b9b8b71a13807502cc",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/test.csv",
+          "sha256": "6b5890343e34ae568b97d7034c29fb8fa75df43517cc3691a5f912292c2f4534",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/train.csv",
+          "sha256": "a904345ce56c5753a49c1cc7d375b6730699c9cd60533fd3daa281b9e2760676",
+          "availability": "committed"
+        },
+        {
+          "path": "data/splits/rsna-pneumonia-5000/val.csv",
+          "sha256": "c185656d0ff3dc1918effdf1726e0030ee723254d8b7ef9e1b9187291ffc7ea4",
+          "availability": "committed"
+        },
+        {
+          "path": "docs/YOLO_NUMERICAL_PATH_AUDIT_V1.md",
+          "sha256": "180d5229bd096244c41fa5d738ee13afc1eee2dc1d960645e07e7fed8701e3a7",
+          "availability": "committed"
+        },
+        {
+          "path": "results/checkpoint_release_manifest.json",
+          "sha256": "7e97d9dfa7db01f97fb962b2447f5c02b522c201ffa11974dba2a91a0c1865d5",
+          "availability": "committed"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed137_full/best_model.pt",
+          "sha256": "b7677b5343b5d3930616f1b5a530f6005ded88dfc54f7e8fdecbe93e3a04fa19",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed17_full/best_model.pt",
+          "sha256": "65909164e82c1ef53c0d38e0d898d37bbbec5f46cb9f5cd029e76ba486c0371c",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed271_full/best_model.pt",
+          "sha256": "d89651bf4e94e1d0067b7b7e287cb95b58c5cd136b654a3a1b3a8a8147b3bd53",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed314_full/best_model.pt",
+          "sha256": "9d4dfb4b6d5338aa3bd4d9eca8be47cd6d50481d575d4d6dc7b2e979351d86b9",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/checkpoints/yolo11s_rsna_seed42_full/best_model.pt",
+          "sha256": "7710372489e96c547aebd4c868663c33a8cf62f8ec48557049b7de8b2a6ab1c0",
+          "availability": "external_or_ignored"
+        },
+        {
+          "path": "results/logs/phase14_threshold_selection/summary.json",
+          "sha256": "4e1d31e1dffb258fdb534b86677d912944df81cc226fde3bc9daf302505f7e50",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_exact_score_v4/summary.json",
+          "sha256": "6614b49208a635e902b6b77e4b2351be86a9700ca3bcec3152c6c1a831799898",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "a11fb858cd36522f3cc4e96489934a04b4745d3eb171ff3f8699fcf4e085d406",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "6d005316d9fbb8d0084178e5b6bead3a13ec2ac6d232af99308912bdabadf234",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "d02bc3bea95d161e002fcb8ef952fbd028395f89851498a526e3588681b453bf",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "8fafe6c0efc342af5f00b730beb2f08b73b1384fe6466f46b45d1fce20e86e88",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "d0540e93e222d6f91b9366ef2c726bb9a025193ccc894d019c3055eae071c4b0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase42_froc_lower_floor_v4/summary.json",
+          "sha256": "02e5ba07fcd656e5917f6815b92ecb83d5a37f90dd88a2ba0e53e6e2c4e5a0d1",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase43_threshold_selection_n5_validation_sensitivity/summary.json",
+          "sha256": "0cbd04874192ac659eef645f64a8352e2de48a8b867bd990be26e17f59e4dcd0",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "3e62b8220181da56c0663defebf745ead5c0d56e7dba082a94adde0bec355b0b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "1a5876f9f8ace7c5af8b3bf81f79ed3b38d9b55d8591d1da27e24be1bef8d384",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "8790c679b7da1cbab0598f79a5e690aa764acacf2885a10379ff201f1047da5b",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "ddd75b4d1b6b493bd0e53a384e58509a8b0cf0217abf323cd802b26661df33e4",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "8d3804eb35f5ff1927c07cc35c246badb548f60d3d1475b9a643b6d34ed8323d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase5_evaluation/summary.json",
+          "sha256": "09fedc40790e1fa125e2c4f607eda2f23c3de33e257ab152938dc6c66a1d7130",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/selected_operating_points.csv",
+          "sha256": "1b0c9fe80b5867f7e8f60fdd9af3489bd779c0a2f124029a6c5b1b8c13d7d58d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/tables/threshold_selection_test_operating_points_n5_validation_sensitivity.csv",
+          "sha256": "526fc5a17f18c47cc7da9eef65a555474287976725ee5ad49f1b728cbd7ed99d",
+          "availability": "committed"
+        },
+        {
+          "path": "results/vindr_external_v1/inference_summary.json",
+          "sha256": "d15070ebcafdfb2711b07db5090e67ef556b60d0042c87ac047b243bdf8fc656",
+          "availability": "committed"
+        },
+        {
+          "path": "src/analyze_exact_score_froc.py",
+          "sha256": "d79c04d1fde3ff2ae73bd3e93c6cc474fef10c304265b1b1d2af7113a2fa122b",
+          "availability": "committed"
+        },
+        {
+          "path": "src/benchmark_inference.py",
+          "sha256": "95118a9993da2a858b2e4bb618058c9f1ba318701086886238ed61af91fe4307",
+          "availability": "committed"
+        },
+        {
+          "path": "src/evaluate.py",
+          "sha256": "6a68abe2aa378a8c97f6128348e8b944036ccf1cb4b426c387103bb8db1f808a",
+          "availability": "committed"
+        },
+        {
+          "path": "src/evaluate_vindr_external.py",
+          "sha256": "f6527332b1b61173b6d4205d42410504660af4c52422f929306539d33fe256df",
+          "availability": "committed"
+        },
+        {
+          "path": "src/meddet_benchmark/coco_evaluation.py",
+          "sha256": "05070ebb84df6f6f35ab1c711bc35dcfe0d9e478ceb8c94ecafca911811a8dd7",
+          "availability": "committed"
+        },
+        {
+          "path": "src/meddet_benchmark/evaluation.py",
+          "sha256": "be7bca53c50d9e1de45a686709fb303c9e389491196406978988dc2033eb933f",
+          "availability": "committed"
+        },
+        {
+          "path": "src/meddet_benchmark/reproducibility.py",
+          "sha256": "65288824c9e5f8da6039f63def2a458d083b0bbc77c27ba8904a9f4cb0cbddd2",
+          "availability": "committed"
+        },
+        {
+          "path": "src/models/faster_rcnn_data.py",
+          "sha256": "29be9d6bcbb88ffc325627be8277a1e58c4e682cab25cbc653b155e2b6284ce2",
+          "availability": "committed"
+        },
+        {
+          "path": "src/models/yolo_config.py",
+          "sha256": "e3dd32b0905421d24465a4b2f2bdf44fffab603d830adb40732feef2fc752b81",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed17_test_predictions.json.gz",
+          "sha256": "b8ae72690a4e6ac8971920af9c089bfd97ab97ee2df9d745bd3f492966324324",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed42_test_predictions.json.gz",
+          "sha256": "5c32605e1b37f5e960b05f523f265f44c4ac7ff02fb5c1af43fabfb9cf0ea786",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed137_test_predictions.json.gz",
+          "sha256": "ab18db3d63ea0fc0b38dd425d0140e44bc70d4d67296abf47f57e626cdd4cce3",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed271_test_predictions.json.gz",
+          "sha256": "9b2b0aef6aa9e6617ee0883e7a59f84ef36e3792d416fe2c837712cccf8fbde5",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed314_test_predictions.json.gz",
+          "sha256": "e98c0759f484c523112cb41da8bfd2f353d9a39bf90c4c79e56ec48bc4130b84",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/per_run.csv",
+          "sha256": "78cf1e9e7e91b5708b0c95a7099e2c3bfc244d2cf1ab6816da13291e1dcfed18",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/aggregate.csv",
+          "sha256": "f86be2695928f24743847f4ae7e463d4b454d72b0b649b4b32d29c222bf08f48",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/agreement.csv",
+          "sha256": "3313e8e14a5f7f8020533f709443daae3cfb189c48ed4ebba78902a226f35232",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/protocol.json",
+          "sha256": "415939ea456f89ad1005931d854d078a1dad1bece8c8806a77256b951993322e",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/environment/pip_freeze.txt",
+          "sha256": "8b80f1441adfcaa3adfbacd0faf7eb9f8cbb07e581c0b170574f1481c1a54489",
+          "availability": "committed"
+        },
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/environment/run_environment.json",
+          "sha256": "e1a62abf4267ba36b21cffed73c5cd9bc71edafd0c058ce53c96d3e6f220d3d3",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_keys": [
+          "aggregate",
+          "analysis_id",
+          "artifacts",
+          "completed_utc",
+          "config_sha256",
+          "external_inference_performed",
+          "gate",
+          "paired_runs",
+          "schema_version",
+          "source_sha256",
+          "status",
+          "threshold_selection_performed",
+          "training_performed"
+        ]
+      },
+      "study_phase": "Batch 53 secondary internal YOLO numerical-path sensitivity",
+      "reproduction_tier": "authorized_data_replay",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": [
+        "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed17_test_predictions.json.gz",
+        "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed42_test_predictions.json.gz",
+        "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed137_test_predictions.json.gz",
+        "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed271_test_predictions.json.gz",
+        "results/logs/phase53_yolo_numerical_path_v1/predictions/yolo11s_seed314_test_predictions.json.gz",
+        "results/logs/phase53_yolo_numerical_path_v1/per_run.csv",
+        "results/logs/phase53_yolo_numerical_path_v1/aggregate.csv",
+        "results/logs/phase53_yolo_numerical_path_v1/agreement.csv",
+        "results/logs/phase53_yolo_numerical_path_v1/protocol.json",
+        "results/logs/phase53_yolo_numerical_path_v1/environment/pip_freeze.txt",
+        "results/logs/phase53_yolo_numerical_path_v1/environment/run_environment.json"
+      ]
+    },
+    {
+      "path": "results/logs/phase53_yolo_numerical_path_v1/protocol.json",
+      "sha256": "415939ea456f89ad1005931d854d078a1dad1bece8c8806a77256b951993322e",
+      "generating_script": "src/analyze_yolo_numerical_path.py",
+      "generating_script_sha256": "9ec11aa54561b48dee3b892e8836aea5d674288ec82c50fe8dd9a428c002a292",
+      "config": {
+        "path": "configs/yolo_numerical_path_sensitivity_v1.yaml",
+        "sha256": "5cc88201e3602d4473881138e55ea3404d1aed295a0b1b428a1138defd799192"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/summary.json",
+          "sha256": "f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "json",
+        "top_level_type": "object",
+        "required_keys": [
+          "config",
+          "config_sha256",
+          "gate",
+          "image_sha256",
+          "started_utc"
+        ]
+      },
+      "study_phase": "Batch 53 secondary internal YOLO numerical-path sensitivity",
+      "reproduction_tier": "exact_inference",
+      "gpu_required": true,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase53_yolo_numerical_path_v1/per_run.csv",
+      "sha256": "78cf1e9e7e91b5708b0c95a7099e2c3bfc244d2cf1ab6816da13291e1dcfed18",
+      "generating_script": "src/analyze_yolo_numerical_path.py",
+      "generating_script_sha256": "9ec11aa54561b48dee3b892e8836aea5d674288ec82c50fe8dd9a428c002a292",
+      "config": {
+        "path": "configs/yolo_numerical_path_sensitivity_v1.yaml",
+        "sha256": "5cc88201e3602d4473881138e55ea3404d1aed295a0b1b428a1138defd799192"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/summary.json",
+          "sha256": "f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "seed",
+          "metric",
+          "fp32",
+          "bfloat16",
+          "delta"
+        ],
+        "exact_columns": [
+          "seed",
+          "metric",
+          "fp32",
+          "bfloat16",
+          "delta"
+        ],
+        "row_count": 850
+      },
+      "study_phase": "Batch 53 secondary internal YOLO numerical-path sensitivity",
+      "reproduction_tier": "authorized_data_replay",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase53_yolo_numerical_path_v1/aggregate.csv",
+      "sha256": "f86be2695928f24743847f4ae7e463d4b454d72b0b649b4b32d29c222bf08f48",
+      "generating_script": "src/analyze_yolo_numerical_path.py",
+      "generating_script_sha256": "9ec11aa54561b48dee3b892e8836aea5d674288ec82c50fe8dd9a428c002a292",
+      "config": {
+        "path": "configs/yolo_numerical_path_sensitivity_v1.yaml",
+        "sha256": "5cc88201e3602d4473881138e55ea3404d1aed295a0b1b428a1138defd799192"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/summary.json",
+          "sha256": "f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "metric",
+          "runs",
+          "fp32_defined_runs",
+          "fp32_mean",
+          "fp32_sample_sd",
+          "bfloat16_defined_runs",
+          "bfloat16_mean",
+          "bfloat16_sample_sd",
+          "delta_defined_runs",
+          "delta_mean",
+          "delta_sample_sd"
+        ],
+        "exact_columns": [
+          "metric",
+          "runs",
+          "fp32_defined_runs",
+          "fp32_mean",
+          "fp32_sample_sd",
+          "bfloat16_defined_runs",
+          "bfloat16_mean",
+          "bfloat16_sample_sd",
+          "delta_defined_runs",
+          "delta_mean",
+          "delta_sample_sd"
+        ],
+        "row_count": 170
+      },
+      "study_phase": "Batch 53 secondary internal YOLO numerical-path sensitivity",
+      "reproduction_tier": "authorized_data_replay",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
+    },
+    {
+      "path": "results/logs/phase53_yolo_numerical_path_v1/agreement.csv",
+      "sha256": "3313e8e14a5f7f8020533f709443daae3cfb189c48ed4ebba78902a226f35232",
+      "generating_script": "src/analyze_yolo_numerical_path.py",
+      "generating_script_sha256": "9ec11aa54561b48dee3b892e8836aea5d674288ec82c50fe8dd9a428c002a292",
+      "config": {
+        "path": "configs/yolo_numerical_path_sensitivity_v1.yaml",
+        "sha256": "5cc88201e3602d4473881138e55ea3404d1aed295a0b1b428a1138defd799192"
+      },
+      "input_artifacts": [
+        {
+          "path": "results/logs/phase53_yolo_numerical_path_v1/summary.json",
+          "sha256": "f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830",
+          "availability": "committed"
+        }
+      ],
+      "expected_schema": {
+        "type": "csv",
+        "required_columns": [
+          "seed",
+          "metric",
+          "value"
+        ],
+        "exact_columns": [
+          "seed",
+          "metric",
+          "value"
+        ],
+        "row_count": 450
+      },
+      "study_phase": "Batch 53 secondary internal YOLO numerical-path sensitivity",
+      "reproduction_tier": "authorized_data_replay",
+      "gpu_required": false,
+      "training_required": false,
+      "referenced_results": []
     }
   ],
   "publication_extension": {
@@ -7589,6 +8113,11 @@
       "availability": "committed"
     },
     "note": "Internal entries copied unchanged; original v1 freeze and scientific definitions retained.",
-    "historical_editorial_bindings": "report/provenance/batch46/baseline_bindings.json"
+    "historical_editorial_bindings": "report/provenance/batch46/baseline_bindings.json",
+    "secondary_numerical_path": {
+      "analysis_id": "rsna-phase53-yolo-numerical-path-v1",
+      "maintenance_script": "scripts/extend_yolo_numerical_path_manifest.py",
+      "note": "All pre-existing entries preserved; no primary or external estimate replaced."
+    }
   }
 }

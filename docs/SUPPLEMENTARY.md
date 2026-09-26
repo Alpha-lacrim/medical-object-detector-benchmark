@@ -235,7 +235,7 @@ it is not a second maintained manuscript.
   errors fail. Original failed-attempt evidence and raw corrected coordinates
   remain private and hash-bound. This was not a scientific protocol amendment
   or post-hoc optimization. Historical internal YOLO FP32 and verified external
-  bfloat16 AMP remain a confound in cross-dataset comparisons.
+  bfloat16 AMP are preserved; S10 now quantifies internal numerical-path sensitivity.
 
 External AP ordering is an observed equal-run result. Most FROC contrasts and
 all historical-threshold contrasts include zero. At upper FROC budgets the
@@ -251,3 +251,23 @@ legacy evidence replay while preserving every original freeze hash. Exact
 commands are in [README](../README.md#final-manuscript-verification-batch-51).
 Restricted images, IDs, annotations and image-linked derivatives remain local;
 only nonidentifying aggregate external artifacts accompany the manuscript.
+
+## S10. YOLO numerical inference-path sensitivity
+
+The [versioned protocol and interpretation](YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md)
+and [forensic path audit](YOLO_NUMERICAL_PATH_AUDIT_V1.md) define a secondary
+same-checkpoint, same-image internal FP32-versus-bfloat16 comparison. The
+[complete results](YOLO_NUMERICAL_PATH_RESULTS_V1.md) report every retained run,
+equal-run means/sample SDs, both unchanged threshold policies, score populations,
+exact-score FROC, candidate composition and matched box/score differences.
+No detector seeds are paired as stochastic replicates; seed 271 stays included.
+
+Canonical secondary artifacts are the
+[summary](../results/logs/phase53_yolo_numerical_path_v1/summary.json),
+[per-run deltas](../results/logs/phase53_yolo_numerical_path_v1/per_run.csv),
+[aggregate deltas](../results/logs/phase53_yolo_numerical_path_v1/aggregate.csv)
+and [agreement table](../results/logs/phase53_yolo_numerical_path_v1/agreement.csv).
+The historical analyses and their intervals are unchanged. This sensitivity
+narrows the precision concern but does not remove cross-dataset confounding,
+finite candidate support or prove numerical equivalence. Exact reproduction
+and read-only replay commands are in the README Batch 53 section.

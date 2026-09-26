@@ -20,3 +20,6 @@ report/provenance/batch46/paper_claim_sources.yaml -text whitespace=cr-at-eol
 
 # Preserve the exact reviewed Batch 52 snapshot before author declarations.
 report/provenance/batch52/* -text whitespace=cr-at-eol
+
+# Secondary numerical-path receipts bind exact generated environment bytes.
+results/logs/phase53_yolo_numerical_path_v1/** -text whitespace=cr-at-eol

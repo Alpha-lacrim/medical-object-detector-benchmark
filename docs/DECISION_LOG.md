@@ -914,3 +914,46 @@ narrow byte-preservation attributes. The full prior audit remains at
 `docs/FINAL_SUBMISSION_AUDIT_2026-09-24.md`. The current canonical PDF is regenerated
 from the updated Markdown; no scientific result, protocol or expected artifact
 hash changes. No staging, commit, push or publication is part of this follow-up.
+
+## D-023 — Retain numerical-path harmonisation as secondary sensitivity
+
+Date: 2026-09-27. Batch 53 completed; stop for user review. Status remains
+**secondary sensitivity**. Historical FP32 internal estimates, confidence
+intervals, validation-selected thresholds and all frozen external outputs retain
+their existing status. No primary analysis is replaced or promoted.
+
+All five exact YOLO checkpoint hashes passed; all five 750-image internal
+bfloat16 runs completed on the pinned RTX 4060 environment. The original native
+external Predictor was reused without adapter changes. Explicit bfloat16
+activation evidence, FP32 weights, disabled TF32, immutable source-image/split/
+annotation identities, software, timestamps and bundle hashes are recorded.
+Historical effective TF32 flags were not logged, so this is numerical-path
+sensitivity, not an isolated activation-dtype causal experiment.
+
+Mean AP50 changes from 0.162612 to 0.158412; historical-threshold recall changes
+from 0.194776 to 0.191791. FROC mean deltas span -0.005970 to +0.002239. Seed
+271 retains nonzero AP with maximum score 0.040771 and no historical-threshold
+detections. Observed major internal comparisons and severe transport failure
+remain unchanged. The precision concern is narrowed, not erased: unmatched
+candidate fractions are appreciable, no equivalence test or new interval was
+computed, and dataset/site/population/annotation/preprocessing factors remain
+confounded. No dataset-only causal attribution follows.
+
+Canonical secondary evidence is
+[`results/logs/phase53_yolo_numerical_path_v1/summary.json`](../results/logs/phase53_yolo_numerical_path_v1/summary.json),
+SHA-256 `f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830`,
+with [protocol/interpretation](YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md),
+[forensic audit](YOLO_NUMERICAL_PATH_AUDIT_V1.md) and
+[complete results](YOLO_NUMERICAL_PATH_RESULTS_V1.md). Full CPU numerical replay
+passes. The publication inventory adds five records while preserving all 83
+prior entries; the original scientific inventory and 38-file freeze remain
+intact. Manuscript integration adds ten numerical bindings and three semantic
+guards without changing historical result sources or tolerances. Two existing
+count locators follow revised limitation prose; their evidence is unchanged.
+
+The canonical Markdown now includes the secondary sensitivity. Existing PDF,
+PDF build/QA receipts and Batch 52 numerical trace remain preserved prior-review
+artifacts and require a fresh reviewed derivative before submission. No training,
+threshold reselection, external inference, seed removal, publication or Git
+write action occurred in this batch. The separate concurrent Batch 52 commit
+advanced HEAD to `4e66e3e`; it did not alter these scientific inputs.

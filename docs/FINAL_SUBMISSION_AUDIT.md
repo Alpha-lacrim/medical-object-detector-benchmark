@@ -1,5 +1,15 @@
 # Final submission audit and author-declaration follow-up
 
+**2026-09-27 Batch 53 update:** The canonical Markdown now includes a verified
+[secondary YOLO numerical-path sensitivity](YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md).
+Historical primary/external evidence remains unchanged. The full audit and PDF
+details below describe the preceding Batch 52/author snapshot; the PDF, its
+build/QA receipts and numerical trace have deliberately not been rewritten.
+They do not yet render or audit the added sensitivity. Current verification
+has 427 numerical bindings/36 semantic guards and 88 publication artifacts;
+the new experiment has its own protocol, provenance and complete metric replay.
+A new PDF/trace and final author review are required before submission.
+
 Updated 2026-09-25. **READY FOR CONTINUED AUTHOR REVIEW; NOT READY FOR JOURNAL
 SUBMISSION.** Author-supplied facts are now incorporated. Institutional/journal
 ethics and consent applicability, the exact submission release, journal selection

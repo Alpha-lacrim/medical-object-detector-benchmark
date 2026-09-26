@@ -1,5 +1,16 @@
 # Reproducibility contract
 
+**Batch 53 secondary numerical-path sensitivity:** All five immutable internal
+YOLO checkpoints were evaluated with the frozen external bfloat16 numerical
+path and fully replayed on CPU. [Protocol, caveats and commands](YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md)
+and [detailed results](YOLO_NUMERICAL_PATH_RESULTS_V1.md) bind the new evidence.
+Publication inventory now has 88 entries, preserving the preceding 83 exactly;
+the original scientific inventory and external freeze remain unchanged. Current
+Markdown claims include 427 numerical bindings and 36 semantic guards. CI
+verifies software/artifacts; it does not run this GPU collection. The previous
+PDF/build receipts and 417-row numerical trace describe the preserved author
+review snapshot, not the current Markdown containing the sensitivity.
+
 **Batch 52 audit and author follow-up:** The [current record](FINAL_SUBMISSION_AUDIT.md)
 links the [preserved scientific gate](FINAL_SUBMISSION_AUDIT_2026-09-24.md), including
 a fresh portable checkout and authorized source/metric/bootstrap replay. The
@@ -93,9 +104,10 @@ or exact-retraining reproduction.
 ## Machine-checkable committed evidence
 
 `results/publication_artifact_manifest.json` is the current reviewed inventory
-of 83 manuscript-supporting artifacts. It copies all 72 original entries in
+of 88 manuscript-supporting artifacts. It copies all 72 original entries in
 `results/scientific_artifact_manifest.json` unchanged and adds the external
-aggregate evidence. The original inventory remains a frozen scientific input.
+aggregate evidence and five secondary numerical-path records. The original
+inventory remains a frozen scientific input.
 Each record binds the artifact SHA256 to its
 generating script and hash, config and hash, input artifact hashes, frozen
 schema, study phase, reproduction tier, and GPU/training requirements. It also

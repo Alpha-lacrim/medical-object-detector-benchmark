@@ -1,0 +1,97 @@
+schema_version: 1
+summary: results/logs/phase53_yolo_numerical_path_v1/summary.json
+input_sha256:
+  results/logs/phase53_yolo_numerical_path_v1/summary.json: f76ac0cb438f31e1721ebe60e596db01a5b613cc702a9bc5fdf6e3ea2f028830
+  configs/yolo_numerical_path_sensitivity_v1.yaml: 5cc88201e3602d4473881138e55ea3404d1aed295a0b1b428a1138defd799192
+output: docs/YOLO_NUMERICAL_PATH_RESULTS_V1.md
+aggregate_groups:
+- title: Ranking
+  metrics: &id001
+    ap.ap50: AP@0.50
+    ap.ap50_95: AP@0.50:0.95
+- title: Historical RSNA threshold, unchanged at 0.05
+  metrics: &id002
+    threshold_transport.primary.precision: precision
+    threshold_transport.primary.recall: recall
+    threshold_transport.primary.f1: f1
+    threshold_transport.primary.fp_per_image: fp_per_image
+    threshold_transport.primary.detections_per_image: detections_per_image
+    threshold_transport.primary.percent_images_with_detections: percent_images_with_detections
+- title: Post-hoc n=5 RSNA threshold, unchanged at 0.01
+  metrics: &id003
+    threshold_transport.secondary.precision: precision
+    threshold_transport.secondary.recall: recall
+    threshold_transport.secondary.f1: f1
+    threshold_transport.secondary.fp_per_image: fp_per_image
+    threshold_transport.secondary.detections_per_image: detections_per_image
+    threshold_transport.secondary.percent_images_with_detections: percent_images_with_detections
+- title: Historical shared 0.25 cutoff
+  metrics:
+    shared_operating_point.precision: precision
+    shared_operating_point.recall: recall
+    shared_operating_point.f1: f1
+- title: Exact-score FROC
+  metrics: &id004
+    froc_budgets.0.sensitivity: Sensitivity at 0.125 FP/image
+    froc_budgets.1.sensitivity: Sensitivity at 0.25 FP/image
+    froc_budgets.2.sensitivity: Sensitivity at 0.5 FP/image
+    froc_budgets.3.sensitivity: Sensitivity at 1 FP/image
+    froc_budgets.4.sensitivity: Sensitivity at 2 FP/image
+- title: 'Scores: all_retained_candidates'
+  metrics: &id005
+    score_summaries.all_retained_candidates.detection_count: detection_count
+    score_summaries.all_retained_candidates.detections_per_image: detections_per_image
+    score_summaries.all_retained_candidates.zero_detection_fraction: zero_detection_fraction
+    score_summaries.all_retained_candidates.min: min
+    score_summaries.all_retained_candidates.mean: mean
+    score_summaries.all_retained_candidates.median: median
+    score_summaries.all_retained_candidates.max: max
+    score_summaries.all_retained_candidates.quantiles.0.01: quantile 0.01
+    score_summaries.all_retained_candidates.quantiles.0.05: quantile 0.05
+    score_summaries.all_retained_candidates.quantiles.0.25: quantile 0.25
+    score_summaries.all_retained_candidates.quantiles.0.5: quantile 0.5
+    score_summaries.all_retained_candidates.quantiles.0.75: quantile 0.75
+    score_summaries.all_retained_candidates.quantiles.0.95: quantile 0.95
+    score_summaries.all_retained_candidates.quantiles.0.99: quantile 0.99
+- title: 'Scores: ap_candidates'
+  metrics: &id006
+    score_summaries.ap_candidates.detection_count: detection_count
+    score_summaries.ap_candidates.detections_per_image: detections_per_image
+    score_summaries.ap_candidates.zero_detection_fraction: zero_detection_fraction
+    score_summaries.ap_candidates.min: min
+    score_summaries.ap_candidates.mean: mean
+    score_summaries.ap_candidates.median: median
+    score_summaries.ap_candidates.max: max
+    score_summaries.ap_candidates.quantiles.0.01: quantile 0.01
+    score_summaries.ap_candidates.quantiles.0.05: quantile 0.05
+    score_summaries.ap_candidates.quantiles.0.25: quantile 0.25
+    score_summaries.ap_candidates.quantiles.0.5: quantile 0.5
+    score_summaries.ap_candidates.quantiles.0.75: quantile 0.75
+    score_summaries.ap_candidates.quantiles.0.95: quantile 0.95
+    score_summaries.ap_candidates.quantiles.0.99: quantile 0.99
+per_run_groups:
+- title: Ranking by checkpoint
+  metrics: *id001
+- title: Historical RSNA threshold, unchanged at 0.05 by checkpoint
+  metrics: *id002
+- title: Post-hoc n=5 RSNA threshold, unchanged at 0.01 by checkpoint
+  metrics: *id003
+- title: Exact-score FROC by checkpoint
+  metrics: *id004
+- title: 'Score distribution by checkpoint: all_retained_candidates'
+  metrics: *id005
+- title: 'Score distribution by checkpoint: ap_candidates'
+  metrics: *id006
+agreement_metrics:
+  before_candidates: before_candidates
+  after_candidates: after_candidates
+  matched_candidates: matched_candidates
+  disappeared_fraction: disappeared_fraction
+  appeared_fraction: appeared_fraction
+  fraction_images_equal_count: fraction_images_equal_count
+  spearman_matched_scores: spearman_matched_scores
+  score_difference.mean: score_difference.mean
+  absolute_score_difference.mean: absolute_score_difference.mean
+  absolute_score_difference.max: absolute_score_difference.max
+  box_absolute_coordinate_difference_pixels.mean: box_absolute_coordinate_difference_pixels.mean
+  box_absolute_coordinate_difference_pixels.max: box_absolute_coordinate_difference_pixels.max

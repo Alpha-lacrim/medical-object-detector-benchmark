@@ -71,9 +71,19 @@ is a separate support limit. Neither the floor nor cap was changed after
 external results; bootstrap intervals cannot fill missing support.
 
 Historical internal YOLO accuracy used FP32; external YOLO used verified
-bfloat16 AMP. Scanners/acquisition, hospital/site, country, population,
-annotation ontology, preprocessing effects and numerical implementation are
-confounded. No single-factor explanation is demonstrated. A documented one-ULP
+bfloat16 AMP. The [Batch 53 secondary sensitivity](YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md)
+harmonises the internal numerical path across all five checkpoints. Mean AP50
+changes by -0.004200, historical-threshold recall by -0.002985, and observed
+FROC means by -0.005970 to +0.002239. Major observed internal orderings and
+severe external transport failure remain. This weakens numerical-path asymmetry
+as a major explanation in this experiment; it is not a numerical equivalence
+test or proof that the remaining shift is entirely a dataset effect. Candidate
+composition changes materially at strict IoU correspondence, despite high
+matched-score rank correlations. Historical TF32 flags were not recorded, so
+this is a numerical-path sensitivity, not an isolated activation-dtype ablation.
+Scanners/acquisition, hospital/site, country, population, annotation ontology
+and preprocessing effects remain confounded. No single-factor explanation is
+demonstrated. A documented one-ULP
 Faster R-CNN inverse-coordinate upper-bound correction was a narrow numerical
 handoff repair before any complete external result. Lower-bound or materially
 out-of-range coordinates still fail; no frozen scientific definition changed.
