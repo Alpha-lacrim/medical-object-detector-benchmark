@@ -864,3 +864,53 @@ final paper. Historical reports and inferential/threshold provenance remain
 preserved. Author declarations and submission-specific reporting remain open;
 the [final audit](FINAL_MANUSCRIPT_AUDIT.md) records checks and review boundaries.
 No publication, commit or push is implied by completion of this batch.
+
+## D-021 — Audit the final science and derive the author-review article
+
+- **Date:** 2026-09-24
+- **Status:** Batch 52; ready for author review, not journal-submission clearance
+
+Fresh portable and authorized verification, exact-HEAD Windows/Ubuntu CI,
+ten-run external replay and full statistical replay support the current
+scientific draft. No scientific artifact, configuration, checkpoint, numerical
+result or inferential policy changed. FROC tied-score treatment and caption-level
+support/cap limitations were made explicit. Human declarations remain unresolved.
+
+`report/paper_draft.md` remains the only editable journal manuscript.
+`output/pdf/rsna_vindr_article.pdf` is its canonical review derivative, generated
+by the versioned Pandoc/pdfLaTeX build with source/output hash receipt. The older
+alternate Markdown/PDF and historical report retain their provenance status.
+The prior submission audit is preserved at `docs/FINAL_SUBMISSION_AUDIT_2026-09-01.md`;
+the current audit and complete numeric trace document this gate. No publication,
+release, commit or push is authorized by completing this audit.
+
+## D-022 — Incorporate supplied author declarations and preserve the audited snapshot
+
+- **Date:** 2026-09-25
+- **Status:** Author-action follow-up; ready for continued author review
+
+The confirmed author order is Pouyan Delivandani (IKIU) and Mohammad Amin
+Hajialirezaei (K. N. Toosi), both in Computer Engineering. Pouyan is corresponding
+author. Both emails, contributions, self-funded/no-institutional-support facts,
+no competing interests and no patient/public involvement are incorporated.
+Original drafting is Pouyan's contribution only; both share analysis, figures
+and review/revision. Future review is not represented as already completed.
+
+No separate institutional ethics/consent determination was sought or obtained.
+Source-study VinDr approval/waiver is cited separately. Applicable institutional
+and journal requirements remain unresolved rather than being labeled exempt.
+All ten checkpoints will stay unpublished at initial submission by author
+decision. No future release date or availability-on-request promise is made.
+The exact public submission revision and target journal remain open.
+
+Codex disclosure covers the user-reported implementation/code-audit assistance
+and the directly documented manuscript/reporting/PDF assistance. Pouyan confirms
+checking all relevant AI-assisted outputs; Mohammad Amin's review is ongoing.
+No other AI tools are reported in the authors' current project records.
+
+The prior source, PDF, numeric trace, layout filter and build/QA receipts are
+preserved exactly under `report/provenance/batch52/`, with a hash manifest and
+narrow byte-preservation attributes. The full prior audit remains at
+`docs/FINAL_SUBMISSION_AUDIT_2026-09-24.md`. The current canonical PDF is regenerated
+from the updated Markdown; no scientific result, protocol or expected artifact
+hash changes. No staging, commit, push or publication is part of this follow-up.

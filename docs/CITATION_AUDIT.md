@@ -1,6 +1,19 @@
 # Citation Verification Audit
 
-## Current final manuscript — 2026-09-24
+Batch 52 independently rechecked current citation resolution and refreshed the
+primary CLAIM, calibration, official VinDr release and direct RSNA-comparison
+sources on 2026-09-24. The [preserved scientific audit](FINAL_SUBMISSION_AUDIT_2026-09-24.md#references-reporting-and-availability)
+records the continuing IEEE bot gate and this session's failed Nature VinDr
+extraction. No new scientific reference or unsupported claim was introduced.
+
+The 2026-09-25 author follow-up independently checked the official VinDr release's
+Methods statement on source-hospital IRB approval and its original-study consent
+waiver, plus NIH's official anonymized-data release announcement. The manuscript
+uses the existing `nguyen2021vindrrelease` citation for the original VinDr ethics
+facts; it does not extend that approval/waiver to the present secondary analysis.
+No BibTeX entry was added and all 19 unique current keys still resolve.
+
+## Current final manuscript — 2026-09-25
 
 This section supersedes the manuscript-location and citation-coverage statements
 in the archived audit below. It audits `report/paper_draft.md` only. All 19 current citation keys resolve. The 16 retained method/background

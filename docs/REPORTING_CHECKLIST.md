@@ -1,13 +1,16 @@
 # Reporting Checklist Crosswalk
 
-Audit date: 2026-09-24
+Audit date: 2026-09-25 (author declarations follow-up; scientific audit 2026-09-24)
 
-Updated for the final internal/external manuscript (Batch 51). Current
-manuscript SHA-256: `1f3b5fac3809ff287ddc952ca0432c405e7c891c1bfc85d7cb009cb6c40330d2`.
+Updated for the internal/external manuscript with supplied author declarations.
+Current manuscript SHA-256: `fc38d6e3a819acdcb05647a2a18e2b0abc5615b9f39f637dbb2cb2c83b959910`.
+The [submission audit](FINAL_SUBMISSION_AUDIT.md) records the 16-page PDF review;
+the journal's official checklist and final submission pagination remain author action.
 The paper separates ranking, operating rules, training variability, observed
 FROC support, implementation timing and cross-dataset transportability. All five
-runs per detector remain represented. External testing is complete; human
-declarations and final submission details remain unresolved.
+runs per detector remain represented. External testing is complete;
+funding, conflicts, contributions and no-PPI facts are now supplied. Ethics/consent
+applicability, submission revision and journal-specific requirements remain open.
 
 This audit is against the **current manuscript**,
 [`report/paper_draft.md`](../report/paper_draft.md). It is not an audit of the
@@ -82,8 +85,8 @@ validation. `Validation` denotes the RSNA model/threshold-selection partition.
 | 40 | Study limitations | Yes | Manuscript §6 and [limitations](LIMITATIONS.md) cover internal sampling/training, ontology/support/patient/precision confounds, coarse run variability, secondary scope and lack of prospective/reader/clinical/fairness evaluation. |
 | 41 | Implications and intended role | Yes | [`paper_draft.md` §§5--6](../report/paper_draft.md#5-discussion) limits conclusions to controlled pipeline trade-offs and prohibits clinical use. |
 | 42 | Protocol and additional technical detail availability | Yes | [README Batch 51](../README.md#final-manuscript-verification-batch-51), frozen v1 protocol, public aggregate manifests and [supplement](SUPPLEMENTARY.md) provide exact commands and separate portable evidence checks from authorized-data replay. Historical editorial baseline bytes are preserved without modifying the scientific freeze. |
-| 43 | Software, model, and data availability statement | No | [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) contains an explicit author-action placeholder, not a release-ready statement. A public/archive URL, version, data-access terms, and public checkpoint status remain unresolved; see [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md). |
-| 44 | Funding/support and the funder's role | No | These author-controlled facts are unknown and must not be inferred. [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) and [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md) preserve explicit author-action placeholders. |
+| 43 | Software, model, and data availability statement | No | [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) now gives the public repository, software license, source-data access routes, restricted derivative boundary and authors' decision to keep all ten checkpoints unpublished. The exact submitted public commit/release/archive identifier is still pending; see [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md). This is an incomplete release record, not a requirement to publish restricted data or weights. |
+| 44 | Funding/support and the funder's role | Yes | Pouyan confirmed no external funding, project-specific scholarship, institutional research support or sponsored computing/equipment for either author; their own resources supported the work. [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) states these facts, so there is no external funder role to report. Provenance is recorded in [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md). |
 
 ## Required sample-size and subset-selection row
 
@@ -131,7 +134,7 @@ object detections; it is not primarily a clinical prediction-model study.
 | Model specification and reproducibility | [`paper_draft.md` §§3.2--3.3](../report/paper_draft.md#32-detector-pipelines-and-controlled-training-factors), configs, source, and [`SUPPLEMENTARY.md`](SUPPLEMENTARY.md) record the pipelines. | Outputs are boxes/scores, not individualized diagnostic/prognostic probabilities. |
 | Sample size and missing data | The dedicated row above reports the subset; annotation/conversion and age/sex/projection missingness audits are traceable. | No formal sample-size calculation exists, and uncollected broader clinical variables cannot be assessed or imputed. |
 | Model performance and calibration | Detection metrics, uncertainty, and emitted-detection D-ECE are in [`paper_draft.md` §§3.3, 3.8, and 4](../report/paper_draft.md#33-five-retained-runs-and-common-evaluation). | D-ECE is not exam-level outcome-probability calibration; decision-curve analysis was correctly not performed. |
-| Open science, declarations, and patient/public involvement | Code/config/artifact provenance is indexed in [`README.md`](../README.md) and [`SUPPLEMENTARY.md`](SUPPLEMENTARY.md); author-action placeholders are in [`paper_draft.md` §8](../report/paper_draft.md#8-declarations). | A release-ready availability statement and author-controlled declarations remain unresolved; no PPI fact may be assumed. |
+| Open science, declarations, and patient/public involvement | Code/config/artifact provenance is indexed in [`README.md`](../README.md) and [`SUPPLEMENTARY.md`](SUPPLEMENTARY.md). [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) incorporates supplied funding/conflict/contribution/no-PPI facts and AI assistance. | No separate institutional ethics/consent determination exists. Applicable requirements and the exact public submission revision remain open. Initial-submission checkpoints stay unpublished by author decision. |
 
 ## Submission blockers and linked audits
 

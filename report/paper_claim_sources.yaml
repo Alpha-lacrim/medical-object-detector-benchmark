@@ -4203,7 +4203,7 @@ claims:
   manuscript:
     regex: '\*\*Methods:\*\*\ This\ retrospective\ study\ used\ 5,000\ RSNA\ radiographs\ in\
 
-      patient\-disjoint\ training/validation/internal\-testing\ partitions\
+      patient\-disjoint\ training,\ validation,\ and\ internal\-testing\ partitions\
 
       \(3,500/750/750\)\.\ Faster\ R\-CNN\ and\ YOLO11s\ shared\ canonical\ inputs,\ disabled\
 
@@ -4286,7 +4286,7 @@ claims:
   manuscript:
     regex: '\*\*Methods:\*\*\ This\ retrospective\ study\ used\ 5,000\ RSNA\ radiographs\ in\
 
-      patient\-disjoint\ training/validation/internal\-testing\ partitions\
+      patient\-disjoint\ training,\ validation,\ and\ internal\-testing\ partitions\
 
       \(3,500/750/750\)\.\ Faster\ R\-CNN\ and\ YOLO11s\ shared\ canonical\ inputs,\ disabled\
 
@@ -4372,7 +4372,7 @@ claims:
   manuscript:
     regex: '\*\*Methods:\*\*\ This\ retrospective\ study\ used\ 5,000\ RSNA\ radiographs\ in\
 
-      patient\-disjoint\ training/validation/internal\-testing\ partitions\
+      patient\-disjoint\ training,\ validation,\ and\ internal\-testing\ partitions\
 
       \(3,500/750/750\)\.\ Faster\ R\-CNN\ and\ YOLO11s\ shared\ canonical\ inputs,\ disabled\
 

@@ -17,3 +17,6 @@ results/vindr_external_v1/adapter_preflight.json -text whitespace=blank-at-eol,b
 # Immutable editorial baseline bytes referenced by the pre-external freeze.
 report/provenance/batch46/paper_draft.md -text whitespace=cr-at-eol
 report/provenance/batch46/paper_claim_sources.yaml -text whitespace=cr-at-eol
+
+# Preserve the exact reviewed Batch 52 snapshot before author declarations.
+report/provenance/batch52/* -text whitespace=cr-at-eol

@@ -1,0 +1,18 @@
+\usepackage{needspace}
+\usepackage{etoolbox}
+\usepackage{caption}
+\usepackage{float}
+\floatplacement{figure}{H}
+% Pandoc 3.9 emits image alt metadata; older graphicx needs this compatibility key.
+% The complete human-readable captions remain in the document.
+\makeatletter
+\@ifundefined{KV@Gin@alt}{\define@key{Gin}{alt}{}}{}
+\makeatother
+\captionsetup{labelformat=empty,font=small}
+\pagestyle{plain}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\AtBeginEnvironment{longtable}{\small}
+\AtBeginEnvironment{CSLReferences}{\small}
+\apptocmd{\CSLReferences}{\setlength{\itemsep}{0.7\baselineskip}}{}{}

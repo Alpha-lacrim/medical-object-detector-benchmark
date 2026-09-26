@@ -2,58 +2,141 @@
 
 Audit date: 2026-09-24
 
-This file isolates submission facts that cannot be inferred from code,
-artifacts, public-dataset documentation, or prior analysis. It is a to-do list,
-not a completed declaration and not manuscript-ready text. A human author must
-replace every `AUTHOR ACTION REQUIRED` field, approve the wording, and insert
-the final declarations into the manuscript or journal submission system.
+Author-fact record updated: 2026-09-25. Facts supplied by Pouyan in the
+author-action follow-up have been incorporated into the canonical manuscript
+and regenerated review PDF. The prior review snapshot is preserved under
+`report/provenance/batch52/`; see the current [audit](FINAL_SUBMISSION_AUDIT.md).
+
+This working record separates supplied author facts, source-documented facts
+and remaining submission actions. It is not submission clearance. The remaining
+`AUTHOR ACTION REQUIRED` fields need factual resolution; both authors must review
+the final submission wording and the eventual journal's declaration forms.
 
 Do not interpret an unresolved item as “none,” “not applicable,” or approval by
 an institution.
 
+## Authorship and journal — supplied facts
+
+Author order supplied by Pouyan:
+
+1. Pouyan Delivandani
+2. Mohammad Amin Hajialirezaei
+
+There are no additional authors at this stage. Pouyan reports that no instructor
+or faculty member has contributed sufficiently for authorship so far. This does
+not establish that there were no contributions potentially worth acknowledging.
+
+Corresponding author: Pouyan Delivandani. Email for publication:
+`Pouyan.Delivandani@edu.ikiu.ac.ir`.
+
+Coauthor email supplied for Mohammad Amin Hajialirezaei:
+`mohammadamin.hajialirezaei@email.kntu.ac.ir`.
+
+Affiliations and author mapping confirmed by Pouyan on 2026-09-25:
+
+- **Pouyan Delivandani:** Department of Computer Engineering, Imam Khomeini
+  International University, Qazvin, Iran.
+- **Mohammad Amin Hajialirezaei:** Department of Computer Engineering,
+  K. N. Toosi University of Technology, Tehran, Iran.
+
+Target journal: not yet chosen. Contributions supplied by Pouyan are recorded
+below. Do not infer additional roles from author order or institutional affiliation.
+
 ## Funding and support
 
-**AUTHOR ACTION REQUIRED:** State either all funding/support sources (funder,
-grant number where applicable, recipient) or the journal-appropriate statement
-that no specific funding was received. For every source, state the funder's
-role in study design, data collection, analysis, interpretation, manuscript
-preparation, and the decision to submit. Do not infer absence of funding from
-the repository.
+**Confirmed by Pouyan on 2026-09-25:** There was no external funding,
+project-specific scholarship, institutional research support, or sponsored
+computing/equipment support. The authors conducted the work using their own
+resources.
+
+Draft manuscript statement: **This research received no external funding or
+institutional research support. The work was conducted using the authors' own
+resources.** No external funder role is applicable to the reported funding facts.
 
 ## Competing interests
 
-**AUTHOR ACTION REQUIRED:** Obtain and report an author-by-author competing-
-interest declaration using the target journal's definition and disclosure
-period. Include relevant employment, consulting, equity, patents, honoraria,
-advisory roles, and relationships, or an explicit author-confirmed “none”
-statement. Do not infer absence of conflicts from academic affiliation or
-course-project status.
+**Confirmed by Pouyan for both authors on 2026-09-25:** Neither author has
+financial or nonfinancial competing interests related to this work. Neither has
+relevant company affiliations, consulting roles, patents, ownership interests,
+or advisory roles connected to the research.
+
+Draft manuscript statement: **The authors declare no financial or nonfinancial
+competing interests related to this work.** Recheck the target journal's
+disclosure scope and period when selected, and update if circumstances change.
 
 ## Ethics and data-use determination
 
-**AUTHOR ACTION REQUIRED:** Obtain or document the responsible institution's
-determination for this retrospective secondary analysis of RSNA challenge and credentialed VinDr external-test data. Report the institution/board, determination type (for example, approval,
-exemption, or not-human-subjects determination), identifier, and date if one
-exists. Separately confirm compliance with the RSNA/Kaggle, NIH and PhysioNet/VinDr data-use
-terms. The recorded approved-access/DUA attestation is not an institutional
-ethics determination; restricted VinDr derivatives remain private. Public availability and de-identification do not by themselves establish
-the applicable ethics determination.
+**Confirmed by Pouyan on 2026-09-25:** Neither author sought or received a
+separate ethics approval, exemption or written determination from IKIU or
+K. N. Toosi University for this study. This was a secondary analysis of
+previously collected, de-identified RSNA/NIH and VinDr-CXR data. The authors did
+not recruit participants or obtain consent themselves.
+
+Source-study facts independently checked on 2026-09-25:
+
+- The [official VinDr-CXR release, Methods](https://physionet.org/content/vindr-cxr/1.0.0/)
+  reports IRB approval at Hanoi Medical University Hospital and Hospital 108.
+  Consent was waived for the original retrospective study because clinical
+  care/workflow was unaffected and identifying information had been removed.
+- The [NIH release announcement](https://irp.nih.gov/news-and-events/in-the-news/nih-clinical-center-provides-one-of-the-largest-publicly-available-chest-x)
+  confirms public release of anonymized chest radiographs screened to remove
+  personally identifying information. It does not establish a determination
+  for these authors' secondary analysis.
+
+Draft factual manuscript text: **This study was a secondary analysis of
+previously collected, de-identified RSNA/NIH and VinDr-CXR datasets. No
+participants were recruited by the authors. No separate institutional ethics
+approval, exemption or written determination was sought or obtained from IKIU
+or K. N. Toosi University for this analysis. The original VinDr-CXR data
+collection received approval from the source hospitals' institutional review
+boards, as reported in the dataset documentation.** Cite the release's existing
+`nguyen2021vindrrelease` bibliography entry for its source-study statement.
+
+**AUTHOR ACTION REQUIRED:** Establish the applicable institutional and target-
+journal requirements for this secondary analysis. The absence of a determination
+is now known; whether separate review is unnecessary is not established. Do not
+convert the source hospitals' approval into approval for this analysis.
+Separately confirm compliance with the RSNA/Kaggle, NIH and PhysioNet/VinDr
+data-use terms. Recorded access/DUA attestation is not an ethics determination;
+restricted VinDr derivatives remain private.
 
 ## Consent applicability
 
-**AUTHOR ACTION REQUIRED:** State whether informed consent was required,
-waived, or not applicable under the documented ethics determination, including
-the responsible body and rationale where required by the journal. Do not infer
-a consent waiver from public data access.
+**Known facts:** The authors did not recruit participants or obtain new consent.
+The official VinDr-CXR release reports a consent waiver for the original study,
+as documented above. No separate consent determination exists for this analysis.
+
+Draft factual manuscript text: **The authors did not obtain new participant
+consent. Informed consent was waived for the original VinDr-CXR study, as
+reported by the dataset creators.** Cite `nguyen2021vindrrelease`.
+
+**AUTHOR ACTION REQUIRED:** Resolve any applicable institutional/journal consent
+reporting requirement. Do not state that consent for this secondary analysis
+was waived or not required on the basis of public/de-identified data alone.
 
 ## Author contributions
 
-**AUTHOR ACTION REQUIRED:** Provide the author list and an author-approved
-contribution statement, preferably using CRediT roles where accepted:
-conceptualization, methodology, software, validation, formal analysis,
-investigation, resources, data curation, writing—original draft,
-writing—review and editing, visualization, supervision, project administration,
-and funding acquisition. Assign only roles each author confirms.
+**Supplied and clarified by Pouyan on 2026-09-25:** Pouyan performed study design,
+coding/implementation, data preparation, experiments, analysis and figure
+preparation, wrote the original draft himself, and contributed to reviewing.
+Mohammad Amin contributed to analysis, figure preparation, and manuscript
+review/revision. Analysis, figures and review/revision were shared. This
+clarification supersedes the initial description of shared original drafting.
+Mohammad Amin also intends to help with future manuscript revisions; this is
+prospective work, not an additional completed contribution.
+
+Draft statement mapped to the [official CRediT role definitions](https://credit.niso.org/contributor-roles-defined/):
+
+**Pouyan Delivandani:** Methodology, Software, Data curation, Investigation,
+Formal analysis, Visualization, Writing – original draft, Writing – review & editing.
+
+**Mohammad Amin Hajialirezaei:** Formal analysis, Visualization,
+Writing – review & editing.
+
+Study design is mapped to Methodology and running experiments to Investigation.
+No equal-contribution/co-first-author designation or final-manuscript approval
+statement is inferred from the shared roles. Confirm final submission wording
+with both authors when completing the target journal's authorship declarations.
 
 ## Data and code availability
 
@@ -68,28 +151,86 @@ Repository facts that may inform a draft, but must be verified at submission:
 - reproducibility requires a release identifier or immutable commit/archive,
   not merely a local working tree.
 
-**AUTHOR ACTION REQUIRED:** Decide what will actually be public at submission
-and provide the permanent repository/archive URL, release/commit/DOI, license,
-data-access instructions, artifact scope, and model-checkpoint availability.
-If any materials cannot be shared, state exactly which and why. Confirm that
-the release contains no credentials, restricted data, or disallowed weights.
+**Initial-submission decision confirmed by Pouyan on 2026-09-25:** The repository
+and relevant code/documentation may be made available. All ten trained model
+checkpoint files will remain unpublished at initial submission. A separate
+public checkpoint release may be considered later; no date, download URL or
+release commitment is established. Do not claim availability on request.
+
+Repository URL on record:
+https://github.com/Alpha-lacrim/medical-object-detector-benchmark
+
+Draft availability text for the intended submission state: **Code,
+configurations, reproduction instructions and public aggregate results are
+available in the project repository. The RSNA/NIH and VinDr-CXR source data
+must be obtained through their respective providers under the applicable access
+conditions; raw source data and restricted VinDr image-linked derivatives are
+not redistributed by this repository. The ten trained model checkpoints are
+not publicly available at initial submission. Reproduction using the exact
+trained checkpoints therefore requires access to those unpublished files.**
+
+This wording describes the intended submission state, not a claim that the
+current uncommitted author edits have been published. The repository's recorded
+license is AGPL-3.0-only; source datasets and third-party components retain their
+respective terms.
+
+**AUTHOR ACTION REQUIRED:** Select and verify the exact public submission
+commit/release/archive identifier, including DOI only if one is actually issued.
+Confirm that the released scope matches the statement and excludes credentials,
+restricted data and the ten checkpoint binaries. No new legal reason for
+withholding weights is asserted; keeping them unpublished is the authors'
+initial-submission decision. No release, commit, push or upload is authorized
+by this declaration choice.
+
+## AI assistance — supplied facts and documented use
+
+The author-action conversation and Batch 52 record document Codex assistance
+with verification/auditing, reporting/manuscript edits and document generation.
+Earlier project records also describe implementation assistance. These uses
+should be described accurately when preparing the target journal's AI-use
+disclosure. AI is not included in the author list.
+
+**Confirmed by Pouyan on 2026-09-25:** OpenAI Codex was the documented AI tool;
+no other AI tools were used for the research or manuscript preparation to the
+best of the authors' current project records. Pouyan reviewed and checked all
+AI-assisted outputs relevant to the research and manuscript. Mohammad Amin has
+reviewed relevant manuscript content, analysis and figures and will continue
+that author review. Neither author treated AI output as authoritative without
+human verification.
+
+The user's answer emphasized implementation assistance and code auditing.
+The disclosure also includes verification/reporting, manuscript editing and PDF
+preparation because those uses are directly documented in this conversation.
+This accurately describes the record without asserting use of additional AI
+tools. Planned future review is not represented as completed final approval.
+The resulting statement is inserted in manuscript Section 8. Final placement,
+tool/version detail if required, and wording depend on the chosen journal.
 
 ## Patient and public involvement
 
-**AUTHOR ACTION REQUIRED:** Confirm whether patients or members of the public
-were involved in setting the research question, study design, conduct,
-interpretation, or dissemination. If none were involved, use the journal's
-required no-involvement statement and, if requested, explain why. The absence
-of a local PPI artifact is not enough to assert no involvement.
+**Confirmed by Pouyan on 2026-09-25:** No patients or members of the public were
+involved as advisers or collaborators in developing the research question,
+designing the study, interpreting results or planning dissemination. The study
+used previously collected datasets only; no patient or public representatives
+participated in the research process.
+
+Draft manuscript statement: **Patients and members of the public were not
+involved in developing the research question, designing or conducting the
+study, interpreting the results, or planning dissemination. This study used
+previously collected datasets.**
 
 ## Final insertion checklist
 
 - [ ] Every `AUTHOR ACTION REQUIRED` field has an author-approved answer.
-- [ ] Ethics and consent wording matches an actual institutional determination.
-- [ ] Funding roles and competing interests cover every author.
-- [ ] Contributions match the final author list and journal policy.
+- [x] Current absence of a separate institutional determination is stated accurately;
+  original VinDr approval/waiver is attributed only to its source study.
+- [ ] Applicable institutional/journal ethics and consent requirements are resolved.
+- [x] Funding and competing-interest facts supplied for both authors are inserted.
+- [x] Contributions reflect the confirmed roles; original drafting is Pouyan's only.
+- [ ] Both authors complete final review and the selected journal's declarations.
 - [ ] Availability links resolve to the exact public release being submitted.
-- [ ] The declarations are inserted into `report/paper_draft.md` or the target
-  journal's submission fields without inventing missing facts.
-- [ ] CLAIM item 43 (availability) and item 44 (funding) are re-audited against
-  the final manuscript and official submission checklist.
+- [x] Supplied declarations, affiliations/emails and AI disclosure are inserted
+  into `report/paper_draft.md`; unresolved ethics/release fields stay explicit.
+- [x] Internal CLAIM items 43 (availability) and 44 (funding) are re-audited;
+  item 43 remains incomplete because the submission revision is pending.
+- [ ] The journal's official submission checklist is completed after journal selection.

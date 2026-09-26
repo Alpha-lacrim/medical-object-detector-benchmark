@@ -1,0 +1,22 @@
+schema_version: 1
+manuscript: report/paper_draft.md
+bibliography: report/references.bib
+output: output/pdf/rsna_vindr_article.pdf
+manifest: report/paper_build_manifest.json
+work_directory: tmp/pdfs/batch52_article
+header: report/pdf/header.tex
+filter: report/pdf/layout.lua
+repository_url: https://github.com/Alpha-lacrim/medical-object-detector-benchmark
+# All repository links in the manuscript point to public supporting files at this revision.
+support_revision: ac6975df799a20c55d97204ddcdcbd0dab6675f9
+pdf_engine: pdflatex
+variables:
+  documentclass: article
+  fontsize: 10pt
+  papersize: a4
+  geometry: margin=22mm
+  colorlinks: true
+  linkcolor: blue
+  urlcolor: blue
+  citecolor: blue
+  lang: en-US

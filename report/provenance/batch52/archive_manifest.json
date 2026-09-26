@@ -1,0 +1,35 @@
+{
+  "description": "Exact Batch 52 reviewed bytes before author declarations were incorporated on 2026-09-25",
+  "files": [
+    {
+      "original_path": "report/paper_draft.md",
+      "archive_path": "report/provenance/batch52/paper_draft.md",
+      "sha256": "0f874aa80d3f90121a02553f41e6017d8b04178914dba70ce5cb54e6c1b24f45"
+    },
+    {
+      "original_path": "output/pdf/rsna_vindr_article.pdf",
+      "archive_path": "report/provenance/batch52/rsna_vindr_article.pdf",
+      "sha256": "7143b8c532433dd38ee647ac43e414a1ca60e1537816e924a2d14c15f96c5319"
+    },
+    {
+      "original_path": "report/paper_build_manifest.json",
+      "archive_path": "report/provenance/batch52/paper_build_manifest.json",
+      "sha256": "d89ea4887d038ba15f92eb4790ed3f5ffc7e32d1723c7c5530185b3ab3471132"
+    },
+    {
+      "original_path": "report/paper_pdf_qa.json",
+      "archive_path": "report/provenance/batch52/paper_pdf_qa.json",
+      "sha256": "9f2d29689e9910caeb05dd56db32d2e46c9b6a7e5c9d067112603d6f52077584"
+    },
+    {
+      "original_path": "report/pdf/layout.lua",
+      "archive_path": "report/provenance/batch52/layout.lua",
+      "sha256": "538fd9f04995120d0c6f7da6f7bda6a2aed9b2958125d9c3b2092033aad4c005"
+    },
+    {
+      "original_path": "docs/SUBMISSION_NUMERICAL_TRACE.csv",
+      "archive_path": "report/provenance/batch52/SUBMISSION_NUMERICAL_TRACE.csv",
+      "sha256": "bcf8e255f6638b7845de109ff8cb005f882e94b861b35cc1c6c29f45fbce13bd"
+    }
+  ]
+}

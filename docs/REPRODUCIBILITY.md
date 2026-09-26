@@ -1,5 +1,18 @@
 # Reproducibility contract
 
+**Batch 52 audit and author follow-up:** The [current record](FINAL_SUBMISSION_AUDIT.md)
+links the [preserved scientific gate](FINAL_SUBMISSION_AUDIT_2026-09-24.md), including
+a fresh portable checkout and authorized source/metric/bootstrap replay. The
+[complete numerical trace](SUBMISSION_NUMERICAL_TRACE.csv) exports 417 bindings
+with exact locators and rounding. Build commands are in
+[README](../README.md#final-submission-audit-and-article-pdf-batch-52).
+The article PDF derives only from `report/paper_draft.md`; its separate document
+tools and hash receipt do not change the scientific lock or make private
+checkpoints/data publicly available. Supplied author declarations are incorporated
+in the current 16-page PDF; exact prior reviewed bytes are archived under
+`report/provenance/batch52/`. The authors have chosen to keep all ten trained
+checkpoint binaries unpublished at initial submission.
+
 **Batch 51 publication boundary:** The sole current manuscript is
 `report/paper_draft.md`. The [final audit](FINAL_MANUSCRIPT_AUDIT.md) maps its
 internal/external claims to artifacts and completed verification. Portable

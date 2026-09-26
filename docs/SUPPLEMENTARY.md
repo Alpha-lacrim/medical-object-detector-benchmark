@@ -244,7 +244,7 @@ substantial Faster R-CNN cap saturation remains independent of that bound.
 Neither low FP/image with collapsed recall nor preserved relative AP ordering
 establishes successful generalization. No patient grouping is invented for VinDr.
 
-[Publication verification](FINAL_MANUSCRIPT_AUDIT.md) records the current paper's
+[Final submission verification](FINAL_SUBMISSION_AUDIT.md) records the current paper's
 claim bindings and clean-checkout checks. The [immutable editorial baseline
 bindings](../report/provenance/batch46/baseline_bindings.json) allow read-only
 legacy evidence replay while preserving every original freeze hash. Exact

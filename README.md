@@ -987,8 +987,7 @@ CUDA environment, with the authorized dataset root set above:
 & .\.venv\Scripts\python.exe -m pytest tests/test_evaluate_vindr_external.py tests/test_exact_score_froc.py tests/test_inference_timing.py -q --basetemp=tmp/pytest-vindr-inference -p no:cacheprovider
 # Format the verified aggregate evidence as readable per-run tables (no analysis).
 & .\.venv\Scripts\python.exe -m scripts.report_vindr_inference --config configs/vindr_inference_report_v1.yaml
-# PLANNED Batch 50, verified predictions only; no model inference:
-# & $benchmarkPython -m src.analyze_vindr_external --config configs/vindr_external_v1.yaml --mode run
+# Completed Batch 50 statistics and its read-only verification commands are below.
 ```
 
 Both native candidate filters use strict `score > floor`; common evaluation
@@ -1174,10 +1173,59 @@ and binds the external public summaries/tables/figures to their existing sources
 The [audit](docs/FINAL_MANUSCRIPT_AUDIT.md) maps manuscript methods, tables,
 figures and inferential statements to deterministic commands and artifacts.
 
+## Final submission audit and article PDF (Batch 52)
+
+The current [submission audit](docs/FINAL_SUBMISSION_AUDIT.md) records the
+author-declaration update and links the preserved [full scientific gate](docs/FINAL_SUBMISSION_AUDIT_2026-09-24.md):
+exact-HEAD Windows/Ubuntu CI, fresh public checkout, authorized replay,
+21 analysis scopes and a 51-value review selection. The
+[complete numerical trace](docs/SUBMISSION_NUMERICAL_TRACE.csv) contains all
+417 verified bindings with current manuscript lines. Supplied author details,
+declarations and AI disclosure are incorporated into the 16-page review PDF.
+Ethics/consent applicability, the exact submission release and journal decisions
+remain unresolved; the disposition is **ready for author review**. The authors
+will keep all ten trained checkpoints unpublished at initial submission.
+
+```powershell
+& .\.venv\Scripts\python.exe -m scripts.export_paper_trace --manifest report/paper_claim_sources.yaml --output docs/SUBMISSION_NUMERICAL_TRACE.csv
+& .\.venv\Scripts\python.exe -m ruff check src tests scripts
+& .\.venv\Scripts\python.exe -m ruff format --check src tests scripts
+```
+
+The current article derivative is
+[`output/pdf/rsna_vindr_article.pdf`](output/pdf/rsna_vindr_article.pdf), built
+only from `report/paper_draft.md` and `report/references.bib` using
+`configs/paper_build.yaml`. The earlier `report/A_Controlled_Comparative_Study___article.pdf`
+is an unchanged, noncanonical alternate. No build recipe for that historical PDF
+was committed; the current canonical source now has the reproducible route below.
+
+Install the **separate document tool environment** (the scientific lock is
+unchanged), with pdfLaTeX/TeX Live, Latin Modern fonts and Poppler available on PATH:
+
+```powershell
+uv venv --python .venv/Scripts/python.exe .tools/paper-build
+uv pip install --python .tools/paper-build/Scripts/python.exe -r report/pdf/requirements.txt
+& .tools/paper-build/Scripts/python.exe -m scripts.build_paper_pdf --config configs/paper_build.yaml
+& .tools/paper-build/Scripts/python.exe -m scripts.check_paper_pdf --pdf output/pdf/rsna_vindr_article.pdf --output report/paper_pdf_qa.json --text tmp/pdfs/batch52_article/extracted-final.txt
+pdftoppm -r 110 -png output/pdf/rsna_vindr_article.pdf tmp/pdfs/batch52_article/page
+```
+
+The builder uses Pandoc/citeproc, the versioned formatting filter/header, and
+two pdfLaTeX passes. It preserves captions and scientific content, sizes table
+columns for portrait pages, and resolves supporting repository links to the audited
+immutable public revision. The source/output hash receipt is
+[`report/paper_build_manifest.json`](report/paper_build_manifest.json).
+PDF timestamps and tool versions can alter byte hashes; matching scientific
+content requires matching source/figure/bibliography inputs. Re-render and inspect
+every page after a manuscript change. The final audit records page-level QA and
+the remaining intentional author placeholders. Building a PDF does not clear
+the manuscript for submission.
+
 ## Repository verification
 
-The final internal/external manuscript checks are recorded in
-[`docs/FINAL_MANUSCRIPT_AUDIT.md`](docs/FINAL_MANUSCRIPT_AUDIT.md).
+The final internal/external manuscript and PDF checks are recorded in
+[`docs/FINAL_SUBMISSION_AUDIT.md`](docs/FINAL_SUBMISSION_AUDIT.md).
+The prior [Batch 51 audit](docs/FINAL_MANUSCRIPT_AUDIT.md) remains available.
 The earlier [`internal focus audit`](docs/INTERNAL_PAPER_FOCUS_AUDIT.md)
 is preserved as pre-external provenance, not current manuscript status. The shared
 bibliography also supports the preserved historical report and long alternate;

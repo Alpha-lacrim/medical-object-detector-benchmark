@@ -1,16 +1,6 @@
 ---
 title: "Ranking and Operating-Point Transportability of Lung-Opacity Detectors: A Multi-Run RSNA–VinDr Study"
-author:
-  - "Pouyan Delivandani^1^"
-  - "Mohammad Amin Hajialirezaei^2^"
-author-details: |
-  ^1^ Department of Computer Engineering, Imam Khomeini International University, Qazvin, Iran.
-
-  ^2^ Department of Computer Engineering, K. N. Toosi University of Technology, Tehran, Iran.
-
-  Corresponding author: Pouyan Delivandani, <Pouyan.Delivandani@edu.ikiu.ac.ir>.
-
-  Mohammad Amin Hajialirezaei: <mohammadamin.hajialirezaei@email.kntu.ac.ir>.
+author: "Authors and affiliations: AUTHOR ACTION REQUIRED"
 bibliography: references.bib
 link-citations: true
 reference-section-title: References
@@ -790,10 +780,9 @@ performance evidence. Portable CI verifies public evidence without licensed
 images; full scientific replay requires authorized data and matching checkpoints.
 Restricted VinDr image-linked derivatives remain private, and the ten checkpoint
 binaries have no public release URL. Retraining is not promised to be bitwise
-identical, including the recorded CUDA ROI Align backward limitation.
-Institutional ethics/consent applicability, the final submission release
-identifier, source-reporting gaps, and a participant-flow diagram remain
-unresolved in the reporting crosswalk.
+identical, including the recorded CUDA ROI Align backward limitation. Human
+declarations, final availability details, source-reporting gaps, and a
+participant-flow diagram remain unresolved in the reporting crosswalk.
 
 ## 7. Conclusion
 
@@ -809,70 +798,37 @@ superiority of either detector family.
 
 ## 8. Declarations
 
-**Funding and support.** This research received no external funding or
-institutional research support. The work was conducted using the authors' own
-resources, without project-specific scholarships or sponsored computing or
-equipment support.
+The following fields are intentionally unresolved placeholders. They are not
+statements of absence, approval, exemption, or applicability.
 
-**Competing interests.** The authors declare no financial or nonfinancial
-competing interests related to this work.
+**Funding and support — AUTHOR ACTION REQUIRED:** Identify every funding or
+support source, grant and recipient where applicable, and the funder's role, or
+insert an author-confirmed journal-appropriate no-funding statement.
 
-**Ethics and data use.** This study was a secondary analysis of previously
-collected, de-identified RSNA/NIH and VinDr-CXR datasets. The authors did not
-recruit participants. No separate institutional ethics approval, exemption or
-written determination was sought or obtained from Imam Khomeini International
-University or K. N. Toosi University of Technology for this analysis. The
-official VinDr-CXR documentation reports approval of the original study by the
-institutional review boards of Hanoi Medical University Hospital and Hospital
-108 [@nguyen2021vindrrelease]. These source-study approvals are distinct from a
-determination for the present secondary analysis.
+**Competing interests — AUTHOR ACTION REQUIRED:** Provide an author-by-author
+declaration under the target journal's policy, including an explicit
+author-confirmed none statement where appropriate.
 
-**Consent.** The authors did not obtain new participant consent. The VinDr-CXR
-dataset documentation reports a consent waiver for the original retrospective
-study because clinical care and workflow were unaffected and identifying
-information had been removed [@nguyen2021vindrrelease]. No separate consent
-determination was obtained for the present analysis.
+**Ethics and data use — AUTHOR ACTION REQUIRED:** Insert the responsible
+institution's determination for this retrospective secondary analysis,
+including the body, determination type, identifier, and date where applicable;
+separately confirm compliance with the RSNA/Kaggle, NIH, and credentialed
+PhysioNet/VinDr data-use terms. Recorded access attestation is not an
+institutional ethics determination.
 
-**Ethics/consent applicability — AUTHOR ACTION REQUIRED:** Establish the
-applicable institutional and target-journal requirements for this secondary
-analysis before submission. The absence of a separate determination is not a
-determination that review or consent was unnecessary.
+**Consent — AUTHOR ACTION REQUIRED:** State whether consent was required,
+waived, or not applicable under the documented ethics determination and give
+the responsible rationale required by the journal.
 
-**Author contributions (CRediT).** Pouyan Delivandani: Methodology, Software,
-Data curation, Investigation, Formal analysis, Visualization, Writing - original
-draft, Writing - review & editing. Mohammad Amin Hajialirezaei: Formal analysis,
-Visualization, Writing - review & editing.
+**Author contributions — AUTHOR ACTION REQUIRED:** Insert the final author list
+and author-approved contribution statement, preferably using CRediT roles where
+accepted.
 
-**Data, code, and model availability.** Code, configurations, reproduction
-instructions and public aggregate results are available in the
-[project repository](https://github.com/Alpha-lacrim/medical-object-detector-benchmark).
-Repository-authored software is licensed under AGPL-3.0-only; source datasets
-and third-party components retain their respective terms. RSNA/NIH source data
-are accessed through the [RSNA challenge](https://www.kaggle.com/c/rsna-pneumonia-detection-challenge/data)
-under its provider terms. VinDr-CXR is accessed through its
-[credentialed PhysioNet release](https://physionet.org/content/vindr-cxr/1.0.0/)
-and data-use agreement. Raw source data and restricted VinDr image-linked
-derivatives are not redistributed by this repository. The authors have chosen
-to keep all ten trained model checkpoints unpublished at initial submission;
-no public checkpoint download is provided. Reproduction using the exact trained
-checkpoints requires access to those unpublished files. The public repository
-supports portable code and aggregate-artifact verification without them.
+**Data, code, and model availability — AUTHOR ACTION REQUIRED:** Provide the
+actual public repository/archive identifier, release or commit, license,
+source-data access instructions, artifact scope, and exact checkpoint-release
+status at submission. Do not insert a speculative checkpoint URL.
 
-**Submission release identifier — AUTHOR ACTION REQUIRED:** Insert the exact
-public commit, release or archive identifier for the submitted version. The
-repository's current public contents do not include these uncommitted author
-declaration edits; no submission DOI or checkpoint release is claimed.
-
-**Patient and public involvement.** Patients and members of the public were
-not involved in developing the research question, designing or conducting the
-study, interpreting the results, or planning dissemination. This study used
-previously collected datasets.
-
-**AI assistance.** OpenAI Codex assisted with software implementation and code
-auditing, as well as verification/reporting, manuscript editing and PDF
-preparation. No other AI tools were used for the research or manuscript
-preparation according to the authors' current project records. Pouyan Delivandani
-reviewed and checked all AI-assisted outputs relevant to the research and
-manuscript. Mohammad Amin Hajialirezaei contributed to review of the manuscript
-content, analysis and figures; author review remains ongoing. Neither author
-treated AI-generated output as authoritative without human verification.
+**Patient and public involvement — AUTHOR ACTION REQUIRED:** Confirm whether
+patients or members of the public were involved and insert the journal-required
+statement; do not infer non-involvement from the repository.
