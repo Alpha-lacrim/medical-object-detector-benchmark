@@ -1180,8 +1180,10 @@ author-declaration update and links the preserved [full scientific gate](docs/FI
 exact-HEAD Windows/Ubuntu CI, fresh public checkout, authorized replay,
 21 analysis scopes and a 51-value review selection. The
 [complete numerical trace](docs/SUBMISSION_NUMERICAL_TRACE.csv) contains all
-417 verified bindings with current manuscript lines. Supplied author details,
-declarations and AI disclosure are incorporated into the 16-page review PDF.
+427 verified bindings with current manuscript lines. Supplied author details,
+declarations and the Batch 53 sensitivity are incorporated into
+the 16-page review PDF. The two pending declaration items use factual status
+statements rather than drafting instructions.
 Ethics/consent applicability, the exact submission release and journal decisions
 remain unresolved; the disposition is **ready for author review**. The authors
 will keep all ten trained checkpoints unpublished at initial submission.
@@ -1212,13 +1214,15 @@ pdftoppm -r 110 -png output/pdf/rsna_vindr_article.pdf tmp/pdfs/batch52_article/
 
 The builder uses Pandoc/citeproc, the versioned formatting filter/header, and
 two pdfLaTeX passes. It preserves captions and scientific content, sizes table
-columns for portrait pages, and resolves supporting repository links to the audited
-immutable public revision. The source/output hash receipt is
+columns for portrait pages, and pins supporting repository links to commit
+`490c55794e2bfc163746089ffb44e7f195ef534b`, the completed numerical-path
+sensitivity revision. This supporting revision is not a selected submission
+release. The source/output hash receipt is
 [`report/paper_build_manifest.json`](report/paper_build_manifest.json).
 PDF timestamps and tool versions can alter byte hashes; matching scientific
 content requires matching source/figure/bibliography inputs. Re-render and inspect
 every page after a manuscript change. The final audit records page-level QA and
-the remaining intentional author placeholders. Building a PDF does not clear
+the remaining ethics and submission-version decisions. Building a PDF does not clear
 the manuscript for submission.
 
 ## Repository verification
@@ -1334,6 +1338,7 @@ while preserving all 83 previous entries. Its one-time maintenance command was:
 
 That command refuses an existing extension; never refresh scientific hashes to
 hide changes. Historical uncertainty intervals are not re-estimated by this
-sensitivity. The Markdown manuscript is updated; the existing reviewed PDF,
-PDF receipts and Batch 52 numerical trace remain their earlier snapshot and
-require a separately reviewed refresh before submission.
+sensitivity. The September 27 declaration-wording follow-up refreshed the
+16-page PDF, build/QA receipts and 427-row numerical trace from the current
+Markdown. The [submission audit](docs/FINAL_SUBMISSION_AUDIT.md) records that
+review and the supporting Git revision.

@@ -134,12 +134,13 @@ object detections; it is not primarily a clinical prediction-model study.
 | Model specification and reproducibility | [`paper_draft.md` §§3.2--3.3](../report/paper_draft.md#32-detector-pipelines-and-controlled-training-factors), configs, source, and [`SUPPLEMENTARY.md`](SUPPLEMENTARY.md) record the pipelines. | Outputs are boxes/scores, not individualized diagnostic/prognostic probabilities. |
 | Sample size and missing data | The dedicated row above reports the subset; annotation/conversion and age/sex/projection missingness audits are traceable. | No formal sample-size calculation exists, and uncollected broader clinical variables cannot be assessed or imputed. |
 | Model performance and calibration | Detection metrics, uncertainty, and emitted-detection D-ECE are in [`paper_draft.md` §§3.3, 3.8, and 4](../report/paper_draft.md#33-five-retained-runs-and-common-evaluation). | D-ECE is not exam-level outcome-probability calibration; decision-curve analysis was correctly not performed. |
-| Open science, declarations, and patient/public involvement | Code/config/artifact provenance is indexed in [`README.md`](../README.md) and [`SUPPLEMENTARY.md`](SUPPLEMENTARY.md). [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) incorporates supplied funding/conflict/contribution/no-PPI facts and AI assistance. | No separate institutional ethics/consent determination exists. Applicable requirements and the exact public submission revision remain open. Initial-submission checkpoints stay unpublished by author decision. |
+| Open science, declarations, and patient/public involvement | Code/config/artifact provenance is indexed in [`README.md`](../README.md) and [`SUPPLEMENTARY.md`](SUPPLEMENTARY.md). [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) incorporates supplied funding/conflict/contribution/no-PPI facts. | No separate institutional ethics/consent determination exists. Applicable requirements and the exact public submission revision remain open. Initial-submission checkpoints stay unpublished by author decision. |
 
 ## Submission blockers and linked audits
 
-- Resolve all `AUTHOR ACTION REQUIRED` fields in [`paper_draft.md` §8](../report/paper_draft.md#8-declarations)
-  and [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md).
+- Resolve the ethics/consent and submission-version decisions stated in
+  [`paper_draft.md` §8](../report/paper_draft.md#8-declarations) and tracked in
+  [`AUTHOR_DECLARATIONS_TODO.md`](AUTHOR_DECLARATIONS_TODO.md).
 - Use [`HYPOTHESIS_TRACEABILITY.md`](HYPOTHESIS_TRACEABILITY.md) to retain the historical
   H1--H6 provenance and endpoint/artifact bindings. These labels are no longer
   journal prose; this does not make the focused research question prospective.

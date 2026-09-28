@@ -1,11 +1,11 @@
 {
   "pdf": "output/pdf/rsna_vindr_article.pdf",
-  "sha256": "4c783e10d4a64c9c29dd8e375b0c48db5f092c93689eb7508664858c815bd6b3",
+  "sha256": "fce7ac64779ef068b218ff0fcc66bd2bb6c9594566bfe08efbfb6a5551497f31",
   "page_count": 16,
   "pages": [
     {
       "page": 1,
-      "text_characters": 3648,
+      "text_characters": 3646,
       "embedded_images": 0,
       "links": 4,
       "rotation": 0
@@ -33,14 +33,14 @@
     },
     {
       "page": 5,
-      "text_characters": 5051,
+      "text_characters": 5186,
       "embedded_images": 0,
-      "links": 5,
+      "links": 6,
       "rotation": 0
     },
     {
       "page": 6,
-      "text_characters": 3791,
+      "text_characters": 4352,
       "embedded_images": 0,
       "links": 5,
       "rotation": 0
@@ -75,7 +75,7 @@
     },
     {
       "page": 11,
-      "text_characters": 3844,
+      "text_characters": 3920,
       "embedded_images": 0,
       "links": 0,
       "rotation": 0
@@ -89,23 +89,23 @@
     },
     {
       "page": 13,
-      "text_characters": 5196,
+      "text_characters": 4993,
       "embedded_images": 0,
       "links": 3,
       "rotation": 0
     },
     {
       "page": 14,
-      "text_characters": 4559,
+      "text_characters": 4794,
       "embedded_images": 0,
-      "links": 2,
+      "links": 0,
       "rotation": 0
     },
     {
       "page": 15,
-      "text_characters": 2056,
+      "text_characters": 2789,
       "embedded_images": 0,
-      "links": 4,
+      "links": 6,
       "rotation": 0
     },
     {
@@ -133,14 +133,15 @@
     "https://doi.org/10.2202/1544-6115.1585",
     "https://doi.org/10.2307/4615733",
     "https://github.com/Alpha-lacrim/medical-object-detector-benchmark",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/COMPUTE_TIMING.md",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md#s1-cohort-split-and-provenance-records",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md#s3-operating-point-and-threshold-evidence",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md#s4-calibration-and-exploratory-raw-score-utility",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md#s5-complete-digital-corruption-and-acquisition-shift-grids",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md#s8-decisions-limitations-and-reproduction",
-    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/ac6975df799a20c55d97204ddcdcbd0dab6675f9/docs/SUPPLEMENTARY.md#s9-frozen-external-testing-and-transportability",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/COMPUTE_TIMING.md",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s1-cohort-split-and-provenance-records",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s10-yolo-numerical-inference-path-sensitivity",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s3-operating-point-and-threshold-evidence",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s4-calibration-and-exploratory-raw-score-utility",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s5-complete-digital-corruption-and-acquisition-shift-grids",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s8-decisions-limitations-and-reproduction",
+    "https://github.com/Alpha-lacrim/medical-object-detector-benchmark/blob/490c55794e2bfc163746089ffb44e7f195ef534b/docs/SUPPLEMENTARY.md#s9-frozen-external-testing-and-transportability",
     "https://github.com/ultralytics/ultralytics/blob/v8.4.110/ultralytics/cfg/models/11/yolo11.yaml",
     "https://physionet.org/content/vindr-cxr/1.0.0/",
     "https://proceedings.neurips.cc/paper/2015/hash/14bfa6bb14875e45bba028a21ed38046-Abstract.html",

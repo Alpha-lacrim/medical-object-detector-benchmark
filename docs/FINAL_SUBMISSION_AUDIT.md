@@ -2,13 +2,54 @@
 
 **2026-09-27 Batch 53 update:** The canonical Markdown now includes a verified
 [secondary YOLO numerical-path sensitivity](YOLO_NUMERICAL_PATH_SENSITIVITY_V1.md).
-Historical primary/external evidence remains unchanged. The full audit and PDF
-details below describe the preceding Batch 52/author snapshot; the PDF, its
-build/QA receipts and numerical trace have deliberately not been rewritten.
-They do not yet render or audit the added sensitivity. Current verification
-has 427 numerical bindings/36 semantic guards and 88 publication artifacts;
-the new experiment has its own protocol, provenance and complete metric replay.
-A new PDF/trace and final author review are required before submission.
+Historical primary/external evidence remains unchanged. The declaration-wording
+follow-up below refreshes the PDF and numerical trace to include this sensitivity.
+Current verification has 427 numerical bindings/36 semantic guards and 88
+publication artifacts; the experiment retains its own protocol, provenance and
+complete metric replay. Final author review is still required before submission.
+
+## 2026-09-27 declaration wording and PDF refresh
+
+At the author's request, two Section 8 drafting instructions were replaced with
+plain statements of the pending ethics-review and submission-version decisions.
+No approval, exemption, consent waiver, public submission identifier or DOI was
+invented. The author's subsequent edit makes patient and public involvement
+the final declaration and shortens the submission-version statement for the
+requested repository publication. Scientific claims, results and their source
+bindings are unchanged.
+
+The canonical PDF was rebuilt with the documented Pandoc/pdfLaTeX command and
+the numerical trace now contains all 427 verified bindings. All 16 pages were
+rendered with Poppler and visually inspected, with a separate inspection of
+the revised declarations on page 15. The Batch 53 sensitivity appears on page
+13. Tables, figures, references and page boundaries remain legible, with no
+clipping, overlap or missing glyphs. The automated QA receipt records 29 internal
+links, 33 URI targets and zero errors; the final TeX log has no overflow,
+undefined-reference or missing-character warnings.
+
+- Manuscript SHA-256: `07ff736eb9c25a6b0178a67e7bafc8a6ceff75797ef45bbe30789a69a960c27c`.
+- PDF SHA-256: `fce7ac64779ef068b218ff0fcc66bd2bb6c9594566bfe08efbfb6a5551497f31`.
+- [Build receipt](../report/paper_build_manifest.json) binds current inputs/output;
+  [QA receipt](../report/paper_pdf_qa.json) records the rendered file checks.
+- Claim verification: 427 numerical claims and all 36 semantic guards pass.
+  Scientific artifact verification: 88 artifacts, 646 present input bindings,
+  212 result references, zero unavailable inputs.
+- Repository support links are pinned to local commit
+  `490c55794e2bfc163746089ffb44e7f195ef534b`, which contains the supporting files.
+  The author explicitly authorized publishing the pending manuscript/PDF,
+  author details and study artifacts to the configured GitHub main branch.
+  This supporting revision is not a submission-release selection.
+
+The two decisions remain tracked in [the author action record](AUTHOR_DECLARATIONS_TODO.md)
+and reporting checklist. No new inference or training occurred. The prior
+PDF/receipts are retained in Git history; the archived
+Batch 52 scientific review files remain unchanged. Checks and render previews
+for the wording edit are under local `tmp/pdfs/declaration-wording-20260927/`.
+The final refresh is recorded under `tmp/pdfs/declarations-final-20260927/`:
+all 15 other pages are pixel-identical to the preceding visual review, and the
+changed declaration page was inspected separately.
+
+## Historical author-review record: 2026-09-25
 
 Updated 2026-09-25. **READY FOR CONTINUED AUTHOR REVIEW; NOT READY FOR JOURNAL
 SUBMISSION.** Author-supplied facts are now incorporated. Institutional/journal
@@ -42,7 +83,7 @@ Faster R-CNN cap saturation remains an additional support limit. The precision
 path caveat and distinction between training-procedure and fixed-checkpoint
 uncertainty are unchanged.
 
-## Current repository and author state
+### Repository and author state at 2026-09-25
 
 Branch is `main`; HEAD remains
 `ac6975df799a20c55d97204ddcdcbd0dab6675f9`. The index remains empty. The earlier
@@ -67,7 +108,6 @@ not publication of the current working tree or selection of a submission revisio
 | Ethics/consent | No separate institutional approval, exemption or written determination was sought or obtained. No participants recruited and no new consent obtained. Source VinDr approval/waiver is attributed to its original study |
 | Patient/public involvement | None in research question, design/conduct, interpretation or dissemination, as confirmed by Pouyan |
 | Availability | Public repository, software license and source-provider routes stated. All ten trained checkpoints remain unpublished at initial submission by author decision; no promised later release or availability-on-request claim |
-| AI assistance | Codex implementation/code auditing plus documented verification/reporting, manuscript editing and PDF preparation. Pouyan confirms reviewing/checking relevant outputs; Mohammad Amin has contributed review and will continue it. No other AI tools reported in current records |
 
 The [author fact/action record](AUTHOR_DECLARATIONS_TODO.md) distinguishes user
 confirmations, externally documented facts and outstanding decisions. Original
@@ -85,7 +125,7 @@ The crosswalk remains a reporting aid, not certification.
 
 - Establish applicable institutional and target-journal ethics/consent requirements.
   The stated absence of a determination is factual; it is not an exemption or waiver.
-- Choose the target journal and satisfy its format, authorship/AI-disclosure,
+- Choose the target journal and satisfy its format, authorship declarations,
   competing-interest scope and official reporting-checklist requirements.
 - Select and verify the exact public commit/release/archive for submission.
   No DOI is claimed. Keep raw/restricted data and unpublished checkpoint binaries
@@ -94,11 +134,11 @@ The crosswalk remains a reporting aid, not certification.
   presented as already performed. Existing upstream-metadata, subgroup-reporting
   and cohort-flow gaps remain disclosed and are not repaired by declarations.
 
-Only two explicit AUTHOR ACTION REQUIRED blocks remain in the manuscript:
+At that review, two explicit AUTHOR ACTION REQUIRED blocks remained in the manuscript:
 ethics/consent applicability and the submission release identifier. The scientific
 review status in the subtitle remains appropriate. This is not submission clearance.
 
-## Current verification and reproducibility
+### Verification and reproducibility at 2026-09-25
 
 The [complete trace](SUBMISSION_NUMERICAL_TRACE.csv) was regenerated for current
 manuscript line numbers. All 417 bindings preserve the prior manuscript values,
@@ -133,7 +173,7 @@ was introduced; the presentation-only Lua change renders author details, keeps
 Table 2 together and starts the bibliography on a fresh page. Scientific artifact
 hash verification and current claim checks above were rerun.
 
-## Current PDF inspection
+### PDF inspection at 2026-09-25
 
 Every one of the 16 final pages was rendered with Poppler and visually inspected.
 The title/author/affiliation/email block is on page 1; all seven tables and five

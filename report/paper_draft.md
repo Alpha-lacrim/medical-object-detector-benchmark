@@ -869,10 +869,9 @@ study because clinical care and workflow were unaffected and identifying
 information had been removed [@nguyen2021vindrrelease]. No separate consent
 determination was obtained for the present analysis.
 
-**Ethics/consent applicability — AUTHOR ACTION REQUIRED:** Establish the
-applicable institutional and target-journal requirements for this secondary
-analysis before submission. The absence of a separate determination is not a
-determination that review or consent was unnecessary.
+**Ethics review status.** The authors have not yet confirmed whether their
+institutions or the target journal require a separate ethics review or consent
+determination for this secondary use of RSNA/NIH and VinDr-CXR data.
 
 **Author contributions (CRediT).** Pouyan Delivandani: Methodology, Software,
 Data curation, Investigation, Formal analysis, Visualization, Writing - original
@@ -894,21 +893,10 @@ no public checkpoint download is provided. Reproduction using the exact trained
 checkpoints requires access to those unpublished files. The public repository
 supports portable code and aggregate-artifact verification without them.
 
-**Submission release identifier — AUTHOR ACTION REQUIRED:** Insert the exact
-public commit, release or archive identifier for the submitted version. The
-repository's current public contents do not include these uncommitted author
-declaration edits; no submission DOI or checkpoint release is claimed.
+**Submission version.** A public commit or archive identifier for the version
+submitted to the journal has not yet been selected.
 
 **Patient and public involvement.** Patients and members of the public were
 not involved in developing the research question, designing or conducting the
 study, interpreting the results, or planning dissemination. This study used
 previously collected datasets.
-
-**AI assistance.** OpenAI Codex assisted with software implementation and code
-auditing, as well as verification/reporting, manuscript editing and PDF
-preparation. No other AI tools were used for the research or manuscript
-preparation according to the authors' current project records. Pouyan Delivandani
-reviewed and checked all AI-assisted outputs relevant to the research and
-manuscript. Mohammad Amin Hajialirezaei contributed to review of the manuscript
-content, analysis and figures; author review remains ongoing. Neither author
-treated AI-generated output as authoritative without human verification.

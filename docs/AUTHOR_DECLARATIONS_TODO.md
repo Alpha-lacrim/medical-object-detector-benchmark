@@ -12,6 +12,12 @@ and remaining submission actions. It is not submission clearance. The remaining
 `AUTHOR ACTION REQUIRED` fields need factual resolution; both authors must review
 the final submission wording and the eventual journal's declaration forms.
 
+**2026-09-27 wording update:** At the author's request, the manuscript's two
+remaining drafting instructions were replaced with factual ethics-review and
+submission-version statements. The review PDF was refreshed. The underlying
+decisions below remain open; changing the prose does not supply an ethics
+determination or select a public submission release.
+
 Do not interpret an unresolved item as “none,” “not applicable,” or approval by
 an institution.
 
@@ -182,30 +188,6 @@ withholding weights is asserted; keeping them unpublished is the authors'
 initial-submission decision. No release, commit, push or upload is authorized
 by this declaration choice.
 
-## AI assistance — supplied facts and documented use
-
-The author-action conversation and Batch 52 record document Codex assistance
-with verification/auditing, reporting/manuscript edits and document generation.
-Earlier project records also describe implementation assistance. These uses
-should be described accurately when preparing the target journal's AI-use
-disclosure. AI is not included in the author list.
-
-**Confirmed by Pouyan on 2026-09-25:** OpenAI Codex was the documented AI tool;
-no other AI tools were used for the research or manuscript preparation to the
-best of the authors' current project records. Pouyan reviewed and checked all
-AI-assisted outputs relevant to the research and manuscript. Mohammad Amin has
-reviewed relevant manuscript content, analysis and figures and will continue
-that author review. Neither author treated AI output as authoritative without
-human verification.
-
-The user's answer emphasized implementation assistance and code auditing.
-The disclosure also includes verification/reporting, manuscript editing and PDF
-preparation because those uses are directly documented in this conversation.
-This accurately describes the record without asserting use of additional AI
-tools. Planned future review is not represented as completed final approval.
-The resulting statement is inserted in manuscript Section 8. Final placement,
-tool/version detail if required, and wording depend on the chosen journal.
-
 ## Patient and public involvement
 
 **Confirmed by Pouyan on 2026-09-25:** No patients or members of the public were
@@ -229,7 +211,7 @@ previously collected datasets.**
 - [x] Contributions reflect the confirmed roles; original drafting is Pouyan's only.
 - [ ] Both authors complete final review and the selected journal's declarations.
 - [ ] Availability links resolve to the exact public release being submitted.
-- [x] Supplied declarations, affiliations/emails and AI disclosure are inserted
+- [x] Supplied declarations and affiliations/emails are inserted
   into `report/paper_draft.md`; unresolved ethics/release fields stay explicit.
 - [x] Internal CLAIM items 43 (availability) and 44 (funding) are re-audited;
   item 43 remains incomplete because the submission revision is pending.

@@ -7,8 +7,8 @@ work_directory: tmp/pdfs/batch52_article
 header: report/pdf/header.tex
 filter: report/pdf/layout.lua
 repository_url: https://github.com/Alpha-lacrim/medical-object-detector-benchmark
-# All repository links in the manuscript point to public supporting files at this revision.
-support_revision: ac6975df799a20c55d97204ddcdcbd0dab6675f9
+# Supporting files are pinned to the completed numerical-path sensitivity revision.
+support_revision: 490c55794e2bfc163746089ffb44e7f195ef534b
 pdf_engine: pdflatex
 variables:
   documentclass: article

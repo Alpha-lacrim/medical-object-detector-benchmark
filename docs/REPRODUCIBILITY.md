@@ -7,14 +7,16 @@ and [detailed results](YOLO_NUMERICAL_PATH_RESULTS_V1.md) bind the new evidence.
 Publication inventory now has 88 entries, preserving the preceding 83 exactly;
 the original scientific inventory and external freeze remain unchanged. Current
 Markdown claims include 427 numerical bindings and 36 semantic guards. CI
-verifies software/artifacts; it does not run this GPU collection. The previous
-PDF/build receipts and 417-row numerical trace describe the preserved author
-review snapshot, not the current Markdown containing the sensitivity.
+verifies software/artifacts; it does not run this GPU collection. The September
+27 declaration-wording follow-up refreshed the PDF/build receipts and 427-row
+numerical trace from the current Markdown, including the sensitivity. Supporting
+PDF links use the completed numerical-path sensitivity commit
+`490c55794e2bfc163746089ffb44e7f195ef534b`. It is not the selected submission release.
 
 **Batch 52 audit and author follow-up:** The [current record](FINAL_SUBMISSION_AUDIT.md)
 links the [preserved scientific gate](FINAL_SUBMISSION_AUDIT_2026-09-24.md), including
 a fresh portable checkout and authorized source/metric/bootstrap replay. The
-[complete numerical trace](SUBMISSION_NUMERICAL_TRACE.csv) exports 417 bindings
+[complete numerical trace](SUBMISSION_NUMERICAL_TRACE.csv) now exports 427 bindings
 with exact locators and rounding. Build commands are in
 [README](../README.md#final-submission-audit-and-article-pdf-batch-52).
 The article PDF derives only from `report/paper_draft.md`; its separate document
